@@ -59,33 +59,39 @@ host_obs_list <- list()
 # Starting with just three of the hosts
 # Vauquelinia californica, Arizona rosewood
 # https://doi.org/10.15468/dl.rfrynw
-host_obs_list[[1]] <- read.delim(file = "data/vauquelinia_californica.csv")
-host_obs_list[[1]] <- host_obs_list[[1]] %>%
-  filter(countryCode %in% c("CA", "MX", "US")) %>%
-  filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
-  dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
-       year, month, day) %>%
-  drop_na()
+host_obs_list[[1]] <- clean_gbif(file = "data/vauquelinia_californica.csv")
+
+# host_obs_list[[1]] <- read.delim(file = "data/vauquelinia_californica.csv")
+# host_obs_list[[1]] <- host_obs_list[[1]] %>%
+#   filter(countryCode %in% c("CA", "MX", "US")) %>%
+#   filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
+#   dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
+#        year, month, day) %>%
+#   drop_na()
 
 # Fraxinus anomala, single-leaf ash
 # https://doi.org/10.15468/dl.tgfk9n
-host_obs_list[[2]] <- read.delim(file = "data/fraxinus_anomala.csv")
-host_obs_list[[2]] <- host_obs_list[[2]] %>%
-  filter(countryCode %in% c("CA", "MX", "US")) %>%
-  filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
-  dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
-         year, month, day) %>%
-  drop_na()
+host_obs_list[[2]] <- clean_gbif(file = "data/fraxinus_anomala.csv")
+
+# host_obs_list[[2]] <- read.delim(file = "data/fraxinus_anomala.csv")
+# host_obs_list[[2]] <- host_obs_list[[2]] %>%
+#   filter(countryCode %in% c("CA", "MX", "US")) %>%
+#   filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
+#   dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
+#          year, month, day) %>%
+#   drop_na()
 
 # Prunus emarginata, bitter cherry
 # https://doi.org/10.15468/dl.djrf2z
-host_obs_list[[3]] <- read.delim(file = "data/prunus_emarginata.csv")
-host_obs_list[[3]] <- host_obs_list[[3]] %>%
-  filter(countryCode %in% c("CA", "MX", "US")) %>%
-  filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
-  dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
-                year, month, day) %>%
-  drop_na()
+host_obs_list[[3]] <- clean_gbif(file = "data/prunus_emarginata.csv")
+
+# host_obs_list[[3]] <- read.delim(file = "data/prunus_emarginata.csv")
+# host_obs_list[[3]] <- host_obs_list[[3]] %>%
+#   filter(countryCode %in% c("CA", "MX", "US")) %>%
+#   filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
+#   dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
+#                 year, month, day) %>%
+#   drop_na()
 
 
 ########################################
@@ -210,6 +216,10 @@ insect_coords <- insect_obs %>%
 
 # Use the observed points to pull out relevant predictor values?
 # Takes a little while when using worldclim instead of dismo
+# TODO: we could raster::crop the predictors to a geographic extent. This takes 
+# a little bit of time up front, but it then makes subsequent raster::extract 
+# calls complete *much* faster...
+
 insect_presence <- raster::extract(x = predictors, y = insect_coords)
 insect_absence <- raster::extract(x = predictors, y = insect_background)
 
