@@ -11,6 +11,15 @@ library(dismo) # requires sp, too
 library(maptools) # for some QA plotting, may not be necessary
 library(kernlab)
 
+# Load up the functions from the functions folder
+function_files <- list.files(path = "./functions", 
+                             pattern = ".R$", 
+                             full.names = TRUE)
+for(fun_file in function_files) {
+  message(paste0("Loading function from ", fun_file))
+  source(file = fun_file)
+}
+
 # TODO: Consider creating a list of lists, where each element in the top-level list 
 # is a two-element list with elements
 #   + type: character vector with "insect" or "host"
@@ -22,17 +31,19 @@ library(kernlab)
 
 # Papilio multicaudata data downloaded 2021-05-18 from GBIF
 # https://doi.org/10.15468/dl.v2puuk
+insect_obs <- clean_gbif(file = "data/papilio_multicaudata.csv")
+
 # Remember, GBIF is a dick and provides TAB-separated files (not CSV)
-insect_obs <- read.delim(file = "data/papilio_multicaudata.csv")
+# insect_obs <- read.delim(file = "data/papilio_multicaudata.csv")
 
 # Drop unused columns (most everything)
 # TODO: if standard, convert to function
-insect_obs <- insect_obs %>%
-  filter(countryCode %in% c("CA", "MX", "US")) %>%
-  filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
-  dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
-         year, month, day) %>%
-  drop_na() # Need complete records for all these
+# insect_obs <- insect_obs %>%
+#   filter(countryCode %in% c("CA", "MX", "US")) %>%
+#   filter(str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
+#   dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
+#          year, month, day) %>%
+#   drop_na() # Need complete records for all these
 
 
 # Hosts
@@ -195,7 +206,7 @@ predictors <- stack(list.files(path = "data/wc2-5",
 
 # Only need geo coordinates, so extract those (in x, y order)
 insect_coords <- insect_obs %>%
-  select(decimalLongitude, decimalLatitude)
+  dplyr::select(decimalLongitude, decimalLatitude)
 
 # Use the observed points to pull out relevant predictor values?
 # Takes a little while when using worldclim instead of dismo
@@ -250,7 +261,7 @@ probs <- predict(predictors,
 pres_threshold <- threshold(svm_eval, "spec_sens")
 
 # Setup graphical params for side-by-side plots
-par(mfrow = c(2, 1))
+par(mfrow = c(1, 2))
 # Plot the probabilities
 plot(probs, main = "SVM Probabilities")
 # Add the map
