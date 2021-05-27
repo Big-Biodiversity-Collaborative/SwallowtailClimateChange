@@ -116,39 +116,6 @@ all_backgrounds <- insect_background %>%
 all_extent <- get_extent(data = all_backgrounds)
 
 ################################################################################
-# QA/QC on background sampling
-# Skip to next horizontal line if unnecessary
-
-data("wrld_simpl")
-
-# Plot the base map
-host_number <- 2
-plot(wrld_simpl, 
-     xlim = host_extent[[host_number]][c(1, 2)],
-     ylim = host_extent[[host_number]][c(3, 4)],
-     axes = TRUE, 
-     col = "grey95",
-     main = "Presence and pseudo-absence points")
-
-# Add the observations
-points(x = host_obs_list[[host_number]]$longitude,
-       y = host_obs_list[[host_number]]$latitude, 
-       col = "olivedrab", 
-       pch = 20, 
-       cex = 0.75)
-
-# Draw a box around the extent we used for randomPoints restriction
-plot(host_extent[[host_number]], 
-     add = TRUE, 
-     col = "red")
-
-# Add the background points
-points(host_background[[host_number]],
-       col = "grey30",
-       pch = 3,
-       cex = 0.5)
-
-################################################################################
 # SVM Model
 # In large part modified from 
 # https://rspatial.org/raster/sdm/6_sdm_methods.html#machine-learning-methods
@@ -161,7 +128,8 @@ predictors <- stack(list.files(path = "data/wc2-5",
 # Crop the predictors for faster subsequent processing
 predictors <- raster::crop(x = predictors, y = all_extent)
 
-# Run support vector machine SDM
+################################################################################
+# Run support vector machine model on insect
 insect_svm <- run_svm(obs = insect_obs,
                       absence = insect_background,
                       predictors = predictors)
@@ -189,6 +157,7 @@ points(x = insect_obs$longitude,
 # Reset graphical parameters
 par(mfrow = c(1, 1))
 
+################################################################################
 # Run support vector machine SDM on host 1
 host1_svm <- run_svm(obs = host_obs_list[[1]],
                      absence = host_background[[1]],
