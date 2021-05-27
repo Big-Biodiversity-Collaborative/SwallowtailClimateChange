@@ -6,8 +6,8 @@
 #' \describe{
 #'   \item{gbifID}{First item}
 #'   \item{species}{Second item}
-#'   \item{decimalLongitude}{Longitude in decimal degrees}
-#'   \item{decimalLatitude}{Latitude in decimal degrees}
+#'   \item{longitude}{Longitude in decimal degrees}
+#'   \item{latitude}{Latitude in decimal degrees}
 #'   \item{year}{Four digit year}
 #'   \item{month}{Two digit month}
 #'   \item{day}{Two digit day}
@@ -29,6 +29,8 @@ clean_gbif <- function(file) {
     dplyr::filter(stringr::str_detect(issue, pattern = "ZERO_COORDINATE", negate = TRUE)) %>%
     dplyr::select(gbifID, species, decimalLongitude, decimalLatitude, 
                   year, month, day) %>%
+    dplyr::rename(longitude = decimalLongitude,
+                  latitude = decimalLatitude) %>%
     tidyr::drop_na() # Need complete records for all these
   
   return(clean_obs)
