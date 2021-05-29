@@ -56,6 +56,7 @@ for (i in 1:nrow(obs_data)) {
                      ".csv")
   obs_list[[i]] <- list(type = obs_data$type[i],
                         name = obs_data$name[i],
+                        nice_name = nice_name,
                         obs = clean_gbif(file = obs_file))
   # Add the extent for this beast to the list element
   obs_list[[i]][["extent"]] <- get_extent(data = obs_list[[i]][["obs"]])
@@ -94,26 +95,34 @@ predictors <- stack(list.files(path = "data/wc2-5",
 # Crop the predictors for faster subsequent processing
 predictors <- raster::crop(x = predictors, y = all_extent)
 
-# Run all support vector machine models
+# Run all support vector machine models; while we are here save those models
+# to file
 for (i in 1:length(obs_list)) {
   message(paste0("\n*****  Running SVM on ", obs_list[[i]][["name"]], "  *****"))
   obs_list[[i]][["svm_model"]] <- run_svm(obs = obs_list[[i]][["obs"]],
                                         absence = obs_list[[i]][["background"]],
                                         predictors = predictors)
+
+  model_file <- paste0("output/models/",
+                       obs_list[[i]][["nice_name"]],
+                       "-svm.rds")
+  saveRDS(object = obs_list[[i]][["svm_model"]],
+          file = model_file)
+  message(paste0("SVM model for ", obs_list[[i]][["name"]], 
+                 " complete; saved to ", model_file))
 }
 
-# Want to stack the rasters of plants for P/A of hosts, regardless of species
-# Start by figuring out which of the list elements is the insect and which 
-# are the hosts
 # Need to start by creating presence/absence rasters for each beast
 for (i in 1:length(obs_list)) {
   obs_list[[i]][["pa_raster"]] <- obs_list[[i]]$svm_model$probs >
     obs_list[[i]]$svm_model$thresh
-  
 }
 
 ################################################################################
 # Plotting below here
+# Want to stack the rasters of plants for P/A of hosts, regardless of species
+# Start by figuring out which of the list elements is the insect and which 
+# are the hosts
 # Returns a named vector; each (named) element indicates host/insect
 types <- unlist(lapply(obs_list, "[[", "type"))
 
@@ -163,7 +172,7 @@ par(mfrow = c(1, 1))
 
 
 
-# For some QA/QC, let's 
+
 
 
 
@@ -171,22 +180,6 @@ par(mfrow = c(1, 1))
 ################################################################################
 ##### Original implementation below here
 ################################################################################
-# TODO: Consider creating a list of lists, where each element in the top-level list 
-# is a two-element list with elements
-#   + type: character vector with "insect" or "host"
-#   + obs:  data frame of observations
-# This way, iterating over the list elements and doing all the same things 
-# (filtering out NAs, selecting columns, running contemporary & forecast models)
-# becomes easier; can also start attaching things like 
-#   + background: data frame of pseudo-absence points
-
-# Each list element would have:
-#   + type: character vector with "insect" or "host"
-#   + obs:  data frame of observations
-#   + name: the species name
-#   + background: background points (added later)
-#   + svm_model: support vector machine model stuff (output of run_svm)
-
 # Papilio multicaudata data downloaded 2021-05-18 from GBIF
 # https://doi.org/10.15468/dl.v2puuk
 insect_obs <- clean_gbif(file = "data/papilio_multicaudata.csv")
