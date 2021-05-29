@@ -42,7 +42,7 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
     dplyr::select(longitude, latitude)
   
   if (verbose) {
-    message("Extracting predictor values based on data.")
+    message("Extracting predictor values based on data. (Step 1 of 4)")
   }
   
   # Use the observed points to pull out relevant predictor values
@@ -85,7 +85,7 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
   sdmtest <- rbind(presence_test, absence_test)
 
   if(verbose) {
-    message("Running support vector machine model.")
+    message("Running support vector machine model. (Step 2 of 4)")
   }  
   # Run an SVM model, specifying model with standard formula syntax
   svm_model <- kernlab::ksvm(pa ~ bio1 + bio5 + bio6 + bio7 + bio8 + bio12 +
@@ -93,7 +93,7 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
                              data = sdmtrain)
   
   if(verbose) {
-    message("Evaluating SVM model with testing data.")
+    message("Model complete. Evaluating SVM model with testing data. (Step 3 of 4)")
   }
   # Evaluate model performance with testing data
   svm_eval <- dismo::evaluate(p = presence_test, 
@@ -112,7 +112,7 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
   # Note predicted probabilities include values < 0 and > 1. Not expected when 
   # applying a linear model to what is a classification problem
   if(verbose) {
-    message("Predicting occurrence probabilities from SVM model.")
+    message("Predicting occurrence probabilities from SVM model. (Step 4 of 4)")
   }
   probs <- predict(predictors, 
                    svm_model, 
