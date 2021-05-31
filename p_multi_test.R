@@ -6,11 +6,11 @@
 # Using require in place of library for easier grepping later on
 require(raster) # also loads sp
 require(dplyr)  # load *after* raster for easier use of select
-require(stringr)
+# require(stringr)
 require(tidyr)
 require(dismo) # requires sp, too
 require(maptools) # for some QA plotting, may not be necessary
-require(kernlab)
+# require(kernlab)
 
 # Load up the functions from the functions folder
 function_files <- list.files(path = "./functions", 
@@ -25,10 +25,10 @@ for(fun_file in function_files) {
 # background points
 # Check for bioclim data and download if it isn't there
 if (!file.exists("data/wc2-5/bio1.bil")) {
-  bioclim.data <- getData(name = "worldclim",
-                          var = "bio",
-                          res = 2.5,
-                          path = "data/")
+  bioclim_data <- raster::getData(name = "worldclim",
+                                  var = "bio",
+                                  res = 2.5,
+                                  path = "data/")
 }
 
 # Using the first bil file to create a raster to use as mask for sampling 
@@ -64,7 +64,7 @@ for (i in 1:nrow(obs_data)) {
   message(paste0("Sampling pseudo-absence points for ", obs_data$name[i]))
   # Do background point sampling while we're here
   # Randomly sample points (same number as our observed points)
-  background_points <- randomPoints(mask = mask,    # Provides resolution of sampling points
+  background_points <- dismo::randomPoints(mask = mask,    # Provides resolution of sampling points
                                     n = nrow(obs_list[[i]][["obs"]]),  # Number of random points
                                     ext = obs_list[[i]][["extent"]],   # Spatially restricts sampling
                                     extf = 1.25)           # Expands sampling a little bit
@@ -82,40 +82,51 @@ for (i in 1:nrow(obs_data)) {
 # we need
 all_backgrounds <- lapply(obs_list, "[[", "background") %>%
   dplyr::bind_rows() %>%
-  rename(longitude = x,
-         latitude = y)
+  dplyr::rename(longitude = x,
+                latitude = y)
 
 all_extent <- get_extent(data = all_backgrounds)
 
 # Grab worldclim data to use as predictors
-predictors <- stack(list.files(path = "data/wc2-5",
-                               pattern = ".bil$",
-                               full.names = TRUE))
+predictors <- raster::stack(list.files(path = "data/wc2-5",
+                                       pattern = ".bil$",
+                                       full.names = TRUE))
 
 # Crop the predictors for faster subsequent processing
 predictors <- raster::crop(x = predictors, y = all_extent)
 
 # Run all support vector machine models; while we are here save those models
-# to file
+# to file as well as predicted presence / absence 
 for (i in 1:length(obs_list)) {
-  message(paste0("\n*****  Running SVM on ", obs_list[[i]][["name"]], "  *****"))
+  start_message <- paste0("\n*****  Running SVM on ", 
+                          obs_list[[i]][["name"]], 
+                          " [species ", i, " of ", length(obs_list), "]",
+                          "  *****")
+  message(start_message)
   obs_list[[i]][["svm_model"]] <- run_svm(obs = obs_list[[i]][["obs"]],
-                                        absence = obs_list[[i]][["background"]],
-                                        predictors = predictors)
-
-  model_file <- paste0("output/models/",
-                       obs_list[[i]][["nice_name"]],
-                       "-svm.rds")
-  saveRDS(object = obs_list[[i]][["svm_model"]],
-          file = model_file)
-  message(paste0("SVM model for ", obs_list[[i]][["name"]], 
-                 " complete; saved to ", model_file))
-}
-
-# Need to start by creating presence/absence rasters for each beast
-for (i in 1:length(obs_list)) {
+                                          absence = obs_list[[i]][["background"]],
+                                          predictors = predictors)
+  # We'll need presence / absence predicted by model for a variety of 
+  # downstream applications, so compute the prediction and save to file.
   obs_list[[i]][["pa_raster"]] <- obs_list[[i]]$svm_model$probs >
     obs_list[[i]]$svm_model$thresh
+
+  # Save the model to file in output/models/
+  model_file <- paste0("output/models/",
+                       obs_list[[i]][["nice_name"]],
+                       "-model-svm-current.rds")
+  saveRDS(object = obs_list[[i]][["svm_model"]],
+          file = model_file)
+
+  # Save these rasters for later compilation of maps in output/distributions/
+  pa_raster_file <- paste0("output/distributions/",
+                           obs_list[[i]][["nice_name"]],
+                           "-distribution-svm-current.rds")
+  saveRDS(object = obs_list[[i]][["pa_raster"]],
+          file = pa_raster_file)
+  
+  message(paste0("SVM model for ", obs_list[[i]][["name"]], 
+                 " complete; saved to ", model_file))
 }
 
 ################################################################################
@@ -170,16 +181,93 @@ plot(wrld_simpl,
      border = "grey30")
 par(mfrow = c(1, 1))
 
+################################################################################
+# Forecast modeling
+
+# Do forecast model, with GFDL-ESM4_RCP45 as example forecast data
+# Check for forecast data, download if it does not exist
+if (!file.exists("data/cmip5/2_5m/gd45bi701.tif")) {
+  gfdl_data <- raster::getData(name = "CMIP5",
+                               var = "bio",
+                               res = 2.5,
+                               rcp = 45,
+                               model = "GD",
+                               year = 70,
+                               path = "data/")
+}
+
+# Need to rename variables in forecast climate data so our predictions work 
+# (these are the same names as the bioclim data, used for the creation of our 
+# species distribution model)
+names(gfdl_data) <- paste0("bio", 1:19)
+
+# For each species, use the SVM model to predict probabilities then use the 
+# previously identified threshold to calculate a presence / absence raster
+for (i in 1:length(obs_list)) {
+  message("***** Forecasting for ", obs_list[[i]]$name, " [", 
+          i, " of ", length(obs_list), " species] *****")
+  obs_list[[i]][["future_probs"]] <- predict(gfdl_data, 
+                                          obs_list[[i]][["svm_model"]]$model, 
+                                          ext =  obs_list[[i]][["extent"]])
+  obs_list[[i]][["future_pa"]] <- obs_list[[i]][["future_probs"]] > 
+    obs_list[[1]]$svm_model$thresh
+}
+
+# Plot the results of the forecast modeling
+insect_pa <- obs_list[[insect]]$future_pa
+
+# Create stack of host presence/absence rasters
+hosts <- which(types == "host")
+host_pa_rasters <- lapply(obs_list[hosts], "[[", "future_pa")
+host_pa_stack <- stack_rasters(r = host_pa_rasters, out = "binary")
+
+# Get creative with raster so easier to see host vs insect
+host_pa_stack[host_pa_stack >= 1] <- 2
+
+# Want to add a third plot showing overlap; will need to get creative so we 
+# see three colors:
+# + 1 where insect only occurs
+# + 2 where plants only occur
+# + 3 where insects and plants overlap
+trio_stack <- stack_rasters(r = list(insect_pa, host_pa_stack))
+
+data("wrld_simpl")
+# We'll need three colors: insect, plants, insect+plants
+plot_colors <- hcl.colors(n = 3, palette = "Cividis")
+# Setup graphical params for side-by-side plots
+par(mfrow = c(1, 3))
+# Plot insect
+insect_title <- paste0(obs_list[[insect]]$name, " Forecast P/A")
+plot(insect_pa, main = insect_title, col = c(NA, plot_colors[1]))
+# Add the map
+plot(wrld_simpl, 
+     add = TRUE,
+     border = "grey30")
+# Plot plant
+plot(host_pa_stack, main = "Forecast Host P/A", col = c(NA, NA, plot_colors[2]))
+# Add the map
+plot(wrld_simpl, 
+     add = TRUE,
+     border = "grey30")
+plot(trio_stack, main = "Forecast Overlap", col = c(NA, plot_colors))
+# Add the map
+plot(wrld_simpl, 
+     add = TRUE,
+     border = "grey30")
+par(mfrow = c(1, 1))
 
 
 
 
-
-
+  
+  
+  
+  
 
 ################################################################################
 ##### Original implementation below here
 ################################################################################
+stop("Stop processing; do not want to run original implementation")
 # Papilio multicaudata data downloaded 2021-05-18 from GBIF
 # https://doi.org/10.15468/dl.v2puuk
 insect_obs <- clean_gbif(file = "data/papilio_multicaudata.csv")
@@ -222,7 +310,7 @@ for (h in 1:length(host_obs_list)) {
 # Will use bioclim data files to create masks for sampling resolution
 # Check for bioclim data and download if it isn't there
 if (!file.exists("data/wc2-5/bio1.bil")) {
-  bioclim.data <- getData(name = "worldclim",
+  bioclim_data <- getData(name = "worldclim",
                           var = "bio",
                           res = 2.5,
                           path = "data/")

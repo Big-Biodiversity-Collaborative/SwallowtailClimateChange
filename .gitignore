@@ -3,5 +3,10 @@
 .RData
 .Ruserdata
 
+# Climate data
 data/wc2-5
-output/models/
+data/cmip5
+
+# Output of modeling
+output/models/*.rds
+output/distributions/*.rds
