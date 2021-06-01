@@ -13,6 +13,14 @@
 #'   \item{day}{Two digit day}
 #' }
 clean_gbif <- function(file) {
+  # TODO: See also some nice utilities in the scrubr package
+  # https://cran.r-project.org/package=scrubr
+  # TODO: consider differences in column names between direct downloads from 
+  # GBIF and queries returned from spocc::occ.
+  #      Direct from GBIF         spocc::occ
+  #                 issue             issues
+  #      decimalLongitude          longitude
+  #       decimalLatitude           latitude
   if (!require(dplyr)) {
     stop("clean_gbif requires dplyr package, but it could not be loaded")
   }

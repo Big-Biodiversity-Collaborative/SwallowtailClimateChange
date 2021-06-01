@@ -36,4 +36,5 @@ for (i in 1:nrow(papilio_species)) {
 
 # Update our data file with count information
 write.csv(x = papilio_species,
-          file = na_papilio_file)
+          file = na_papilio_file,
+          row.names = FALSE)

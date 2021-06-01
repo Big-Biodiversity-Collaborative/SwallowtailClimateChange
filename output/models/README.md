@@ -18,3 +18,6 @@ underscore ("GFDL-ESM4") and the representative concentration pathway (RCP,
 here, 4.5% CO2) is right of the underscore. Future work should use CMIP6 data 
 set, where RCP has been replaced by the shared socioeconomic pathway (SSP).
 
+**UPDATE**: There should be no <predictors> specification (at least as written
+above), as modeling will occur with contemporary data; only _distributions_ will 
+be based on non-contemporary (i.e. future) predictors.

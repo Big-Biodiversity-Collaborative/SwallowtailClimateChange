@@ -185,21 +185,22 @@ par(mfrow = c(1, 1))
 # Forecast modeling
 
 # Do forecast model, with GFDL-ESM4_RCP45 as example forecast data
-# Check for forecast data, download if it does not exist
-if (!file.exists("data/cmip5/2_5m/gd45bi701.tif")) {
-  gfdl_data <- raster::getData(name = "CMIP5",
-                               var = "bio",
-                               res = 2.5,
-                               rcp = 45,
-                               model = "GD",
-                               year = 70,
-                               path = "data/")
-}
+# Load forecast data, download if it does not exist
+gfdl_data <- raster::getData(name = "CMIP5",
+                             var = "bio",
+                             res = 2.5,
+                             rcp = 45,
+                             model = "GD",
+                             year = 70,
+                             path = "data/")
 
 # Need to rename variables in forecast climate data so our predictions work 
 # (these are the same names as the bioclim data, used for the creation of our 
 # species distribution model)
 names(gfdl_data) <- paste0("bio", 1:19)
+
+# TODO: Should we crop these data? Probably not necessary, as the predict
+# function has an argument to limit extent
 
 # For each species, use the SVM model to predict probabilities then use the 
 # previously identified threshold to calculate a presence / absence raster
@@ -211,6 +212,16 @@ for (i in 1:length(obs_list)) {
                                           ext =  obs_list[[i]][["extent"]])
   obs_list[[i]][["future_pa"]] <- obs_list[[i]][["future_probs"]] > 
     obs_list[[1]]$svm_model$thresh
+  
+  # Save the p/a raster for later compilation of maps in output/distributions/
+  pa_raster_file <- paste0("output/distributions/",
+                           obs_list[[i]][["nice_name"]],
+                           "-distribution-svm-GFDL-ESM4_RCP45.rds")
+  saveRDS(object = obs_list[[i]][["future_pa"]],
+          file = pa_raster_file)
+  
+  message(paste0("SVM model forecast predictions for ", obs_list[[i]][["name"]], 
+                 " complete; saved to ", pa_raster_file))
 }
 
 # Plot the results of the forecast modeling
