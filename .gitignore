@@ -10,6 +10,9 @@ data/cmip5
 # Data downloaded from GBIF via download_gbif
 data/*-gbif.csv
 
+# Auto-generated scripts
+scripts/*.R
+
 # Output of modeling
 output/models/*.rds
 output/distributions/*.rds
