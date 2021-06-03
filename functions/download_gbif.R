@@ -10,7 +10,7 @@
 #' @param query_limit integer number of results to return per query
 download_gbif <- function(species_name, gbif_name, replace = FALSE, 
                           verbose = FALSE, countries = c("CA", "MX", "US"),
-                          query_limit = 500) {
+                          query_limit = 100) {
   if (!require(dplyr)) {
     stop("download_gbif requires dplyr package, but it could not be loaded")
   }
@@ -58,7 +58,9 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       total <- total + num_records
       
       if (num_records > 0) {
-        pages <- ceiling(num_records/query_limit) - 1
+        starts <- seq(from = 0, 
+                      to = num_records,
+                      by = query_limit)
         
         # Perform multiple queries, paging over results
         if (verbose) {
@@ -66,38 +68,42 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
                          species_name, " (as ", gbif_name, ") from ",
                          country))
         }
-        for (page in 0:pages) {
-          if (verbose) {
-            message(paste0("...page ", (page + 1), " of ", (pages + 1)))
-          }
-          gbif_query <- spocc::occ(query = gbif_name,
-                                   from = "gbif",
-                                   limit = query_limit,
-                                   start = page,
-                                   has_coords = TRUE,
-                                   gbifopts = list(country = country))
-          
-          # Extract the data and clean it up before adding to results
-          # Doing the filtration separate as it may result in zero results
-          # spocc::occ returns list of data frames, indexed by query
-          query_data <- gbif_query$gbif$data[[list_name]] %>%
-            dplyr::filter(countryCode %in% c("CA", "MX", "US"),
-                          stringr::str_detect(issues, pattern = "ZERO_COORDINATE", 
-                                              negate = TRUE))
-          
-          # If any data remain, add to results
-          if (nrow(query_data) > 0) {
-            if (is.null(obs)) {
-              obs <- query_data
-            } else {
-              obs <- obs %>%
-                dplyr::bind_rows(query_data)
+        for (start in starts) {
+          # For edge case, since gbif record indexing actually starts at 0
+          if (start < num_records) {
+            if (verbose) {
+              end <- min((start + query_limit - 1), num_records)
+              message(paste0("...records ", start, " through ", end, " of ", num_records))
             }
-          }
-        }
+            gbif_query <- spocc::occ(query = gbif_name,
+                                     from = "gbif",
+                                     limit = query_limit,
+                                     start = start,
+                                     has_coords = TRUE,
+                                     gbifopts = list(country = country))
+            
+            # Extract the data and clean it up before adding to results
+            # spocc::occ returns list of data frames, indexed by query
+            query_data <- gbif_query$gbif$data[[list_name]] %>%
+              dplyr::filter(countryCode %in% c("CA", "MX", "US"),
+                            stringr::str_detect(issues, pattern = "ZERO_COORDINATE", 
+                                                negate = TRUE))
+            
+            # If any data remain, add to results
+            if (nrow(query_data) > 0) {
+              if (is.null(obs)) {
+                obs <- query_data
+              } else {
+                obs <- obs %>%
+                  dplyr::bind_rows(query_data)
+              }
+            }
+          } # end conditional for start < num_records
+        } # end iteration over starts
       } else {
         if (verbose) {
-          message(paste0("Zero records of ", species_name, " found from ", country))
+          message(paste0("Zero records of ", species_name, 
+                         " found from ", country))
         }
       }
     } # End iterating over all countries

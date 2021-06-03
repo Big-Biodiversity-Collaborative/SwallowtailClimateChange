@@ -3,7 +3,7 @@
 # jcoliver@arizona.edu
 # 2021-06-02
 
-require(dplyr) # currently only needed for testing subset
+# require(dplyr) # currently only needed for testing subset
 
 # Load up the functions from the functions folder
 function_files <- list.files(path = "./functions", 
@@ -19,7 +19,7 @@ replace <- FALSE
 
 # For testing with subset
 # gbif_data <- gbif_data %>%
-#   filter(species %in% c("brevicauda", "multicaudata"))
+#   dplyr::filter(species %in% c("brevicauda", "multicaudata"))
 
 # Loop over all entries in gbif data and do queries
 for (i in 1:nrow(gbif_data)) {
