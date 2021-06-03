@@ -1,4 +1,4 @@
-# Run all SDM scripts
+# Run all forecast distribution-generating scripts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-03
@@ -11,22 +11,20 @@
 # Logical indicating whether or not to for re-running script if the model 
 # output already exists
 rerun <- TRUE
-sdm_files <- list.files(path = "./scripts",
-                        pattern = "*-sdm.R",
-                        full.names = TRUE)
+dist_files <- list.files(path = "./scripts",
+                         pattern = "*-forecast.R",
+                         full.names = TRUE)
 
-# TODO: Will need to update file checks if multiple model types end up being 
-# run (e.g. random forest, bioclim, etc); current code just checks for support
-# vector machine
-for (one_file in sdm_files) {
+for (one_file in dist_files) {
   # Need to extract species name from file to see if model has already been run
   species_name <- strsplit(x = basename(one_file),
                            split = "-")[[1]][1]
   
-  # the file name that would be used for model output
-  model_out <- paste0("output/models/", species_name, "-model-svm-current.rds")
+  # the file name that would be used for distribution output
+  # TODO: only checks for one forecast
+  dist_out <- paste0("output/distributions/", species_name, "-distribution-svm-GFDL-ESM4_RCP45.rds")
   
-  if (!file.exists(model_out) | rerun) {
+  if (!file.exists(dist_out) | rerun) {
     source(file = one_file)
   }
 }

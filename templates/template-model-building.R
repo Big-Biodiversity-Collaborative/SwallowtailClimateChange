@@ -3,7 +3,7 @@
 # jcoliver@arizona.edu
 # 2021-06-02
 
-require(raster) # also loads sp
+require(raster)
 require(dplyr)  # load *after* raster for easier use of select
 require(dismo)  # background point sampling
 
@@ -30,6 +30,11 @@ obs_file <- paste0("data/",
                    nice_name,
                    "-gbif.csv")
 obs <- read.csv(file = obs_file)
+
+# A note to let folks know you are alive
+n_obs <- nrow(obs)
+message(paste0("\n**** Running SVM SDM on ", n_obs, " observations of ", 
+               species_name, " ****"))
 
 # Get the geographic extent of this beast
 obs_extent <- get_extent(data = obs)
@@ -77,8 +82,6 @@ predictors <- raster::stack(list.files(path = "data/wc2-5",
 predictors <- raster::crop(x = predictors, y = obs_extent)
 
 # Run support vector machine model
-message(paste0("\n**** Running SVM SDM on ", species_name, " ****"))
-
 svm_model <- run_svm(obs = obs,
                      absence = background_points,
                      predictors = predictors)
