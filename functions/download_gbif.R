@@ -28,10 +28,15 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
   
   # Only proceed if file doesn't exist or we want to replace existing files
   if (!file.exists(filename) | replace) {
-    # We use the gbif name to extract results from list object
-    list_name <- tolower(x = gsub(pattern = " ",
-                                  replacement = "_",
-                                  x = gbif_name))
+    if (verbose) {
+      message(paste0("\n****   Beginning process for ", species_name, "  ****"))
+    }
+    
+    # We use the gbif name to extract results from list object, but spocc 
+    # replaces spaces with underscores for list element names
+    list_name <- gsub(pattern = " ",
+                      replacement = "_",
+                      x = gbif_name)
     # To restrict to three countries, need to do three separate queries
     total <- 0
     obs <- NULL
