@@ -5,9 +5,9 @@
 
 # Read the file with organism names in as an array, skipping the header row 
 # (hence -n +2 in call to tail)
-# readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
+readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
 # for testing on two lines
-readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv | head -n 2)
+# readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv | head -n 2)
 
 # Iterate over all lines in that names file
 for LINE in "${NAMES[@]}"
