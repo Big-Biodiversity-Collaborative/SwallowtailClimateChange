@@ -47,8 +47,8 @@ for (i in 1:nrow(species_df)) {
 }
 
 # To see things of interest
-species_df %>%
-  select(genus, species, gbif_name, gbif_count)
+# species_df %>%
+#   select(genus, species, gbif_name, gbif_count)
 
 # Update our data file with count information
 write.csv(x = species_df,

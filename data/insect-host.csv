@@ -2,29 +2,267 @@ insect,host,source
 Papilio appalachiensis,Prunus serotina,https://www.butterfliesandmoths.org/species/Papilio-appalachiensis
 Papilio aristodemus,Amyris elemifera,https://en.wikipedia.org/wiki/Papilio_aristodemus
 Papilio aristodemus,Ptelea trifoliata,https://en.wikipedia.org/wiki/Papilio_aristodemus
-Papilio brevicauda,Ligusticum scoticum,https://en.wikipedia.org/wiki/Papilio_brevicauda
-Papilio brevicauda,Heracleum maximum,https://en.wikipedia.org/wiki/Papilio_brevicauda
-Papilio brevicauda,Pastinaca sativa,https://en.wikipedia.org/wiki/Papilio_brevicauda
-Papilio brevicauda,Petroselinum crispum,https://en.wikipedia.org/wiki/Papilio_brevicauda
 Papilio brevicauda,Angelica lucida,https://en.wikipedia.org/wiki/Papilio_brevicauda
 Papilio brevicauda,Apium graveolens,https://en.wikipedia.org/wiki/Papilio_brevicauda
 Papilio brevicauda,Conioselinum chinense,https://en.wikipedia.org/wiki/Papilio_brevicauda
 Papilio brevicauda,Daucus carota,https://en.wikipedia.org/wiki/Papilio_brevicauda
-Papilio canadensis,,
-Papilio cresphontes,,
-Papilio eurymedon,,
-Papilio glaucus,,
-Papilio indra,,
-Papilio machaon,,
-Papilio multicaudata,Vauquelinia californica,https://en.wikipedia.org/wiki/Papilio_multicaudata
+Papilio brevicauda,Heracleum maximum,https://en.wikipedia.org/wiki/Papilio_brevicauda
+Papilio brevicauda,Ligusticum scoticum,https://en.wikipedia.org/wiki/Papilio_brevicauda
+Papilio brevicauda,Pastinaca sativa,https://en.wikipedia.org/wiki/Papilio_brevicauda
+Papilio brevicauda,Petroselinum crispum,https://en.wikipedia.org/wiki/Papilio_brevicauda
+Papilio canadensis,Alnus rugosa,Prudic et al. 2007 PNAS
+Papilio canadensis,Amelanchier canadensis,Prudic et al. 2007 PNAS
+Papilio canadensis,Betula alba,Prudic et al. 2007 PNAS
+Papilio canadensis,Betula allegheniensis,Prudic et al. 2007 PNAS
+Papilio canadensis,Betula lenta,Prudic et al. 2007 PNAS
+Papilio canadensis,Betula papyrifera,Prudic et al. 2007 PNAS
+Papilio canadensis,Fraxinus americana,Prudic et al. 2007 PNAS
+Papilio canadensis,Fraxinus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio canadensis,Malus pumila,Prudic et al. 2007 PNAS
+Papilio canadensis,Populus balsamifera,Prudic et al. 2007 PNAS
+Papilio canadensis,Populus grandidentata,Prudic et al. 2007 PNAS
+Papilio canadensis,Populus tremuloides,Prudic et al. 2007 PNAS
+Papilio canadensis,Prunus cerasus,Prudic et al. 2007 PNAS
+Papilio canadensis,Prunus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio canadensis,Prunus persica,Prudic et al. 2007 PNAS
+Papilio canadensis,Prunus serotina,Prudic et al. 2007 PNAS
+Papilio canadensis,Prunus virginiana,Prudic et al. 2007 PNAS
+Papilio canadensis,Sorbus americana,Prudic et al. 2007 PNAS
+Papilio canadensis,Syringa vulgaris,Prudic et al. 2007 PNAS
+Papilio canadensis,Tilia americana,Prudic et al. 2007 PNAS
+Papilio cresphontes,Ptelea trifoliata,https://www.butterfliesandmoths.org/species/Papilio-cresphontes
+Papilio cresphontes,Ruta graveolens,https://www.butterfliesandmoths.org/species/Papilio-cresphontes
+Papilio cresphontes,Zanthoxylum americanum,https://www.butterfliesandmoths.org/species/Papilio-cresphontes
+Papilio cresphontes,Zanthoxylum clava-herculis,
+Papilio eurymedon,Alnus rubra,https://en.wikipedia.org/wiki/Papilio_eurymedon
+Papilio eurymedon,Eriodictyon californicum,https://en.wikipedia.org/wiki/Papilio_eurymedon
+Papilio eurymedon,Holodiscus discolor,https://en.wikipedia.org/wiki/Papilio_eurymedon
+Papilio eurymedon,Prunus emarginata,https://www.butterfliesandmoths.org/species/Papilio-eurymedon
+Papilio eurymedon,Rhamnus californica,https://www.butterfliesandmoths.org/species/Papilio-eurymedon
+Papilio glaucus,Alnus incana,Prudic et al. 2007 PNAS
+Papilio glaucus,Carpinus caroliniana,Prudic et al. 2007 PNAS
+Papilio glaucus,Catalpa bignonioides,Prudic et al. 2007 PNAS
+Papilio glaucus,Cinnamomum camphora,Prudic et al. 2007 PNAS
+Papilio glaucus,Cydonia oblonga,Prudic et al. 2007 PNAS
+Papilio glaucus,Fraxinus americana,Prudic et al. 2007 PNAS
+Papilio glaucus,Fraxinus caroliniana,Prudic et al. 2007 PNAS
+Papilio glaucus,Fraxinus nigra,Prudic et al. 2007 PNAS
+Papilio glaucus,Fraxinus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio glaucus,Lindera benzoin,Prudic et al. 2007 PNAS
+Papilio glaucus,Liriodendron tulipifera,Prudic et al. 2007 PNAS
+Papilio glaucus,Magnolia acuminata,Prudic et al. 2007 PNAS
+Papilio glaucus,Magnolia virginiana,Prudic et al. 2007 PNAS
+Papilio glaucus,Malus pumila,Prudic et al. 2007 PNAS
+Papilio glaucus,Populus deltoides,Prudic et al. 2007 PNAS
+Papilio glaucus,Populus tremuloides,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus americana,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus cerasus,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus domestica,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus serotina,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus virginiana,Prudic et al. 2007 PNAS
+Papilio glaucus,Ptelea trifoliata,Prudic et al. 2007 PNAS
+Papilio glaucus,Sassafras albidum,Prudic et al. 2007 PNAS
+Papilio glaucus,Syringa vulgaris,Prudic et al. 2007 PNAS
+Papilio glaucus,Zanthoxylum americanum ,Prudic et al. 2007 PNAS
+Papilio indra,Aletes acaulis,Prudic et al. 2007 PNAS
+Papilio indra,Cymopterus panamintensis,Prudic et al. 2007 PNAS
+Papilio indra,Cymopterus purpurea,Prudic et al. 2007 PNAS
+Papilio indra,Harbouria trachypleura,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium dissectum,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium eastwoodi,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium grayi,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium junceum,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium latilobum,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium lucidum,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium marginatum,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium nuttallii,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium parryi,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium scabrum,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium triternatum,Prudic et al. 2007 PNAS
+Papilio indra,Pteryxia hendersonii,Prudic et al. 2007 PNAS
+Papilio indra,Pteryxia petraea,Prudic et al. 2007 PNAS
+Papilio indra,Pteryxia terebinthina,Prudic et al. 2007 PNAS
+Papilio indra,Tauschia arguta,Prudic et al. 2007 PNAS
+Papilio indra,Tauschia parishii,Prudic et al. 2007 PNAS
+Papilio indra,Thamnosma montana,Prudic et al. 2007 PNAS
+Papilio machaon,Aegopodium podagraria,Prudic et al. 2007 PNAS
+Papilio machaon,Ammi visnaga,Prudic et al. 2007 PNAS
+Papilio machaon,Anethum graveolens,Prudic et al. 2007 PNAS
+Papilio machaon,Angelica archangelica,Prudic et al. 2007 PNAS
+Papilio machaon,Angelica sylvestris,Prudic et al. 2007 PNAS
+Papilio machaon,Artemisia dracunculus,Prudic et al. 2007 PNAS
+Papilio machaon,Artemisia norvegica,Prudic et al. 2007 PNAS
+Papilio machaon,Bupleurum falcatum,Prudic et al. 2007 PNAS
+Papilio machaon,Bupleurum fruticescens,Prudic et al. 2007 PNAS
+Papilio machaon,Carum carvi,Prudic et al. 2007 PNAS
+Papilio machaon,Crithmum maritimum,Prudic et al. 2007 PNAS
+Papilio machaon,Daucus carota,Prudic et al. 2007 PNAS
+Papilio machaon,Dictamnus albus,Prudic et al. 2007 PNAS
+Papilio machaon,Falcaria vulgaris,Prudic et al. 2007 PNAS
+Papilio machaon,Ferula communis,Prudic et al. 2007 PNAS
+Papilio machaon,Haplophyllum balcanicum,Prudic et al. 2007 PNAS
+Papilio machaon,Haplophyllum linifolium,Prudic et al. 2007 PNAS
+Papilio machaon,Haplophyllum tuberculatum,Prudic et al. 2007 PNAS
+Papilio machaon,Heracleum lanatum,Prudic et al. 2007 PNAS
+Papilio machaon,Heracleum sphondylium,Prudic et al. 2007 PNAS
+Papilio machaon,Laserpitium halleri,Prudic et al. 2007 PNAS
+Papilio machaon,Laserpitium latifolium,Prudic et al. 2007 PNAS
+Papilio machaon,Levisticum officinale,Prudic et al. 2007 PNAS
+Papilio machaon,Meum athamanticum,Prudic et al. 2007 PNAS
+Papilio machaon,Petroselinum crispum,Prudic et al. 2007 PNAS
+Papilio machaon,Peucedanum cervaria,Prudic et al. 2007 PNAS
+Papilio machaon,Peucedanum officinale,Prudic et al. 2007 PNAS
+Papilio machaon,Peucedanum oreoselinum,Prudic et al. 2007 PNAS
+Papilio machaon,Pimpinella saxifraga,Prudic et al. 2007 PNAS
+Papilio machaon,Ridolfia segetum,Prudic et al. 2007 PNAS
+Papilio machaon,Ruta angustifolia,Prudic et al. 2007 PNAS
+Papilio machaon,Ruta chalepensis,Prudic et al. 2007 PNAS
+Papilio machaon,Ruta graveolens,Prudic et al. 2007 PNAS
+Papilio machaon,Seseli libanotis,Prudic et al. 2007 PNAS
+Papilio machaon,Seseli varium,Prudic et al. 2007 PNAS
+Papilio machaon,Silaum silaus,Prudic et al. 2007 PNAS
+Papilio machaon,Sleinum carvifolia,Prudic et al. 2007 PNAS
+Papilio machaon,Trinia glauca,Prudic et al. 2007 PNAS
+Papilio machaon,Zizia aptera,Prudic et al. 2007 PNAS
 Papilio multicaudata,Fraxinus anomala,https://en.wikipedia.org/wiki/Papilio_multicaudata
+Papilio multicaudata,Fraxinus latifolia,Prudic et al. 2007 PNAS
+Papilio multicaudata,Fraxinus oregonius,Prudic et al. 2007 PNAS
+Papilio multicaudata,Fraxinus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio multicaudata,Fraxinus viridis,Prudic et al. 2007 PNAS
+Papilio multicaudata,Ligustrum lucidum,Prudic et al. 2007 PNAS
+Papilio multicaudata,Ligustrum vulgare,Prudic et al. 2007 PNAS
+Papilio multicaudata,Platanus racemosa,Prudic et al. 2007 PNAS
+Papilio multicaudata,Platanus wrightii,https://en.wikipedia.org/wiki/Papilio_multicaudata
+Papilio multicaudata,Prunus americana,Prudic et al. 2007 PNAS
+Papilio multicaudata,Prunus capuli,Prudic et al. 2007 PNAS
+Papilio multicaudata,Prunus cerasus,Prudic et al. 2007 PNAS
 Papilio multicaudata,Prunus emarginata,https://en.wikipedia.org/wiki/Papilio_multicaudata
 Papilio multicaudata,Prunus virginiana,https://en.wikipedia.org/wiki/Papilio_multicaudata
+Papilio multicaudata,Ptelea baldwinii,Prudic et al. 2007 PNAS
+Papilio multicaudata,Ptelea crenulata,Prudic et al. 2007 PNAS
 Papilio multicaudata,Ptelea trifoliata,https://en.wikipedia.org/wiki/Papilio_multicaudata
-Papilio multicaudata,Platanus wrightii,https://en.wikipedia.org/wiki/Papilio_multicaudata
-Papilio palamedes,,
-Papilio polyxenes,,
-Papilio rumiko,,
-Papilio rutulus,,
-Papilio troilus,,
-Papilio zelicaon,,
+Papilio multicaudata,Vauquelinia californica,https://en.wikipedia.org/wiki/Papilio_multicaudata
+Papilio palamedes,Persea borbonia,Prudic et al. 2007 PNAS
+Papilio palamedes,Sassafras albidum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Anethum graveolens,Prudic et al. 2007 PNAS
+Papilio polyxenes,Angelica ampla,Prudic et al. 2007 PNAS
+Papilio polyxenes,Angelica atropurpurea,Prudic et al. 2007 PNAS
+Papilio polyxenes,Angelica venenosa,Prudic et al. 2007 PNAS
+Papilio polyxenes,Apium graveolens,Prudic et al. 2007 PNAS
+Papilio polyxenes,Berula erecta,Prudic et al. 2007 PNAS
+Papilio polyxenes,Carum carvi,Prudic et al. 2007 PNAS
+Papilio polyxenes,Cicuta bulbifera,Prudic et al. 2007 PNAS
+Papilio polyxenes,Cicuta douglasii,Prudic et al. 2007 PNAS
+Papilio polyxenes,Cicuta maculata,Prudic et al. 2007 PNAS
+Papilio polyxenes,Conium maculatum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Cryptotaenia canadensis,Prudic et al. 2007 PNAS
+Papilio polyxenes,Cymopterus panamintensis,Prudic et al. 2007 PNAS
+Papilio polyxenes,Daucus carota,Prudic et al. 2007 PNAS
+Papilio polyxenes,Daucus pusillus,Prudic et al. 2007 PNAS
+Papilio polyxenes,Dictamnus albus,Prudic et al. 2007 PNAS
+Papilio polyxenes,Foeniculum vulgare,Prudic et al. 2007 PNAS
+Papilio polyxenes,Harbouria trachypleura,Prudic et al. 2007 PNAS
+Papilio polyxenes,Heracleum lanatum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Levisticum officinale,Prudic et al. 2007 PNAS
+Papilio polyxenes,Ligusticum scothicum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Osmorhiza longistylis,Prudic et al. 2007 PNAS
+Papilio polyxenes,Oxypolis canbyi,Prudic et al. 2007 PNAS
+Papilio polyxenes,Pastinaca sativa,Prudic et al. 2007 PNAS
+Papilio polyxenes,Petroselinum crispum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Ptilimnium capillaceum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Ruta graveolens,Prudic et al. 2007 PNAS
+Papilio polyxenes,Sium suave,Prudic et al. 2007 PNAS
+Papilio polyxenes,Spermolepis divaricata,Prudic et al. 2007 PNAS
+Papilio polyxenes,Taenidia integerrima,Prudic et al. 2007 PNAS
+Papilio polyxenes,Tauschia arguta,Prudic et al. 2007 PNAS
+Papilio polyxenes,Tauschia parishii,Prudic et al. 2007 PNAS
+Papilio polyxenes,Thamnosma montana,Prudic et al. 2007 PNAS
+Papilio polyxenes,Thamnosma texana,Prudic et al. 2007 PNAS
+Papilio polyxenes,Thaspium barbinode,Prudic et al. 2007 PNAS
+Papilio polyxenes,Zizia aptera,Prudic et al. 2007 PNAS
+Papilio polyxenes,Zizia aurea,Prudic et al. 2007 PNAS
+Papilio rumiko,Amyris texana,https://en.wikipedia.org/wiki/Papilio_rumiko
+Papilio rumiko,Casimiroa greggii,https://en.wikipedia.org/wiki/Papilio_rumiko
+Papilio rumiko,Ptelea trifoliata,https://en.wikipedia.org/wiki/Papilio_rumiko
+Papilio rumiko,Ruta graveolens,https://en.wikipedia.org/wiki/Papilio_rumiko
+Papilio rumiko,Zanthoxylum fagara,https://en.wikipedia.org/wiki/Papilio_rumiko
+Papilio rutulus,Alnus crispa,Prudic et al. 2007 PNAS
+Papilio rutulus,Alnus rubra,Prudic et al. 2007 PNAS
+Papilio rutulus,Alnus tenuifolia,Prudic et al. 2007 PNAS
+Papilio rutulus,Alnus viridis,Prudic et al. 2007 PNAS
+Papilio rutulus,Betula papyrifera,Prudic et al. 2007 PNAS
+Papilio rutulus,Malus pumila,Prudic et al. 2007 PNAS
+Papilio rutulus,Persea americana,Prudic et al. 2007 PNAS
+Papilio rutulus,Platanus racemosa,Prudic et al. 2007 PNAS
+Papilio rutulus,Populus angustifolia,Prudic et al. 2007 PNAS
+Papilio rutulus,Populus balsamifera,Prudic et al. 2007 PNAS
+Papilio rutulus,Populus tremuloides,Prudic et al. 2007 PNAS
+Papilio rutulus,Populus trichocarpa,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus americana,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus armeniaca,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus caroliniana,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus cerasus,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus domestica,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus emarginata,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus ilicifolia,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus persica,Prudic et al. 2007 PNAS
+Papilio rutulus,Prunus virginiana,Prudic et al. 2007 PNAS
+Papilio rutulus,Ptelea baldwinii,Prudic et al. 2007 PNAS
+Papilio rutulus,Salix babylonica,Prudic et al. 2007 PNAS
+Papilio rutulus,Salix exigua,Prudic et al. 2007 PNAS
+Papilio rutulus,Salix hookeriana,Prudic et al. 2007 PNAS
+Papilio rutulus,Salix lasiandra,Prudic et al. 2007 PNAS
+Papilio rutulus,Salix lasiolepis,Prudic et al. 2007 PNAS
+Papilio rutulus,Salix scouleriana,Prudic et al. 2007 PNAS
+Papilio rutulus,Syringa vulgaris,Prudic et al. 2007 PNAS
+Papilio troilus,Cinnamomum camphora,Prudic et al. 2007 PNAS
+Papilio troilus,Lindera benzoin,Prudic et al. 2007 PNAS
+Papilio troilus,Liriodendron tulipifera,Prudic et al. 2007 PNAS
+Papilio troilus,Magnolia virginiana,Prudic et al. 2007 PNAS
+Papilio troilus,Persea borbonia,Prudic et al. 2007 PNAS
+Papilio troilus,Sassafras albidum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Anethum graveolens,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica ampla,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica arguta,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica hendersonii,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica kingii,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica lineariloba,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica lucida,Prudic et al. 2007 PNAS
+Papilio zelicaon,Angelica tomentosa,Prudic et al. 2007 PNAS
+Papilio zelicaon,Apium graveolens,Prudic et al. 2007 PNAS
+Papilio zelicaon,Carum carvi,Prudic et al. 2007 PNAS
+Papilio zelicaon,Cicuta maculata,Prudic et al. 2007 PNAS
+Papilio zelicaon,Conioselinum scopulorum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Conium maculatum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Daucus carota,Prudic et al. 2007 PNAS
+Papilio zelicaon,Daucus pusillus,Prudic et al. 2007 PNAS
+Papilio zelicaon,Foeniculum vulgare,Prudic et al. 2007 PNAS
+Papilio zelicaon,Harbouria trachypleura,Prudic et al. 2007 PNAS
+Papilio zelicaon,Heracleum lanatum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Heracleum sphondylium,Prudic et al. 2007 PNAS
+Papilio zelicaon,Ligusticum grayi,Prudic et al. 2007 PNAS
+Papilio zelicaon,Ligusticum porteri,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium californicum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium dasycarpum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium dissectum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium grayi,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium marginatum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium nuttallii,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium parryi,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium triternatum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Lomatium utriculatum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Oenanthe sarmentosa,Prudic et al. 2007 PNAS
+Papilio zelicaon,Pastinaca sativa,Prudic et al. 2007 PNAS
+Papilio zelicaon,Perideridia bolanderi,Prudic et al. 2007 PNAS
+Papilio zelicaon,Perideridia gairdneri,Prudic et al. 2007 PNAS
+Papilio zelicaon,Perideridia kelloggii,Prudic et al. 2007 PNAS
+Papilio zelicaon,Petroselinum crispum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Pseudocymopterus montanus,Prudic et al. 2007 PNAS
+Papilio zelicaon,Pteryxia hendersonii,Prudic et al. 2007 PNAS
+Papilio zelicaon,Pteryxia petraea,Prudic et al. 2007 PNAS
+Papilio zelicaon,Pteryxia terebinthina,Prudic et al. 2007 PNAS
+Papilio zelicaon,Sphenosciadium capitellatum,Prudic et al. 2007 PNAS
+Papilio zelicaon,Tauschia arguta,Prudic et al. 2007 PNAS
+Papilio zelicaon,Tauschia parishii,Prudic et al. 2007 PNAS
+Papilio zelicaon,Zizia aptera,Prudic et al. 2007 PNAS
