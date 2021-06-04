@@ -10,7 +10,7 @@ Papilio brevicauda,Heracleum maximum,https://en.wikipedia.org/wiki/Papilio_brevi
 Papilio brevicauda,Ligusticum scoticum,https://en.wikipedia.org/wiki/Papilio_brevicauda
 Papilio brevicauda,Pastinaca sativa,https://en.wikipedia.org/wiki/Papilio_brevicauda
 Papilio brevicauda,Petroselinum crispum,https://en.wikipedia.org/wiki/Papilio_brevicauda
-Papilio canadensis,Alnus rugosa,Prudic et al. 2007 PNAS
+Papilio canadensis,Alnus incana,Prudic et al. 2007 PNAS
 Papilio canadensis,Amelanchier canadensis,Prudic et al. 2007 PNAS
 Papilio canadensis,Betula alba,Prudic et al. 2007 PNAS
 Papilio canadensis,Betula alleghaniensis,Prudic et al. 2007 PNAS
@@ -185,10 +185,9 @@ Papilio rumiko,Casimiroa greggii,https://en.wikipedia.org/wiki/Papilio_rumiko
 Papilio rumiko,Ptelea trifoliata,https://en.wikipedia.org/wiki/Papilio_rumiko
 Papilio rumiko,Ruta graveolens,https://en.wikipedia.org/wiki/Papilio_rumiko
 Papilio rumiko,Zanthoxylum fagara,https://en.wikipedia.org/wiki/Papilio_rumiko
-Papilio rutulus,Alnus crispa,Prudic et al. 2007 PNAS
+Papilio rutulus,Alnus alnobetula,Prudic et al. 2007 PNAS
+Papilio rutulus,Alnus incana,Prudic et al. 2007 PNAS
 Papilio rutulus,Alnus rubra,Prudic et al. 2007 PNAS
-Papilio rutulus,Alnus tenuifolia,Prudic et al. 2007 PNAS
-Papilio rutulus,Alnus viridis,Prudic et al. 2007 PNAS
 Papilio rutulus,Betula papyrifera,Prudic et al. 2007 PNAS
 Papilio rutulus,Malus pumila,Prudic et al. 2007 PNAS
 Papilio rutulus,Persea americana,Prudic et al. 2007 PNAS

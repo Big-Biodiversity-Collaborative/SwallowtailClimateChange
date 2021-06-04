@@ -1,14 +1,11 @@
 genus,species,gbif_name,notes,gbif_count,gbif_date
 Aegopodium,podagraria,Aegopodium podagraria,,2641,2021-06-04
 Aletes,acaulis,Aletes acaulis,,94,2021-06-04
-Alnus,crispa,Alnus crispa,,68,2021-06-04
-Alnus,incana,Alnus incana,,5636,2021-06-04
+Alnus,alnobetula,Alnus alnobetula,Originally referred to as A. crispa and A. viridis,68,2021-06-04
+Alnus,incana,Alnus incana,Includes A. rugosa and A. tenuifolia,5636,2021-06-04
 Alnus,rubra,Alnus rubra,,2878,2021-06-04
-Alnus,rugosa,Alnus rugosa,,7,2021-06-04
-Alnus,tenuifolia,Alnus tenuifolia,,84,2021-06-04
-Alnus,viridis,Alnus viridis,,236,2021-06-04
 Amelanchier,canadensis,Amelanchier canadensis,,742,2021-06-04
-Ammi,visnaga,Ammi visnaga,,0,2021-06-04
+Ammi,visnaga,Ammi visnaga,Mediterranean species,0,2021-06-04
 Amyris,elemifera,Amyris elemifera,,275,2021-06-04
 Amyris,texana,Amyris texana,,143,2021-06-04
 Anethum,graveolens,Anethum graveolens,,247,2021-06-04
