@@ -23,7 +23,7 @@ Papilio canadensis,Populus balsamifera,Prudic et al. 2007 PNAS
 Papilio canadensis,Populus grandidentata,Prudic et al. 2007 PNAS
 Papilio canadensis,Populus tremuloides,Prudic et al. 2007 PNAS
 Papilio canadensis,Prunus cerasus,Prudic et al. 2007 PNAS
-Papilio canadensis,Prunus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio canadensis,Prunus pensylvanica,Prudic et al. 2007 PNAS
 Papilio canadensis,Prunus persica,Prudic et al. 2007 PNAS
 Papilio canadensis,Prunus serotina,Prudic et al. 2007 PNAS
 Papilio canadensis,Prunus virginiana,Prudic et al. 2007 PNAS
@@ -58,7 +58,7 @@ Papilio glaucus,Populus tremuloides,Prudic et al. 2007 PNAS
 Papilio glaucus,Prunus americana,Prudic et al. 2007 PNAS
 Papilio glaucus,Prunus cerasus,Prudic et al. 2007 PNAS
 Papilio glaucus,Prunus domestica,Prudic et al. 2007 PNAS
-Papilio glaucus,Prunus pennsylvanica,Prudic et al. 2007 PNAS
+Papilio glaucus,Prunus pensylvanica,Prudic et al. 2007 PNAS
 Papilio glaucus,Prunus serotina,Prudic et al. 2007 PNAS
 Papilio glaucus,Prunus virginiana,Prudic et al. 2007 PNAS
 Papilio glaucus,Ptelea trifoliata,Prudic et al. 2007 PNAS
@@ -70,7 +70,7 @@ Papilio indra,Cymopterus panamintensis,Prudic et al. 2007 PNAS
 Papilio indra,Cymopterus purpureus,Prudic et al. 2007 PNAS
 Papilio indra,Harbouria trachypleura,Prudic et al. 2007 PNAS
 Papilio indra,Lomatium dissectum,Prudic et al. 2007 PNAS
-Papilio indra,Lomatium eastwoodi,Prudic et al. 2007 PNAS
+Papilio indra,Lomatium eastwoodiae,Prudic et al. 2007 PNAS
 Papilio indra,Lomatium grayi,Prudic et al. 2007 PNAS
 Papilio indra,Lomatium junceum,Prudic et al. 2007 PNAS
 Papilio indra,Lomatium latilobum,Prudic et al. 2007 PNAS
@@ -133,11 +133,10 @@ Papilio multicaudata,Ligustrum vulgare,Prudic et al. 2007 PNAS
 Papilio multicaudata,Platanus racemosa,Prudic et al. 2007 PNAS
 Papilio multicaudata,Platanus wrightii,https://en.wikipedia.org/wiki/Papilio_multicaudata
 Papilio multicaudata,Prunus americana,Prudic et al. 2007 PNAS
-Papilio multicaudata,Prunus capuli,Prudic et al. 2007 PNAS
+Papilio multicaudata,Prunus serotina,Prudic et al. 2007 PNAS
 Papilio multicaudata,Prunus cerasus,Prudic et al. 2007 PNAS
 Papilio multicaudata,Prunus emarginata,https://en.wikipedia.org/wiki/Papilio_multicaudata
 Papilio multicaudata,Prunus virginiana,https://en.wikipedia.org/wiki/Papilio_multicaudata
-Papilio multicaudata,Ptelea baldwinii,Prudic et al. 2007 PNAS
 Papilio multicaudata,Ptelea crenulata,Prudic et al. 2007 PNAS
 Papilio multicaudata,Ptelea trifoliata,https://en.wikipedia.org/wiki/Papilio_multicaudata
 Papilio multicaudata,Vauquelinia californica,https://en.wikipedia.org/wiki/Papilio_multicaudata
@@ -163,9 +162,9 @@ Papilio polyxenes,Foeniculum vulgare,Prudic et al. 2007 PNAS
 Papilio polyxenes,Harbouria trachypleura,Prudic et al. 2007 PNAS
 Papilio polyxenes,Heracleum lanatum,Prudic et al. 2007 PNAS
 Papilio polyxenes,Levisticum officinale,Prudic et al. 2007 PNAS
-Papilio polyxenes,Ligusticum scothicum,Prudic et al. 2007 PNAS
+Papilio polyxenes,Ligusticum scoticum,Prudic et al. 2007 PNAS
 Papilio polyxenes,Osmorhiza longistylis,Prudic et al. 2007 PNAS
-Papilio polyxenes,Oxypolis canbyi,Prudic et al. 2007 PNAS
+Papilio polyxenes,Tiedemannia canbyi,Prudic et al. 2007 PNAS
 Papilio polyxenes,Pastinaca sativa,Prudic et al. 2007 PNAS
 Papilio polyxenes,Petroselinum crispum,Prudic et al. 2007 PNAS
 Papilio polyxenes,Ptilimnium capillaceum,Prudic et al. 2007 PNAS
@@ -205,7 +204,7 @@ Papilio rutulus,Prunus emarginata,Prudic et al. 2007 PNAS
 Papilio rutulus,Prunus ilicifolia,Prudic et al. 2007 PNAS
 Papilio rutulus,Prunus persica,Prudic et al. 2007 PNAS
 Papilio rutulus,Prunus virginiana,Prudic et al. 2007 PNAS
-Papilio rutulus,Ptelea baldwinii,Prudic et al. 2007 PNAS
+Papilio rutulus,Ptelea trifoliata,Prudic et al. 2007 PNAS
 Papilio rutulus,Salix babylonica,Prudic et al. 2007 PNAS
 Papilio rutulus,Salix exigua,Prudic et al. 2007 PNAS
 Papilio rutulus,Salix hookeriana,Prudic et al. 2007 PNAS
