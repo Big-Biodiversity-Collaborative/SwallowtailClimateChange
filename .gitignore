@@ -16,3 +16,9 @@ scripts/*.R
 # Output of modeling
 output/models/*.rds
 output/distributions/*.rds
+
+# Map files
+output/maps
+
+# Proportion of range overlaps
+output/overlaps.csv
