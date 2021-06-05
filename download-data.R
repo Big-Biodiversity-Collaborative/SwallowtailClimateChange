@@ -29,4 +29,6 @@ for (i in 1:nrow(gbif_data)) {
                 gbif_name = gbif_name,
                 replace = replace,
                 verbose = TRUE)
+  # Adding a 2 second sleep to slow things down.
+  Sys.sleep(time = 2)
 }
