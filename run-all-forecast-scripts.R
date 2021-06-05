@@ -25,6 +25,11 @@ for (one_file in dist_files) {
   dist_out <- paste0("output/distributions/", species_name, "-distribution-svm-GFDL-ESM4_RCP45.rds")
   
   if (!file.exists(dist_out) | rerun) {
-    source(file = one_file)
+    forecast_script <- paste0("scripts/", nice_name, "-forecast.R")
+    if (file.exists(forecast_script)) {
+      source(file = forecast_script)
+    } else {
+      warning(paste0("Could not find script: ", forecast_script))
+    }
   }
 }

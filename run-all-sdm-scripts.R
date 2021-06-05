@@ -10,7 +10,11 @@
 
 # Logical indicating whether or not to for re-running script if the model 
 # output already exists
-rerun <- FALSE
+rerun <- TRUE
+
+# Integer indicating minimum number of observations necessary to run script
+min_obs <- 50
+
 sdm_files <- list.files(path = "./scripts",
                         pattern = "*-sdm.R",
                         full.names = TRUE)
@@ -20,13 +24,30 @@ sdm_files <- list.files(path = "./scripts",
 # vector machine
 for (one_file in sdm_files) {
   # Need to extract species name from file to see if model has already been run
-  species_name <- strsplit(x = basename(one_file),
+  nice_name <- strsplit(x = basename(one_file),
                            split = "-")[[1]][1]
   
-  # the file name that would be used for model output
-  model_out <- paste0("output/models/", species_name, "-model-svm-current.rds")
-  
-  if (!file.exists(model_out) | rerun) {
-    source(file = one_file)
+  # Need to count the number of observations in data file to see if it meets 
+  # minimums
+  obs_file <- paste0("data/",
+                     nice_name,
+                     "-gbif.csv")
+  n_obs <- nrow(x = read.csv(file = obs_file))
+
+  if (n_obs >= min_obs) {
+    # the file name that would be used for model output
+    model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
+    
+    if (!file.exists(model_out) | rerun) {
+      sdm_script <- paste0("scripts/", nice_name, "-sdm.R")
+      if (file.exists(sdm_script)) {
+        source(file = sdm_script)
+      } else {
+        warning(paste0("Could not find script: ", sdm_script))
+      }
+    }
+  } else {
+    message(paste0("Too few observations for ", nice_name, " (", n_obs, 
+                   " < ", min_obs, "). Skipping modeling."))
   }
 }
