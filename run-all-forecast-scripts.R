@@ -17,19 +17,26 @@ dist_files <- list.files(path = "./scripts",
 
 for (one_file in dist_files) {
   # Need to extract species name from file to see if model has already been run
-  species_name <- strsplit(x = basename(one_file),
+  nice_name <- strsplit(x = basename(one_file),
                            split = "-")[[1]][1]
   
   # the file name that would be used for distribution output
   # TODO: only checks for one forecast
-  dist_out <- paste0("output/distributions/", species_name, "-distribution-svm-GFDL-ESM4_RCP45.rds")
+  dist_out <- paste0("output/distributions/", nice_name, "-distribution-svm-GFDL-ESM4_RCP45.rds")
   
   if (!file.exists(dist_out) | rerun) {
-    forecast_script <- paste0("scripts/", nice_name, "-forecast.R")
-    if (file.exists(forecast_script)) {
-      source(file = forecast_script)
+    
+    # Make sure model output exists
+    model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
+    if (file.exists(model_out)) {
+      forecast_script <- paste0("scripts/", nice_name, "-forecast.R")
+      if (file.exists(forecast_script)) {
+        source(file = forecast_script)
+      } else {
+        warning(paste0("\nCould not find script: ", forecast_script))
+      }
     } else {
-      warning(paste0("Could not find script: ", forecast_script))
+      message(paste0("\nNo model found for ", nice_name, ". Skipping forecast."))
     }
   }
 }

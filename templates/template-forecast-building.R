@@ -23,7 +23,7 @@ species_name <- paste0(genus, " ", species)
 nice_name <- tolower(paste0(genus, "_", species))
 
 # For the paranoid
-message(paste0("Predicting distribution of ", species_name, 
+message(paste0("\nPredicting distribution of ", species_name, 
                " based on GFDL-ESM4_RCP45 forecast data."))
 
 # Do forecast model, with GFDL-ESM4_RCP45 as forecast data

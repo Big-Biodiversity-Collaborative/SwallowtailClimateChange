@@ -32,22 +32,28 @@ for (one_file in sdm_files) {
   obs_file <- paste0("data/",
                      nice_name,
                      "-gbif.csv")
-  n_obs <- nrow(x = read.csv(file = obs_file))
 
-  if (n_obs >= min_obs) {
-    # the file name that would be used for model output
-    model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
     
-    if (!file.exists(model_out) | rerun) {
-      sdm_script <- paste0("scripts/", nice_name, "-sdm.R")
-      if (file.exists(sdm_script)) {
-        source(file = sdm_script)
-      } else {
-        warning(paste0("Could not find script: ", sdm_script))
+  if (file.exists(obs_file)) {
+    n_obs <- nrow(x = read.csv(file = obs_file))
+    
+    if (n_obs >= min_obs) {
+      # the file name that would be used for model output
+      model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
+      
+      if (!file.exists(model_out) | rerun) {
+        sdm_script <- paste0("scripts/", nice_name, "-sdm.R")
+        if (file.exists(sdm_script)) {
+          source(file = sdm_script)
+        } else {
+          warning(paste0("\nCould not find script: ", sdm_script))
+        }
       }
+    } else {
+      message(paste0("\nToo few observations for ", nice_name, " (", n_obs, 
+                     " < ", min_obs, "). Skipping modeling."))
     }
   } else {
-    message(paste0("Too few observations for ", nice_name, " (", n_obs, 
-                   " < ", min_obs, "). Skipping modeling."))
+    message(paste0("\nNo data file found for ", nice_name, "(", obs_file, ")."))
   }
 }
