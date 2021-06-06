@@ -3,8 +3,8 @@
 # jcoliver@arizona.edu
 # 2021-06-03
 
-library(raster)
-# library(ggplot2)
+require(raster)
+require(ggplot2)
 
 # Load up the functions from the functions folder
 function_files <- list.files(path = "./functions", 
@@ -13,6 +13,9 @@ function_files <- list.files(path = "./functions",
 for(fun_file in function_files) {
   source(file = fun_file)
 }
+
+# Indicates whether or not to write output ggplot maps to file
+save_maps <- TRUE
 
 # Script will do three things (or call functions to do three things) for each 
 # insect species:
@@ -32,47 +35,61 @@ insect_species <- unique(insects_hosts$insect)
 
 # iterate over each species of insects
 for (species_name in insect_species) {
-  # TODO: Move to a function that takes two arguments:
-  # 1. species name
-  # 2. predictor (for now, either current or GFDL-ESM4_RCP45)
-  # Return a list with a 
-  # 1. ggplot object
-  # 2. Percentage of insect range that overlaps with host
+  message(paste0("\nCreating overlap maps & calculations for ", species_name))
   
   current_overlap <- create_overlaps(species_name = species_name,
-                                     predictor = "current")
+                                     predictor = "current",
+                                     crop_to_insect = TRUE)
 
   forecast_overlap <- create_overlaps(species_name = species_name,
-                                      predictor = "GFDL-ESM4_RCP45")  
+                                      predictor = "GFDL-ESM4_RCP45",
+                                      crop_to_insect = TRUE)  
 
-  # Convert NULL to NA in overlaps, for easier record keeping
-  if (is.null(current_overlap)) {
-    current_overlap <- NA
+  # If requested, save the maps
+  if (save_maps) {
+    nice_name <- tolower(x = gsub(pattern = " ",
+                                  replacement = "_",
+                                  x = species_name))
+    if (!is.null(current_overlap$overlap_map)) {
+      current_filename <- paste0("output/maps/", nice_name, 
+                                 "-overlap-current.pdf")
+      ggsave(filename = current_filename, plot = current_overlap$overlap_map)
+    }
+    if (!is.null(forecast_overlap$overlap_map)) {
+      forecast_filename <- paste0("output/maps/", nice_name, 
+                                 "-overlap-GFDL-ESM4_RCP45.pdf")
+      ggsave(filename = forecast_filename, plot = forecast_overlap$overlap_map)
+    }
   }
-  if (is.null(forecast_overlap)) {
-    forecast_overlap <- NA
+  
+  # Convert NULL to NA in overlaps, for easier record keeping
+  if (is.null(current_overlap$prop_overlap)) {
+    current_overlap$prop_overlap <- NA
+  }
+  if (is.null(forecast_overlap$prop_overlap)) {
+    forecast_overlap$prop_overlap <- NA
   }
 
   # Only proceed if at least one is not NA
-  if (!is.na(current_overlap) | !is.na(forecast_overlap)) {
+  if (!is.na(current_overlap$prop_overlap) | !is.na(forecast_overlap$prop_overlap)) {
     # Add those to the file (create it if it doesn't exist)
     if (file.exists(output_file)) {
       overlaps <- read.csv(file = output_file)
       # If there is a row for this species already, update it
       if (species_name %in% overlaps$species) {
-        overlaps$current[overlaps$species == species_name] <- current_overlap
-        overlaps$forecast[overlaps$species == species_name] <- forecast_overlap
+        overlaps$current[overlaps$species == species_name] <- current_overlap$prop_overlap
+        overlaps$forecast[overlaps$species == species_name] <- forecast_overlap$prop_overlap
       } else {
         # No row for this species yet, so add it
         overlaps <- rbind(overlaps,
                           list(species = species_name,
-                               current = current_overlap,
-                               forecast = forecast_overlap))
+                               current = current_overlap$prop_overlap,
+                               forecast = forecast_overlap$prop_overlap))
       }
     } else {
       overlaps <- data.frame(species = species_name,
-                             current = current_overlap,
-                             forecast = forecast_overlap)
+                             current = current_overlap$prop_overlap,
+                             forecast = forecast_overlap$prop_overlap)
     }
     write.csv(x = overlaps,
               file = output_file,

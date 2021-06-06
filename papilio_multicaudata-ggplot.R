@@ -10,7 +10,7 @@ library(RColorBrewer)
 
 distribution <- readRDS(file = "output/distributions/papilio_multicaudata-distribution-svm-current.rds")
 
-# May need to convert to data frame?
+# Need to convert to data frame (two steps to do so)
 # First, to a SpatialPointsDataFrame
 dist_points <- raster::rasterToPoints(x = distribution, 
                                       spatial = TRUE)
@@ -33,6 +33,64 @@ dist_df <- dist_df %>%
 
 ggplot(data = dist_df, mapping = aes(x = Longitude, y = Latitude, fill = PA)) +
   geom_raster() +
-  scale_fill_discrete() +
+  scale_fill_discrete(type = c("Absent" = "#e5e5e5", "Present" = "#5ab4ac")) +
+  labs(title = "Papilio multicaudata") +
   coord_equal() + 
-  theme_bw()
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        legend.title = element_blank())
+
+# Doing plots of multiple hosts
+
+host1 <- readRDS(file = "output/distributions/fraxinus_anomala-distribution-svm-current.rds")
+host2 <- readRDS(file = "output/distributions/ptelea_trifoliata-distribution-svm-current.rds")
+
+r <- list(distribution, host1, host2)
+
+# Need to find largest extent of everything
+x <- r
+# Remove names from x because they cause issues?
+names(x) <- NULL
+x$fun = sum
+x$na.rm = TRUE
+mosaic_raster <- do.call(raster::mosaic, x)
+
+sum_r <- NULL
+for (i in 1:length(r)) {
+  one_raster <- r[[i]]
+  
+  if (is.null(sum_r)) {
+    # First one, so just extend the raster to the appropriate extent, leaving
+    # missing values as missing, and assign to sum_r
+    sum_r <- raster::extend(x = one_raster,
+                            y = mosaic_raster)
+  } else {
+    # for each additional raster, need to have two extentions: One with missing 
+    # values as missing, one with missing values as zero
+    
+    # We use the 0 raster for actual addition, but the NA raster to then turn all 
+    # zeros back to that should be NA afterwards
+    one_raster_NA <- raster::extend(x = one_raster,
+                                    y = mosaic_raster)
+    one_raster_0 <- raster::extend(x = one_raster,
+                                   y = mosaic_raster,
+                                   value = 0)
+    # We're adding to the sum_r raster, which has zeros and NAs at this point.
+    # Make a copy of sum_r, and convert the NAs to zeros, so we can sum the 
+    # rasters
+    sum_r_0 <- sum_r
+    sum_r_0[is.na(sum_r_0)] <- 0
+    
+    # Add the two rasters that have missings as zero together
+    sum_r <- sum_r_0 + one_raster_0
+    
+    # Now use indexing of the two rasters that have missing as NA to change 
+    # back any cells that are NA in both rasters
+    sum_r[is.na(sum_r) & is.na(one_raster_NA)] <- NA
+  }
+}
+
+if (out == "binary") {
+  sum_r[sum_r > 1] <- 1
+}
+

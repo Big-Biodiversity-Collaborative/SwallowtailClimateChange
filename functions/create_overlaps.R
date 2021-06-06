@@ -12,9 +12,15 @@ create_overlaps <- function(species_name,
   if (!require(raster)) {
     stop("create_overlaps requires raster package, but it could not be loaded")
   }
-  if (!require(maptools)) {
-    stop("create_overlaps requires maptools package, but it could not be loaded")
+  if (!require(dplyr)) {
+    stop("create_overlaps requires dplyr package, but it could not be loaded")
   }
+  if (!require(ggplot2)) {
+    stop("create_overlaps requires ggplot2 package, but it could not be loaded")
+  }
+  # if (!require(maptools)) {
+  #   stop("create_overlaps requires maptools package, but it could not be loaded")
+  # }
   # Load up the functions from the functions folder
   function_files <- list.files(path = "./functions", 
                                pattern = ".R$", 
@@ -23,11 +29,6 @@ create_overlaps <- function(species_name,
     source(file = fun_file)
   }
   
-  
-  # 1. species name
-  # 2. predictor (for now, either current or GFDL-ESM4_RCP45)
-  # Save a file with a plot and return a double that is the proportion of the 
-  #     insects range that overlaps with host
   predictor <- match.arg(predictor)
   
   nice_name <- tolower(x = gsub(pattern = " ",
@@ -93,37 +94,87 @@ create_overlaps <- function(species_name,
     if (crop_to_insect) {
       all_pa <- raster::crop(x = all_pa, y = insect_pa)
     }
+
+    # Now we can use ggplot to plot these rasters, but we need to extract 
+    # raster information into a data frame
+    
+    # Convert to data frame (two steps to do so)
+    # First, to a SpatialPointsDataFrame
+    pa_points <- raster::rasterToPoints(x = all_pa, 
+                                        spatial = TRUE)
+    # Then to a 'conventional' dataframe
+    pa_df  <- data.frame(pa_points)
+    rm(pa_points)
+    
+    # Rename columns so they plot without extra ggplot commands
+    pa_df <- pa_df %>%
+      dplyr::rename(Longitude = x,
+                    Latitude = y)
+
+    # Create column indicating what each layer means
+    pa_df <- pa_df %>%
+      dplyr::mutate(Status = dplyr::case_when(layer == 0 ~ "Absent",
+                                              layer == 1 ~ species_name,
+                                              layer == 2 ~ "Hosts only",
+                                              layer == 3 ~ paste0(species_name, " & hosts"))) %>%
+      dplyr::mutate(Status = factor(x = Status,
+                                    levels = c("Absent", "Hosts only",
+                                    species_name, paste0(species_name, " & hosts"))))
+
+    color_vec <- c("#e5e5e5",   # Absent
+                   "#b2df8a",   # Hosts only
+                   "#a6cee3",   # Insect only
+                   "#1f78b4")   # Hosts and insect
+    
+    overlap_plot <- ggplot(data = pa_df, mapping = aes(x = Longitude, y = Latitude, fill = Status)) +
+      geom_raster() +
+      scale_fill_discrete(type = color_vec) +
+      # scale_fill_discrete(type = c("Absent" = "#e5e5e5",
+      #                              "Papilio multicaudata" = "#a6cee3",
+      #                              "Hosts only" = "#b2df8a",
+      #                              "Papilio multicaudata & hosts" = "#1f78b4")) +
+      # scale_fill_discrete(type = c("#e5e5e5",
+      #                              "#a6cee3",
+      #                              "#b2df8a",
+      #                              "#1f78b4")) +
+      labs(title = paste0(species_name, " ", predictor)) +
+      coord_equal() + 
+      theme_minimal() +
+      theme(axis.title = element_blank(),
+            legend.title = element_blank())
     
     # Now we can create a plot, using maptools for borders
-    data("wrld_simpl")
+    # data("wrld_simpl")
     
     # We'll need three colors: insect, plants, insect+plants
-    plot_colors <- hcl.colors(n = 3, palette = "Cividis")
-
-    plot_file <- paste0("output/maps/", nice_name, "-overlap-", 
-                        predictor, ".pdf")
+    # plot_colors <- hcl.colors(n = 3, palette = "Cividis")
+    # 
+    # plot_file <- paste0("output/maps/", nice_name, "-overlap-", 
+    #                     predictor, ".pdf")
     
     # Write to pdf instead of screen
-    pdf(file = plot_file, useDingbats = FALSE)
-      main_title <- paste0(species_name, " ", predictor)
-      plot(all_pa, 
-           main = main_title, 
-           col = c(NA, plot_colors),
-           legend = FALSE)
+    # pdf(file = plot_file, useDingbats = FALSE)
+    #   main_title <- paste0(species_name, " ", predictor)
+    #   plot(all_pa, 
+    #        main = main_title, 
+    #        col = c(NA, plot_colors),
+    #        legend = FALSE)
       # Add the map
-      plot(wrld_simpl, 
-           add = TRUE,
-           border = "grey30")
+      # plot(wrld_simpl, 
+      #      add = TRUE,
+      #      border = "grey30")
       # legend("topleft", 
       #        legend = c("Insect", "Host(s)", "Both"),
       #        fill = plot_colors[1:3])
-    dev.off() # stop writing to disk
+#    dev.off() # stop writing to disk
     
-    message(paste0("PDF map for ", species_name, " written to ", plot_file))
+    # message(paste0("PDF map for ", species_name, " written to ", plot_file))
     
     # Now do calculations for overlaps and return that
     # Calculate frequencies of all possible pixel values
     pixel_freqs <- data.frame(raster::freq(all_pa))
+    # Drop row with NA counts
+    pixel_freqs <- na.omit(pixel_freqs)
     
     # Count how many pixels are insect only (== 1)
     insect_only <- pixel_freqs$count[pixel_freqs$value == 1]
@@ -143,7 +194,8 @@ create_overlaps <- function(species_name,
     # insect only / (insect + plant AND insect)
     # This is the proportion of the insect's range that overlaps with host range
     prop_overlap <- insect_plant / (insect_only + insect_plant)
-    return(prop_overlap)
+    return(list(prop_overlap = prop_overlap,
+                overlap_map = overlap_plot))
     
   } else {
     # No host plants listed in file, message and return NULL
