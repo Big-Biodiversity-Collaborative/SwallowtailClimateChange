@@ -111,15 +111,22 @@ create_overlaps <- function(species_name,
       dplyr::rename(Longitude = x,
                     Latitude = y)
 
+    # Want an abbreviated version of species name for title & legend
+    name_split <- unlist(strsplit(x = species_name, split = " "))
+    abbr_name <- paste0(substr(x = name_split[1], start = 1, stop = 1),
+                        ". ", name_split[2])
+    
     # Create column indicating what each layer means
     pa_df <- pa_df %>%
       dplyr::mutate(Status = dplyr::case_when(layer == 0 ~ "Absent",
-                                              layer == 1 ~ species_name,
+                                              layer == 1 ~ abbr_name,
                                               layer == 2 ~ "Hosts only",
-                                              layer == 3 ~ paste0(species_name, " & hosts"))) %>%
+                                              layer == 3 ~ paste0(abbr_name, " & hosts"))) %>%
       dplyr::mutate(Status = factor(x = Status,
-                                    levels = c("Absent", "Hosts only",
-                                    species_name, paste0(species_name, " & hosts"))))
+                                    levels = c("Absent", 
+                                               "Hosts only",
+                                               abbr_name, 
+                                               paste0(abbr_name, " & hosts"))))
 
     color_vec <- c("#e5e5e5",   # Absent
                    "#b2df8a",   # Hosts only
@@ -129,15 +136,7 @@ create_overlaps <- function(species_name,
     overlap_plot <- ggplot(data = pa_df, mapping = aes(x = Longitude, y = Latitude, fill = Status)) +
       geom_raster() +
       scale_fill_discrete(type = color_vec) +
-      # scale_fill_discrete(type = c("Absent" = "#e5e5e5",
-      #                              "Papilio multicaudata" = "#a6cee3",
-      #                              "Hosts only" = "#b2df8a",
-      #                              "Papilio multicaudata & hosts" = "#1f78b4")) +
-      # scale_fill_discrete(type = c("#e5e5e5",
-      #                              "#a6cee3",
-      #                              "#b2df8a",
-      #                              "#1f78b4")) +
-      labs(title = paste0(species_name, " ", predictor)) +
+      labs(title = paste0(abbr_name, " ", predictor)) +
       coord_equal() + 
       theme_minimal() +
       theme(axis.title = element_blank(),
