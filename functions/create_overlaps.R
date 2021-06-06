@@ -110,7 +110,7 @@ create_overlaps <- function(species_name,
     pa_df <- pa_df %>%
       dplyr::rename(Longitude = x,
                     Latitude = y)
-
+    
     # Want an abbreviated version of species name for title & legend
     name_split <- unlist(strsplit(x = species_name, split = " "))
     abbr_name <- paste0(substr(x = name_split[1], start = 1, stop = 1),
@@ -138,7 +138,7 @@ create_overlaps <- function(species_name,
       scale_fill_discrete(type = color_vec) +
       labs(title = paste0(abbr_name, " ", predictor)) +
       coord_equal() + 
-      theme_minimal() +
+      theme_bw() +
       theme(axis.title = element_blank(),
             legend.title = element_blank())
     

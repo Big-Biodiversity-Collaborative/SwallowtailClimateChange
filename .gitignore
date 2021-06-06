@@ -22,3 +22,4 @@ output/maps
 
 # Proportion of range overlaps
 output/overlaps.csv
+output/overlap-plot.pdf
