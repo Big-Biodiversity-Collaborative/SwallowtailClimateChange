@@ -110,7 +110,7 @@ create_overlaps <- function(species_name,
     # First, to a SpatialPointsDataFrame
     pa_points <- raster::rasterToPoints(x = all_pa, 
                                         spatial = TRUE)
-    # Then to a 'conventional' dataframe
+    # Then to a dataframe
     pa_df  <- data.frame(pa_points)
     rm(pa_points)
     
@@ -149,35 +149,8 @@ create_overlaps <- function(species_name,
       theme_bw() +
       theme(axis.title = element_blank(),
             legend.title = element_blank())
-    
-    # Now we can create a plot, using maptools for borders
-    # data("wrld_simpl")
-    
-    # We'll need three colors: insect, plants, insect+plants
-    # plot_colors <- hcl.colors(n = 3, palette = "Cividis")
-    # 
-    # plot_file <- paste0("output/maps/", nice_name, "-overlap-", 
-    #                     predictor, ".pdf")
-    
-    # Write to pdf instead of screen
-    # pdf(file = plot_file, useDingbats = FALSE)
-    #   main_title <- paste0(species_name, " ", predictor)
-    #   plot(all_pa, 
-    #        main = main_title, 
-    #        col = c(NA, plot_colors),
-    #        legend = FALSE)
-      # Add the map
-      # plot(wrld_simpl, 
-      #      add = TRUE,
-      #      border = "grey30")
-      # legend("topleft", 
-      #        legend = c("Insect", "Host(s)", "Both"),
-      #        fill = plot_colors[1:3])
-#    dev.off() # stop writing to disk
-    
-    # message(paste0("PDF map for ", species_name, " written to ", plot_file))
-    
-    # Now do calculations for overlaps and return that
+
+    # Now do calculations for overlaps
     # Calculate frequencies of all possible pixel values
     pixel_freqs <- data.frame(raster::freq(all_pa))
     # Drop row with NA counts
