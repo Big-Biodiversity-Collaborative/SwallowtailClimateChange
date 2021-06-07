@@ -7,6 +7,8 @@
 #' @param predictors environmental predictor data to use for modeling
 #' @param verbose logical indicating whether or not to print processing messages
 #' 
+#' @details Uses \code{kernlab::ksvm()} for support vector machine model
+#' 
 #' @return a list with the following elements:
 #' \describe{
 #'   \item{model}{Support vector machine SDM; the output of \code{kernlab::ksvm}}
@@ -17,11 +19,11 @@
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
 run_svm <- function(obs, absence, predictors, verbose = TRUE) {
-  if (!require(dplyr)) {
-    stop("run_svm requires dplyr package, but it could not be loaded")
-  }
   if (!require(raster)) {
     stop("run_svm requires raster package, but it could not be loaded")
+  }
+  if (!require(dplyr)) {
+    stop("run_svm requires dplyr package, but it could not be loaded")
   }
   if (!require(dismo)) {
     stop("run_svm requires dismo package, but it could not be loaded")

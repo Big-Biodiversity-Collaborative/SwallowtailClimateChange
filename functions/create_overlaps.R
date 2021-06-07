@@ -6,6 +6,14 @@
 #' which predictions are based
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
+#' 
+#' @return A list with two elements:
+#' \describe{
+#'   \item{prop_overlap}{double indicating the proportion of insect's range 
+#'   that overlaps with host plant(s)' range}
+#'   \item{overlap_plot}{ggplot object showing distribution of insect, host(s),
+#'   and their overlap}
+#' }
 create_overlaps <- function(species_name, 
                             predictor = c("current", "GFDL-ESM4_RCP45"),
                             crop_to_insect = FALSE) {

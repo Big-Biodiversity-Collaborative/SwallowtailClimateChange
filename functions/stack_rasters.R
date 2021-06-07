@@ -1,4 +1,4 @@
-#' Stack rasters
+#' Stack rasters of predicted presence / absence
 #' 
 #' @param r \code{list} of \code{Raster*} objects
 #' @param neg_values DEPRECATED character indicating how to treat negative values; 
@@ -8,6 +8,21 @@
 #' cells with summed values >= 1 are reported as 1, while "total" will return 
 #' the total summed value of the cell
 #' 
+#' @details Because the desired output may be based on individual \code{Raster*}
+#' objects of differing geographic extent, \code{stack_rasters} will attempt to 
+#' extend every raster to the maximum extent covered by the union of all 
+#' elements of \code{r}. Due to the treatment of missing values by 
+#' \code{raster::mosaic()} and binary raster addition (i.e. `+`), this function 
+#' uses some creative workarounds to ensure that cells that are missing data 
+#' from a subset of the elements of \code{r} but have data from at least one 
+#' element of \code{r} have a non-\code{NA} value returned for that cell. 
+#' Direct use of \code{raster::mosaic(fun = sum)} would result in NA values 
+#' being converted to zeros in the output raster, while the binary operation 
+#' (`+`) returns a raster where the only cells that are not \code{NA} are those 
+#' cells which did not have any missing data across all elements of \code{r}.
+#' 
+#' @param A \code{RasterLayer} with cell values reflecting the sum of values 
+#' across rasters in \code{r}
 stack_rasters <- function(r, neg_values = c("missing", "as-is"), 
                           out = c("total", "binary")) {
   if (!require(raster)) {

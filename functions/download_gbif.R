@@ -13,6 +13,11 @@
 #' fall (roughly) outside the latitudinal and longitudinal bounds of North 
 #' America; primarily useful for removing observations with incorrect 
 #' geographical coordinates
+#' 
+#' @details Downloaded data are downloaded to the 'data' directory with the 
+#' following file naming convention: <genus name>_<specific epithet>-gbif.csv.
+#' 
+#' @return NULL
 download_gbif <- function(species_name, gbif_name, replace = FALSE, 
                           verbose = FALSE, countries = c("CA", "MX", "US"),
                           query_limit = 100, max_attempts = 5, 

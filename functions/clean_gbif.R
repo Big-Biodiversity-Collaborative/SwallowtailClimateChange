@@ -2,6 +2,16 @@
 #' 
 #' @param file a tab-delimited file of GBIF occurrence data
 #' 
+#' @details Developed for use with occurrence data that are manually downloaded 
+#' from the GBIF website. Designed to filter such data and align selected 
+#' column names to those output by \code{spocc::occ}. Specifically:
+#' \tabular{ll}{
+#'   \strong{Manual download} \tab \strong{\code{spocc::occ()}} \cr
+#'   issue \tab issues \cr
+#'   decimalLongitude \tab longitude \cr
+#'   decimalLatitude \tab latitude
+#' }
+#' 
 #' @return data frame with the following columns:
 #' \describe{
 #'   \item{gbifID}{First item}
@@ -15,12 +25,6 @@
 clean_gbif <- function(file) {
   # TODO: See also some nice utilities in the scrubr package
   # https://cran.r-project.org/package=scrubr
-  # TODO: consider differences in column names between direct downloads from 
-  # GBIF and queries returned from spocc::occ.
-  #      Direct from GBIF         spocc::occ
-  #                 issue             issues
-  #      decimalLongitude          longitude
-  #       decimalLatitude           latitude
   if (!require(dplyr)) {
     stop("clean_gbif requires dplyr package, but it could not be loaded")
   }

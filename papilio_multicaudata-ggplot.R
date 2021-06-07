@@ -24,8 +24,6 @@ dist_df <- dist_df %>%
                       true = "Absent",
                       false = "Present"))
 
-# dist_df$layer <- factor(dist_df$layer)
-
 # Rename columns so they plot without extra ggplot commands
 dist_df <- dist_df %>%
   dplyr::rename(Longitude = x,
@@ -47,6 +45,7 @@ host2 <- readRDS(file = "output/distributions/ptelea_trifoliata-distribution-svm
 
 r <- list(distribution, host1, host2)
 
+# Process for stacking insect and host rasters; handled now by stack_rasters.R
 # Need to find largest extent of everything
 x <- r
 # Remove names from x because they cause issues?
@@ -90,7 +89,32 @@ for (i in 1:length(r)) {
   }
 }
 
-if (out == "binary") {
-  sum_r[sum_r > 1] <- 1
-}
+# Convert raster to a data frame for use with ggplot
+all_points <- raster::rasterToPoints(x = sum_r, 
+                                      spatial = TRUE)
+# Then to a 'conventional' dataframe
+all_df  <- data.frame(all_points)
+rm(all_points)
 
+# Rename columns so they plot without extra ggplot commands
+all_df <- all_df %>%
+  dplyr::rename(Longitude = x,
+                Latitude = y)
+
+
+# Converting layer to factor so it plots correctly
+all_df <- all_df %>%
+  mutate(layer = factor(layer))
+
+# Plot, now mostly handled by create_overlaps
+ggplot(data = all_df, mapping = aes(x = Longitude, y = Latitude, fill = layer)) +
+  geom_raster() +
+  scale_fill_discrete(type = c("#e5e5e5",     # Absent
+                               "#a6cee3",     # Insect only
+                               "#b2df8a",     # Hosts only
+                               "#1f78b4")) +  # Hosts and insect
+  labs(title = "Papilio multicaudata") +
+  coord_equal() + 
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        legend.position = "none")

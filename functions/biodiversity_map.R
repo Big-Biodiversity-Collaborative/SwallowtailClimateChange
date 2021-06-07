@@ -1,6 +1,13 @@
 #' Make a map of biodiversity hotspots
 #' 
 #' @param r list of rasters
+#' @param predictor the predictor values used in the model to create the 
+#' biodiversity map
+#' 
+#' @details Note that this script does no modeling or predicting, relying on 
+#' predictions being passed through the list of rasters, \code{r}.
+#' 
+#' @return A ggplot object
 biodiversity_map <- function(r, predictor = c("current", "GFDL-ESM4_RCP45")) {
   if (!require(raster)) {
     stop("biodiversity_map requires raster package, but it could not be loaded")
