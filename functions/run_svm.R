@@ -90,8 +90,10 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
     message("Running support vector machine model. (Step 2 of 4)")
   }  
   # Run an SVM model, specifying model with standard formula syntax
-  svm_model <- kernlab::ksvm(pa ~ bio1 + bio5 + bio6 + bio7 + bio8 + bio12 +
-                               bio16 + bio17,
+  svm_model <- kernlab::ksvm(pa ~ bio1 + bio2 + bio3 + bio4 + bio5 + bio6 +
+                               bio7 + bio8 + bio9 + bio10 + bio11 + bio12 +
+                               bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
+                               bio19,
                              data = sdmtrain)
   
   if(verbose) {
