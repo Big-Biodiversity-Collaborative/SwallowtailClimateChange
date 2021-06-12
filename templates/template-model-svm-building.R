@@ -1,4 +1,4 @@
-# A template for building species distribution models for a single species
+# A template for building SVM species distribution models for a single species
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-02
@@ -84,7 +84,8 @@ predictors <- raster::crop(x = predictors, y = obs_extent)
 # Run support vector machine model
 svm_model <- run_svm(obs = obs,
                      absence = background_points,
-                     predictors = predictors)
+                     predictors = predictors,
+                     verbose = FALSE)
 
 # Save the model to file in output/models/
 model_file <- paste0("output/models/", nice_name,

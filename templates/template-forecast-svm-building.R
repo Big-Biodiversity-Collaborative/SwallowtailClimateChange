@@ -1,4 +1,4 @@
-# A template for building predicted distributions for a single species
+# A template for building predicted distributions for a single species from SVM
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-02

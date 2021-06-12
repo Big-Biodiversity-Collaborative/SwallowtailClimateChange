@@ -12,7 +12,7 @@
 # output already exists
 rerun <- TRUE
 dist_files <- list.files(path = "./scripts",
-                         pattern = "*-forecast.R",
+                         pattern = "*-forecast-svm.R",
                          full.names = TRUE)
 
 for (one_file in dist_files) {

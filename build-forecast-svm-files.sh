@@ -23,11 +23,11 @@ do
 
     # For the filename, want genus to be lower case
     GENUSLOWER=$(echo $GENUS | tr '[:upper:]' '[:lower:]')
-    FILENAME="scripts/${GENUSLOWER}_${SPECIES}-forecast.R"
+    FILENAME="scripts/${GENUSLOWER}_${SPECIES}-forecast-svm.R"
     
     # Read in the template file contents into the MODELFILE variable, 
     # skipping very first line
-    MODELFILE=$(cat templates/template-forecast-building.R | tail -n +2)
+    MODELFILE=$(cat templates/template-forecast-svm-building.R | tail -n +2)
 
     # Add lines at top of file explaining script & message warning against 
     # editing

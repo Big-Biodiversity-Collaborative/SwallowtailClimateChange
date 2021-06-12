@@ -1,4 +1,4 @@
-# Run all SDM scripts
+# Run all Support Vector Machine scripts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-03
@@ -15,14 +15,14 @@ rerun <- TRUE
 # Integer indicating minimum number of observations necessary to run script
 min_obs <- 50
 
-sdm_files <- list.files(path = "./scripts",
-                        pattern = "*-sdm.R",
+svm_files <- list.files(path = "./scripts",
+                        pattern = "*-model-svm.R",
                         full.names = TRUE)
 
 # TODO: Will need to update file checks if multiple model types end up being 
 # run (e.g. random forest, bioclim, etc); current code just checks for support
 # vector machine
-for (one_file in sdm_files) {
+for (one_file in svm_files) {
   # Need to extract species name from file to see if model has already been run
   nice_name <- strsplit(x = basename(one_file),
                            split = "-")[[1]][1]
@@ -42,11 +42,11 @@ for (one_file in sdm_files) {
       model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
       
       if (!file.exists(model_out) | rerun) {
-        sdm_script <- paste0("scripts/", nice_name, "-sdm.R")
-        if (file.exists(sdm_script)) {
-          source(file = sdm_script)
+        svm_script <- paste0("scripts/", nice_name, "-svm.R")
+        if (file.exists(svm_script)) {
+          source(file = svm_script)
         } else {
-          warning(paste0("\nCould not find script: ", sdm_script))
+          warning(paste0("\nCould not find script: ", svm_script))
         }
       }
     } else {
@@ -54,6 +54,6 @@ for (one_file in sdm_files) {
                      " < ", min_obs, "). Skipping modeling."))
     }
   } else {
-    message(paste0("\nNo data file found for ", nice_name, "(", obs_file, ")."))
+    message(paste0("\nNo data file found for ", nice_name, " (", obs_file, ")."))
   }
 }
