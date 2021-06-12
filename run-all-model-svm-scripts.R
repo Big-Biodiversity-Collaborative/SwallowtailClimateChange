@@ -42,7 +42,7 @@ for (one_file in svm_files) {
       model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
       
       if (!file.exists(model_out) | rerun) {
-        svm_script <- paste0("scripts/", nice_name, "-svm.R")
+        svm_script <- paste0("scripts/", nice_name, "-model-svm.R")
         if (file.exists(svm_script)) {
           source(file = svm_script)
         } else {
