@@ -29,7 +29,7 @@ for (one_file in dist_files) {
     # Make sure model output exists
     model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
     if (file.exists(model_out)) {
-      forecast_script <- paste0("scripts/", nice_name, "-forecast.R")
+      forecast_script <- paste0("scripts/", nice_name, "-forecast-svm.R")
       if (file.exists(forecast_script)) {
         source(file = forecast_script)
       } else {
