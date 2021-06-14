@@ -127,9 +127,14 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   if(verbose) {
     message("Predicting occurrence probabilities from GLM model. (Step 4 of 4)")
   }
+
+  obs_extent <- get_extent(data = obs)
+
+  # TODO: Which extent to use for predictors?  
   probs <- predict(predictors, 
                    glm_model, 
-                   ext = absence_extent)
+                   ext = obs_extent)
+                   # ext = absence_extent)
   
   # Calculate threshold so we can include a P/A map
   pres_threshold <- dismo::threshold(x = glm_eval, 

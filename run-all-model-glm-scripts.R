@@ -25,13 +25,14 @@ glm_files <- list.files(path = "./scripts",
                         full.names = TRUE)
 
 # For testing, subset this vector
-glm_files <- glm_files[1:12]
+# glm_files <- glm_files[1:12]
 
 glm_file_list <- as.list(glm_files)
 
 # Function we'll use to parallelize the process
 run_glm_script <- function(script_name,
-                           log_file) {
+                           log_file,
+                           rerun, min_obs) {
   one_file <- script_name
 
   # Need to extract species name from file to see if model has already been run
@@ -60,7 +61,6 @@ run_glm_script <- function(script_name,
           write(x = paste0("About to run ", glm_script), 
                 file = log_file,
                 append = TRUE)
-          
           message(paste0("About to run ", glm_script))
           # Run the actual script
           source(file = glm_script)
@@ -100,7 +100,9 @@ f <- file.create(logfile)
 r <- parallel::mclapply(X = glm_file_list,
                         FUN = run_glm_script,
                         mc.cores = num_cores,
-                        log_file = logfile)
+                        log_file = logfile,
+                        rerun = rerun,
+                        min_obs = min_obs)
 
 if (remove_log && file.exists(logfile)) {
   file.remove(logfile)
@@ -111,43 +113,43 @@ if (remove_log && file.exists(logfile)) {
 ################################################################################
 # Below here is serial implentation
 
-stop("End parallel implementation")
+message("End parallel implementation")
 
 # TODO: Will need to update file checks if multiple model types end up being 
 # run (e.g. random forest, bioclim, etc); current code just checks for 
 # generalized linear model
-for (one_file in glm_files) {
-  # Need to extract species name from file to see if model has already been run
-  nice_name <- strsplit(x = basename(one_file),
-                           split = "-")[[1]][1]
-  
-  # Need to count the number of observations in data file to see if it meets 
-  # minimums
-  obs_file <- paste0("data/",
-                     nice_name,
-                     "-gbif.csv")
-
-    
-  if (file.exists(obs_file)) {
-    n_obs <- nrow(x = read.csv(file = obs_file))
-    
-    if (n_obs >= min_obs) {
-      # the file name that would be used for model output
-      model_out <- paste0("output/models/", nice_name, "-model-glm-current.rds")
-      
-      if (!file.exists(model_out) | rerun) {
-        glm_script <- paste0("scripts/", nice_name, "-model-glm.R")
-        if (file.exists(glm_script)) {
-          source(file = glm_script)
-        } else {
-          warning(paste0("\nCould not find script: ", glm_script))
-        }
-      }
-    } else {
-      message(paste0("\nToo few observations for ", nice_name, " (", n_obs, 
-                     " < ", min_obs, "). Skipping modeling."))
-    }
-  } else {
-    message(paste0("\nNo data file found for ", nice_name, " (", obs_file, ")."))
-  }
-}
+# for (one_file in glm_files) {
+#   # Need to extract species name from file to see if model has already been run
+#   nice_name <- strsplit(x = basename(one_file),
+#                            split = "-")[[1]][1]
+#   
+#   # Need to count the number of observations in data file to see if it meets 
+#   # minimums
+#   obs_file <- paste0("data/",
+#                      nice_name,
+#                      "-gbif.csv")
+# 
+#     
+#   if (file.exists(obs_file)) {
+#     n_obs <- nrow(x = read.csv(file = obs_file))
+#     
+#     if (n_obs >= min_obs) {
+#       # the file name that would be used for model output
+#       model_out <- paste0("output/models/", nice_name, "-model-glm-current.rds")
+#       
+#       if (!file.exists(model_out) | rerun) {
+#         glm_script <- paste0("scripts/", nice_name, "-model-glm.R")
+#         if (file.exists(glm_script)) {
+#           source(file = glm_script)
+#         } else {
+#           warning(paste0("\nCould not find script: ", glm_script))
+#         }
+#       }
+#     } else {
+#       message(paste0("\nToo few observations for ", nice_name, " (", n_obs, 
+#                      " < ", min_obs, "). Skipping modeling."))
+#     }
+#   } else {
+#     message(paste0("\nNo data file found for ", nice_name, " (", obs_file, ")."))
+#   }
+# }
