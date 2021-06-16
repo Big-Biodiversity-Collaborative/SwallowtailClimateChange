@@ -16,6 +16,7 @@
 #' }
 create_overlaps <- function(species_name, 
                             predictor = c("current", "GFDL-ESM4_RCP45"),
+                            model = c("svm", "glm"),
                             crop_to_insect = FALSE) {
   if (!require(raster)) {
     stop("create_overlaps requires raster package, but it could not be loaded")
@@ -38,6 +39,7 @@ create_overlaps <- function(species_name,
   }
   
   predictor <- match.arg(predictor)
+  model <- match.arg(model)
   
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
@@ -50,7 +52,10 @@ create_overlaps <- function(species_name,
   # Make sure we have the distribution of the insect before proceeding  
   insect_dist_file <- paste0("output/distributions/",
                              nice_name, 
-                             "-distribution-svm-",
+                             # "-distribution-svm-",
+                             "-distribution-",
+                             model,
+                             "-",
                              predictor,
                              ".rds")
   
@@ -72,7 +77,10 @@ create_overlaps <- function(species_name,
                                          x = host_name))
       host_dist_file <- paste0("output/distributions/",
                                host_nice_name,
-                               "-distribution-svm-",
+                               # "-distribution-svm-",
+                               "-distribution-",
+                               model,
+                               "-",
                                predictor,
                                ".rds")
       # Only try to add distributions if the file exists
@@ -150,25 +158,45 @@ create_overlaps <- function(species_name,
       theme(axis.title = element_blank(),
             legend.title = element_blank())
 
-    # Now do calculations for overlaps
-    # Calculate frequencies of all possible pixel values
-    pixel_freqs <- data.frame(raster::freq(all_pa))
-    # Drop row with NA counts
-    pixel_freqs <- na.omit(pixel_freqs)
-    
+    # Now do calculations for overlaps, using raster::area, we get 
+    # (approximate) km2 of each cell value
+    cell_areas <- tapply(X = raster::area(all_pa),
+                         INDEX = all_pa[],
+                         FUN = sum)
+
     # Count how many pixels are insect only (== 1)
-    insect_only <- pixel_freqs$count[pixel_freqs$value == 1]
+    insect_only <- cell_areas["1"]
     # In case where there are NO pixels of insect only, need to set this to 0
     if (length(insect_only) == 0) {
       insect_only <- 0
     }
-    
+
     # Count how many pixels are plant AND insect (== 3)
-    insect_plant <- pixel_freqs$count[pixel_freqs$value == 3]
+    insect_plant <- cell_areas["3"]
     # If there are no pixels with both, set to 0
     if (length(insect_plant) == 0) {
       insect_plant <- 0
     }
+    
+    # Previous implementation, based on pixels
+    # # Calculate frequencies of all possible pixel values
+    # pixel_freqs <- data.frame(raster::freq(all_pa))
+    # # Drop row with NA counts
+    # pixel_freqs <- na.omit(pixel_freqs)
+    # 
+    # # Count how many pixels are insect only (== 1)
+    # insect_only <- pixel_freqs$count[pixel_freqs$value == 1]
+    # # In case where there are NO pixels of insect only, need to set this to 0
+    # if (length(insect_only) == 0) {
+    #   insect_only <- 0
+    # }
+    # 
+    # # Count how many pixels are plant AND insect (== 3)
+    # insect_plant <- pixel_freqs$count[pixel_freqs$value == 3]
+    # # If there are no pixels with both, set to 0
+    # if (length(insect_plant) == 0) {
+    #   insect_plant <- 0
+    # }
     
     # Calculate proportion of insect overlapping with plant relative to insect total 
     # insect only / (insect + plant AND insect)

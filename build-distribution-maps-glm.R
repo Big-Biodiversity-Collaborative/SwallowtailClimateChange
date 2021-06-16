@@ -1,10 +1,12 @@
-# Create maps from model predictions for each insect species and it's hosts
+# Create maps from GLM predictions for each insect species and it's hosts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-03
 
 require(raster)
 require(ggplot2)
+
+model <- "glm"
 
 # Load up the functions from the functions folder
 function_files <- list.files(path = "./functions", 
@@ -28,7 +30,7 @@ save_maps <- TRUE
 #    output/overlaps.csv
 
 insects_hosts <- read.csv(file = "data/insect-host.csv")
-output_file <- "output/overlaps.csv"
+output_file <- paste0("output/", model, "-overlaps.csv")
 
 # identify unique species of insects
 insect_species <- unique(insects_hosts$insect)
@@ -39,10 +41,12 @@ for (species_name in insect_species) {
   
   current_overlap <- create_overlaps(species_name = species_name,
                                      predictor = "current",
+                                     model = model,
                                      crop_to_insect = TRUE)
 
   forecast_overlap <- create_overlaps(species_name = species_name,
                                       predictor = "GFDL-ESM4_RCP45",
+                                      model = model,
                                       crop_to_insect = TRUE)  
 
   # If requested, save the maps
@@ -52,12 +56,16 @@ for (species_name in insect_species) {
                                   x = species_name))
     if (!is.null(current_overlap$overlap_map)) {
       current_filename <- paste0("output/maps/", nice_name, 
-                                 "-overlap-current.pdf")
+                                 "-overlap-",
+                                 model,
+                                 "-current.pdf")
       ggsave(filename = current_filename, plot = current_overlap$overlap_map)
     }
     if (!is.null(forecast_overlap$overlap_map)) {
       forecast_filename <- paste0("output/maps/", nice_name, 
-                                 "-overlap-GFDL-ESM4_RCP45.pdf")
+                                 "-overlap-",
+                                 model,
+                                 "-GFDL-ESM4_RCP45.pdf")
       ggsave(filename = forecast_filename, plot = forecast_overlap$overlap_map)
     }
   }
