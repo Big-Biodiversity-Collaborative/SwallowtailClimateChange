@@ -1,72 +1,51 @@
-# Compare contemporary vs. forecast range areas for insect species
+# Compare range areas between current and forecast estimates
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-18
 
-require(raster)
+require(dplyr)
+require(tidyr)
 require(ggplot2)
 
 model <- "glm"
-output_file <- paste0("output/ranges/", model, "-range-areas.csv") 
+area_file <- paste0("output/ranges/", model, "-range-areas.csv")
 
-# Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  source(file = fun_file)
-}
+# Read in range size estimates
+range_areas <- read.csv(file = area_file)
 
-# Need to see if the output file exists yet; create empty data frame if not
-if (file.exists(output_file)) {
-  range_areas <- read.csv(file = output_file)
-} else {
-  range_areas <- data.frame(species = character(0),
-                            current_area = numeric(0),
-                            forecast_area = numeric(0))
-}
+# Grab the information on arid/non-arid
+arid <- read.csv(file = "data/arid-estimates.csv")
 
-insects_hosts <- read.csv(file = "data/insect-host.csv")
+# Join arid estimate with range areas
+range_areas <- range_areas %>%
+  inner_join(arid, by = c("species" = "insect"))
 
-# identify unique species of insects
-insect_species <- unique(insects_hosts$insect)
+# Calculate delta
+range_areas <- range_areas %>%
+  mutate(area_proportion = forecast_area / current_area) %>%
+  mutate(area_change = -100 * (1 - area_proportion))
 
-# iterate over each species of insects
-for (species_name in insect_species) {
-  nice_name <- tolower(x = gsub(pattern = " ",
-                                replacement = "_",
-                                x = species_name))
-  current_area <- NA
-  current_file <- paste0("output/distributions/", 
-                         nice_name, "-distribution-", 
-                         model, "-current.rds")
-  if (file.exists(current_file)) {
-    current_raster <- readRDS(file = current_file)
-    current_area <- range_area(r = current_raster)
-  }
+# Create a long-formatted data set for easier plotting areas
+areas_long <- range_areas %>%
+  select(species, current_area, forecast_area, arid) %>%
+  pivot_longer(cols = -c(species, arid), 
+               names_to = "timepoint",
+               values_to = "area") %>%
+  mutate(arid_text = if_else(condition = arid,
+                             true = "Arid", 
+                             false = "Non-arid"))
 
-  forecast_area <- NA
-  forecast_file <- paste0("output/distributions/", 
-                            nice_name, "-distribution-", 
-                          model, "-GFDL-ESM4_RCP45.rds")
-  if (file.exists(forecast_file)) {
-    forecast_raster <- readRDS(file = forecast_file)
-    forecast_area <- range_area(r = forecast_raster)
-  }
-  
-  # Area calculations complete, update output data frame
-  if (species_name %in% range_areas$species) {
-    range_areas$current_area[range_areas$species == species_name] <- current_area
-    range_areas$forecast_area[range_areas$species == species_name] <- forecast_area
-  } else {
-    # No row for this species yet, so add it
-    range_areas <- rbind(range_areas,
-                   list(species = species_name,
-                        current_area = current_area,
-                        forecast_area = forecast_area))
-  }
-} # end iterating over all insect species
+# Plot areas
+ggplot(data = areas_long, 
+       mapping = aes(x = timepoint, y = area, group = species, color = arid_text)) +
+  geom_line() + 
+  geom_point() +
+  scale_color_manual(values = c("#66c2a5", "#fc8d62")) +
+  theme_bw() +
+  theme(legend.title = element_blank())
 
-write.csv(x = range_areas,
-          file = output_file,
-          row.names = FALSE)
+# See what Wilcox says about change
+wilcox_result <- wilcox.test(x = range_areas$area_change[range_areas$arid]/100,
+                             y = range_areas$area_change[!range_areas$arid]/100,
+                             paired = FALSE)
+# W = 12, p-value = 0.05594
