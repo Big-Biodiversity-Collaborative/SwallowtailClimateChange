@@ -3,6 +3,8 @@
 # jcoliver@arizona.edu
 # 2021-06-03
 
+# TODO: Update this so output file isn't read in separately for each species
+# see compare-range-sizes.R for example
 require(raster)
 require(ggplot2)
 
