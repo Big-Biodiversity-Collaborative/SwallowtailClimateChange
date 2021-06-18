@@ -13,6 +13,10 @@
 #'   that overlaps with host plant(s)' range}
 #'   \item{overlap_plot}{ggplot object showing distribution of insect, host(s),
 #'   and their overlap}
+#'   \item{insect_area}{total area of predicted range of insect, in square 
+#'   kilometers}
+#'   \item{overlap_area}{total area of predicted range of insect overlapping 
+#'   with any host plants' distribution, in square kilometers}
 #' }
 create_overlaps <- function(species_name, 
                             predictor = c("current", "GFDL-ESM4_RCP45"),
@@ -27,9 +31,7 @@ create_overlaps <- function(species_name,
   if (!require(ggplot2)) {
     stop("create_overlaps requires ggplot2 package, but it could not be loaded")
   }
-  # if (!require(maptools)) {
-  #   stop("create_overlaps requires maptools package, but it could not be loaded")
-  # }
+
   # Load up the functions from the functions folder
   function_files <- list.files(path = "./functions", 
                                pattern = ".R$", 
@@ -77,7 +79,6 @@ create_overlaps <- function(species_name,
                                          x = host_name))
       host_dist_file <- paste0("output/distributions/",
                                host_nice_name,
-                               # "-distribution-svm-",
                                "-distribution-",
                                model,
                                "-",
@@ -131,24 +132,29 @@ create_overlaps <- function(species_name,
     name_split <- unlist(strsplit(x = species_name, split = " "))
     abbr_name <- paste0(substr(x = name_split[1], start = 1, stop = 1),
                         ". ", name_split[2])
+    and_hosts <- paste0(abbr_name, " & hosts")
     
     # Create column indicating what each layer means
+    status_levels <- c("Absent", 
+                       "Hosts only",
+                       abbr_name, 
+                       and_hosts)
+    
     pa_df <- pa_df %>%
       dplyr::mutate(Status = dplyr::case_when(layer == 0 ~ "Absent",
                                               layer == 1 ~ abbr_name,
                                               layer == 2 ~ "Hosts only",
-                                              layer == 3 ~ paste0(abbr_name, " & hosts"))) %>%
+                                              layer == 3 ~ and_hosts)) %>%
       dplyr::mutate(Status = factor(x = Status,
-                                    levels = c("Absent", 
-                                               "Hosts only",
-                                               abbr_name, 
-                                               paste0(abbr_name, " & hosts"))))
+                                    levels = status_levels))
 
     color_vec <- c("#e5e5e5",   # Absent
                    "#b2df8a",   # Hosts only
                    "#a6cee3",   # Insect only
                    "#1f78b4")   # Hosts and insect
     
+    names(color_vec) <- status_levels
+        
     overlap_plot <- ggplot(data = pa_df, mapping = aes(x = Longitude, y = Latitude, fill = Status)) +
       geom_raster() +
       scale_fill_discrete(type = color_vec) +
@@ -164,14 +170,14 @@ create_overlaps <- function(species_name,
                          INDEX = all_pa[],
                          FUN = sum)
 
-    # Count how many pixels are insect only (== 1)
+    # Pull out area of those cells for insect only (== 1)
     insect_only <- cell_areas["1"]
     # In case where there are NO pixels of insect only, need to set this to 0
     if (length(insect_only) == 0) {
       insect_only <- 0
     }
 
-    # Count how many pixels are plant AND insect (== 3)
+    # Pull out area of those cells for plant AND insect (== 3)
     insect_plant <- cell_areas["3"]
     # If there are no pixels with both, set to 0
     if (length(insect_plant) == 0) {
@@ -201,9 +207,14 @@ create_overlaps <- function(species_name,
     # Calculate proportion of insect overlapping with plant relative to insect total 
     # insect only / (insect + plant AND insect)
     # This is the proportion of the insect's range that overlaps with host range
-    prop_overlap <- insect_plant / (insect_only + insect_plant)
+    
+    total_insect <- insect_only + insect_plant
+    prop_overlap <- insect_plant / total_insect
+
     return(list(prop_overlap = prop_overlap,
-                overlap_map = overlap_plot))
+                overlap_map = overlap_plot,
+                insect_area = total_insect,
+                overlap_area = insect_plant))
     
   } else {
     # No host plants listed in file, message and return NULL

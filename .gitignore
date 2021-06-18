@@ -24,5 +24,8 @@ output/maps
 output/overlaps.csv
 output/overlap-plot.pdf
 
+# Range area calculations
+output/ranges
+
 # Log files
 logs/

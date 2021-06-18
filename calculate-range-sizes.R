@@ -23,7 +23,9 @@ if (file.exists(output_file)) {
 } else {
   range_areas <- data.frame(species = character(0),
                             current_area = numeric(0),
-                            forecast_area = numeric(0))
+                            current_overlap = numeric(0),
+                            forecast_area = numeric(0),
+                            forecast_overlap = numeric(0))
 }
 
 insects_hosts <- read.csv(file = "data/insect-host.csv")
@@ -36,6 +38,9 @@ for (species_name in insect_species) {
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
+  
+  # Start by using distribution rasters to get the range areas of the insect 
+  # itself (ignoring whether or not it overlaps with host(s))
   current_area <- NA
   current_file <- paste0("output/distributions/", 
                          nice_name, "-distribution-", 
@@ -53,17 +58,34 @@ for (species_name in insect_species) {
     forecast_raster <- readRDS(file = forecast_file)
     forecast_area <- range_area(r = forecast_raster)
   }
+
+  # Now use overlap function to do calcluations and use value from area_overlap
+  current_overlap <- create_overlaps(species_name = species_name,
+                                     predictor = "current",
+                                     model = model,
+                                     crop_to_insect = FALSE)
+  current_overlap_area <- current_overlap$overlap_area
   
+  forecast_overlap <- create_overlaps(species_name = species_name,
+                                      predictor = "GFDL-ESM4_RCP45",
+                                      model = model,
+                                      crop_to_insect = TRUE)  
+  forecast_overlap_area <- forecast_overlap$overlap_area
+    
   # Area calculations complete, update output data frame
   if (species_name %in% range_areas$species) {
     range_areas$current_area[range_areas$species == species_name] <- current_area
+    range_areas$current_overlap[range_areas$species == species_name] <- current_overlap_area
     range_areas$forecast_area[range_areas$species == species_name] <- forecast_area
+    range_areas$forecast_overlap[range_areas$species == species_name] <- forecast_overlap_area
   } else {
     # No row for this species yet, so add it
     range_areas <- rbind(range_areas,
                    list(species = species_name,
                         current_area = current_area,
-                        forecast_area = forecast_area))
+                        current_overlap = current_overlap_area,
+                        forecast_area = forecast_area,
+                        forecast_overlap = forecast_overlap_area))
   }
 } # end iterating over all insect species
 
