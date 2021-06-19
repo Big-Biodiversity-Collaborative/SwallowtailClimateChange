@@ -13,16 +13,18 @@ data/*-gbif.csv
 # Auto-generated scripts
 scripts/*.R
 
+# Map files
+output/maps
+
 # Output of modeling
 output/models/*.rds
 output/distributions/*.rds
 
-# Map files
-output/maps
-
 # Proportion of range overlaps
-output/overlaps.csv
-output/overlap-plot.pdf
+output/overlaps/
+
+# General data visualization
+output/plots
 
 # Range area calculations
 output/ranges

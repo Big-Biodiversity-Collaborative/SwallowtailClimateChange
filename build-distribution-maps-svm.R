@@ -25,10 +25,10 @@ save_maps <- TRUE
 #    estimate (currently only based on one forecast climate model)
 # 3. For each of above maps, calculate the percentage of the insect's range 
 #    that overlaps with the host(s)' range and report that to the output file
-#    output/overlaps.csv
+#    output/overlaps/svm-overlaps.csv
 
 insects_hosts <- read.csv(file = "data/insect-host.csv")
-output_file <- "output/svm-overlaps.csv"
+output_file <- "output/overlaps/svm-overlaps.csv"
 
 # identify unique species of insects
 insect_species <- unique(insects_hosts$insect)

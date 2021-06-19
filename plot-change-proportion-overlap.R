@@ -1,4 +1,4 @@
-# Plot change in proportion of range overlap
+# Plot change in proportion of range overlap from SVM models
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-06
@@ -7,7 +7,7 @@ require(ggplot2)
 require(dplyr)
 require(tidyr)
 
-overlaps <- read.csv(file = "output/overlaps.csv")
+overlaps <- read.csv(file = "output/overlaps/svm-overlaps.csv")
 
 # Drop any that have missing
 overlaps <- na.omit(overlaps)
@@ -44,4 +44,4 @@ prop_change_plot <- ggplot(data = overlaps_long,
   theme(axis.title.x = element_blank(),
         legend.position = "none")
 
-ggsave(filename = "output/overlap-plot.pdf", plot = prop_change_plot)
+ggsave(filename = "output/plots/svm-overlap-changes.pdf", plot = prop_change_plot)

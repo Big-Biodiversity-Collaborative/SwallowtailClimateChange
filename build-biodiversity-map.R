@@ -18,7 +18,6 @@ for(fun_file in function_files) {
 save_maps <- TRUE
 
 insects_hosts <- read.csv(file = "data/insect-host.csv")
-output_file <- "output/overlaps.csv"
 
 # Identify unique species of insects
 insect_species <- unique(insects_hosts$insect)
