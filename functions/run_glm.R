@@ -15,7 +15,6 @@
 #'   with family = "logit"
 #'   \item{evaluation}{Evaluation of model using testing data; the output of 
 #'   \code{dismo::evaluate}}
-#'   \item{probs}{Occurrence probabilities predicted from GLM model}
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
@@ -36,7 +35,7 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   if (!("latitude" %in% colnames(obs))) {
     stop("get_extent requires column named 'latitude' in passed data argument)")
   }
-  
+
   # Only need geo coordinates, so extract those (in x, y order)
   presence <- obs %>%
     dplyr::select(longitude, latitude)
@@ -44,17 +43,17 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   if (verbose) {
     message("Extracting predictor values based on data. (Step 1 of 4)")
   }
-
+  
   # Will do some cropping / limiting based on the extent of the (pseudo)absence 
   # data, so get the geographic extent
   absence_extent <- get_extent(data = absence)
   
   # Predictors won't be needed beyond the extent of the (pseudo)absence points
-  predictors <- raster::crop(x = predictors, y = absence_extent)
-
+  model_predictors <- raster::crop(x = predictors, y = absence_extent)
+  
   # Use the observed points to pull out relevant predictor values
-  predictors_presence <- raster::extract(x = predictors, y = presence)
-  predictors_absence <- raster::extract(x = predictors, y = absence)
+  predictors_presence <- raster::extract(x = model_predictors, y = presence)
+  predictors_absence <- raster::extract(x = model_predictors, y = absence)
 
   # Make a vector of appropriate length with 0/1 values for 
   # (pseudo)absence/presence
@@ -107,35 +106,28 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   if(verbose) {
     message("Model complete. Evaluating GLM model with testing data. (Step 3 of 4)")
   }
+  
   # Evaluate model performance with testing data
   glm_eval <- dismo::evaluate(p = presence_test, 
                               a = absence_test, 
                               model = glm_model)
 
-
-  # Get the extent of data so we can calculate probabilities for that 
-  # geographic extent
-  # TODO: Could use extent of absence(background) data, but would need to be 
-  # sure the data included longitude and latitude columns (not just x, y) in 
-  # order to work with get_extent
-  # UPDATE: absence extent retrieved above...
-  # obs_extent <- get_extent(data = obs)
-  
   # Do the predictions so we can map things (takes a few seconds with worldclim)
-  # Note predicted probabilities include values < 0 and > 1. Not expected when 
+  # Note predicted probabilities include values < 0 and > 1. Not unexpected when 
   # applying a linear model to what is a classification problem
   if(verbose) {
     message("Predicting occurrence probabilities from GLM model. (Step 4 of 4)")
   }
 
-  obs_extent <- get_extent(data = obs)
+  # TODO: Move predictions out of this function; model, evaluation, and 
+  # threshold all get stored, probabilities go elsewhere
+  # obs_extent <- get_extent(data = obs)
 
-  # TODO: Which extent to use for predictors?  
-  probs <- predict(predictors, 
-                   glm_model, 
-                   ext = obs_extent)
-                   # ext = absence_extent)
-  
+  # Current implementation limits prediction to current extent of observations
+  # probs <- predict(predictors, 
+  #                  glm_model, 
+  #                  ext = obs_extent)
+
   # Calculate threshold so we can include a P/A map
   pres_threshold <- dismo::threshold(x = glm_eval, 
                                      stat = "spec_sens")
@@ -143,7 +135,7 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   # Bind everything together and return as list  
   results <- list(model = glm_model,
                   evaluation = glm_eval,
-                  probs = probs,
+                  # probs = probs,
                   thresh = pres_threshold)
   
   return(results)
