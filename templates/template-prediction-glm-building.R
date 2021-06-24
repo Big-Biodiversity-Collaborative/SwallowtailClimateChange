@@ -25,10 +25,11 @@ message(paste0("Predicting presence / absence  based on GLM for ", species_name)
 # To keep track if any returned presence / absence rasters were NULL
 success <- TRUE 
 
+################################################################################
 # Start by doing prediction for current conditions (worldclim data)
 current_predictors <- raster::stack(list.files(path = "data/wc2-5",
-                                       pattern = ".bil$",
-                                       full.names = TRUE))
+                                               pattern = ".bil$",
+                                               full.names = TRUE))
 
 # Estimate presence / absence
 current_pa <- predict_pa(nice_name = nice_name,
@@ -59,8 +60,8 @@ suppressWarnings({
                                path = "data/")
 })
 
-# Need to rename variables in forecast climate data so our predictions work 
-# (these are the same names as the bioclim data, used for the creation of our 
+# Need to rename variables in forecast climate data so our predictions work
+# (these are the same names as the bioclim data, used for the creation of our
 # species distribution model)
 names(gfdl_data) <- paste0("bio", 1:19)
 
@@ -79,9 +80,12 @@ if (!is.null(forecast_pa)) {
   success <- FALSE
 }
 
+################################################################################
+# Reporting
 completion_message <- paste0("Prediction process based on GLM for ", 
                              species_name, " complete.")
 if (!success) {
-  completion_message <- paste0(completion_message, " But one or more rasters were null; check for warnings.")
+  completion_message <- paste0(completion_message, 
+                               " But one or more rasters were null; check for warnings.")
 }
 message(completion_message)
