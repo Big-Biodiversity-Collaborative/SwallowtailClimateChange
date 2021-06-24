@@ -30,4 +30,5 @@ output/plots
 output/ranges
 
 # Log files
-logs/
+logs/*.log
+!/logs/.gitkeep
