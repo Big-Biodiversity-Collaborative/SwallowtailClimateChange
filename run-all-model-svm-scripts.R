@@ -88,10 +88,10 @@ run_svm_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
+# For parallel processing, do two fewer cores or four (whichever is lower)
 num_cores <- detectCores() - 2
-if (num_cores > 8) {
-  num_cores <- 8
+if (num_cores > 4) {
+  num_cores <- 4
 }
 
 # Create that log file before running the parallel processes
