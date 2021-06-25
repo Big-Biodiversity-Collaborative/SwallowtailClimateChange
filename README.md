@@ -5,40 +5,42 @@ Data and code for North American Swallowtail and larval host plant distributions
 
 ## General approach:
 
+Retrieve data from online sources (in this case, the Global Biodiversity 
+Information Facility, [GBIF](https://gbif.org)) and perform quality control 
+processes to ensure observations are only from Canada, Mexico, and the United 
+States of America. The data are analyzed to create species distribution models 
+based on presence and pseudo-absence data using a variety of models (e.g. 
+generalized linear model, support vector machine). The models are then used to 
+predict presence or absence under a variety of conditions, including current 
+climate and forecast climate models. These predictions are used to estimate 
+change in the range sizes of individual butterfly species and the relative size 
+of range overlap of their known host plant species.
+
+## Scripts, in order of use
+
 In descriptions below, <model> refers to a character string indicating the 
 model used for species distribution modeling, e.g. "glm" for generalized 
 linear model and "svm" for support vector machine.
 
-1. Download observational data from the [Global Biodiversity Information 
-Facility](https://gbif.org) to the data folder; note by default these data 
-files are _not_ under version control. (download-data.R)
-2. Run quality assurance on downloaded data, to ensure observations fall within
-geographic area of interest, in this case, North America (data-gbif-qa.R)
-3. Run a species distribution model for individual species (in the scripts 
-directory, files ending in "model-<model>.R")
-4. Use the resultant model to predict distributions, for forecast climate 
-conditions (in the scripts directory, files ending in "-forecast-<model>.R")
-5. Create maps and calculate proportion overlap between insect and hosts 
-(build-distribution-maps-<model>.R); maps are saved to output/maps and overlap 
-calculations are saved to output/<model>-overlaps.csv
-6. Create biodiversity maps of insects for current and forecast models
-(build-biodiversity-map.R)
-7. Interrogate changes in overlap between current and forecast models 
-(plot-change-proportion-overlap.R)
-8. Calculate range sizes (in square kilometers) for insect species 
-(calculate-range-sizes.R)
-9. Compare the range sizes of current and forecast distributions, both 
-considering insect ranges alone, and considering only the areas where insects 
-are predicted to overlap with one or more host plant species 
-(compare-range-sizes.R)
-
-Wrapper scripts to accomplish 3 and 4 above for all species are 
-run-all-model-<model>-scripts.R and run-all-forecast-<model>-scripts.R, 
-respectively. 
-
-Scripts to run species distribution modeling and to generate forecast 
-distributions for each species individually are generated from shell script 
-build-model-<model>-files.sh and build-forecast-<model>-files.sh, respectively.
+1. **download-data.R**: Download observational data from GBIF to the data folder; 
+note by default these data files are _not_ under version control.
+1. **data-gbif-qa.R**: Run quality assurance on downloaded data, to ensure 
+observations fall within geographic area of interest, in this case, North 
+America
+1. **build-model-<model>-files.sh**: bash shell scripts to build species 
+distribution models for individual species. One script is built for each row 
+(species) in data/gbif-reconcile.csv.
+1. **run-all-model-<model>-scripts.R**: Run each script that was generated in 
+previous step (operates in parallel using `parallel::mclapply`)
+1. **run-all-prediction-<model>-scripts.R**: Use species distribution model to 
+predict presence / absence for current and forecast climate conditions
+1. **build-distribution-maps-<model>.R**: Assemble predicted presence / absence
+rasters into maps, one for each species of insect in data/insect-host.csv
+1. **calculate-range-sizes.R**: Calculate range sizes (in square kilometers) 
+for each insect species 
+1. **compare-range-sizes.R**: Compare the range sizes of current and forecast distributions, both considering insect ranges alone, and considering only the 
+areas where insects are predicted to overlap with one or more host plant 
+species
 
 ## Directory structure
 
