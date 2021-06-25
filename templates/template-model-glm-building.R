@@ -95,16 +95,5 @@ model_file <- paste0("output/models/", nice_name,
 saveRDS(object = glm_model,
         file = model_file)
 
-# TODO: This stuff is now done by predict_pa() via prediction scripts
-# We'll need presence / absence predicted by model for a variety of 
-# downstream applications, so compute the prediction and save to file.
-# pa_raster <- glm_model$probs > glm_model$thresh
-
-# Save the raster for later compilation of maps in output/distributions/
-# pa_raster_file <- paste0("output/distributions/", nice_name,
-#                          "-distribution-glm-current.rds")
-# saveRDS(object = pa_raster,
-#         file = pa_raster_file)
-
 message(paste0("GLM model for ", species_name, 
                " complete; saved to ", model_file))

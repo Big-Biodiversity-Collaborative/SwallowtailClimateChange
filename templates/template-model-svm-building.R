@@ -78,7 +78,8 @@ predictors <- raster::stack(list.files(path = "data/wc2-5",
                                        pattern = ".bil$",
                                        full.names = TRUE))
 
-# Crop the predictors for faster subsequent processing
+# Crop the predictors for faster subsequent processing (not sure how much time 
+# this saves, as run_svm will extract only values it needs)
 predictors <- raster::crop(x = predictors, y = obs_extent)
 
 # Run support vector machine model
@@ -92,16 +93,6 @@ model_file <- paste0("output/models/", nice_name,
                      "-model-svm-current.rds")
 saveRDS(object = svm_model,
         file = model_file)
-
-# We'll need presence / absence predicted by model for a variety of 
-# downstream applications, so compute the prediction and save to file.
-pa_raster <- svm_model$probs > svm_model$thresh
-
-# Save the raster for later compilation of maps in output/distributions/
-pa_raster_file <- paste0("output/distributions/", nice_name,
-                         "-distribution-svm-current.rds")
-saveRDS(object = pa_raster,
-        file = pa_raster_file)
 
 message(paste0("SVM model for ", species_name, 
                " complete; saved to ", model_file))

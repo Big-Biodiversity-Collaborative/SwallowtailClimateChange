@@ -44,7 +44,7 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
     dplyr::select(longitude, latitude)
   
   if (verbose) {
-    message("Extracting predictor values based on data. (Step 1 of 4)")
+    message("Extracting predictor values based on data. (Step 1 of 3)")
   }
   
   # Use the observed points to pull out relevant predictor values
@@ -87,9 +87,11 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
   sdmtest <- rbind(presence_test, absence_test)
 
   if(verbose) {
-    message("Running support vector machine model. (Step 2 of 4)")
+    message("Running support vector machine model. (Step 2 of 3)")
   }  
   # Run an SVM model, specifying model with standard formula syntax
+  # Could exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 
+  # and bio6), but for now including them all
   svm_model <- kernlab::ksvm(pa ~ bio1 + bio2 + bio3 + bio4 + bio5 + bio6 +
                                bio7 + bio8 + bio9 + bio10 + bio11 + bio12 +
                                bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
@@ -97,39 +99,20 @@ run_svm <- function(obs, absence, predictors, verbose = TRUE) {
                              data = sdmtrain)
   
   if(verbose) {
-    message("Model complete. Evaluating SVM model with testing data. (Step 3 of 4)")
+    message("Model complete. Evaluating SVM model with testing data. (Step 3 of 3)")
   }
   # Evaluate model performance with testing data
   svm_eval <- dismo::evaluate(p = presence_test, 
                               a = absence_test, 
                               model = svm_model)
 
-
-  # Get the extent of data so we can calculate probabilities for that 
-  # geographic extent
-  # TODO: Could use extent of absence(background) data, but would need to be 
-  # sure the data included longitude and latitude columns (not just x, y) in 
-  # order to work with get_extent
-  obs_extent <- get_extent(data = obs)
-  
-  # Do the predictions so we can map things (takes a few seconds with worldclim)
-  # Note predicted probabilities include values < 0 and > 1. Not expected when 
-  # applying a linear model to what is a classification problem
-  if(verbose) {
-    message("Predicting occurrence probabilities from SVM model. (Step 4 of 4)")
-  }
-  probs <- predict(predictors, 
-                   svm_model, 
-                   ext = obs_extent)
-  
-  # Calculate threshold so we can include a P/A map
+  # Calculate threshold so we can make a P/A map later
   pres_threshold <- dismo::threshold(x = svm_eval, 
                                      stat = "spec_sens")
 
   # Bind everything together and return as list  
   results <- list(model = svm_model,
                   evaluation = svm_eval,
-                  probs = probs,
                   thresh = pres_threshold)
   
   return(results)

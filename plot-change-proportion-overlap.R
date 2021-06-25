@@ -3,6 +3,8 @@
 # jcoliver@arizona.edu
 # 2021-06-06
 
+# DEPRECATED
+
 require(ggplot2)
 require(dplyr)
 require(tidyr)

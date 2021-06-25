@@ -41,7 +41,7 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
     dplyr::select(longitude, latitude)
   
   if (verbose) {
-    message("Extracting predictor values based on data. (Step 1 of 4)")
+    message("Extracting predictor values based on data. (Step 1 of 3)")
   }
   
   # Will do some cropping / limiting based on the extent of the (pseudo)absence 
@@ -91,7 +91,7 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   sdmtest <- rbind(presence_test, absence_test)
 
   if(verbose) {
-    message("Running generalized linear model. (Step 2 of 4)")
+    message("Running generalized linear model. (Step 2 of 3)")
   }  
   # Run an GLM model, specifying model with standard formula syntax
   # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
@@ -104,7 +104,7 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
                           family = binomial(link = "logit"))
 
   if(verbose) {
-    message("Model complete. Evaluating GLM model with testing data. (Step 3 of 4)")
+    message("Model complete. Evaluating GLM model with testing data. (Step 3 of 3)")
   }
   
   # Evaluate model performance with testing data
@@ -112,30 +112,13 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
                               a = absence_test, 
                               model = glm_model)
 
-  # Do the predictions so we can map things (takes a few seconds with worldclim)
-  # Note predicted probabilities include values < 0 and > 1. Not unexpected when 
-  # applying a linear model to what is a classification problem
-  if(verbose) {
-    message("Predicting occurrence probabilities from GLM model. (Step 4 of 4)")
-  }
-
-  # TODO: Move predictions out of this function; model, evaluation, and 
-  # threshold all get stored, probabilities go elsewhere
-  # obs_extent <- get_extent(data = obs)
-
-  # Current implementation limits prediction to current extent of observations
-  # probs <- predict(predictors, 
-  #                  glm_model, 
-  #                  ext = obs_extent)
-
-  # Calculate threshold so we can include a P/A map
+  # Calculate threshold so we can make a P/A map later
   pres_threshold <- dismo::threshold(x = glm_eval, 
                                      stat = "spec_sens")
 
   # Bind everything together and return as list  
   results <- list(model = glm_model,
                   evaluation = glm_eval,
-                  # probs = probs,
                   thresh = pres_threshold)
   
   return(results)

@@ -1,4 +1,4 @@
-# A template for building predicted distributions for a single species from GLM
+# A template for building predicted distributions for a single species from SVM
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-02
@@ -16,7 +16,7 @@ for(fun_file in function_files) {
 genus <- "GENUS"
 species <- "SPECIES"
 
-model <- "glm"
+model <- "svm"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
