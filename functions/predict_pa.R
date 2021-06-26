@@ -67,11 +67,4 @@ predict_pa <- function(nice_name, predictors, model = c("glm", "svm"),
 
   # Send back this raster
   return(pa_raster)
-    
-  # # Save the raster for later compilation of maps in output/distributions/
-  # pa_raster_file <- paste0("output/distributions/", nice_name,
-  #                          "-distribution-", model, 
-  #                          "-current.rds")
-  # saveRDS(object = pa_raster,
-  #         file = pa_raster_file)
 }

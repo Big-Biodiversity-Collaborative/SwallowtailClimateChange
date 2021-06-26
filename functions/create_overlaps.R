@@ -54,7 +54,6 @@ create_overlaps <- function(species_name,
   # Make sure we have the distribution of the insect before proceeding  
   insect_dist_file <- paste0("output/distributions/",
                              nice_name, 
-                             # "-distribution-svm-",
                              "-distribution-",
                              model,
                              "-",
@@ -157,7 +156,7 @@ create_overlaps <- function(species_name,
         
     overlap_plot <- ggplot(data = pa_df, mapping = aes(x = Longitude, y = Latitude, fill = Status)) +
       geom_raster() +
-      scale_fill_discrete(type = color_vec) +
+      scale_fill_manual(values = color_vec) +
       labs(title = paste0(abbr_name, " ", predictor)) +
       coord_equal() + 
       theme_bw() +
