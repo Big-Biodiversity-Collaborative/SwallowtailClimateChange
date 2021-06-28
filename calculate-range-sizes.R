@@ -6,6 +6,8 @@
 require(raster)
 require(ggplot2)
 
+# TODO: Needs significant revision with pending deprecation of create_overlaps
+
 model <- "glm"
 output_file <- paste0("output/ranges/", model, "-range-areas.csv") 
 
