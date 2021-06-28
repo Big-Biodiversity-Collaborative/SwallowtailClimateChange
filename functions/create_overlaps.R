@@ -1,9 +1,13 @@
+#' DEPRECATED
+#' 
 #' Create overlap maps of insect and hosts
 #' 
 #' @param species_name character vector with name of insect species, e.g. 
 #' "Papilio multicaudata"
 #' @param predictor character vector indicating which climate variables on 
 #' which predictions are based
+#' @param model character vector of model used to generate species distribution
+#' model
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
 #' 

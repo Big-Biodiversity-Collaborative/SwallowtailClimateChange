@@ -34,10 +34,13 @@ distribution models for individual species. One script is built for each row
 previous step (operates in parallel using `parallel::mclapply`)
 1. **run-all-prediction-<model>-scripts.R**: Use species distribution model to 
 predict presence / absence for current and forecast climate conditions
-1. **build-distribution-maps-<model>.R**: Assemble predicted presence / absence
-rasters into maps, one for each species of insect in data/insect-host.csv
+1. **build-overlap-rasters-<model>.R**: Assemble predicted presence / absence
+rasters for each insect and associated host plants into a single raster per 
+insect species
+1. **build-distribution-maps-<model>.R**: Use predicted overlap rasters to 
+generate maps, one for each species of insect in data/insect-host.csv
 1. **calculate-range-sizes.R**: Calculate range sizes (in square kilometers) 
-for each insect species 
+for each insect species
 1. **compare-range-sizes.R**: Compare the range sizes of current and forecast distributions, both considering insect ranges alone, and considering only the 
 areas where insects are predicted to overlap with one or more host plant 
 species
@@ -57,11 +60,11 @@ species
     + models: species distribution model objects
     + plots: miscellaneous data visualizations
     + ranges: estimates of range areas
-    + scripts: scripts for individual species modeling and forecasting; 
-    automatically created by shell script
-    + templates: template R scripts used by shell scripts to generate modeling 
-    and forecasting scripts for individual species
-    + tests: woefully depauperate location for tests
++ scripts: scripts for individual species modeling and forecasting; 
+automatically created by shell script
++ templates: template R scripts used by shell scripts to generate modeling 
+and forecasting scripts for individual species
++ tests: woefully depauperate location for tests
 
 ## Miscellany
 

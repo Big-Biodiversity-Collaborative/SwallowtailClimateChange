@@ -26,7 +26,7 @@ output/overlaps/
 # General data visualization
 output/plots
 
-# Range area calculations
+# Predicted ranges and range area calculations
 output/ranges
 
 # Log files
