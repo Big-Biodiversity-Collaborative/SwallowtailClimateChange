@@ -20,7 +20,7 @@ overlap_raster <- function(species_name,
                            predictor = c("current", "GFDL-ESM4_RCP45"),
                            model = c("glm", "svm")) {
   if (!require(raster)) {
-    stop("create_overlaps requires raster package, but it could not be loaded")
+    stop("overlap_raster requires raster package, but it could not be loaded")
   }
   # Load up the functions from the functions folder
   function_files <- list.files(path = "./functions", 
