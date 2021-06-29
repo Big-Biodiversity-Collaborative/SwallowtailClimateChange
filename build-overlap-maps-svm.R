@@ -1,4 +1,4 @@
-# Create maps from SVM predictions for each insect species and it's hosts
+# Create maps from SVM predictions for each insect species and its hosts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-03
