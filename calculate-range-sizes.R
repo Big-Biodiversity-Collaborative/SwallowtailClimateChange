@@ -4,7 +4,6 @@
 # 2021-06-18
 
 require(raster)
-require(ggplot2)
 
 # TODO: Needs significant revision with pending deprecation of create_overlaps
 
@@ -23,11 +22,11 @@ for(fun_file in function_files) {
 if (file.exists(output_file)) {
   range_areas <- read.csv(file = output_file)
 } else {
-  range_areas <- data.frame(species = character(0),
-                            current_area = numeric(0),
-                            current_overlap = numeric(0),
-                            forecast_area = numeric(0),
-                            forecast_overlap = numeric(0))
+  range_areas <- data.frame(species = character(0))
+                            # current_area = numeric(0),
+                            # current_overlap = numeric(0),
+                            # forecast_area = numeric(0),
+                            # forecast_overlap = numeric(0))
 }
 
 insects_hosts <- read.csv(file = "data/insect-host.csv")
@@ -35,12 +34,70 @@ insects_hosts <- read.csv(file = "data/insect-host.csv")
 # identify unique species of insects
 insect_species <- unique(insects_hosts$insect)
 
-# iterate over each species of insects
+predictors <- c("current", "GFDL-ESM4_RCP45")
+
+# iterate over each species of insects, doing pairs of calculations:
+# 1. Calculate the area of the insect
+# 2. Calculate the area of the insect's range that overlaps with >= 1 host
+# Do each of the above for current and forecast predictions
 for (species_name in insect_species) {
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
+
+  # Iterate over all predictors, naming output columns accordingly
+  for (predictor in predictors) {
+    overlap_file <- paste0("output/ranges/",
+                           nice_name, "-overlap-",
+                           model, 
+                           "-",
+                           predictor,
+                           ".rds")
+    
+    if (file.exists(overlap_file)) {
+      overlap <- readRDS(file = overlap_file)
+      
+      # Now do calculations for overlaps, using raster::area, we get 
+      # (approximate) km2 of each cell value
+      cell_areas <- tapply(X = raster::area(overlap),
+                           INDEX = overlap[],
+                           FUN = sum)
+      
+      # Pull out area of those cells for insect only (== 1)
+      insect_only <- cell_areas["1"]
+      # In case where there are NO pixels of insect only, need to set this to 0
+      if (length(insect_only) == 0) {
+        insect_only <- 0
+      }
+      
+      # Pull out area of those cells for plant AND insect (== 3)
+      insect_plant <- cell_areas["3"]
+      # If there are no pixels with both, set to 0
+      if (length(insect_plant) == 0) {
+        insect_plant <- 0
+      }
+      
+      total_insect <- insect_only + insect_plant
+      
+      # Now to add the values of total_insect and insect_plant to data frame,
+      # naming the columns 
+      # <predictor>_area (total_insect), 
+      # <predictor>_overlap_area (insect_plant), and 
+      # <predictor>_alone_area
+      
+      
+      
+      
+    } else {
+      # Overlap file not found
+      # TODO: Add a warning or something...
+    }
+  }
   
+  # start with the 
+  
+  
+    
   # Start by using distribution rasters to get the range areas of the insect 
   # itself (ignoring whether or not it overlaps with host(s))
   current_area <- NA
@@ -61,7 +118,7 @@ for (species_name in insect_species) {
     forecast_area <- range_area(r = forecast_raster)
   }
 
-  # Now use overlap function to do calcluations and use value from area_overlap
+  # Now use overlap function to do calculations and use value from area_overlap
   current_overlap <- create_overlaps(species_name = species_name,
                                      predictor = "current",
                                      model = model,
