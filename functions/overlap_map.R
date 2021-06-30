@@ -61,12 +61,21 @@ overlap_map <- function(species_name,
     insect <- raster::reclassify(x = insect, 
                                  rcl = matrix(data = c(0, NA, 2, NA), 
                                               ncol = 2, byrow = TRUE))
-    # Trim the raster to only include extent of non-NA pixels
-    insect <- raster::trim(x = insect)
-    # Get the extent of the insect
-    insect_extent <- extent(insect)
-    # Crop the overlap raster and go from there
-    overlap <- raster::crop(x = overlap, y = insect_extent)
+    
+    # Make sure there are at least some non-NA pixels
+    if (nrow(raster::freq(x = insect, useNA = "no")) > 0) {
+      # Trim the raster to only include extent of non-NA pixels
+      insect <- raster::trim(x = insect)
+      # Get the extent of the insect
+      insect_extent <- extent(insect)
+      # Crop the overlap raster and go from there
+      overlap <- raster::crop(x = overlap, y = insect_extent)
+    } else {
+      # No cells were found with insect, so cannot use crop to insect
+      warning(paste0("No pixels indicated presence of ", species_name, 
+                     " in overlap raster file ", overlap_file, 
+                     ". Map will not be cropped."))
+    }
   }
   
   # Use ggplot to plot these rasters, but we need to extract raster information 
