@@ -89,3 +89,12 @@ insect species
     host plants
 + single-species-download.R can be used to test (and develop) automated 
 downloads of a single species from GBIF.
+
+## Additional resources
+
++ Excellent set of examples and underlying rationale of species distribution 
+modeling in R: [https://rspatial.org/raster/sdm/index.html](https://rspatial.org/raster/sdm/index.html)
++ Good best practices that we should probably adopt at  [https://cran.r-project.org/web/packages/rangeModelMetadata/vignettes/rmm_workflowWithExampleRangeModel.html](https://cran.r-project.org/web/packages/rangeModelMetadata/vignettes/rmm_workflowWithExampleRangeModel.html)
++ Heh heh, just look: [https://doi.org/10.1111/2041-210X.13591](https://doi.org/10.1111/2041-210X.13591)
++ Comparison among different SDM approaches at
+[https://doi.org/10.1002/ecm.1370](https://doi.org/10.1002/ecm.1370)
