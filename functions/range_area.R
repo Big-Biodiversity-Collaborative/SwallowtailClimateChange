@@ -5,7 +5,7 @@
 #' @return numeric value in square kilometers
 range_area <- function(r) {
   if (!require(raster)) {
-    stop("create_overlaps requires raster package, but it could not be loaded")
+    stop("range_area requires raster package, but it could not be loaded")
   }
   cell_areas <- tapply(X = raster::area(r),
                        INDEX = r[],

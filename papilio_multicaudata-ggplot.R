@@ -106,7 +106,7 @@ all_df <- all_df %>%
 all_df <- all_df %>%
   mutate(layer = factor(layer))
 
-# Plot, now mostly handled by create_overlaps
+# Plot, but should use overlap_map instead
 ggplot(data = all_df, mapping = aes(x = Longitude, y = Latitude, fill = layer)) +
   geom_raster() +
   scale_fill_discrete(type = c("#e5e5e5",     # Absent

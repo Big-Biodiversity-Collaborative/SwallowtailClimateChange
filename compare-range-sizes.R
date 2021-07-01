@@ -7,6 +7,9 @@ require(dplyr)
 require(tidyr)
 require(ggplot2)
 
+# TODO: Needs revision based on changes to calculate-range-sizes-<model>.R 
+# output file
+
 model <- "glm"
 area_file <- paste0("output/ranges/", model, "-range-areas.csv")
 

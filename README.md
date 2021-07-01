@@ -32,6 +32,9 @@ distribution models for individual species. One script is built for each row
 (species) in data/gbif-reconcile.csv.
 1. **run-all-model-<model>-scripts.R**: Run each script that was generated in 
 previous step (operates in parallel using `parallel::mclapply`)
+1. **build-prediction-<model>-files.sh**: bash shell scripts to build R scripts
+that predict presence / absence of species based on species distribution models 
+and predictor data (e.g. current bioclimatic data and forecast data)
 1. **run-all-prediction-<model>-scripts.R**: Use species distribution model to 
 predict presence / absence for current and forecast climate conditions
 1. **build-overlap-rasters-<model>.R**: Assemble predicted presence / absence
@@ -40,7 +43,9 @@ insect species
 1. **build-distribution-maps-<model>.R**: Use predicted overlap rasters to 
 generate maps, one for each species of insect in data/insect-host.csv
 1. **calculate-range-sizes.R**: Calculate range sizes (in square kilometers) 
-for each insect species
+for each insect species, as well as area (km<sup>2</sup>) of the insect's range 
+that overlaps with at least one host plant species' range and the area of the 
+insect's range that overlaps with zero host plant species' ranges.
 1. **compare-range-sizes.R**: Compare the range sizes of current and forecast distributions, both considering insect ranges alone, and considering only the 
 areas where insects are predicted to overlap with one or more host plant 
 species
@@ -52,18 +57,20 @@ species
     + wc2-5: current climate data (not under version control)
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
-(not under version control)
+(files with .log extension are not under version control)
 + output
     + distributions: raster files of predicted distributions for individual 
     species
     + maps: distribution maps for insect species and hosts
     + models: species distribution model objects
+    + overlaps: DEPRECATED
     + plots: miscellaneous data visualizations
-    + ranges: estimates of range areas
+    + ranges: composite rasters of insect and host species and estimates of 
+    range areas
 + scripts: scripts for individual species modeling and forecasting; 
-automatically created by shell script
+automatically created by shell scripts
 + templates: template R scripts used by shell scripts to generate modeling 
-and forecasting scripts for individual species
+and prediction scripts for individual species
 + tests: woefully depauperate location for tests
 
 ## Miscellany
@@ -78,8 +85,8 @@ insect species
 + Examples (i.e. developmental scripts) can be found with the prefix 
 "papilio_multicaudata"
     + papilio_multicaudata-ggplot.R: Using ggplot to overlay insect and host 
-    distributions. Mostly proof of concept replaced by create_overlaps.R in 
-    the functions directory
+    distributions. Mostly proof of concept replaced by combination of functions 
+    `overlap_raster` and `overlap_map`
     + papilio_multicaudata-range-comparison.R: Comparing proportion of range 
     overlap of insect and hosts for current and forecast conditions. Replaced 
     by plot-change-proportion-overlap.R
