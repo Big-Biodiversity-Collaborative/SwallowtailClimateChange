@@ -7,11 +7,8 @@ require(dplyr)
 require(tidyr)
 require(ggplot2)
 
-# TODO: Needs revision based on changes to calculate-range-sizes-<model>.R 
-# output file
-
 model <- "glm"
-area_file <- paste0("output/ranges/", model, "-range-areas.csv")
+area_file <- paste0("output/ranges/range-areas-", model, ".csv")
 
 # Read in range size estimates
 range_areas <- read.csv(file = area_file)
@@ -21,25 +18,27 @@ arid <- read.csv(file = "data/arid-estimates.csv")
 
 # Join arid estimate with range areas
 range_areas <- range_areas %>%
-  inner_join(arid, by = c("species" = "insect"))
+  dplyr::inner_join(arid, by = c("species" = "insect"))
 
 # Calculate deltas
 range_areas <- range_areas %>%
-  mutate(area_proportion = forecast_area / current_area,
-         overlap_proportion = forecast_overlap / current_overlap) %>%
-  mutate(area_change = -100 * (1 - area_proportion),
-         overlap_change = -100 * (1 - overlap_proportion))
+  dplyr::mutate(area_proportion = GFDL.ESM4_RCP45_area / current_area,
+         overlap_proportion = GFDL.ESM4_RCP45_overlap_area / current_overlap_area,
+         alone_proportion = GFDL.ESM4_RCP45_alone_area / current_alone_area) %>%
+  dplyr::mutate(area_change = -100 * (1 - area_proportion),
+         overlap_change = -100 * (1 - overlap_proportion),
+         alone_change = -100 * (1 - alone_proportion))
 
 # Start by looking at insect areas alone, ignoring whether or not the range 
 # overlaps with host(s)
 
 # Create a long-formatted data set for easier plotting areas
 areas_long <- range_areas %>%
-  select(species, current_area, forecast_area, arid) %>%
-  pivot_longer(cols = -c(species, arid), 
+  dplyr::select(species, current_area, GFDL.ESM4_RCP45_area, arid) %>%
+  tidyr::pivot_longer(cols = -c(species, arid), 
                names_to = "timepoint",
                values_to = "area") %>%
-  mutate(arid_text = if_else(condition = arid,
+  dplyr::mutate(arid_text = if_else(condition = arid,
                              true = "Arid", 
                              false = "Non-arid"))
 
@@ -53,29 +52,30 @@ areas_plot <- ggplot(data = areas_long,
   geom_point() +
   scale_color_manual(values = c("Arid" = "#fc8d62", 
                                 "Non-arid" = "#66c2a5")) +
-  scale_x_discrete(labels = c("current_overlap" = "Contemporary",
-                              "forecast_overlap" = "Forecast")) +
+  scale_x_discrete(labels = c("current_area" = "Contemporary",
+                              "GFDL.ESM4_RCP45_area" = "Forecast")) +
   labs(x = "Timepoint", y = "Area (sq. km)") +
   theme_bw() +
   theme(legend.title = element_blank())
-ggsave(filename =paste0("output/plots/", model, "-area-changes.pdf"),
+ggsave(filename =paste0("output/plots/area-changes-", model, ".pdf"),
        plot = areas_plot)
 
 # See what Wilcox says about change
 wilcox_result <- wilcox.test(x = range_areas$area_change[range_areas$arid]/100,
                              y = range_areas$area_change[!range_areas$arid]/100,
                              paired = FALSE)
-# W = 12, p-value = 0.05594
+# 2021-07-01
+# W = 8, p-value = 0.02557
 
 # Same as above, but only considering areas where insect overlaps with at least 
 # one host plant
 # Create a long-formatted data set for easier plotting areas
 overlaps_long <- range_areas %>%
-  select(species, current_overlap, forecast_overlap, arid) %>%
-  pivot_longer(cols = -c(species, arid), 
+  dplyr::select(species, current_overlap_area, GFDL.ESM4_RCP45_overlap_area, arid) %>%
+  tidyr::pivot_longer(cols = -c(species, arid), 
                names_to = "timepoint",
                values_to = "area") %>%
-  mutate(arid_text = if_else(condition = arid,
+  dplyr::mutate(arid_text = if_else(condition = arid,
                              true = "Arid", 
                              false = "Non-arid"))
 
@@ -89,21 +89,29 @@ overlaps_plot <- ggplot(data = overlaps_long,
   geom_point() +
   scale_color_manual(values = c("Arid" = "#fc8d62", 
                                 "Non-arid" = "#66c2a5")) +
-  scale_x_discrete(labels = c("current_overlap" = "Contemporary",
-                              "forecast_overlap" = "Forecast")) +
+  scale_x_discrete(labels = c("current_overlap_area" = "Contemporary",
+                              "GFDL.ESM4_RCP45_overlap_area" = "Forecast")) +
   labs(x = "Timepoint", y = "Area (sq. km)") +
   theme_bw() +
   theme(legend.title = element_blank())
-ggsave(filename =paste0("output/plots/", model, "-overlap-changes.pdf"),
+ggsave(filename =paste0("output/plots/overlap-changes-", model, ".pdf"),
        plot = overlaps_plot)
 
 # See what Wilcox says about change
 wilcox_result <- wilcox.test(x = range_areas$overlap_change[range_areas$arid]/100,
                              y = range_areas$overlap_change[!range_areas$arid]/100,
                              paired = FALSE)
+# 2021-07-01
 # W = 11, p-value = 0.04196
 
 # Also go ahead and do t-test
 t_result <- t.test(x = range_areas$overlap_proportion[range_areas$arid],
                    y = range_areas$overlap_proportion[!range_areas$arid])
 # Meh
+
+# What about plotting changes?
+change_boxplot <- ggplot(data = range_areas,
+                         mapping = aes(x = arid, y = overlap_proportion)) +
+  geom_boxplot() +
+  scale_y_log10()
+change_boxplot

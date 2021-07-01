@@ -73,7 +73,7 @@ range_calcs <- function(species_name, model, predictors) {
       # <predictor>_alone_area
       if (is.null(return_list)) {
         return_list <- list()
-        return_list[["insect"]] <- species_name
+        return_list[["species"]] <- species_name
       }
       
       name_area <- paste0(predictor, "_area")
