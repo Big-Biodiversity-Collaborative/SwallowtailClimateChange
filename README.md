@@ -18,7 +18,7 @@ of range overlap of their known host plant species.
 
 ## Scripts, in order of use
 
-In descriptions below, <model> refers to a character string indicating the 
+In descriptions below, \<model\> refers to a character string indicating the 
 model used for species distribution modeling, e.g. "glm" for generalized 
 linear model and "svm" for support vector machine.
 
@@ -27,20 +27,23 @@ note by default these data files are _not_ under version control.
 1. **data-gbif-qa.R**: Run quality assurance on downloaded data, to ensure 
 observations fall within geographic area of interest, in this case, North 
 America
-1. **build-model-<model>-files.sh**: bash shell scripts to build species 
+1. **build-model-\<model\>-files.sh**: bash shell scripts to build species 
 distribution models for individual species. One script is built for each row 
 (species) in data/gbif-reconcile.csv.
-1. **run-all-model-<model>-scripts.R**: Run each script that was generated in 
+1. **run-all-model-\<model\>-scripts.R**: Run each script that was generated in 
 previous step (operates in parallel using `parallel::mclapply`)
-1. **build-prediction-<model>-files.sh**: bash shell scripts to build R scripts
+1. **build-prediction-\<model\>-files.sh**: bash shell scripts to build R scripts
 that predict presence / absence of species based on species distribution models 
 and predictor data (e.g. current bioclimatic data and forecast data)
-1. **run-all-prediction-<model>-scripts.R**: Use species distribution model to 
+1. **run-all-prediction-\<model\>-scripts.R**: Use species distribution model to 
 predict presence / absence for current and forecast climate conditions
-1. **build-overlap-rasters-<model>.R**: Assemble predicted presence / absence
-rasters for each insect and associated host plants into a single raster per 
-insect species
-1. **build-distribution-maps-<model>.R**: Use predicted overlap rasters to 
+1. **build-overlap-raster-\<model\>-files.sh**: bash shell scripts to build R
+scripts that create overlap rasters for each species of insect with its 
+respective host plant(s)
+1. **run-all-overlap-raster-\<model\>-scripts.R**: Assemble predicted presence 
+/ absence rasters for each insect and associated host plants into a single 
+raster per insect species
+1. **build-distribution-maps-\<model\>.R**: Use predicted overlap rasters to 
 generate maps, one for each species of insect in data/insect-host.csv
 1. **calculate-range-sizes.R**: Calculate range sizes (in square kilometers) 
 for each insect species, as well as area (km<sup>2</sup>) of the insect's range 
