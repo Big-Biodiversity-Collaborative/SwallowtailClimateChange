@@ -1,31 +1,32 @@
-#' Make a map of biodiversity hotspots
+#' Make a map of species richness
 #' 
 #' @param r list of rasters
 #' @param predictor the predictor values used in the model to create the 
-#' biodiversity map
+#' map
+#' @param xlim longitudinal limits for map in decimal degrees. Warning: this 
+#' will probably not work if map includes international date line
+#' @param ylim latitudinal limits for map in decimal degrees.
 #' 
 #' @details Note that this script does no modeling or predicting, relying on 
 #' predictions being passed through the list of rasters, \code{r}.
 #' 
 #' @return A ggplot object
-biodiversity_map <- function(r, predictor = c("current", "GFDL-ESM4_RCP45")) {
+richness_map <- function(r, 
+                         predictor = c("current", "GFDL-ESM4_RCP45"),
+                         xlim = c(-170, -50),
+                         ylim = c(10, 70)) {
   if (!require(raster)) {
-    stop("biodiversity_map requires raster package, but it could not be loaded")
+    stop("richness_map requires raster package, but it could not be loaded")
   }
   if (!require(dplyr)) {
-    stop("biodiversity_map requires dplyr package, but it could not be loaded")
+    stop("richness_map requires dplyr package, but it could not be loaded")
   }
   if (!require(ggplot2)) {
-    stop("biodiversity_map requires ggplot2 package, but it could not be loaded")
+    stop("richness_map requires ggplot2 package, but it could not be loaded")
   }
-  # Load up the functions from the functions folder
-  function_files <- list.files(path = "./functions", 
-                               pattern = ".R$", 
-                               full.names = TRUE)
-  for(fun_file in function_files) {
-    source(file = fun_file)
-  }
-  
+
+  source(file = "load_functions.R")
+
   predictor = match.arg(predictor)
   
   # Stack the rasters on top of one another
@@ -46,7 +47,7 @@ biodiversity_map <- function(r, predictor = c("current", "GFDL-ESM4_RCP45")) {
                   Latitude = y)
 
   
-  plot_title <- paste0("Biodiversity, ", predictor, " conditions")
+  plot_title <- paste0("Species richness, ", predictor, " conditions")
   bio_plot <- ggplot(data = bio_df,
                       mapping = aes(x = Longitude,
                                     y = Latitude,
@@ -59,5 +60,17 @@ biodiversity_map <- function(r, predictor = c("current", "GFDL-ESM4_RCP45")) {
     theme_minimal() +
     theme(axis.title = element_blank(),
           legend.title = element_blank())
-  return(bio_plot)
+  
+  if (!is.null(xlim)) {
+    bio_plot <- bio_plot +
+      xlim(xlim)
+  }
+  
+  if (!is.null(ylim)) {
+    bio_plot <- bio_plot + 
+      ylim(ylim)
+  }
+  
+  return(list(bio_plot = bio_plot,
+              rasters = bio_raster))
 }
