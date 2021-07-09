@@ -1,8 +1,10 @@
+# DEPRECATED; use run-all-overlap-raster-svm-scripts.R instead
 # Create raster from SVM predictions for each insect species and its hosts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-28
 
+stop("DEPRECATED; use run-all-overlap-raster-svm-scripts.R instead")
 require(parallel)
 
 model <- "svm"

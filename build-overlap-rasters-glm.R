@@ -1,8 +1,10 @@
+# DEPRECATED; use run-all-overlap-raster-glm-scripts.R instead
 # Create raster from GLM predictions for each insect species and its hosts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-28
 
+stop("DEPRECATED; use run-all-overlap-raster-glm-scripts.R instead")
 require(parallel)
 
 model <- "glm"
