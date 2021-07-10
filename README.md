@@ -52,6 +52,9 @@ insect's range that overlaps with zero host plant species' ranges.
 1. **compare-range-sizes.R**: Compare the range sizes of current and forecast distributions, both considering insect ranges alone, and considering only the 
 areas where insects are predicted to overlap with one or more host plant 
 species
+1. **draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ species 
+richness for current and forecast climate conditions and a map showing the 
+change between current and forecast estimates
 
 ## Directory structure
 

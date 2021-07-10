@@ -106,7 +106,8 @@ overlap_map <- function(species_name,
                      abbr_name, 
                      and_hosts)
 
-  # TODO: Better way of doing this?  
+  # TODO: Better way of doing this?
+  # NOTE NOTE NOTE!!! level indexes differ from layer values
   overlap_df <- overlap_df %>%
     dplyr::mutate(Status = dplyr::case_when(layer == 0 ~ status_levels[1],
                                             layer == 1 ~ status_levels[3],
