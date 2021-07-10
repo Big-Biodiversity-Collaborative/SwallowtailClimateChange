@@ -5,6 +5,7 @@
 
 require(raster)
 require(ggplot2)
+require(dplyr)
 
 source(file = "load_functions.R")
 
@@ -44,35 +45,51 @@ for (species_name in insect_species) {
 # long: -170 to -50
 # lat: 10 to 70
 
-# Make plot for current bioclim conditions
+################################################################################
+# Need to start by stacking both current and forecast rasters so we can find 
+# limits of color palette (i.e. minimum and maximum species richness)
+
+current_stack <- stack_rasters(r = current_rasters, out = "total")
+forecast_stack <- stack_rasters(r = forecast_rasters, out = "total")
+
+# For now, we'll assume 0 as minimum, but need to find maximum from rasters
+max_current <- raster::cellStats(x = current_stack, stat = "max")
+max_forecast <- raster::cellStats(x = forecast_stack, stat = "max")
+palette_limits <- c(0, max(max_current, max_forecast))
+rm(max_current, max_forecast)
+
+# Now that we have the scale for palette, start with making plot for current 
+# richness
 current_predictor <- "current"
-current_map <- richness_map(r = current_rasters,
-                            predictor = current_predictor)
-# current_map$bio_plot
+current_map <- richness_map(r = current_stack,
+                            predictor = current_predictor,
+                            pal_limits = palette_limits)
+
 ggsave(filename = paste0("output/maps/richness-",
                          model, 
                          "-",
                          current_predictor,
                          ".",
                          output_format),
-       plot = current_map$bio_plot)
+       plot = current_map)
 
 # Make plot for forecast conditions
 forecast_predictor <- "GFDL-ESM4_RCP45"
-forecast_map <- richness_map(r = forecast_rasters,
-                             predictor = forecast_predictor)
-# forecast_map$bio_plot
+forecast_map <- richness_map(r = forecast_stack,
+                             predictor = forecast_predictor,
+                             pal_limits = palette_limits)
+# forecast_map
 ggsave(filename = paste0("output/maps/richness-",
                          model, 
                          "-",
                          forecast_predictor,
                          ".",
                          output_format),
-       plot = forecast_map$bio_plot)
+       plot = forecast_map)
 
 # Finally, subtract the current raster from the forecast raster, to generate a
 # map of differences. We can use the rasters that come back from richness_map
-delta_raster <- forecast_map$rasters - current_map$rasters
+delta_raster <- forecast_stack - current_stack
 
 # Conversion for plotting with ggplot
 delta_points <- raster::rasterToPoints(x = delta_raster, 
