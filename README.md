@@ -111,3 +111,5 @@ modeling in R: [https://rspatial.org/raster/sdm/index.html](https://rspatial.org
 + Heh heh, just look: [https://doi.org/10.1111/2041-210X.13591](https://doi.org/10.1111/2041-210X.13591)
 + Comparison among different SDM approaches at
 [https://doi.org/10.1002/ecm.1370](https://doi.org/10.1002/ecm.1370)
++ Worked example of species distribution models used to inform decision-making
+[https://doi.org/10.1093/biosci/biz045](https://doi.org/10.1093/biosci/biz045)

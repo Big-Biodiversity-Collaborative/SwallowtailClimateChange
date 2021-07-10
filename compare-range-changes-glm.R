@@ -9,6 +9,7 @@ require(ggplot2)
 
 model <- "glm"
 area_file <- paste0("output/ranges/range-areas-", model, ".csv")
+output_format <- "png" # pdf
 
 # Read in range size estimates
 range_areas <- read.csv(file = area_file)
@@ -57,7 +58,7 @@ areas_plot <- ggplot(data = areas_long,
   labs(x = "Timepoint", y = "Area (sq. km)") +
   theme_bw() +
   theme(legend.title = element_blank())
-ggsave(filename =paste0("output/plots/area-changes-", model, ".pdf"),
+ggsave(filename =paste0("output/plots/area-changes-", model, ".", output_format),
        plot = areas_plot)
 
 # See what Wilcox says about change
@@ -82,20 +83,34 @@ overlaps_long <- range_areas %>%
 # Plot areas
 overlaps_plot <- ggplot(data = overlaps_long, 
                         mapping = aes(x = timepoint, 
-                                      y = area, 
+                                      y = area/1e6, 
                                       group = species, 
                                       color = arid_text)) +
-  geom_line() + 
-  geom_point() +
+  geom_line(alpha = 0.8) + 
+  # geom_point(alpha = 0.8) +
   scale_color_manual(values = c("Arid" = "#fc8d62", 
-                                "Non-arid" = "#66c2a5")) +
-  scale_x_discrete(labels = c("current_overlap_area" = "Contemporary",
-                              "GFDL.ESM4_RCP45_overlap_area" = "Forecast")) +
-  labs(x = "Timepoint", y = "Area (sq. km)") +
-  theme_bw() +
-  theme(legend.title = element_blank())
-ggsave(filename =paste0("output/plots/overlap-changes-", model, ".pdf"),
-       plot = overlaps_plot)
+                                "Non-arid" = "#66c2a5"),
+                     alpha) +
+  scale_x_discrete(labels = c("current_overlap_area" = "2020",
+                              "GFDL.ESM4_RCP45_overlap_area" = "2070"),
+                   expand = expansion(add = c(0.3, 0.78))) +
+  # labs(x = "Timepoint", y = "Area (sq. km)") +
+  ylab(label = bquote("Area (sq. km x"~10^6*")")) + # ~ is space, * is no space
+  theme_minimal() +
+  theme(legend.title = element_blank(),
+        legend.position = c(0.82, 0.48),
+        # legend.position = "top",
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(x = 3, units = "mm"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size = 8),
+        axis.text = element_text(size = 10))
+overlaps_plot
+ggsave(filename =paste0("output/plots/overlap-changes-", model, ".", output_format),
+       plot = overlaps_plot,
+       width = 56,
+       height = 30,
+       units = "mm")
 
 # See what Wilcox says about change
 wilcox_result <- wilcox.test(x = range_areas$overlap_change[range_areas$arid]/100,
