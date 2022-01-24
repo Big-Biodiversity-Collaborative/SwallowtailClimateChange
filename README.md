@@ -1,5 +1,6 @@
 # SwallowtailClimateChange
-Data and code for North American Swallowtail and larval host plant distributions in relation to climate change
+Data and code for North American Swallowtail and larval host plant 
+distributions in relation to climate change
 
 **Currently under development**
 
@@ -22,8 +23,8 @@ In descriptions below, \<model\> refers to a character string indicating the
 model used for species distribution modeling, e.g. "glm" for generalized 
 linear model and "svm" for support vector machine.
 
-1. **download-data.R**: Download observational data from GBIF to the data folder; 
-note by default these data files are _not_ under version control.
+1. **download-data.R**: Download observational data from GBIF to the data 
+folder; note by default these data files are _not_ under version control.
 1. **data-gbif-qa.R**: Run quality assurance on downloaded data, to ensure 
 observations fall within geographic area of interest, in this case, North 
 America
@@ -32,11 +33,12 @@ distribution models for individual species. One script is built for each row
 (species) in data/gbif-reconcile.csv.
 1. **run-all-model-\<model\>-scripts.R**: Run each script that was generated in 
 previous step (operates in parallel using `parallel::mclapply`)
-1. **build-prediction-\<model\>-files.sh**: bash shell scripts to build R scripts
-that predict presence / absence of species based on species distribution models 
-and predictor data (e.g. current bioclimatic data and forecast data)
-1. **run-all-prediction-\<model\>-scripts.R**: Use species distribution model to 
-predict presence / absence for current and forecast climate conditions
+1. **build-prediction-\<model\>-files.sh**: bash shell scripts to build R 
+scripts that predict presence / absence of species based on species 
+distribution models and predictor data (e.g. current bioclimatic data and
+forecast data)
+1. **run-all-prediction-\<model\>-scripts.R**: Use species distribution model 
+to predict presence / absence for current and forecast climate conditions
 1. **build-overlap-raster-\<model\>-files.sh**: bash shell scripts to build R
 scripts that create overlap rasters for each species of insect with its 
 respective host plant(s)
