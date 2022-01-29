@@ -107,7 +107,7 @@ message(paste0("Fininshed estimating SDMs for ", nrow(all_species),
 # At this point we have vectors for insects and plants; as the distributions
 # for each are independent (at least from a programming point of view), we can 
 # run them all in parallel.
-# As currently written, contemporary distributions are created in the same 
+# As currently written, contemporary distributions are created in the *same* 
 # script as forecast distributions ([nice_name]-prediction-[model].R). Those 
 # scripts run *all* the forecast climate models
 
@@ -139,9 +139,103 @@ if (length(missing_predictions > 0)) {
                  " species not made, due to missing prediction scripts."))
 }
 
+########################################
 # create restricted current range of bug to areas with >= 1 plant
 # create restricted forecast range of bug to areas with >= 1 plant
+
+# These are called "overlaps" and the output is a raster with four values (see
+# functions/overlap_raster.R for meanings of each value). As currently written, 
+# contemporary distributions are created in the *same* script as forecast 
+# distributions ([nice_name]-overlap-raster-[model].R)
+
+# Subsequent analyses will be insect-based, so we can extract just the insects
+# from the data frame of names we have been using
+insect_species <- all_species[all_species$category == "insect",]
+
+message(paste0("\n*** Estimating overlaps for ", nrow(insect_species), 
+               " species and ", length(model_names), " models."))
+missing_overlaps <- integer(0)
+for (i in 1:nrow(insect_species)) {
+  species_name <- insect_species$species_name[i]
+  nice_name <- insect_species$nice_name[i]
+  for (model_name in model_names) {
+    overlap_filename <- paste0("scripts/", nice_name, "-overlap-raster-",
+                               model_name, ".R")
+    if (!file.exists(overlap_filename)) {
+      warning(paste0("Overlap raster file ", overlap_filename,
+                     " is missing. Has build-overlap-raster-", model_name, 
+                     "-files.sh been run locally?"))
+      missing_overlaps <- c(missing_overlaps, i)
+    } else {
+      message(paste0("Running overlap raster script ", overlap_filename))
+      # source(file = overlap_filename)
+    }
+  }
+}
+message(paste0("Finished creating overlap rasters for ", 
+               nrow(insect_species) - length(missing_overlaps), 
+               " species and ", length(model_names), " models."))
+if (length(missing_overlaps > 0)) {
+  warning(paste0("Overlap rasters for ", length(missing_overlaps), 
+                 " species not made, due to missing overlap raster scripts."))
+}
+
+########################################
+# calculate area where insect is present
+# calculate area where insect and at least one host species is present
+
+# Both are accomplished by calculate-range-sizes-[model].R. These files 
+# iterate over insect species (in parallel) to calculate 
+#   (1) the total area in which the insect occurs 
+#   (2) the area where the insect occurs with at least one host species
+#   (3) the area where the insect occurs but zero host species occur
+
+# As it is written, it does this for *all* insect species, not just the ones 
+# that are the focus of this script.
+for (model_name in model_names) {
+  area_script <- paste0("calcuate-range-sizes-", model_name, ".R")
+  message(paste0("Running area calculation script ", area_script))
+  # source(file = area_script)
+}
+
+########################################
 # calculate change between current and forecast (bugs only)
 # calculate change between current and forecast (bug range with plants in mind)
+
+# TODO
+
+########################################
 # get aridity data & calculate measurement for a species
+# Want to get the Thornthwaite Aridity Index from https://envirem.github.io
+# [region]_[time period]_[circulation model]_[resolution]_[file format].zip
+# Since we want current data, no circulation_model is necessary, for the AI, 
+# we need Set1 data. Bioclimate variables are at 2.5 minute resolution, so that 
+# should be fine. Using generic, .bil files to get the data.
+# Files are archived at https://deepblue.lib.umich.edu/data/concern/generic_works/gt54kn05f
+# We want NAmerica_current_2.5arcmin_generic.zip
+# Which is at https://deepblue.lib.umich.edu/data/downloads/4b29b610g
+
+# They should live in data/envirem, but check to see if they don't
+if (!file.exists("data/envirem/current_2-5arcmin_aridityIndexThornthwaite.bil")) {
+  # Download the whole archive
+  download.file(url = "https://deepblue.lib.umich.edu/data/downloads/4b29b610g",
+                destfile = "data/envirem/NAmerica_current_2.5arcmin_generic.zip")
+  # Unzip said archive, which will extract to working directory; only pulling out
+  # aridity index for now
+  to_extract <- c("current_2-5arcmin_aridityIndexThornthwaite.bil",
+                  "current_2-5arcmin_aridityIndexThornthwaite.bil.aux.xml",
+                  "current_2-5arcmin_aridityIndexThornthwaite.hdr",
+                  "current_2-5arcmin_aridityIndexThornthwaite.prj")
+  unzip(zipfile = "data/envirem/NAmerica_current_2.5arcmin_generic.zip",
+        files = to_extract)
+  # Move files of interest to appropriate data folder
+  new_files <- paste0("data/envirem/", to_extract)
+  file.rename(from = to_extract, to = new_files)
+  # Remove the zip archive (leaving it for now, though)
+  # file.remove("data/envirem/NAmerica_current_2.5arcmin_generic.zip")
+}
+
+
+
 # do regression between aridity & percent change
+

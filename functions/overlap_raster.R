@@ -13,7 +13,7 @@
 #' \describe{
 #'   \item{0}{Insect and all host plant species absent}
 #'   \item{1}{Insect present, but all host plant species absent}
-#'   \item{2}{At least on host plant species present, but insect present}
+#'   \item{2}{At least one host plant species present, but insect absent}
 #'   \item{3}{Insect and at least one host plant species present}
 #' } 
 overlap_raster <- function(species_name, 
