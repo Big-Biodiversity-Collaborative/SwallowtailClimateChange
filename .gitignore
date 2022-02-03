@@ -29,6 +29,9 @@ output/plots
 # Predicted ranges and range area calculations
 output/ranges
 
+# Measurements of species' aridity
+output/aridity/*.csv
+
 # Log files
 logs/*.log
 !/logs/.gitkeep

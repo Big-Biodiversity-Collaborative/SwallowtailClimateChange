@@ -5,8 +5,17 @@
 
 # This script should do little else than call *other* scripts to accomplish 
 # each step
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 
-insect_species <- c("Papilio rutulus", "Papilio glaucus")
+insect_species <- c("Papilio rutulus", "Papilio glaucus",
+                    "Papilio polyxenes", "Papilio zelicaon",
+                    "Papilio rumiko", "Papilio cresphontes",
+                    "Papilio indra", "Papilio canadensis",
+                    "Papilio eurymedon", "Papilio multicaudata",
+                    "Papilio troilus", "Papilio machaon",
+                    "Papilio palamedes")
 model_names <- c("svm", "glm")
 
 ########################################
@@ -73,6 +82,8 @@ if (length(rows_to_exclude) > 0) {
 # United States. It further discards any observations outside a rough rectangle 
 # of North America (latitude: 14-80, longitude: -170, -52). See 
 # functions/download_gbif.R for details.
+
+# TODO
 
 ########################################
 # build sdm models for all remaining species (insects and plants)
@@ -215,17 +226,30 @@ for (model_name in model_names) {
 # We want NAmerica_current_2.5arcmin_generic.zip
 # Which is at https://deepblue.lib.umich.edu/data/downloads/4b29b610g
 
+# TODO: need to decide on most informative measure of aridity
+# PET Seasonality might be interesting to look at, to see if those highly 
+# variable environments are likely to 
+
 # They should live in data/envirem, but check to see if they don't
-if (!file.exists("data/envirem/current_2-5arcmin_aridityIndexThornthwaite.bil")) {
+aridity_measure <- "aridityIndexThornthwaite"
+# aridity_measure <- "climaticMoistureIndex"
+
+aridity_file <- paste0("data/envirem/current_2-5arcmin_",
+                       aridity_measure,
+                       ".bil")
+
+if (!file.exists(aridity_file)) {
   # Download the whole archive
   download.file(url = "https://deepblue.lib.umich.edu/data/downloads/4b29b610g",
                 destfile = "data/envirem/NAmerica_current_2.5arcmin_generic.zip")
   # Unzip said archive, which will extract to working directory; only pulling out
   # aridity index for now
-  to_extract <- c("current_2-5arcmin_aridityIndexThornthwaite.bil",
-                  "current_2-5arcmin_aridityIndexThornthwaite.bil.aux.xml",
-                  "current_2-5arcmin_aridityIndexThornthwaite.hdr",
-                  "current_2-5arcmin_aridityIndexThornthwaite.prj")
+  file_start <- paste0("current_2-5arcmin_", aridity_measure)
+  to_extract <- paste0(file_start, c(".bil", ".bil.aux.xml", ".hdr", ".prj"))
+  # to_extract <- c("current_2-5arcmin_aridityIndexThornthwaite.bil",
+  #                 "current_2-5arcmin_aridityIndexThornthwaite.bil.aux.xml",
+  #                 "current_2-5arcmin_aridityIndexThornthwaite.hdr",
+  #                 "current_2-5arcmin_aridityIndexThornthwaite.prj")
   unzip(zipfile = "data/envirem/NAmerica_current_2.5arcmin_generic.zip",
         files = to_extract)
   # Move files of interest to appropriate data folder
@@ -235,7 +259,86 @@ if (!file.exists("data/envirem/current_2-5arcmin_aridityIndexThornthwaite.bil"))
   # file.remove("data/envirem/NAmerica_current_2.5arcmin_generic.zip")
 }
 
+# Load aridity data into memory
+aridity_data <- raster::raster(x = aridity_file)
+# thornthwaite <- raster::raster(x = aridity_file)
 
+# For each species, extract aridity data for each cell of observations and 
+# calculate a mean aridity score
+aridity_means <- data.frame(species = insect_species$species_name,
+                            aridity_mean = NA,
+                            aridity_median = NA)
+aridity_means_file <- "output/aridity/aridity-means.csv"
+for (i in 1:nrow(insect_species)) {
+  species_name <- insect_species$species_name[i]
+  nice_name <- insect_species$nice_name[i]
+  
+  # Need observation data for this species, so load that
+  obs_file <- paste0("data/",
+                     nice_name,
+                     "-gbif.csv")
+  if (!file.exists(obs_file)) {
+    warning(paste0("No observation data found for ", species_name))
+  } else {
+    obs <- read.csv(file = obs_file)
+    obs <- obs %>%
+      dplyr::select(longitude, latitude)
+    # Extract aridity from cells with > 1 observation
+    sp_arid_raster <- raster::extract(x = aridity_data, 
+                                      y = obs)
+    # Calculate a mean aridity score for each species
+    mean_aridity <- mean(sp_arid_raster, na.rm = TRUE)
+    median_aridity <- median(sp_arid_raster, na.rm = TRUE)
+    cat(species_name, ": ", mean_aridity, ", ", median_aridity, "\n", sep = "")
+    aridity_means$aridity_mean[i] <- mean_aridity
+    aridity_means$aridity_median[i] <- median_aridity
+  }
+}
 
+write.csv(x = aridity_means, 
+          file = aridity_means_file,
+          row.names = FALSE)
+
+########################################
 # do regression between aridity & percent change
 
+# TODO: Make this iterative
+# model <- "svm"
+model <- "glm"
+change_file <- paste0("output/ranges/range-areas-", model, ".csv")
+
+range_changes <- read.csv(file = change_file)
+aridity_means <- read.csv(file = aridity_means_file)
+
+# Merge range information with aridity information
+range_changes <- range_changes %>%
+  inner_join(aridity_means)
+
+# Calculate deltas, with and without considering plants
+range_changes <- range_changes %>%
+  mutate(area_change_total = GFDL.ESM4_RCP45_area - current_area,
+         area_change_overlap = GFDL.ESM4_RCP45_overlap_area - current_overlap_area) %>%
+  mutate(perc_change_total = area_change_total / current_area,
+         perc_change_overlap = area_change_overlap / current_overlap_area)
+
+# Run regression
+model_total <- lm(perc_change_total ~ aridity_mean, data = range_changes)
+summary(model_total)
+model_total <- lm(perc_change_total ~ aridity_median, data = range_changes)
+summary(model_total)
+
+model_overlap <- lm(perc_change_overlap ~ aridity_mean, data = range_changes)
+summary(model_overlap)
+model_overlap <- lm(perc_change_overlap ~ aridity_median, data = range_changes)
+summary(model_overlap)
+
+# Quick plot
+plot_data <- range_changes %>%
+  select(species, perc_change_total, perc_change_overlap, aridity_mean) %>%
+  pivot_longer(cols = -c(species, aridity_mean),
+               names_to = "measurement",
+               values_to = "value")
+
+ggplot(data = plot_data, mapping = aes(x = aridity_mean, y = value, color = measurement)) +
+  geom_point() + 
+  geom_smooth(method = "lm")
