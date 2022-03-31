@@ -10,28 +10,37 @@ data/cmip5
 # Data downloaded from GBIF via download_gbif
 data/*-gbif.csv
 
-# Auto-generated scripts
-scripts/*.R
+# Measurements of species' aridity
+output/aridity/*.csv
+!output/aridity/.gitkeep
+
+# Predicted distributions
+output/distributions/*.rds
+!output/distributions/.gitkeep
 
 # Map files
-output/maps
+output/maps/*
+!output/maps/.gitkeep
 
 # Output of modeling
 output/models/*.rds
-output/distributions/*.rds
+!output/models/.gitkeep
 
 # Proportion of range overlaps
-output/overlaps/
+output/overlaps/*
+!output/overlaps/.gitkeep
 
 # General data visualization
-output/plots
+output/plots/*
+!output/plots/.gitkeep
 
 # Predicted ranges and range area calculations
-output/ranges
-
-# Measurements of species' aridity
-output/aridity/*.csv
+output/ranges/*
+!output/ranges/.gitkeep
 
 # Log files
 logs/*.log
 !/logs/.gitkeep
+
+# Auto-generated scripts
+scripts/*.R
