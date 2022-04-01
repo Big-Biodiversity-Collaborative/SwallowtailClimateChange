@@ -23,40 +23,46 @@ In descriptions below, \<model\> refers to a character string indicating the
 model used for species distribution modeling, e.g. "glm" for generalized 
 linear model and "svm" for support vector machine.
 
-1. **download-data.R**: Download observational data from GBIF to the data 
-folder; note by default these data files are _not_ under version control.
-1. **data-gbif-qa.R**: Run quality assurance on downloaded data, to ensure 
-observations fall within geographic area of interest, in this case, North 
-America
-1. **build-model-\<model\>-files.sh**: bash shell scripts to build species 
+1. **src/data/download-data.R**: Download observational data from GBIF to the 
+data folder; note by default the data files that are downloaded by this script 
+are _not_ under version control.
+1. **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, to 
+ensure observations fall within geographic area of interest, in this case, 
+North America
+1. **src/bash/build-scripts-model.sh**: bash shell scripts to build species 
 distribution models for individual species. One script is built for each row 
 (species) in data/gbif-reconcile.csv.
-1. **run-all-model-\<model\>-scripts.R**: Run each script that was generated in 
-previous step (operates in parallel using `parallel::mclapply`)
-1. **build-prediction-\<model\>-files.sh**: bash shell scripts to build R 
+1. **src/bash/build-scripts-prediction.sh**: bash shell scripts to build R 
 scripts that predict presence / absence of species based on species 
 distribution models and predictor data (e.g. current bioclimatic data and
 forecast data)
-1. **run-all-prediction-\<model\>-scripts.R**: Use species distribution model 
-to predict presence / absence for current and forecast climate conditions
-1. **build-overlap-raster-\<model\>-files.sh**: bash shell scripts to build R
+1. **src/bash/build-scripts-overlap-raster.sh**: bash shell scripts to build R
 scripts that create overlap rasters for each species of insect with its 
 respective host plant(s)
-1. **run-all-overlap-raster-\<model\>-scripts.R**: Assemble predicted presence 
-/ absence rasters for each insect and associated host plants into a single 
-raster per insect species
-1. **build-distribution-maps-\<model\>.R**: Use predicted overlap rasters to 
-generate maps, one for each species of insect in data/insect-host.csv
-1. **calculate-range-sizes.R**: Calculate range sizes (in square kilometers) 
-for each insect species, as well as area (km<sup>2</sup>) of the insect's range 
-that overlaps with at least one host plant species' range and the area of the 
-insect's range that overlaps with zero host plant species' ranges.
-1. **compare-range-sizes.R**: Compare the range sizes of current and forecast distributions, both considering insect ranges alone, and considering only the 
-areas where insects are predicted to overlap with one or more host plant 
-species
-1. **draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ species 
-richness for current and forecast climate conditions and a map showing the 
-change between current and forecast estimates
+1. **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each script that 
+was generated in previous step (operates in parallel using 
+`parallel::mclapply`)
+1. **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Use species 
+distribution model to predict presence / absence for current and forecast 
+climate conditions
+1. **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
+predicted presence / absence rasters for each insect and associated host plants 
+into a single raster per insect species
+1. **src/summary/create-distribution-maps-\<model\>.R**: Use predicted overlap 
+rasters to generate maps (image files), one for each species of insect in 
+data/insect-host.csv
+1. **src/summary/calculate-range-sizes.R**: Calculate range sizes (in square 
+kilometers) for each insect species, as well as area (km<sup>2</sup>) of the 
+insect's range that overlaps with at least one host plant species' range and 
+the area of the insect's range that overlaps with zero host plant species' 
+ranges.
+1. **src/summary/compare-range-sizes.R**: Compare the range sizes of current 
+and forecast distributions, both considering insect ranges alone, and 
+considering only the areas where insects are predicted to overlap with one or 
+more host plant species
+1. **src/summary/draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ 
+species richness for current and forecast climate conditions and a map showing 
+the change between current and forecast estimates
 
 ## Directory structure
 
@@ -66,17 +72,25 @@ change between current and forecast estimates
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
 (files with .log extension are not under version control)
-+ output
++ output: most files are not under version control, but directory structure is
     + distributions: raster files of predicted distributions for individual 
     species
-    + maps: distribution maps for insect species and hosts
+    + maps: distribution maps (image files) for insect species and hosts
     + models: species distribution model objects
     + overlaps: DEPRECATED
     + plots: miscellaneous data visualizations
     + ranges: composite rasters of insect and host species and estimates of 
     range areas
-+ scripts: scripts for individual species modeling and forecasting; 
-automatically created by shell scripts
++ scripts: DEPRECATED
++ src: 
+    + bash: bash scripts to generate individual species R scripts
+    + data: R scripts for data download and assessment
+    + indiv: R scripts for individual species modeling and forecasting; 
+    automatically created by shell scripts in src/bash
+    + run-indiv: R scripts to run individual species scripts in src/indiv in 
+    parallel
+    + summary: R scripts to analyze and visualize results of individual species
+    modeling and predictions
 + templates: template R scripts used by shell scripts to generate modeling 
 and prediction scripts for individual species
 + tests: woefully depauperate location for tests

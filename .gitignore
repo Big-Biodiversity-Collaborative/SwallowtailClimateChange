@@ -42,5 +42,6 @@ output/ranges/*
 logs/*.log
 !/logs/.gitkeep
 
-# Auto-generated scripts
+# Auto-generated scripts for individual species
 scripts/*.R
+src/indiv/*.R

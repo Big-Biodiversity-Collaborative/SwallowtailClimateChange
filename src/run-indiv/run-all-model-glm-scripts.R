@@ -20,7 +20,7 @@ rerun <- TRUE
 # Integer indicating minimum number of observations necessary to run script
 min_obs <- 50
 
-glm_files <- list.files(path = "./scripts",
+glm_files <- list.files(path = "./src/indiv",
                         pattern = "*-model-glm.R",
                         full.names = TRUE)
 
@@ -55,7 +55,8 @@ run_glm_script <- function(script_name,
       model_out <- paste0("output/models/", nice_name, "-model-glm-current.rds")
       
       if (!file.exists(model_out) | rerun) {
-        glm_script <- paste0("scripts/", nice_name, "-model-glm.R")
+        # TODO: Seems duplicated with one_file and script_name...
+        glm_script <- paste0("src/indiv/", nice_name, "-model-glm.R")
         if (file.exists(glm_script)) {
           # In this one case, we want to let user know that we are running
           write(x = paste0("About to run ", glm_script), 

@@ -1,15 +1,15 @@
-# Run all overlap raster scripts for SVM
+# Run all overlap raster scripts for GLM
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-07-08
 
 require(parallel)
 
-logfile <- "logs/overlap-raster-svm-out.log"
+logfile <- "logs/overlap-raster-glm-out.log"
 remove_log <- FALSE
 
-script_files <- list.files(path = "./scripts",
-                           pattern = "*-overlap-raster-svm.R",
+script_files <- list.files(path = "./src/indiv",
+                           pattern = "*-overlap-raster-glm.R",
                            full.names = TRUE)
 
 # For testing, subset this vector

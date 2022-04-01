@@ -20,7 +20,7 @@ rerun <- TRUE
 # Integer indicating minimum number of observations necessary to run script
 min_obs <- 50
 
-svm_files <- list.files(path = "./scripts",
+svm_files <- list.files(path = "./src/indiv",
                         pattern = "*-model-svm.R",
                         full.names = TRUE)
 
@@ -55,7 +55,8 @@ run_svm_script <- function(script_name,
       model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
       
       if (!file.exists(model_out) | rerun) {
-        svm_script <- paste0("scripts/", nice_name, "-model-svm.R")
+        # TODO: Seems duplicated with one_file and script_name...
+        svm_script <- paste0("src/indiv/", nice_name, "-model-svm.R")
         if (file.exists(svm_script)) {
           # In this one case, we want to let user know that we are running
           write(x = paste0("About to run ", svm_script), 

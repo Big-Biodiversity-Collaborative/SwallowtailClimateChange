@@ -1,7 +1,7 @@
-# Run all presence / absence prediction scripts for GLM models
+# Run all presence / absence prediction scripts for SVM models
 # Jeff Oliver
 # jcoliver@arizona.edu
-# 2021-06-03
+# 2021-06-24
 
 # TODO: An open question of whether we want to run *all* the appropriate 
 # scripts that are found in the scripts folder (as implemented below) or if 
@@ -10,12 +10,12 @@
 
 require(parallel)
 
-logfile <- "logs/prediction-glm-out.log"
+logfile <- "logs/prediction-svm-out.log"
 remove_log <- FALSE
 rerun <- TRUE
 
-pred_scripts <- list.files(path = "./scripts",
-                         pattern = "*-prediction-glm.R",
+pred_scripts <- list.files(path = "./src/indiv",
+                         pattern = "*-prediction-svm.R",
                          full.names = TRUE)
 
 # For testing, use only a subset 
@@ -23,7 +23,7 @@ pred_scripts <- list.files(path = "./scripts",
 
 pred_script_list <- as.list(pred_scripts)
 
-run_glm_prediction <- function(script_name,
+run_svm_prediction <- function(script_name,
                             log_file,
                             rerun) {
   
@@ -33,9 +33,10 @@ run_glm_prediction <- function(script_name,
                         split = "-")[[1]][1]
   
   # Make sure model output exists
-  model_out <- paste0("output/models/", nice_name, "-model-glm-current.rds")
+  model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
   if (file.exists(model_out)) {
-    prediction_script <- paste0("scripts/", nice_name, "-prediction-glm.R")
+    # TODO: Seems duplicated with one_file and script_name...
+    prediction_script <- paste0("src/indiv/", nice_name, "-prediction-svm.R")
     if (file.exists(prediction_script)) {
       # In this one case, we want to let user know that we are running
       write(x = paste0("About to run ", prediction_script), 
@@ -71,7 +72,7 @@ f <- file.create(logfile)
 
 # Run the processes in parallel
 r <- parallel::mclapply(X = pred_script_list,
-                        FUN = run_glm_prediction,
+                        FUN = run_svm_prediction,
                         mc.cores = num_cores,
                         log_file = logfile,
                         rerun = rerun)
@@ -79,4 +80,3 @@ r <- parallel::mclapply(X = pred_script_list,
 if (remove_log && file.exists(logfile)) {
   file.remove(logfile)
 }
-
