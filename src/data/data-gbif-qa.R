@@ -13,7 +13,7 @@ require(dplyr)
 # longitude and latitude)
 remove_oob <- TRUE
 
-gbif_files <- list.files(path = "./data",
+gbif_files <- list.files(path = "./data/gbif",
                          pattern = "*-gbif.csv",
                          full.names = TRUE)
 lat_lim <- c(14, 80)

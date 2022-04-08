@@ -26,7 +26,7 @@ species_name <- paste0(genus, " ", species)
 nice_name <- tolower(paste0(genus, "_", species))
 
 # Load in observation data
-obs_file <- paste0("data/",
+obs_file <- paste0("data/gbif/",
                    nice_name,
                    "-gbif.csv")
 obs <- read.csv(file = obs_file)

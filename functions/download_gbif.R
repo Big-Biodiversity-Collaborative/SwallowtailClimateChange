@@ -35,7 +35,7 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
-  filename <- paste0("data/", nice_name, "-gbif.csv")
+  filename <- paste0("data/gbif/", nice_name, "-gbif.csv")
   
   # Only proceed if file doesn't exist or we want to replace existing files
   if (!file.exists(filename) | replace) {

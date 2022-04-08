@@ -6,9 +6,10 @@
 # Climate data
 data/wc2-5
 data/cmip5
+data/envirem
 
 # Data downloaded from GBIF via download_gbif
-data/*-gbif.csv
+data/gbif/*-gbif.csv
 
 # Measurements of species' aridity
 output/aridity/*.csv
