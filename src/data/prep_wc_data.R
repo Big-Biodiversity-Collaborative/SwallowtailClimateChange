@@ -6,6 +6,7 @@
 # library(dplyr)
 library(raster)
 library(dismo)
+library(parallel)
 
 wc_vars <- c("tmin", "tmax", "prec")
 # Used for file downloads
@@ -69,7 +70,7 @@ month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1]
 # Do biovar calculation for each year; biovars_annual will hold values for a 
 # single year
 biovars_annual <- vector("list", length(year_span))
-biovar_names <- paste0("bio", 1:19)
+# TODO: Run this MOFO in parallel?
 for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
   raster_list <- vector("list", length(wc_vars))
@@ -81,12 +82,54 @@ for (year_i in 1:length(year_span)) {
                                 one_year, "-", 
                                 month_vec, ".tif")) 
     raster_list[[one_var]] <- raster::stack(x = var_files)
-    # Restrict to geographical area of this study (CA, MX, US)
+    # Restrict to geographical area of this study (CA, MX, US); cropping will 
+    # take a few seconds
     raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
                                            y = geo_extent)
   }
-  # Do biovar calculation for this year
+  # Do biovar calculation for this year; can take several minutes
   biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
                                              tmin = raster_list[["tmin"]],
                                              tmax = raster_list[["tmax"]])
 }
+
+# Could do parallel if RAM is giant. Otherwise, will eat your computer.
+# calc_biovar_annual <- function(x, year_span, wc_vars, month_vec, geo_extent) {
+#   one_year <- year_span[x]
+#   raster_list <- vector("list", length(wc_vars))
+#   names(raster_list) <- wc_vars
+#   # Create a RasterStack for each of the variables for this year
+#   for (one_var in wc_vars) {
+#     var_files <- as.list(paste0("data/wc2-1/monthly/wc2.1_2.5m_",
+#                                 one_var, "_", 
+#                                 one_year, "-", 
+#                                 month_vec, ".tif")) 
+#     raster_list[[one_var]] <- raster::stack(x = var_files)
+#     # Restrict to geographical area of this study (CA, MX, US); cropping will 
+#     # take a few seconds
+#     raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
+#                                            y = geo_extent)
+#   }
+#   # Do biovar calculation for this year; can take several minutes
+#   # biovars_annual <- dismo::biovars(prec = raster_list[["prec"]],
+#   #                                       tmin = raster_list[["tmin"]],
+#   #                                       tmax = raster_list[["tmax"]])
+#   # return(biovars_annual)
+#   return(var_files)
+# }
+# ncores = parallel::detectCores() - 2
+# cl = parallel::makeCluster(ncores)
+# # Have to explicitly load libraries on each core; using assignment to keep 
+# # things quiet
+# a <- clusterEvalQ(cl, library(dismo))
+# biovars_annual <- parallel::parLapply(cl = cl,
+#                                       X = 1:length(year_span),
+#                                       fun = calc_biovar_annual,
+#                                       year_span = year_span,
+#                                       wc_vars = wc_vars,
+#                                       month_vec = month_vec,
+#                                       geo_extent = geo_extent)
+# 
+# parallel::stopCluster(cl = cl)
+
+biovar_names <- paste0("bio", 1:19)
