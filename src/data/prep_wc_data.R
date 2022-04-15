@@ -1,0 +1,92 @@
+# Download and prepare bioclimatic variables for 2000-2019
+# Jeff Oliver
+# jcoliver@arizona.edu
+# 2022-04-15
+
+# library(dplyr)
+library(raster)
+library(dismo)
+
+wc_vars <- c("tmin", "tmax", "prec")
+# Used for file downloads
+time_periods <- c("2000-2009", "2010-2018")
+# Used for annual biovariable calculations
+year_span <- 2000:2018
+# Rough extremes of Canada, Mexico, and USA
+coord_bounds <- c("xmin" = -169,
+                  "xmax" = -48, 
+                  "ymin" = 13,
+                  "ymax" = 75)
+geo_extent <- raster::extent(x = coord_bounds)
+
+# Check for data files for tmin, tmax, and prec; download from 
+# https://www.worldclim.org/data/monthlywth.html if not here, and 
+# extract zip files
+timeout_default <- getOption("timeout")
+options(timeout = 10 * 60) # Set to 15 minutes, files are large
+for (one_var in wc_vars) {
+  for (time_per in time_periods) {
+    # Data files doesn't exist, so download
+    
+    zip_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, 
+                       "_", time_per, ".zip")
+    if (!file.exists(zip_file)) {
+      message(paste0("Downloading zip for ", one_var, ", ", time_per))
+      file_url <- paste0("https://biogeo.ucdavis.edu/data/worldclim/v2.1/hist/wc2.1_2.5m_",
+                         one_var, "_", time_per, ".zip")
+      download.file(url = file_url,
+                    destfile = zip_file)
+    } else {
+      message(paste0("Zip already present for ", one_var, ", ", time_per))
+    }
+    
+    # if data files haven't been extracted yet, do that now
+    # Extraction can take a minute
+    final_year <- substr(x = time_per, start = 6, stop = 9)
+    one_data_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, "_", 
+                            final_year, "-12.tif")
+    if (!file.exists(one_data_file)) {
+      message(paste0("Extracting ", zip_file))
+      unzip(zipfile = zip_file,
+            exdir = "data/wc2-1/monthly")
+    }
+  }
+}
+options(timeout = timeout_default) # Reset to default
+
+# Now have monthly data 2000-2019, one for each month / year for each of three 
+# variables
+
+# Need to create single RasterBrick/Stack for each of the three variables for 
+# a single year (so 12 layers each), then feed them to dismo::biovars()
+
+# We calculate the average for the entire span, 2000-2018, so we start by 
+# calculating biovar for each year
+# Files have two-digit month, so creating a character vector for that
+month_vec <- as.character(1:12)
+month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1])
+
+# Do biovar calculation for each year; biovars_annual will hold values for a 
+# single year
+biovars_annual <- vector("list", length(year_span))
+biovar_names <- paste0("bio", 1:19)
+for (year_i in 1:length(year_span)) {
+  one_year <- year_span[year_i]
+  raster_list <- vector("list", length(wc_vars))
+  names(raster_list) <- wc_vars
+  # Create a RasterStack for each of the variables for this year
+  for (one_var in wc_vars) {
+    var_files <- as.list(paste0("data/wc2-1/monthly/wc2.1_2.5m_",
+                                one_var, "_", 
+                                one_year, "-", 
+                                month_vec, ".tif")) 
+    raster_list[[one_var]] <- raster::stack(x = var_files)
+    # Restrict to geographical area of this study (CA, MX, US)
+    raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
+                                           y = geo_extent)
+  }
+  # Do biovar calculation for this year
+  biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
+                                             tmin = raster_list[["tmin"]],
+                                             tmax = raster_list[["tmax"]])
+}
