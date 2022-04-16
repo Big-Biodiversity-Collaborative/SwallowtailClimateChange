@@ -7,7 +7,8 @@
 data/wc2-5
 data/cmip5
 data/envirem
-data/wc2-1/*
+data/wc2-1/annual/*
+data/wc2-1/monthly/*
 !data/wc2-1/.gitkeep
 
 # Data downloaded from GBIF via download_gbif

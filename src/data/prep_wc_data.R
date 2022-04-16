@@ -3,13 +3,28 @@
 # jcoliver@arizona.edu
 # 2022-04-15
 
-# library(dplyr)
 library(raster)
 library(dismo)
-# library(parallel)
 
+# Calculates average values for the 19 bioclimatic variables for 2000-2018, 
+# based on monthly values for the 19 year span (yeah, two 19s, I'm sure this 
+# won't cause any confusion). Monthly climate data (tmin, tmax, and prec) 
+# sourced from https://worldclim.org/data/monthlywth.html.
+
+# Much of the approach adapted from Keaton Wilson's work on Giant Swallowtails 
+# at https://github.com/keatonwilson/swallowtail_ms, especially the code in the 
+# appropriately named scripts/terraclim_nonsense.R
+
+# TODO: Add toggle for removal of monthly tif files (they take up considerable
+# HD space)
+# TODO: Need to add check for existence of bioclim averages before extraction 
+# (monthly file check is fine, but these might be deleted, but not necessary)
+# TODO: Update filenames for prec and tmax 2018 December data - both have 
+# (misleadingly) "2019" in their filenames instead of "2018"
+
+# WorldClim variables
 wc_vars <- c("tmin", "tmax", "prec")
-# Used for file downloads
+# Used for file downloads, based on names at WorldClim site
 time_periods <- c("2000-2009", "2010-2018")
 # Used for annual biovariable calculations
 year_span <- 2000:2018
@@ -19,9 +34,10 @@ coord_bounds <- c("xmin" = -169,
                   "ymin" = 13,
                   "ymax" = 75)
 geo_extent <- raster::extent(x = coord_bounds)
-# for writing raster files to disk
+# For writing raster files to disk
 raster_format <- ".bil"
-overwrite_averages <- TRUE
+# Whether or not to re-calculate averages for the 19 bioclim variables
+overwrite_averages <- FALSE
 
 # Check for data files for tmin, tmax, and prec; download from 
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
@@ -74,7 +90,7 @@ month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1]
 # single year
 biovars_annual <- vector("list", length(year_span))
 biovar_names <- paste0("bio", 1:19)
-year_span <- 2000:2001 # For testing only
+# year_span <- 2000:2001 # For testing only
 for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
   # Check to see if biovars have yet been calculated for this year; if not, do 
