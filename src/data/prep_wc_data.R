@@ -19,6 +19,9 @@ coord_bounds <- c("xmin" = -169,
                   "ymin" = 13,
                   "ymax" = 75)
 geo_extent <- raster::extent(x = coord_bounds)
+# for writing raster files to disk
+raster_format <- ".bil"
+overwrite_averages <- TRUE
 
 # Check for data files for tmin, tmax, and prec; download from 
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
@@ -76,10 +79,12 @@ for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
   # Check to see if biovars have yet been calculated for this year; if not, do 
   # calculations and store in stack (and save to file); if so, read in values 
-  # as RasterStack (?), 
+  # as RasterStack 
+  # TODO: Want to save these as bil or grd or tif format?
   biovar_filenames <- paste0("data/wc2-1/annual/biovars-", 
                              one_year, "-",
-                             biovar_names, ".bil")
+                             biovar_names, 
+                             raster_format)
   if (any(!file.exists(biovar_filenames))) {
     # A list of three elements, one corresponding to each of the variables (tmin, 
     # tmax, and prec). Each element will be a RasterStack of the 12 monthly 
@@ -111,14 +116,17 @@ for (year_i in 1:length(year_span)) {
     for (biovar_name in names(biovars_annual[[year_i]])) {
       biovar_filename <- paste0("data/wc2-1/annual/biovars-", 
                                 one_year, "-",
-                                biovar_name, ".bil")
+                                biovar_name, 
+                                raster_format)
       raster::writeRaster(x = biovars_annual[[year_i]][[biovar_name]],
                           filename = biovar_filename,
                           overwrite = TRUE)
     }
   } else { # biovars already calculated for this year, just read them in
-    message(paste0("biovars already calculated for ", one_year))
+    message(paste0("biovars already calculated for ", one_year, "; loading."))
     biovars_annual[[year_i]] <- raster::stack(x = biovar_filenames)
+    # Blech
+    names(biovars_annual[[year_i]]) <- biovar_names
   }
 }
 
@@ -162,3 +170,22 @@ for (year_i in 1:length(year_span)) {
 # parallel::stopCluster(cl = cl)
 
 # Now do calculation of means for each variable
+for (biovar_name in biovar_names) {
+  mean_filename <- paste0("data/wc2-1/", 
+                          biovar_name, 
+                          raster_format)
+  if (!file.exists(mean_filename) | overwrite_averages) {
+    message("Averaging ", biovar_name)
+    # Pull corresponding RasterLayer out for this variable
+    biovar_rasters <- lapply(X = biovars_annual, FUN = "[[", biovar_name)
+    # Making a stack, but why?
+    biovar_stack <- raster::stack(biovar_rasters)
+    # Calculate mean of all layers (each layer is a year in this case)
+    biovar_mean <- raster::calc(x = biovar_stack, fun = mean, na.rm = TRUE)
+    raster::writeRaster(x = biovar_mean,
+                        filename = mean_filename,
+                        overwrite = TRUE)
+  } else {
+    message("Averages already on disk for ", biovar_name)
+  }
+}
