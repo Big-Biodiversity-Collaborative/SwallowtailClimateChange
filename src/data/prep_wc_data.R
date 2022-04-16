@@ -6,7 +6,7 @@
 # library(dplyr)
 library(raster)
 library(dismo)
-library(parallel)
+# library(parallel)
 
 wc_vars <- c("tmin", "tmax", "prec")
 # Used for file downloads
@@ -70,27 +70,56 @@ month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1]
 # Do biovar calculation for each year; biovars_annual will hold values for a 
 # single year
 biovars_annual <- vector("list", length(year_span))
-# TODO: Run this MOFO in parallel?
+biovar_names <- paste0("bio", 1:19)
+year_span <- 2000:2001 # For testing only
 for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
-  raster_list <- vector("list", length(wc_vars))
-  names(raster_list) <- wc_vars
-  # Create a RasterStack for each of the variables for this year
-  for (one_var in wc_vars) {
-    var_files <- as.list(paste0("data/wc2-1/monthly/wc2.1_2.5m_",
-                                one_var, "_", 
-                                one_year, "-", 
-                                month_vec, ".tif")) 
-    raster_list[[one_var]] <- raster::stack(x = var_files)
-    # Restrict to geographical area of this study (CA, MX, US); cropping will 
-    # take a few seconds
-    raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
-                                           y = geo_extent)
+  # Check to see if biovars have yet been calculated for this year; if not, do 
+  # calculations and store in stack (and save to file); if so, read in values 
+  # as RasterStack (?), 
+  biovar_filenames <- paste0("data/wc2-1/annual/biovars-", 
+                             one_year, "-",
+                             biovar_names, ".bil")
+  if (any(!file.exists(biovar_filenames))) {
+    # A list of three elements, one corresponding to each of the variables (tmin, 
+    # tmax, and prec). Each element will be a RasterStack of the 12 monthly 
+    # layers for that variable
+    raster_list <- vector("list", length(wc_vars))
+    names(raster_list) <- wc_vars
+    # Create a RasterStack for each of the variables for this year
+    for (one_var in wc_vars) {
+      var_files <- as.list(paste0("data/wc2-1/monthly/wc2.1_2.5m_",
+                                  one_var, "_", 
+                                  one_year, "-", 
+                                  month_vec, ".tif")) 
+      raster_list[[one_var]] <- raster::stack(x = var_files)
+      # Restrict to geographical area of this study (CA, MX, US); cropping will 
+      # take a few seconds
+      raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
+                                             y = geo_extent)
+    }
+    # Do biovar calculation for this year; can take several (> 10) minutes
+    # See note on parallelization below
+    message(paste0(Sys.time(), " | Calculating biovars for ", one_year))
+    # Spits out a RasterBrick
+    biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
+                                               tmin = raster_list[["tmin"]],
+                                               tmax = raster_list[["tmax"]])
+    message(paste0(Sys.time(), " | Finished calculating ", one_year, " biovars"))
+    
+    # Write each biovar to a raster file
+    for (biovar_name in names(biovars_annual[[year_i]])) {
+      biovar_filename <- paste0("data/wc2-1/annual/biovars-", 
+                                one_year, "-",
+                                biovar_name, ".bil")
+      raster::writeRaster(x = biovars_annual[[year_i]][[biovar_name]],
+                          filename = biovar_filename,
+                          overwrite = TRUE)
+    }
+  } else { # biovars already calculated for this year, just read them in
+    message(paste0("biovars already calculated for ", one_year))
+    biovars_annual[[year_i]] <- raster::stack(x = biovar_filenames)
   }
-  # Do biovar calculation for this year; can take several minutes
-  biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
-                                             tmin = raster_list[["tmin"]],
-                                             tmax = raster_list[["tmax"]])
 }
 
 # Could do parallel if RAM is giant. Otherwise, will eat your computer.
@@ -132,4 +161,4 @@ for (year_i in 1:length(year_span)) {
 # 
 # parallel::stopCluster(cl = cl)
 
-biovar_names <- paste0("bio", 1:19)
+# Now do calculation of means for each variable
