@@ -15,12 +15,10 @@ library(dismo)
 # at https://github.com/keatonwilson/swallowtail_ms, especially the code in the 
 # appropriately named scripts/terraclim_nonsense.R
 
-# TODO: Add toggle for removal of monthly tif files (they take up considerable
-# HD space)
 # TODO: Need to add check for existence of bioclim averages before extraction 
 # (monthly file check is fine, but these might be deleted, but not necessary)
-# TODO: Update filenames for prec and tmax 2018 December data - both have 
-# (misleadingly) "2019" in their filenames instead of "2018"
+# TODO: Add some QA at the end, doing a rough comparison to the averages for 
+# the 1970-2000 time period. Numbers will be different, but not _too_ different
 
 # WorldClim variables
 wc_vars <- c("tmin", "tmax", "prec")
@@ -36,8 +34,16 @@ coord_bounds <- c("xmin" = -169,
 geo_extent <- raster::extent(x = coord_bounds)
 # For writing raster files to disk
 raster_format <- ".bil"
+# Names of the variables, to be used in filenames et al
+biovar_names <- paste0("bio", 1:19)
 # Whether or not to re-calculate averages for the 19 bioclim variables
-overwrite_averages <- FALSE
+overwrite_averages <- TRUE
+# Whether or not to remove monthly tmin, tmax, prec after annual bioclim 
+# variables have been calculated for that year
+remove_monthly <- TRUE
+# Whether or not to remove annual bioclim data after the average has been 
+# calculated for the time span of interest
+remove_annual <- FALSE
 
 # Check for data files for tmin, tmax, and prec; download from 
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
@@ -64,17 +70,29 @@ for (one_var in wc_vars) {
     # Extraction can take a minute
     final_year <- substr(x = time_per, start = 6, stop = 9)
     one_data_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, "_", 
-                            final_year, "-12.tif")
+                            final_year, "-11.tif")
     if (!file.exists(one_data_file)) {
       message(paste0("Extracting ", zip_file))
       unzip(zipfile = zip_file,
             exdir = "data/wc2-1/monthly")
+      # Some December 2018 files are named wrong ("2019" instead of "2018"), 
+      # fix this; only necessary for second archive (2010-2018)
+      if (final_year == 2018) {
+        dec_19_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, 
+                              "_2019-12.tif")
+        if (file.exists(dec_19_file)) {
+          dec_18_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, 
+                                "_2018-12.tif")
+          invisible(file.rename(from = dec_19_file,
+                                to = dec_18_file))
+        }
+      }
     }
   }
 }
 options(timeout = timeout_default) # Reset to default
 
-# Now have monthly data 2000-2019, one for each month / year for each of three 
+# Now have monthly data 2000-2018, one for each month / year for each of three 
 # variables
 
 # Need to create single RasterBrick/Stack for each of the three variables for 
@@ -89,7 +107,6 @@ month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1]
 # Do biovar calculation for each year; biovars_annual will hold values for a 
 # single year
 biovars_annual <- vector("list", length(year_span))
-biovar_names <- paste0("bio", 1:19)
 # year_span <- 2000:2001 # For testing only
 for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
@@ -143,6 +160,33 @@ for (year_i in 1:length(year_span)) {
     biovars_annual[[year_i]] <- raster::stack(x = biovar_filenames)
     # Blech
     names(biovars_annual[[year_i]]) <- biovar_names
+  }
+  # If necessary, remove monthly files used for biovar calculation
+  if (remove_monthly) {
+    # file_start <- paste0("data/wc2-1/monthly/wc2.1_2.5m_",
+    #                     wc_vars, "_",
+    #                     one_year, "-")
+    # monthly_files <- paste0(file_start,
+    #                         month_vec, ".tif")
+    # for (month_file in monthly_files) {
+    #   if (file.exists(month_file)) {
+    #     message(paste0("Would remove ", month_file))
+    #     invisible(file.remove(month_file))
+    #   }
+    # }
+    for (var_i in 1:length(wc_vars)) {
+      one_var <- wc_vars[var_i]
+      for (month_i in 1:length(month_vec)) {
+        one_month <- month_vec[month_i]
+        month_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_",
+                             one_var, "_",
+                             one_year, "-",
+                             one_month, ".tif")
+        if (file.exists(month_file)) {
+          invisible(file.remove(month_file))
+        }
+      }
+    }
   }
 }
 
@@ -205,3 +249,30 @@ for (biovar_name in biovar_names) {
     message("Averages already on disk for ", biovar_name)
   }
 }
+
+# Remove annual calculations as necessary
+if (remove_annual) {
+  for (one_biovar in biovar_names) {
+    for (one_year in year_span) {
+      annual_basename <- paste0("data/wc2-1/annual/biovars-",
+                                one_year, "-",
+                                one_biovar)
+      for (extension in c("bil", "hdr", "stx")) {
+        annual_filename <- paste0(annual_basename, ".", extension)
+        if (file.exists(annual_filename)) {
+          message(paste0("Would remove ", annual_filename))
+          # invisible(file.remove(annual_filename))
+        }
+      }
+    }
+  }
+}
+
+# QA, comparing averages for this time period to data available via 
+# raster::getData(). These are for a (potentially) different time period 
+# (1970-2000), but should still be useful to detect massive mistakes
+?raster::getData
+historic_biovars <- raster::getData(name = "worldclim",
+                                    var = "bio",
+                                    res = 2.5,
+                                    path = "data/wc2-1/historic")
