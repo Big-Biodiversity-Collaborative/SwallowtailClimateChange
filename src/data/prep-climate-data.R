@@ -16,9 +16,10 @@ library(dismo)
 # appropriately named scripts/terraclim_nonsense.R
 
 # TODO: Need to add check for existence of bioclim averages before extraction 
-# (monthly file check is fine, but these might be deleted, but not necessary)
-# TODO: Add some QA at the end, doing a rough comparison to the averages for 
-# the 1970-2000 time period. Numbers will be different, but not _too_ different
+# TODO: Probably need to figure out and set the CRS for these calculated 
+# bioclimate variables
+# TODO: Do we want temporary raster files to be saved as .bil (current) or 
+# .tif?
 
 # WorldClim variables
 wc_vars <- c("tmin", "tmax", "prec")
@@ -33,7 +34,8 @@ coord_bounds <- c("xmin" = -169,
                   "ymax" = 75)
 geo_extent <- raster::extent(x = coord_bounds)
 # For writing raster files to disk
-raster_format <- ".bil"
+temp_raster_format <- ".bil"
+final_raster_format <- ".tif"
 # Names of the variables, to be used in filenames et al
 biovar_names <- paste0("bio", 1:19)
 # Whether or not to re-calculate averages for the 19 bioclim variables
@@ -44,6 +46,8 @@ remove_monthly <- TRUE
 # Whether or not to remove annual bioclim data after the average has been 
 # calculated for the time span of interest
 remove_annual <- FALSE
+# Whether or not to remove the historic bioclim data after doing QA
+remove_historic <- TRUE
 
 # Check for data files for tmin, tmax, and prec; download from 
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
@@ -52,8 +56,7 @@ timeout_default <- getOption("timeout")
 options(timeout = 10 * 60) # Set to 15 minutes, files are large
 for (one_var in wc_vars) {
   for (time_per in time_periods) {
-    # Data files doesn't exist, so download
-    
+    # Download zip file if it doesn't exist
     zip_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, 
                        "_", time_per, ".zip")
     if (!file.exists(zip_file)) {
@@ -113,12 +116,11 @@ for (year_i in 1:length(year_span)) {
   # Check to see if biovars have yet been calculated for this year; if not, do 
   # calculations and store in stack (and save to file); if so, read in values 
   # as RasterStack 
-  # TODO: Want to save these as bil or grd or tif format?
-  biovar_filenames <- paste0("data/wc2-1/annual/biovars-", 
+  annual_filenames <- paste0("data/wc2-1/annual/biovars-", 
                              one_year, "-",
                              biovar_names, 
-                             raster_format)
-  if (any(!file.exists(biovar_filenames))) {
+                             temp_raster_format)
+  if (any(!file.exists(annual_filenames))) {
     # A list of three elements, one corresponding to each of the variables (tmin, 
     # tmax, and prec). Each element will be a RasterStack of the 12 monthly 
     # layers for that variable
@@ -150,14 +152,14 @@ for (year_i in 1:length(year_span)) {
       biovar_filename <- paste0("data/wc2-1/annual/biovars-", 
                                 one_year, "-",
                                 biovar_name, 
-                                raster_format)
+                                temp_raster_format)
       raster::writeRaster(x = biovars_annual[[year_i]][[biovar_name]],
                           filename = biovar_filename,
                           overwrite = TRUE)
     }
   } else { # biovars already calculated for this year, just read them in
     message(paste0("biovars already calculated for ", one_year, "; loading."))
-    biovars_annual[[year_i]] <- raster::stack(x = biovar_filenames)
+    biovars_annual[[year_i]] <- raster::stack(x = annual_filenames)
     # Blech
     names(biovars_annual[[year_i]]) <- biovar_names
   }
@@ -233,7 +235,7 @@ for (year_i in 1:length(year_span)) {
 for (biovar_name in biovar_names) {
   mean_filename <- paste0("data/wc2-1/", 
                           biovar_name, 
-                          raster_format)
+                          final_raster_format)
   if (!file.exists(mean_filename) | overwrite_averages) {
     message("Averaging ", biovar_name)
     # Pull corresponding RasterLayer out for this variable
@@ -271,8 +273,62 @@ if (remove_annual) {
 # QA, comparing averages for this time period to data available via 
 # raster::getData(). These are for a (potentially) different time period 
 # (1970-2000), but should still be useful to detect massive mistakes
-?raster::getData
 historic_biovars <- raster::getData(name = "worldclim",
                                     var = "bio",
                                     res = 2.5,
                                     path = "data/wc2-1/historic")
+# Crop to same extent as data we have
+historic_biovars <- raster::crop(x = historic_biovars,
+                                 y = geo_extent)
+# Load in those averages we calculated above
+biovar_filenames <- paste0("data/wc2-1/",
+                           biovar_names,
+                           final_raster_format)
+current_biovars <- raster::stack(x = biovar_filenames)
+
+# For these comparisons, because we used dismo::biovars, all temperature 
+# calculations are in degrees C, but the historic climate data is coming in 
+# at 10 x degrees C (plot the bio1 layer for each to see the scales are an 
+# order of magnitude different). To make meaningful deltas, multiply the 
+# temperature layers for historic biovars by 0.1 before calculating delta
+temp_biovars <- c("bio1", "bio2", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                  "bio9", "bio10", "bio11")
+# Create data frame to hold measures of variance
+biovar_qc <- data.frame(name = biovar_names,
+                        mean_delta = NA)
+# Do calculation for each layer, seems quicker this way
+delta_raster_list <- list()
+for (biovar_name in biovar_names) {
+  cat("Calcluating delta for ", biovar_name, "...\n", sep = "")
+  multfac <- 1
+  if (biovar_name %in% temp_biovars) {
+    multfac <- 0.1
+  }
+  delta <- current_biovars[[biovar_name]] - (multfac * historic_biovars[[biovar_name]])
+  names(delta) <- biovar_name
+  delta_raster_list[[biovar_name]] <- delta
+  mean_delta <- raster::cellStats(x = delta, stat = "mean")
+  biovar_qc$mean_delta[biovar_qc$name == biovar_name] <- mean_delta
+}
+
+# If we want to see where changes are happening, we can make a raster stack 
+# and plot individual layers
+# One a with "big" delta (bio4) just shows that it's driven by some Alaska and 
+# Great Lakes; precip of wettest quarter (bio16) delta driven by BC and 
+# Guatemala
+# delta_stack <- raster::stack(x = delta_raster_list)
+# plot(delta_stack[["bio4"]])
+# plot(delta_stack[["bio16"]])
+
+
+if (remove_historic) {
+  historic_basenames <- paste0("data/wc2-1/historic/wc2-5/bio",
+                               1:19)
+  historic_filenames <- c(paste0(historic_basenames, ".bil"),
+                          paste0(historic_basenames, ".hdr"))
+  for (historic_filename in historic_filenames) {
+    if (file.exists(historic_filename)) {
+      invisible(file.remove(historic_filename))
+    }
+  }
+}

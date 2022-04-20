@@ -26,6 +26,9 @@ linear model and "svm" for support vector machine.
 1. **src/data/download-data.R**: Download observational data from GBIF to the 
 data folder; note by default the data files that are downloaded by this script 
 are _not_ under version control.
+1. **src/data/prep-climate-data.R**: Download monthly climate data for time 
+span of interest (2000-2018) and calculate the average values for the 19 
+standard bioclimatic variables.
 1. **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, to 
 ensure observations fall within geographic area of interest, in this case, 
 North America
@@ -68,7 +71,8 @@ the change between current and forecast estimates
 
 + data
     + cmip5/2_5m: forecast climate data (not under version control)
-    + wc2-5: current climate data (not under version control)
+    + wc2-1: current climate data
+    + wc2-5: DEPRECATED current climate data (not under version control)
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
 (files with .log extension are not under version control)
