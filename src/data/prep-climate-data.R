@@ -15,11 +15,7 @@ library(dismo)
 # at https://github.com/keatonwilson/swallowtail_ms, especially the code in the 
 # appropriately named scripts/terraclim_nonsense.R
 
-# TODO: Need to add check for existence of bioclim averages before extraction 
-# TODO: Probably need to figure out and set the CRS for these calculated 
-# bioclimate variables
-# TODO: Do we want temporary raster files to be saved as .bil (current) or 
-# .tif?
+# TODO: Add check for existence of bioclim averages before extraction 
 
 # WorldClim variables
 wc_vars <- c("tmin", "tmax", "prec")
@@ -34,7 +30,7 @@ coord_bounds <- c("xmin" = -169,
                   "ymax" = 75)
 geo_extent <- raster::extent(x = coord_bounds)
 # For writing raster files to disk
-temp_raster_format <- ".bil"
+temp_raster_format <- ".tif"
 final_raster_format <- ".tif"
 # Names of the variables, to be used in filenames et al
 biovar_names <- paste0("bio", 1:19)
@@ -244,6 +240,7 @@ for (biovar_name in biovar_names) {
     biovar_stack <- raster::stack(biovar_rasters)
     # Calculate mean of all layers (each layer is a year in this case)
     biovar_mean <- raster::calc(x = biovar_stack, fun = mean, na.rm = TRUE)
+    terra::crs(biovar_mean) <- "EPSG:4326"
     raster::writeRaster(x = biovar_mean,
                         filename = mean_filename,
                         overwrite = TRUE)
@@ -259,7 +256,7 @@ if (remove_annual) {
       annual_basename <- paste0("data/wc2-1/annual/biovars-",
                                 one_year, "-",
                                 one_biovar)
-      for (extension in c("bil", "hdr", "stx")) {
+      for (extension in c("bil", "hdr", "stx", "tif")) {
         annual_filename <- paste0(annual_basename, ".", extension)
         if (file.exists(annual_filename)) {
           message(paste0("Would remove ", annual_filename))
@@ -310,6 +307,7 @@ for (biovar_name in biovar_names) {
   mean_delta <- raster::cellStats(x = delta, stat = "mean")
   biovar_qc$mean_delta[biovar_qc$name == biovar_name] <- mean_delta
 }
+# biovar_qc
 
 # If we want to see where changes are happening, we can make a raster stack 
 # and plot individual layers
