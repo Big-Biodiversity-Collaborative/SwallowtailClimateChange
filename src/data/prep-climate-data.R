@@ -1,10 +1,11 @@
-# Download and prepare bioclimatic variables for 2000-2019
+# Download and prepare bioclimatic variables for 2000-2018
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2022-04-15
 
-library(raster)
-library(dismo)
+require(sp)     # raster needs this
+require(raster) # you know, raster stuff
+require(dismo)  # calculating bioclimate variables
 
 # Calculates average values for the 19 bioclimatic variables for 2000-2018, 
 # based on monthly values for the 19 year span (yeah, two 19s, I'm sure this 
@@ -23,7 +24,7 @@ wc_vars <- c("tmin", "tmax", "prec")
 time_periods <- c("2000-2009", "2010-2018")
 # Used for annual biovariable calculations
 year_span <- 2000:2018
-# Rough extremes of Canada, Mexico, and USA
+# Rough bounding box for Canada + Mexico + USA
 coord_bounds <- c("xmin" = -169,
                   "xmax" = -48, 
                   "ymin" = 13,
@@ -49,7 +50,7 @@ remove_historic <- TRUE
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
 # extract zip files
 timeout_default <- getOption("timeout")
-options(timeout = 10 * 60) # Set to 15 minutes, files are large
+options(timeout = 15 * 60) # Set to 15 minutes, files are large
 for (one_var in wc_vars) {
   for (time_per in time_periods) {
     # Download zip file if it doesn't exist
@@ -106,7 +107,9 @@ month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1]
 # Do biovar calculation for each year; biovars_annual will hold values for a 
 # single year
 biovars_annual <- vector("list", length(year_span))
-# year_span <- 2000:2001 # For testing only
+# One could do this operation if the RAM on your machine is giant. Otherwise 
+# (i.e. on your computer, most likely), if you try to parallelize this step it 
+# will eat your computer.
 for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
   # Check to see if biovars have yet been calculated for this year; if not, do 
@@ -135,9 +138,8 @@ for (year_i in 1:length(year_span)) {
                                              y = geo_extent)
     }
     # Do biovar calculation for this year; can take several (> 10) minutes
-    # See note on parallelization below
     message(paste0(Sys.time(), " | Calculating biovars for ", one_year))
-    # Spits out a RasterBrick
+    # dismo::biovars spits out a RasterBrick
     biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
                                                tmin = raster_list[["tmin"]],
                                                tmax = raster_list[["tmax"]])
@@ -156,22 +158,11 @@ for (year_i in 1:length(year_span)) {
   } else { # biovars already calculated for this year, just read them in
     message(paste0("biovars already calculated for ", one_year, "; loading."))
     biovars_annual[[year_i]] <- raster::stack(x = annual_filenames)
-    # Blech
+    # Blech. Have to re-assign layer names.
     names(biovars_annual[[year_i]]) <- biovar_names
   }
   # If necessary, remove monthly files used for biovar calculation
   if (remove_monthly) {
-    # file_start <- paste0("data/wc2-1/monthly/wc2.1_2.5m_",
-    #                     wc_vars, "_",
-    #                     one_year, "-")
-    # monthly_files <- paste0(file_start,
-    #                         month_vec, ".tif")
-    # for (month_file in monthly_files) {
-    #   if (file.exists(month_file)) {
-    #     message(paste0("Would remove ", month_file))
-    #     invisible(file.remove(month_file))
-    #   }
-    # }
     for (var_i in 1:length(wc_vars)) {
       one_var <- wc_vars[var_i]
       for (month_i in 1:length(month_vec)) {
@@ -179,7 +170,8 @@ for (year_i in 1:length(year_span)) {
         month_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_",
                              one_var, "_",
                              one_year, "-",
-                             one_month, ".tif")
+                             one_month, 
+                             temp_raster_format)
         if (file.exists(month_file)) {
           invisible(file.remove(month_file))
         }
@@ -187,45 +179,6 @@ for (year_i in 1:length(year_span)) {
     }
   }
 }
-
-# Could do parallel if RAM is giant. Otherwise, will eat your computer.
-# calc_biovar_annual <- function(x, year_span, wc_vars, month_vec, geo_extent) {
-#   one_year <- year_span[x]
-#   raster_list <- vector("list", length(wc_vars))
-#   names(raster_list) <- wc_vars
-#   # Create a RasterStack for each of the variables for this year
-#   for (one_var in wc_vars) {
-#     var_files <- as.list(paste0("data/wc2-1/monthly/wc2.1_2.5m_",
-#                                 one_var, "_", 
-#                                 one_year, "-", 
-#                                 month_vec, ".tif")) 
-#     raster_list[[one_var]] <- raster::stack(x = var_files)
-#     # Restrict to geographical area of this study (CA, MX, US); cropping will 
-#     # take a few seconds
-#     raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
-#                                            y = geo_extent)
-#   }
-#   # Do biovar calculation for this year; can take several minutes
-#   # biovars_annual <- dismo::biovars(prec = raster_list[["prec"]],
-#   #                                       tmin = raster_list[["tmin"]],
-#   #                                       tmax = raster_list[["tmax"]])
-#   # return(biovars_annual)
-#   return(var_files)
-# }
-# ncores = parallel::detectCores() - 2
-# cl = parallel::makeCluster(ncores)
-# # Have to explicitly load libraries on each core; using assignment to keep 
-# # things quiet
-# a <- clusterEvalQ(cl, library(dismo))
-# biovars_annual <- parallel::parLapply(cl = cl,
-#                                       X = 1:length(year_span),
-#                                       fun = calc_biovar_annual,
-#                                       year_span = year_span,
-#                                       wc_vars = wc_vars,
-#                                       month_vec = month_vec,
-#                                       geo_extent = geo_extent)
-# 
-# parallel::stopCluster(cl = cl)
 
 # Now do calculation of means for each variable
 for (biovar_name in biovar_names) {
@@ -240,6 +193,7 @@ for (biovar_name in biovar_names) {
     biovar_stack <- raster::stack(biovar_rasters)
     # Calculate mean of all layers (each layer is a year in this case)
     biovar_mean <- raster::calc(x = biovar_stack, fun = mean, na.rm = TRUE)
+    # Set the CRS to WGS84
     terra::crs(biovar_mean) <- "EPSG:4326"
     raster::writeRaster(x = biovar_mean,
                         filename = mean_filename,
@@ -249,7 +203,7 @@ for (biovar_name in biovar_names) {
   }
 }
 
-# Remove annual calculations as necessary
+# Remove annual biovariable calculations as necessary
 if (remove_annual) {
   for (one_biovar in biovar_names) {
     for (one_year in year_span) {
@@ -259,8 +213,7 @@ if (remove_annual) {
       for (extension in c("bil", "hdr", "stx", "tif")) {
         annual_filename <- paste0(annual_basename, ".", extension)
         if (file.exists(annual_filename)) {
-          message(paste0("Would remove ", annual_filename))
-          # invisible(file.remove(annual_filename))
+          invisible(file.remove(annual_filename))
         }
       }
     }
@@ -283,7 +236,7 @@ biovar_filenames <- paste0("data/wc2-1/",
                            final_raster_format)
 current_biovars <- raster::stack(x = biovar_filenames)
 
-# For these comparisons, because we used dismo::biovars, all temperature 
+# For these comparisons, because we used dismo::biovars(), all temperature 
 # calculations are in degrees C, but the historic climate data is coming in 
 # at 10 x degrees C (plot the bio1 layer for each to see the scales are an 
 # order of magnitude different). To make meaningful deltas, multiply the 
