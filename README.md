@@ -6,7 +6,7 @@ distributions in relation to climate change
 
 ## General approach:
 
-Retrieve data from online sources (in this case, the Global Biodiversity 
+Retrieves data from online sources (in this case, the Global Biodiversity 
 Information Facility, [GBIF](https://gbif.org)) and perform quality control 
 processes to ensure observations are only from Canada, Mexico, and the United 
 States of America. The data are analyzed to create species distribution models 

@@ -8,12 +8,7 @@ require(dplyr)  # load *after* raster for easier use of select
 require(dismo)  # background point sampling
 
 # Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  source(file = fun_file)
-}
+source(file = "load_functions.R")
 
 genus <- "GENUS"
 species <- "SPECIES"
@@ -29,6 +24,9 @@ nice_name <- tolower(paste0(genus, "_", species))
 obs_file <- paste0("data/gbif/",
                    nice_name,
                    "-gbif.csv")
+if (!file.exists(obs_file)) {
+  unzip(zipfile = "data/gbif.zip")
+}
 obs <- read.csv(file = obs_file)
 
 # A note to let folks know you are alive

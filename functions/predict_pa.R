@@ -30,6 +30,9 @@ predict_pa <- function(nice_name, predictors, model = c("glm", "svm"),
                      nice_name,
                      "-gbif.csv")
   if (!file.exists(obs_file)) {
+    unzip(zipfile = "data/gbif.zip")
+  }
+  if (!file.exists(obs_file)) {
     warning(paste0("Could not find observations for ", nice_name, 
                    " predictions not geographically restricted"))
   } else {

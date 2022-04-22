@@ -13,7 +13,7 @@ require(dplyr)
 # longitude and latitude)
 remove_oob <- TRUE
 
-gbif_files <- list.files(path = "./data/gbif",
+gbif_files <- list.files(path = "data/gbif",
                          pattern = "*-gbif.csv",
                          full.names = TRUE)
 lat_lim <- c(14, 80)
@@ -45,3 +45,7 @@ for (one_file in gbif_files) {
     }
   }
 }
+
+# Create a zip file of all the gbif flies
+zip(zipfile = "data/gbif.zip",
+    files = gbif_files)

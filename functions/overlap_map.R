@@ -22,12 +22,7 @@ overlap_map <- function(species_name,
     stop("overlap_map requires ggplot2 package, but it could not be loaded")
   }
   # Load up the functions from the functions folder
-  function_files <- list.files(path = "./functions", 
-                               pattern = ".R$", 
-                               full.names = TRUE)
-  for(fun_file in function_files) {
-    source(file = fun_file)
-  }
+  source(file = "load_functions.R")
   
   predictor <- match.arg(predictor)
   model <- match.arg(model)

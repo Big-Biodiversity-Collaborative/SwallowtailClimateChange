@@ -39,6 +39,9 @@ for (i in 1:nrow(obs_data)) {
   obs_file <- paste0("data/gbif/",
                      nice_name,
                      ".csv")
+  if (!file.exists(obs_file)) {
+    unzip(zipfile = "data/gbif.zip")
+  }
   obs_list[[i]] <- list(type = obs_data$type[i],
                         name = obs_data$name[i],
                         nice_name = nice_name,
