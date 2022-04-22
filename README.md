@@ -51,7 +51,7 @@ climate conditions
 1. **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
 predicted presence / absence rasters for each insect and associated host plants 
 into a single raster per insect species
-1. **src/summary/create-distribution-maps-\<model\>.R**: Use predicted overlap 
+1. **src/summary/create-overlap-maps-\<model\>.R**: Use predicted overlap 
 rasters to generate maps (image files), one for each species of insect in 
 data/insect-host.csv
 1. **src/summary/calculate-range-sizes.R**: Calculate range sizes (in square 

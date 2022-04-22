@@ -41,20 +41,20 @@ obs_extent <- get_extent(data = obs)
 
 # Will use bioclim data files to create masks for sampling resolution of 
 # background points. Check for bioclim data and download if it isn't there
-if (!file.exists("data/wc2-5/bio1.bil")) {
-  bioclim_data <- raster::getData(name = "worldclim",
-                                  var = "bio",
-                                  res = 2.5,
-                                  path = "data/")
-  # Will load in the predictor variables as a RasterStack later, so removing 
-  # to free up memory
-  rm(bioclim_data)
-}
+# if (!file.exists("data/wc2-5/bio1.bil")) {
+#   bioclim_data <- raster::getData(name = "worldclim",
+#                                   var = "bio",
+#                                   res = 2.5,
+#                                   path = "data/")
+#   # Will load in the predictor variables as a RasterStack later, so removing 
+#   # to free up memory
+#   rm(bioclim_data)
+# }
 
 # Using the first bil file to create a raster to use as mask for sampling 
 # background points
-bil_file <- list.files(path = "data/wc2-5", 
-                       pattern = ".bil$", 
+bil_file <- list.files(path = "data/wc2-1", 
+                       pattern = ".tif$", 
                        full.names = TRUE)[1]
 mask <- raster(bil_file)
 # Do not need this anymore
@@ -79,8 +79,8 @@ background_points <- background_points %>%
                 latitude = y)
 
 # Grab worldclim data to use as predictors
-predictors <- raster::stack(list.files(path = "data/wc2-5",
-                                       pattern = ".bil$",
+predictors <- raster::stack(list.files(path = "data/wc2-1",
+                                       pattern = ".tif$",
                                        full.names = TRUE))
 
 # Run generalized linear model

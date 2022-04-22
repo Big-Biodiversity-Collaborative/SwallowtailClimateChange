@@ -30,8 +30,8 @@ success <- TRUE
 
 ################################################################################
 # Start by doing prediction for current conditions (worldclim data)
-current_predictors <- raster::stack(list.files(path = "data/wc2-5",
-                                               pattern = ".bil$",
+current_predictors <- raster::stack(list.files(path = "data/wc2-1",
+                                               pattern = ".tif$",
                                                full.names = TRUE))
 
 # Estimate presence / absence
@@ -68,6 +68,14 @@ suppressWarnings({
 # (these are the same names as the bioclim data, used for the creation of our
 # species distribution model)
 names(gfdl_data) <- paste0("bio", 1:19)
+
+# Need to transform temperature variables, which come in from CMIP5 as degrees
+# C x 10.
+temp_biovars <- c("bio1", "bio2", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                  "bio9", "bio10", "bio11")
+for (temp_biovar in temp_biovars) {
+  gfdl_data[[temp_biovar]] <- 0.1 * gfdl_data[[temp_biovar]]
+}
 
 # Estimate presence / absence
 forecast_pa <- predict_pa(nice_name = nice_name,

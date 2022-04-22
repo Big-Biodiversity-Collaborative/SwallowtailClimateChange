@@ -26,7 +26,7 @@ predict_pa <- function(nice_name, predictors, model = c("glm", "svm"),
 
   # Get the current observations, to dictate the geographic extent of the 
   # predicted presence / absence
-  obs_file <- paste0("data/",
+  obs_file <- paste0("data/gbif/",
                      nice_name,
                      "-gbif.csv")
   if (!file.exists(obs_file)) {

@@ -21,7 +21,8 @@ for(fun_file in function_files) {
 overlap_maps_glm <- function(species_name, 
                              model,
                              logfile,
-                             predictors = c("current", "GFDL-ESM4_RCP45")) {
+                             predictors = c("current", "GFDL-ESM4_RCP45"),
+                             file_ext) {
   # Have species name
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
@@ -71,7 +72,6 @@ overlap_maps_glm <- function(species_name,
 
 # Data for identifying insect species
 insects_hosts <- read.csv(file = "data/insect-host.csv")
-output_file <- paste0("output/overlaps/", model, "-overlaps.csv")
 
 # identify unique species of insects
 insect_species <- unique(insects_hosts$insect)
@@ -90,4 +90,5 @@ r <- parallel::mclapply(X = insect_species_list,
                         FUN = overlap_maps_glm,
                         mc.cores = num_cores,
                         model = model,
-                        logfile = logfile)
+                        logfile = logfile,
+                        file_ext = file_ext)

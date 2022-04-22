@@ -9,13 +9,14 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
-insect_species <- c("Papilio rutulus", "Papilio glaucus",
-                    "Papilio polyxenes", "Papilio zelicaon",
-                    "Papilio rumiko", "Papilio cresphontes",
-                    "Papilio indra", "Papilio canadensis",
-                    "Papilio eurymedon", "Papilio multicaudata",
-                    "Papilio troilus", "Papilio machaon",
-                    "Papilio palamedes")
+insect_species <- c("Papilio rumiko")
+# insect_species <- c("Papilio rutulus", "Papilio glaucus",
+#                     "Papilio polyxenes", "Papilio zelicaon",
+#                     "Papilio rumiko", "Papilio cresphontes",
+#                     "Papilio indra", "Papilio canadensis",
+#                     "Papilio eurymedon", "Papilio multicaudata",
+#                     "Papilio troilus", "Papilio machaon",
+#                     "Papilio palamedes")
 model_names <- c("svm", "glm")
 
 ########################################
@@ -53,7 +54,7 @@ message(paste0("Checking data files for ", nrow(all_species), " species."))
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
-  data_filename <- paste0("data/", nice_name, "-gbif.csv")
+  data_filename <- paste0("data/gbif/", nice_name, "-gbif.csv")
   if (!file.exists(data_filename)) {
     # If this is a host species, remove it from the list of hosts to include 
     # in subsequent steps
@@ -77,7 +78,6 @@ if (length(rows_to_exclude) > 0) {
 
 ########################################
 # do any data qa/qc
-#     consider restricting bug and plant data temporally...
 # Data download restricts observations to those in Canada, Mexico, and the 
 # United States. It further discards any observations outside a rough rectangle 
 # of North America (latitude: 14-80, longitude: -170, -52). See 
@@ -95,14 +95,14 @@ for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
   for (model_name in model_names) {
-    model_filename <- paste0("scripts/", nice_name, "-model-", model_name, ".R")
+    model_filename <- paste0("src/indiv/", nice_name, "-model-", model_name, ".R")
     if (!file.exists(model_filename)) {
       warning(paste0("Model file ", model_filename,
                      " is missing. Has build-scripts-model-", model_name, 
                      ".sh been run locally?"))
     } else {
       message(paste0("Running model script ", model_filename))
-      # source(file = model_filename)
+      source(file = model_filename)
     }
   }
 }
@@ -129,7 +129,7 @@ for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
   for (model_name in model_names) {
-    prediction_filename <- paste0("scripts/", nice_name, "-prediction-",
+    prediction_filename <- paste0("src/indiv/", nice_name, "-prediction-",
                                   model_name, ".R")
     if (!file.exists(prediction_filename)) {
       warning(paste0("Prediction file ", prediction_filename,
@@ -138,7 +138,7 @@ for (i in 1:nrow(all_species)) {
       missing_predictions <- c(missing_predictions, i)
     } else {
       message(paste0("Running prediction script ", prediction_filename))
-      # source(file = prediction_filename)
+      source(file = prediction_filename)
     }
   }
 }
@@ -170,7 +170,7 @@ for (i in 1:nrow(insect_species)) {
   species_name <- insect_species$species_name[i]
   nice_name <- insect_species$nice_name[i]
   for (model_name in model_names) {
-    overlap_filename <- paste0("scripts/", nice_name, "-overlap-raster-",
+    overlap_filename <- paste0("src/indiv/", nice_name, "-overlap-raster-",
                                model_name, ".R")
     if (!file.exists(overlap_filename)) {
       warning(paste0("Overlap raster file ", overlap_filename,
@@ -179,7 +179,7 @@ for (i in 1:nrow(insect_species)) {
       missing_overlaps <- c(missing_overlaps, i)
     } else {
       message(paste0("Running overlap raster script ", overlap_filename))
-      # source(file = overlap_filename)
+      source(file = overlap_filename)
     }
   }
 }
@@ -204,7 +204,7 @@ if (length(missing_overlaps > 0)) {
 # As it is written, it does this for *all* insect species, not just the ones 
 # that are the focus of this script.
 for (model_name in model_names) {
-  area_script <- paste0("calcuate-range-sizes-", model_name, ".R")
+  area_script <- paste0("summary/calcuate-range-sizes-", model_name, ".R")
   message(paste0("Running area calculation script ", area_script))
   # source(file = area_script)
 }
@@ -274,7 +274,7 @@ for (i in 1:nrow(insect_species)) {
   nice_name <- insect_species$nice_name[i]
   
   # Need observation data for this species, so load that
-  obs_file <- paste0("data/",
+  obs_file <- paste0("data/gbif/",
                      nice_name,
                      "-gbif.csv")
   if (!file.exists(obs_file)) {
