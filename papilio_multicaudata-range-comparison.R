@@ -7,13 +7,7 @@ require(raster)
 require(dplyr)
 
 # Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  message(paste0("Loading function from ", fun_file))
-  source(file = fun_file)
-}
+source(file = "load_functions.R")
 
 # Eventually be replaced...somehow...
 obs_data <- data.frame(type = c("insect", rep(x = "host", times = 3)),

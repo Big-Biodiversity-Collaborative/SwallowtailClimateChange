@@ -11,28 +11,14 @@ require(dismo)    # requires sp, too
 require(maptools) # for some QA plotting
 
 # Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  message(paste0("Loading function from ", fun_file))
-  source(file = fun_file)
-}
+source(file = "load_functions.R")
 
 # Will use bioclim data files to create masks for sampling resolution of 
 # background points
-# Check for bioclim data and download if it isn't there
-if (!file.exists("data/wc2-5/bio1.bil")) {
-  bioclim_data <- raster::getData(name = "worldclim",
-                                  var = "bio",
-                                  res = 2.5,
-                                  path = "data/")
-}
-
 # Using the first bil file to create a raster to use as mask for sampling 
 # background points
-bil_file <- list.files(path = "data/wc2-5", 
-                       pattern = ".bil$", 
+bil_file <- list.files(path = "data/wc2-1", 
+                       pattern = ".tif$", 
                        full.names = TRUE)[1]
 mask <- raster(bil_file)
 
@@ -50,7 +36,7 @@ for (i in 1:nrow(obs_data)) {
   nice_name <- tolower(gsub(pattern = " ", 
                             replacement = "_",
                             x = obs_data$name[i]))
-  obs_file <- paste0("data/",
+  obs_file <- paste0("data/gbif/",
                      nice_name,
                      ".csv")
   obs_list[[i]] <- list(type = obs_data$type[i],
@@ -87,8 +73,8 @@ all_backgrounds <- lapply(obs_list, "[[", "background") %>%
 all_extent <- get_extent(data = all_backgrounds)
 
 # Grab worldclim data to use as predictors
-predictors <- raster::stack(list.files(path = "data/wc2-5",
-                                       pattern = ".bil$",
+predictors <- raster::stack(list.files(path = "data/wc2-1",
+                                       pattern = ".tif$",
                                        full.names = TRUE))
 
 # Crop the predictors for faster subsequent processing
@@ -197,6 +183,14 @@ gfdl_data <- raster::getData(name = "CMIP5",
 # (these are the same names as the bioclim data, used for the creation of our 
 # species distribution model)
 names(gfdl_data) <- paste0("bio", 1:19)
+
+# Need to transform temperature variables, which come in from CMIP5 as degrees
+# C x 10.
+temp_biovars <- c("bio1", "bio2", "bio4", "bio5", "bio6", "bio7", "bio8", 
+                  "bio9", "bio10", "bio11")
+for (temp_biovar in temp_biovars) {
+  gfdl_data[[temp_biovar]] <- 0.1 * gfdl_data[[temp_biovar]]
+}
 
 # For each species, use the SVM model to predict probabilities then use the 
 # previously identified threshold to calculate a presence / absence raster
