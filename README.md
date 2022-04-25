@@ -33,50 +33,50 @@ model used for species distribution modeling, e.g. "glm" for generalized
 linear model and "svm" for support vector machine.
 
 1. Data retrieval and cleaning (in src/data)
-   a. **src/data/download-data.R**: Download observational data from GBIF to 
+   + **src/data/download-data.R**: Download observational data from GBIF to 
    the data folder; note by default the data files that are downloaded by this 
    script are _not_ under version control
-   b. **src/data/prep-climate-data.R**: Download monthly climate data for time 
+   + **src/data/prep-climate-data.R**: Download monthly climate data for time 
    span of interest (2000-2018) and calculate the average values for the 19 
    standard bioclimatic variables
-   c. **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, 
+   + **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, 
    to ensure observations fall within geographic area of interest, in this 
    case, North America
 2. Preparing R scripts for analyses of individual species
-   a. **src/bash/build-scripts-model.sh**: bash shell scripts to build species 
+   + **src/bash/build-scripts-model.sh**: bash shell scripts to build species 
    distribution models for individual species; one script is built for each 
    row (species) in data/gbif-reconcile.csv
-   b. **src/bash/build-scripts-prediction.sh**: bash shell scripts to build R 
+   + **src/bash/build-scripts-prediction.sh**: bash shell scripts to build R 
    scripts that predict presence / absence of species based on species 
    distribution models and predictor data (e.g. current bioclimatic data and
    forecast data)
-   c. **src/bash/build-scripts-overlap-raster.sh**: bash shell scripts to 
+   + **src/bash/build-scripts-overlap-raster.sh**: bash shell scripts to 
    build R scripts that create overlap rasters for each species of insect with 
    its respective host plant(s)
 3. Bulk processing of single-species analyses
-   a. **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each script 
+   + **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each script 
    that was generated in previous step (operates in parallel using 
    `parallel::mclapply`)
-   b. **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Use species 
+   + **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Use species 
    distribution model to predict presence / absence for current and forecast 
    climate conditions
-   c. **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
+   + **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
    predicted presence / absence rasters for each insect and associated host 
    plants into a single raster per insect species
 4. Synthesizing results of single-species analyses
-   a. **src/summary/create-overlap-maps-\<model\>.R**: Use predicted overlap 
+   + **src/summary/create-overlap-maps-\<model\>.R**: Use predicted overlap 
    rasters to generate maps (image files), one for each species of insect in 
    data/insect-host.csv
-   b. **src/summary/calculate-range-sizes.R**: Calculate range sizes (in 
+   + **src/summary/calculate-range-sizes.R**: Calculate range sizes (in 
    square kilometers) for each insect species, as well as area 
    (km<sup>2</sup>) of the insect's range that overlaps with at least one host 
    plant species' range and the area of the insect's range that overlaps with 
    zero host plant species' ranges
-   c. **src/summary/compare-range-sizes.R**: Compare the range sizes of 
+   + **src/summary/compare-range-sizes.R**: Compare the range sizes of 
    current and forecast distributions, both considering insect ranges alone, 
    and considering only the areas where insects are predicted to overlap with 
    one or more host plant species
-   d. **src/summary/draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ 
+   + **src/summary/draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ 
    species richness for current and forecast climate conditions and a map 
    showing the change between current and forecast estimates
 
