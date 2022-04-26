@@ -41,7 +41,8 @@ for (one_file in gbif_files) {
       data <- data %>%
         filter(!(gbifID %in% any_oob$gbifID))
       write.csv(x = data,
-                file = one_file)
+                file = one_file,
+                row.names = FALSE)
     }
   }
 }
