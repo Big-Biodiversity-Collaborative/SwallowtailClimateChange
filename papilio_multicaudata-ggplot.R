@@ -3,10 +3,10 @@
 # jcoliver@arizona.edu
 # 2021-06-05
 
-library(raster)
-library(dplyr)   # some data wrangling
-library(ggplot2)
-library(RColorBrewer)
+require(raster)
+require(dplyr)   # some data wrangling
+require(ggplot2)
+require(RColorBrewer)
 
 distribution <- readRDS(file = "output/distributions/papilio_multicaudata-distribution-svm-current.rds")
 

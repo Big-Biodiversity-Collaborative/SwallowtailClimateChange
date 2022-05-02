@@ -5,9 +5,9 @@
 
 # This script should do little else than call *other* scripts to accomplish 
 # each step
-library(dplyr)
-library(ggplot2)
-library(tidyr)
+require(dplyr)
+require(ggplot2)
+require(tidyr)
 
 insect_species <- c("Papilio rumiko")
 # insect_species <- c("Papilio rutulus", "Papilio glaucus",

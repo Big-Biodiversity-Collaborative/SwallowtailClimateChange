@@ -17,6 +17,22 @@ climate and forecast climate models. These predictions are used to estimate
 change in the range sizes of individual butterfly species and the relative size 
 of range overlap of their known host plant species.
 
+## Dependencies
+
+The project uses the following additional R packages:
+
++ dismo
++ dplyr
++ ggplot2
++ maptools
++ parallel (usually part of R distribution, but needs explicit loading)
++ raster
++ RColorBrewer
++ sp
++ spocc
++ stringr
++ tidyr
+
 ## Workflow
 
 The workflow has the general structure of:
