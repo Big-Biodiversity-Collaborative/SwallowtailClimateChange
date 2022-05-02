@@ -1,4 +1,4 @@
-# Estimate data reduction when restricting GBIF data to 2000-2018
+# Estimate data reduction when restricting GBIF data to recent years
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-04-30
@@ -11,7 +11,7 @@ unzip(zipfile = "data/gbif.zip")
 gbif_files <- list.files(path = "data/gbif",
                          pattern = "*-gbif.csv",
                          full.names=TRUE)
-year_list <- 2000:2018 
+year_list <- 2000:2022 
 
 for(one_file in gbif_files){
   dat <- read.csv(file = one_file)
@@ -19,9 +19,10 @@ for(one_file in gbif_files){
   # Count the total number of occurrence records (note that this includes records where year = NA)
   total <- nrow(dat)
   
-  # Count the number of occurrences in 2000-2018
+  # Count the number of occurrences in year_list
   recent <- sum(dat$year %in% year_list)
-  
+
+  # If this is the first record, we need to create the dataframe  
   if (one_file == gbif_files[1]) {
     spp_nocc <- data.frame(species=dat$species[1],total_occ=total,recent_occ=recent)
   } else {
@@ -33,4 +34,3 @@ write.csv(spp_nocc,
           file = "data/gbif_noccurrences.csv",
           row.names = FALSE)
 
-# Need to remove data/gbif folder?
