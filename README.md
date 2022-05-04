@@ -24,10 +24,12 @@ The project uses the following additional R packages:
 + dismo
 + dplyr
 + ggplot2
++ kernlab
 + maptools
 + parallel (usually part of R distribution, but needs explicit loading)
 + raster
 + RColorBrewer
++ rgdal
 + sp
 + spocc
 + stringr

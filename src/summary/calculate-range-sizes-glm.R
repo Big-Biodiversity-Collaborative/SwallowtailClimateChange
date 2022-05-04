@@ -12,12 +12,7 @@ output_file <- paste0("output/ranges/range-areas-", model, ".csv")
 predictors <- c("current", "GFDL-ESM4_RCP45")
 
 # Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  source(file = fun_file)
-}
+source(file = "load_functions.R")
 
 # Function to perform calculations for each species of insect; allows 
 # vectorization and list output that we'll turn into a data frame later

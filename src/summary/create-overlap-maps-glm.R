@@ -10,12 +10,7 @@ logfile <- "logs/maps-glm-out.log"
 file_ext <- "png" # "pdf"
 
 # Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  source(file = fun_file)
-}
+source(file = "load_functions.R")
 
 # Function we use with mclapply to build overlap rasters in parallel
 overlap_maps_glm <- function(species_name, 
