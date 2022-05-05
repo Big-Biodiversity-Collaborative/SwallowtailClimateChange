@@ -14,6 +14,7 @@
 require(dplyr)
 require(ggplot2)
 require(tidyr)
+require(parallel)
 source(file = "load_functions.R")
 
 insect_names <- c("Papilio rumiko")
@@ -94,22 +95,37 @@ if (length(rows_to_exclude) > 0) {
 message(paste0("\n*** Estimating SDMs for ", nrow(all_species), " species and ",
                length(model_names), " models."))
 
-# TODO: At least some of this should be parallelized. Over species, probably
-for (i in 1:nrow(all_species)) {
-  species_name <- all_species$species_name[i]
-  nice_name <- all_species$nice_name[i]
+# Set up cluster for parallel processing of SDMs
+n <- parallel::detectCores() - 2
+clust <- parallel::makeCluster(n)
+# Write a short function to use for running individual species scripts
+run_sdms <- function(x, model_names) {
+  nice_name <- x
+  message_out <- ""
   for (model_name in model_names) {
     model_filename <- paste0("src/indiv/", nice_name, "-model-", model_name, ".R")
     if (!file.exists(model_filename)) {
-      warning(paste0("Model file ", model_filename,
-                     " is missing. Has build-scripts-model-", model_name, 
-                     ".sh been run locally?"))
+      message_out <- paste0("Model file ", model_filename,
+                            " is missing. Has build-scripts-model-", model_name, 
+                            ".sh been run locally?")
+      warning(message_out)
     } else {
       # message(paste0("Running model script ", model_filename))
       source(file = model_filename)
+      message_out <- paste0("Model script ", model_filename, " run.")
     }
   }
+  return(message_out)
 }
+s <- parallel::parLapply(cl = clust,
+                         X = all_species$nice_name,
+                         fun = run_sdms,
+                         model_names = model_names)
+# TODO: Could do a better job of reporting problems than just requiring folks 
+# to read every element in resultant list...
+# unlist(s)
+stopCluster(cl = clust)
+
 message(paste0("Fininshed estimating SDMs for ", nrow(all_species), 
                " species and ", length(model_names), " models."))
 
@@ -120,14 +136,17 @@ message(paste0("Fininshed estimating SDMs for ", nrow(all_species),
 # do forecast distributions for plants (all plants)
 
 # At this point we have vectors for insects and plants; as the distributions
-# for each are independent (at least from a programming point of view), we can 
-# run them all in parallel.
+# for each are independent (at least from a programming point of view), we 
+# could run them all in parallel. However, keeping the iterative, serial 
+# approach because each is pretty RAM-intensive and could bring processes to a 
+# crawl.
 # As currently written, contemporary distributions are created in the *same* 
 # script as forecast distributions ([nice_name]-prediction-[model].R). Those 
 # scripts run *all* the forecast climate models
 
 message(paste0("\n*** Predicting distributions for ", nrow(all_species), 
                " species and ", length(model_names), " models."))
+
 missing_predictions <- integer(0)
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
