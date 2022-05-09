@@ -6,6 +6,8 @@
 require(sp)     # raster needs this
 require(raster) # you know, raster stuff
 require(dismo)  # calculating bioclimate variables
+require(dplyr)  # QA/QC
+require(ggplot2)# QA/QC
 
 # Calculates average values for the 19 bioclimatic variables for two time 
 # spans, 2041-2070 and 2071-2100, based on monthly values for the 30 year span. 
@@ -142,68 +144,73 @@ for (ssp in ssps) {
   }
 }
 
+# Do some QA/QC for each of the forecast data sets
 
+# Probably should pick one or two of the forecast GCMs available from worldclim
+# and do those comparisons.
 
-# QA, comparing averages for this time period to data available via 
-# raster::getData(). These are for a (potentially) different time period 
-# (1970-2000), but should still be useful to detect massive mistakes
-historic_biovars <- raster::getData(name = "worldclim",
-                                    var = "bio",
-                                    res = 2.5,
-                                    path = "data/wc2-1/historic")
-# Crop to same extent as data we have
-historic_biovars <- raster::crop(x = historic_biovars,
-                                 y = geo_extent)
-# Load in those averages we calculated above
-biovar_filenames <- paste0("data/wc2-1/",
-                           biovar_names,
-                           final_raster_format)
-current_biovars <- raster::stack(x = biovar_filenames)
+# Get contemporary estimates, for a rough comparison
+current_biovars <- raster::stack(x = paste0("data/wc2-1/",
+                                            biovar_names, 
+                                            final_raster_format))
 
-# For these comparisons, because we used dismo::biovars(), all temperature 
-# calculations are in degrees C, but the historic climate data is coming in 
-# at 10 x degrees C (plot the bio1 layer for each to see the scales are an 
-# order of magnitude different). To make meaningful deltas, multiply the 
-# temperature layers for historic biovars by 0.1 before calculating delta
-temp_biovars <- c("bio1", "bio2", "bio4", "bio5", "bio6", "bio7", "bio8", 
-                  "bio9", "bio10", "bio11")
-# Create data frame to hold measures of variance
-biovar_qc <- data.frame(name = biovar_names,
-                        mean_delta = NA)
-# Do calculation for each layer, seems quicker this way
-delta_raster_list <- list()
-for (biovar_name in biovar_names) {
-  cat("Calcluating delta for ", biovar_name, "...\n", sep = "")
-  multfac <- 1
-  if (biovar_name %in% temp_biovars) {
-    multfac <- 0.1
-  }
-  delta <- current_biovars[[biovar_name]] - (multfac * historic_biovars[[biovar_name]])
-  names(delta) <- biovar_name
-  delta_raster_list[[biovar_name]] <- delta
-  mean_delta <- raster::cellStats(x = delta, stat = "mean")
-  biovar_qc$mean_delta[biovar_qc$name == biovar_name] <- mean_delta
-}
-# biovar_qc
+# Each element should be a list with two objects:
+#  + delta_raster_list : rasters of delta values
+#  + biovar_qc         : data frame of mean deltas for each biovar
+qa_result_list <- list()
 
-# If we want to see where changes are happening, we can make a raster stack 
-# and plot individual layers
-# One a with "big" delta (bio4) just shows that it's driven by some Alaska and 
-# Great Lakes; precip of wettest quarter (bio16) delta driven by BC and 
-# Guatemala
-# delta_stack <- raster::stack(x = delta_raster_list)
-# plot(delta_stack[["bio4"]])
-# plot(delta_stack[["bio16"]])
+# Iterate over all SSP and time period combinations
+for (ssp in ssps) {
+  for (time_per in per_start) {
+    gcm_name <- paste0(ssp, "_", time_per)
+    message(paste0("Delta calculations ", ssp, ", ", time_per))
+    # Load in those averages we calculated above
+    biovar_filenames <- paste0("data/ensemble/",
+                               ssp, "/",
+                               time_per, "/",
+                               biovar_names,
+                               final_raster_format)
+    forecast_biovars <- raster::stack(x = biovar_filenames)
 
-
-if (remove_historic) {
-  historic_basenames <- paste0("data/wc2-1/historic/wc2-5/bio",
-                               1:19)
-  historic_filenames <- c(paste0(historic_basenames, ".bil"),
-                          paste0(historic_basenames, ".hdr"))
-  for (historic_filename in historic_filenames) {
-    if (file.exists(historic_filename)) {
-      invisible(file.remove(historic_filename))
+    biovar_qc <- data.frame(name = biovar_names,
+                            mean_delta = NA)
+    # A list to hold delta rasters, that is one raster for each of the biovars,
+    # that has, as raster values, the difference of the current - forecast 
+    # values for that biovar.
+    delta_raster_list <- list()
+    # Do calculation for each layer, seems quicker this way
+    for (biovar_name in biovar_names) {
+      cat("Calcluating delta for ", biovar_name, "...\n", sep = "")
+      delta <- forecast_biovars[[biovar_name]] - current_biovars[[biovar_name]]
+      names(delta) <- biovar_name
+      delta_raster_list[[biovar_name]] <- delta
+      mean_delta <- raster::cellStats(x = delta, stat = "mean", na.rm = TRUE)
+      biovar_qc$mean_delta[biovar_qc$name == biovar_name] <- mean_delta
     }
+    # Add the results to the large QA/QC list
+    qa_result_list[[gcm_name]] <- list(delta_raster_list = delta_raster_list,
+                                       biovar_qc = biovar_qc)
   }
 }
+
+# For some quick, eyeball check, will plot the mean deltas for all four 
+# forecast scenarios 
+deltas_df <- dplyr::bind_rows(lapply(X = qa_result_list,
+                                     FUN = "[[",
+                                     "biovar_qc"),
+                              .id = "GCM")
+deltas_plot <- ggplot(data = deltas_df, 
+                      mapping = aes(x = GCM, 
+                                    y = mean_delta,
+                                    color = GCM)) +
+  geom_point() +
+  facet_wrap(~ name, scales = "free_y") +
+  theme_bw() +
+  theme(axis.text.x = element_blank())
+print(deltas_plot)
+
+# Really big deltas in bio12? Precipitation measured in mm, so not so big...
+plot(qa_result_list[["ssp370_2071"]][["delta_raster_list"]][["bio12"]])
+bio12_forecast <- raster(x = paste0("data/ensemble/ssp370/2071/bio12.tif"))
+plot(current_biovars[["bio12"]])
+plot(bio12_forecast)
