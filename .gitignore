@@ -17,6 +17,9 @@ data/wc2-1/historic/*
 # Forecast climate data
 data/ensemble/monthly/*
 !data/ensemble/monthly/.gitkeep
+# Forecast data for QA/QC
+data/ensemble/*.zip
+data/ensemble/bioclim/*
 
 # Data downloaded from GBIF via download_gbif
 data/gbif/*-gbif.csv
