@@ -63,9 +63,8 @@ Haplophyllum,balcanicum,Haplophyllum balcanicum,Eurasian species,0,2021-06-04,FA
 Haplophyllum,linifolium,Haplophyllum linifolium,European species,0,2021-06-04,FALSE
 Haplophyllum,tuberculatum,Haplophyllum tuberculatum,Eurasian species,0,2021-06-04,FALSE
 Harbouria,trachypleura,Harbouria trachypleura,,232,2021-06-04,TRUE
-Heracleum,lanatum,Heracleum lanatum,,805,2021-06-04,TRUE
-Heracleum,maximum,Heracleum maximum,,7410,2021-06-04,TRUE
-Heracleum,sphondylium,Heracleum sphondylium,,8507,2021-06-04,TRUE
+Heracleum,maximum,Heracleum sphondylium subsp. montanum,Includes H. lanatum and H. maximum,7410,2021-06-04,TRUE
+Heracleum,sphondylium,Heracleum sphondylium subsp. sibiricum,European species,8507,2021-06-04,FALSE
 Holodiscus,discolor,Holodiscus discolor,,7660,2021-06-04,TRUE
 Laserpitium,halleri,Laserpitium halleri,Mediterranean species,0,2021-06-04,FALSE
 Laserpitium,latifolium,Laserpitium latifolium,European species,0,2021-06-04,FALSE
@@ -166,7 +165,7 @@ Seseli,libanotis,Seseli libanotis,Eurasian species,3,2021-06-04,FALSE
 Seseli,varium,Seseli varium,Mediterranean species,0,2021-06-04,FALSE
 Silaum,silaus,Silaum silaus,European species,2,2021-06-04,FALSE
 Sium,suave,Sium suave,,2495,2021-06-04,TRUE
-Sleinum,carvifolia,Sleinum carvifolia,Eurasian species,0,2021-06-04,FALSE
+Selinum,carvifolia,Selinum carvifolia,Eurasian species,0,2021-06-04,FALSE
 Sorbus,americana,Sorbus americana,,1798,2021-06-04,TRUE
 Spermolepis,divaricata,Spermolepis divaricata,,115,2021-06-04,TRUE
 Sphenosciadium,capitellatum,Sphenosciadium capitellatum,,351,2021-06-04,TRUE
