@@ -23,7 +23,7 @@ if (!("gbif_date" %in% colnames(species_df))) {
 countries <- c("CA", "MX", "US")
 # Iterate over each row, doing search for gbif records with lat/long data
 for (i in 1:nrow(species_df)) {
-  species_name <- paste(species_df$genus[i], species_df$species[i])
+  species_name <- species_df$accepted_name[i]
   gbif_name <- species_df$gbif_name[i]
 
   # Limiting by continent DOES NOT WORK
@@ -48,7 +48,7 @@ for (i in 1:nrow(species_df)) {
 
 # To see things of interest
 species_df %>%
-  select(genus, species, gbif_name, gbif_count)
+  select(accepted_name, gbif_name, gbif_count)
 
 # Which zero (or very few) records?
 species_df %>%
