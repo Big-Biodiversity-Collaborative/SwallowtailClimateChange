@@ -7,7 +7,6 @@ require(TNRS)
 require(dplyr)
 
 # TO DO: 
-# Add accepted name of hostplants to insect_host
 # Modify the code above to check or update accepted names in gbif-reconcile.csv
 # (Current version adds an accepted_name column assuming it doesn't already exist)
 # Output updated csvs
@@ -21,7 +20,7 @@ gbif_hosts <- subset(rec, genus != "Papilio", select = c(genus, species))
 gbif_hosts$Genus_species <- paste(gbif_hosts$genus, gbif_hosts$species, sep = " ")
 
 # Use TNRS package to find the accepted name for each hostplant
-# (using the default taxonomic sources: TROPICOS, WCVP)
+# (using default taxonomic sources: TROPICOS, WCVP)
 gbif_hosts$accepted_name <- 
   TNRS(taxonomic_names = gbif_hosts$Genus_species)[,"Accepted_species"]
 
@@ -31,23 +30,19 @@ filter(gbif_hosts, Genus_species != accepted_name)
 # Merge accepted names with original csv
 rec <- left_join(rec, select(gbif_hosts, -Genus_species))
 
-# Add in insect accepted names
+# Add in insect accepted names (assuming genus and species columns are correct)
 rec$accepted_name <- ifelse(is.na(rec$accepted_name),
                                  paste(rec$genus, rec$species, sep = " "),
                                  rec$accepted_name)
 rec <- relocate(rec, accepted_name, .after = gbif_name)
 
+# Append hostplant accepted names to insect-host
+gbif_hosts <- data.frame(host = gbif_hosts$Genus_species, 
+                         host_accepted = gbif_hosts$accepted_name)
+insect_host <- left_join(insect_host, gbif_hosts)
+insect_host <- relocate(insect_host, host_accepted, .before = source)
 
-# Are there hostplants in insect_host that aren't in gbif-reconcile?
-insect_host$host[!insect_host$host %in% paste0(rec$genus, " ", rec$species)]
-
-  # Heracleum lanatum (known issue -- included with H. maximum)
-  # TNRS will output H. maximum as accepted name
-  
-  # Prunus armeniaca (looks like its non-native, but throughout, North America)
-  insect_host[insect_host$host == "Prunus armeniaca",]
-  rec[rec$genus == "Prunus",]
-
-
+# Which species have different accepted names?
+filter(insect_host, host != host_accepted)
 
 
