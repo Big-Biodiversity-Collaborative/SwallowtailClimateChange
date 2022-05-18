@@ -43,7 +43,7 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       message(paste0("\n****   Beginning process for ", species_name, "  ****"))
     }
     
-    # We use the gbif name to extract results from list object, but spocc 
+    # We use the gbif name to extract results from list object, but spocc
     # replaces spaces with underscores for list element names
     list_name <- gsub(pattern = " ",
                       replacement = "_",
@@ -169,6 +169,10 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       obs <- obs %>%
         dplyr::select(gbifID, species, longitude, latitude, 
                       year, month, day, countryCode)
+      
+      # Before writing to file, add a column with accepted name (which
+      # may be different than what GBIF puts in species column)
+      obs$accepted_name <- species_name
       
       # Before writing to file, if required, remove observations falling 
       # outside North America
