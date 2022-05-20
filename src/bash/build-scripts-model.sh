@@ -22,9 +22,10 @@ do
       IFS="," read -r -a ONENAME <<< "${LINE}"
   
       # Extract genus & species name
-      GENUS=$(echo "${ONENAME[0]}" | sed 's/\"//g')
-      SPECIES=$(echo "${ONENAME[1]}" | sed 's/\"//g')
-
+      GENUSSPECIES=$(echo "${ONENAME[3]}" | sed 's/\"//g')
+      GENUS=$(echo "$GENUSSPECIES" | cut -d' ' -f 1)
+      SPECIES=$(echo "$GENUSSPECIES" | cut -d' ' -f 2)
+      
       # For the filename, want genus to be lower case
       GENUSLOWER=$(echo $GENUS | tr '[:upper:]' '[:lower:]')
       FILENAME="src/indiv/${GENUSLOWER}_${SPECIES}-${SCRIPTTYPE}-${MODEL}.R"
