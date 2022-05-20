@@ -21,8 +21,8 @@ do
   do
       # Split NAME into constituent parts
       NAME=($NAME)  # turns it into an array
-      GENUS=${NAME[0]}
-      SPECIES=${NAME[1]}
+      GENUS=$(echo "${NAME[0]}" | sed 's/\"//g')
+      SPECIES=$(echo "${NAME[1]}" | sed 's/\"//g')
 
       # For the filename, want genus to be lower case
       GENUSLOWER=$(echo $GENUS | tr '[:upper:]' '[:lower:]')
