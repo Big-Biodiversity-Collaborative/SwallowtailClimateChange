@@ -31,7 +31,7 @@ unzip(zipfile = "data/gbif.zip")
 insects_hosts <- read.csv(file = "data/insect-host.csv")
 
 # identify all host plants used for each insect
-host_species <- insects_hosts$host[insects_hosts$insect %in% insect_names]
+host_species <- insects_hosts$host_accepted[insects_hosts$insect %in% insect_names]
 rm(insects_hosts)
 
 # drop duplicates, as some insects may share host plant species
