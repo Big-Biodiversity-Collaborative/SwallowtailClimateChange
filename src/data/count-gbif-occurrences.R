@@ -15,7 +15,8 @@ gbif_files <- list.files(path = "data/gbif",
 # Create decadal bins for occurrence records (and one pre-1900 bin)
 decades <- c(0, seq(1900, 2030, by=10))
 
-# Create empty dataframe to store number of records in each decade (e.g., d2000 = 2000-2009)
+# Create empty dataframe to store number of records in each decade 
+# (e.g., d2000 = 2000-2009)
 spp_nocc <- data.frame(matrix(NA, nrow = length(gbif_files), ncol = 16))
 colnames(spp_nocc) <- c("species", 
                         "pre1900", 
@@ -27,13 +28,15 @@ for(i in 1:length(gbif_files)){
   spp_nocc[i,1] <- dat$species[1]
   
   # Count the number of occurrence records in each decade
-  spp_nocc[i,2:15] <- as.numeric(table(cut(dat$year, breaks = decades, right = FALSE)))
+  spp_nocc[i,2:15] <- as.numeric(table(cut(dat$year, 
+                                           breaks = decades, 
+                                           right = FALSE)))
   
   # Count the number of records where year = NA
   spp_nocc[i,16] <- sum(is.na(dat$year))
 }  
 
 write.csv(spp_nocc, 
-          file = "data/gbif_noccurrences.csv",
+          file = "data/gbif-noccurrences.csv",
           row.names = FALSE)
 

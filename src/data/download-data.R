@@ -19,11 +19,11 @@ replace <- FALSE
 
 # For testing with subset
 # gbif_data <- gbif_data %>%
-#   dplyr::filter(species %in% c("brevicauda", "multicaudata"))
+#   dplyr::filter(species %in% c("brevicauda", "maximum"))
 
 # Loop over all entries in gbif data and do queries
 for (i in 1:nrow(gbif_data)) {
-  species_name <- paste0(gbif_data$genus[i], " ", gbif_data$species[i])
+  species_name <- gbif_data$accepted_name[i]
   gbif_name <- gbif_data$gbif_name[i]
   download_gbif(species_name = species_name,
                 gbif_name = gbif_name,

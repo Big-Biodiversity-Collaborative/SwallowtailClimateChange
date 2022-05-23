@@ -1,187 +1,187 @@
-genus,species,gbif_name,notes,gbif_count,gbif_date,include
-Aegopodium,podagraria,Aegopodium podagraria,,2641,2021-06-04,TRUE
-Aletes,acaulis,Aletes acaulis,,94,2021-06-04,TRUE
-Alnus,alnobetula,Alnus alnobetula,includes A. crispa and A. viridis,4037,2021-06-04,TRUE
-Alnus,incana,Alnus incana,Includes A. rugosa and A. tenuifolia,5637,2021-06-04,TRUE
-Alnus,rubra,Alnus rubra,,2878,2021-06-04,TRUE
-Amelanchier,canadensis,Amelanchier canadensis,,742,2021-06-04,TRUE
-Ammi,visnaga,Ammi visnaga,Mediterranean species,0,2021-06-04,FALSE
-Amyris,elemifera,Amyris elemifera,,275,2021-06-04,TRUE
-Amyris,texana,Amyris texana,,143,2021-06-04,TRUE
-Anethum,graveolens,Anethum graveolens,,247,2021-06-04,TRUE
-Angelica,ampla,Angelica ampla,,89,2021-06-04,TRUE
-Angelica,archangelica,Angelica archangelica,European species,13,2021-06-04,FALSE
-Angelica,arguta,Angelica arguta,,176,2021-06-04,TRUE
-Angelica,atropurpurea,Angelica atropurpurea,,1251,2021-06-04,TRUE
-Angelica,hendersonii,Angelica hendersonii,,322,2021-06-04,TRUE
-Angelica,kingii,Angelica kingii,,47,2021-06-04,TRUE
-Angelica,lineariloba,Angelica lineariloba,,198,2021-06-04,TRUE
-Angelica,lucida,Angelica lucida,,669,2021-06-04,TRUE
-Angelica,sylvestris,Angelica sylvestris,,248,2021-06-04,TRUE
-Angelica,tomentosa,Angelica tomentosa,,205,2021-06-04,TRUE
-Angelica,venenosa,Angelica venenosa,,479,2021-06-04,TRUE
-Apium,graveolens,Apium graveolens,,832,2021-06-04,TRUE
-Artemisia,dracunculus,Artemisia dracunculus,,2666,2021-06-04,TRUE
-Artemisia,norvegica,Artemisia norvegica,,998,2021-06-04,TRUE
-Berula,erecta,Berula erecta,,1312,2021-06-04,TRUE
-Betula,alba,Betula alba,"Eurasian species, potentially syn of B. pubescens",39,2021-06-04,FALSE
-Betula,alleghaniensis,Betula alleghaniensis,,7602,2021-06-04,TRUE
-Betula,lenta,Betula lenta,,2055,2021-06-04,TRUE
-Betula,papyrifera,Betula papyrifera,,9432,2021-06-04,TRUE
-Bupleurum,falcatum,Bupleurum falcatum,Eurasian species,0,2021-06-04,FALSE
-Bupleurum,fruticescens,Bupleurum fruticescens,European species,4,2021-06-04,FALSE
-Carpinus,caroliniana,Carpinus caroliniana,,6888,2021-06-04,TRUE
-Carum,carvi,Carum carvi,,577,2021-06-04,TRUE
-Casimiroa,greggii,Casimiroa greggii,,149,2021-06-04,TRUE
-Catalpa,bignonioides,Catalpa bignonioides,,1358,2021-06-04,TRUE
-Cicuta,bulbifera,Cicuta bulbifera,,1359,2021-06-04,TRUE
-Cicuta,douglasii,Cicuta douglasii,,696,2021-06-04,TRUE
-Cicuta,maculata,Cicuta maculata,,4206,2021-06-04,TRUE
-Cinnamomum,camphora,Cinnamomum camphora,,697,2021-06-04,TRUE
-Conioselinum,chinense,Conioselinum chinense,,432,2021-06-04,TRUE
-Conioselinum,scopulorum,Conioselinum scopulorum,,351,2021-06-04,TRUE
-Conium,maculatum,Conium maculatum,,7150,2021-06-04,TRUE
-Crithmum,maritimum,Crithmum maritimum,Mediterranean species,4,2021-06-04,FALSE
-Cryptotaenia,canadensis,Cryptotaenia canadensis,,2901,2021-06-04,TRUE
-Cydonia,oblonga,Cydonia oblonga,,292,2021-06-04,TRUE
-Cymopterus,panamintensis,Cymopterus panamintensis,,31,2021-06-04,TRUE
-Cymopterus,purpureus,Cymopterus purpureus,Originally referred to as C. purpurea,225,2021-06-04,TRUE
-Daucus,carota,Daucus carota,,18057,2021-06-04,TRUE
-Daucus,pusillus,Daucus pusillus,,3733,2021-06-04,TRUE
-Dictamnus,albus,Dictamnus albus,Eurasian species,20,2021-06-04,FALSE
-Eriodictyon,californicum,Eriodictyon californicum,,3200,2021-06-04,TRUE
-Falcaria,vulgaris,Falcaria vulgaris,Eurasian species,13,2021-06-04,FALSE
-Ferula,communis,Ferula communis,Mediterranean species,4,2021-06-04,FALSE
-Foeniculum,vulgare,Foeniculum vulgare,,7278,2021-06-04,TRUE
-Fraxinus,americana,Fraxinus americana,,6506,2021-06-04,TRUE
-Fraxinus,anomala,Fraxinus anomala,,853,2021-06-04,TRUE
-Fraxinus,caroliniana,Fraxinus caroliniana,,449,2021-06-04,TRUE
-Fraxinus,latifolia,Fraxinus latifolia,,1031,2021-06-04,TRUE
-Fraxinus,nigra,Fraxinus nigra,,2583,2021-06-04,TRUE
-Fraxinus,pennsylvanica,Fraxinus pennsylvanica,,43334,2021-06-04,TRUE
-Haplophyllum,balcanicum,Haplophyllum balcanicum,Eurasian species,0,2021-06-04,FALSE
-Haplophyllum,linifolium,Haplophyllum linifolium,European species,0,2021-06-04,FALSE
-Haplophyllum,tuberculatum,Haplophyllum tuberculatum,Eurasian species,0,2021-06-04,FALSE
-Harbouria,trachypleura,Harbouria trachypleura,,232,2021-06-04,TRUE
-Heracleum,lanatum,Heracleum lanatum,,805,2021-06-04,TRUE
-Heracleum,maximum,Heracleum maximum,,7410,2021-06-04,TRUE
-Heracleum,sphondylium,Heracleum sphondylium,,8507,2021-06-04,TRUE
-Holodiscus,discolor,Holodiscus discolor,,7660,2021-06-04,TRUE
-Laserpitium,halleri,Laserpitium halleri,Mediterranean species,0,2021-06-04,FALSE
-Laserpitium,latifolium,Laserpitium latifolium,European species,0,2021-06-04,FALSE
-Levisticum,officinale,Levisticum officinale,Eurasian species,75,2021-06-04,FALSE
-Ligusticum,grayi,Ligusticum grayi,,549,2021-06-04,TRUE
-Ligusticum,porteri,Ligusticum porteri,,386,2021-06-04,TRUE
-Ligusticum,scoticum,Ligusticum scoticum,,797,2021-06-04,TRUE
-Ligustrum,lucidum,Ligustrum lucidum,,4109,2021-06-04,TRUE
-Ligustrum,vulgare,Ligustrum vulgare,,1099,2021-06-04,TRUE
-Lindera,benzoin,Lindera benzoin,,9171,2021-06-04,TRUE
-Liriodendron,tulipifera,Liriodendron tulipifera,,26994,2021-06-04,TRUE
-Lomatium,californicum,Lomatium californicum,,377,2021-06-04,TRUE
-Lomatium,dasycarpum,Lomatium dasycarpum,,1385,2021-06-04,TRUE
-Lomatium,dissectum,Lomatium dissectum,,736,2021-06-04,TRUE
-Lomatium,eastwoodiae,Lomatium eastwoodiae,,35,2021-06-04,TRUE
-Lomatium,grayi,Lomatium grayi,,669,2021-06-04,TRUE
-Lomatium,junceum,Lomatium junceum,Fairly restricted range in Utah,21,2021-06-04,TRUE
-Lomatium,latilobum,Lomatium latilobum,Fairly restricted range in Utah and Colorado,37,2021-06-04,TRUE
-Lomatium,lucidum,Lomatium lucidum,,401,2021-06-04,TRUE
-Lomatium,marginatum,Lomatium marginatum,,153,2021-06-04,TRUE
-Lomatium,nuttallii,Lomatium nuttallii,,70,2021-06-04,TRUE
-Lomatium,parryi,Lomatium parryi,,244,2021-06-04,TRUE
-Lomatium,scabrum,Lomatium scabrum,,109,2021-06-04,TRUE
-Lomatium,triternatum,Lomatium triternatum,,1308,2021-06-04,TRUE
-Lomatium,utriculatum,Lomatium utriculatum,,2218,2021-06-04,TRUE
-Magnolia,acuminata,Magnolia acuminata,,862,2021-06-04,TRUE
-Magnolia,virginiana,Magnolia virginiana,,1842,2021-06-04,TRUE
-Malus,pumila,Malus pumila,,2941,2021-06-04,TRUE
-Meum,athamanticum,Meum athamanticum,European species,0,2021-06-04,FALSE
-Oenanthe,sarmentosa,Oenanthe sarmentosa,,1144,2021-06-04,TRUE
-Osmorhiza,longistylis,Osmorhiza longistylis,,178,2021-06-04,TRUE
-Tiedemannia,canbyi,Tiedemannia canbyi,"Rare, also known as Oxypolis canbyi",7,2021-06-04,TRUE
-Papilio,appalachiensis,Papilio appalachiensis,,73,2021-06-04,TRUE
-Papilio,aristodemus,Papilio aristodemus,,62,2021-06-04,TRUE
-Papilio,brevicauda,Papilio brevicauda,,422,2021-06-04,TRUE
-Papilio,canadensis,Papilio canadensis,,7490,2021-06-04,TRUE
-Papilio,cresphontes,Papilio cresphontes,includes some observations that are likely P. rumiko,10362,2021-06-04,TRUE
-Papilio,eurymedon,Papilio eurymedon,,3740,2021-06-04,TRUE
-Papilio,glaucus,Papilio glaucus,,33238,2021-06-04,TRUE
-Papilio,indra,Papilio indra,,933,2021-06-04,TRUE
-Papilio,machaon,Papilio machaon,"for now, including P. machaon oregonius",2793,2021-06-04,TRUE
-Papilio,multicaudata,Papilio multicaudata,,4453,2021-06-04,TRUE
-Papilio,palamedes,Papilio palamedes,,2731,2021-06-04,TRUE
-Papilio,polyxenes,Papilio polibetes,note incorrect specific epithet for gbif name,21681,2021-06-04,TRUE
-Papilio,rumiko,Papilio rumiko,includes at least some P. cresphontes – see Long Island observation,3711,2021-06-04,TRUE
-Papilio,rutulus,Papilio rutulus,,6935,2021-06-04,TRUE
-Papilio,troilus,Papilio troilus,,12017,2021-06-04,TRUE
-Papilio,zelicaon,Papilio zelicaon,,7202,2021-06-04,TRUE
-Pastinaca,sativa,Pastinaca sativa,,3623,2021-06-04,TRUE
-Perideridia,bolanderi,Perideridia bolanderi,,336,2021-06-04,TRUE
-Perideridia,gairdneri,Perideridia gairdneri,,563,2021-06-04,TRUE
-Perideridia,kelloggii,Perideridia kelloggii,,239,2021-06-04,TRUE
-Persea,americana,Persea americana,,2440,2021-06-04,TRUE
-Persea,borbonia,Persea borbonia,,529,2021-06-04,TRUE
-Petroselinum,crispum,Petroselinum crispum,,186,2021-06-04,TRUE
-Peucedanum,cervaria,Peucedanum cervaria,Mediterranean species,0,2021-06-04,FALSE
-Peucedanum,officinale,Peucedanum officinale,European species,0,2021-06-04,FALSE
-Peucedanum,oreoselinum,Peucedanum oreoselinum,European species,2,2021-06-04,FALSE
-Pimpinella,saxifraga,Pimpinella saxifraga,,136,2021-06-04,TRUE
-Platanus,racemosa,Platanus racemosa,,3847,2021-06-04,TRUE
-Platanus,wrightii,Platanus wrightii,,890,2021-06-04,TRUE
-Populus,angustifolia,Populus angustifolia,,1974,2021-06-04,TRUE
-Populus,balsamifera,Populus balsamifera,,3776,2021-06-04,TRUE
-Populus,deltoides,Populus deltoides,,9369,2021-06-04,TRUE
-Populus,grandidentata,Populus grandidentata,,4332,2021-06-04,TRUE
-Populus,tremuloides,Populus tremuloides,,12953,2021-06-04,TRUE
-Populus,trichocarpa,Populus trichocarpa,,2177,2021-06-04,TRUE
-Prunus,americana,Prunus americana,,2112,2021-06-04,TRUE
-Prunus,caroliniana,Prunus caroliniana,,2229,2021-06-04,TRUE
-Prunus,cerasus,Prunus cerasus,,185,2021-06-04,TRUE
-Prunus,domestica,Prunus domestica,,554,2021-06-04,TRUE
-Prunus,emarginata,Prunus emarginata,,3027,2021-06-04,TRUE
-Prunus,ilicifolia,Prunus ilicifolia,,3996,2021-06-04,TRUE
-Prunus,pensylvanica,Prunus pensylvanica,,3215,2021-06-04,TRUE
-Prunus,persica,Prunus persica,,3408,2021-06-04,TRUE
-Prunus,serotina,Prunus serotina,Includes P. capuli,18339,2021-06-04,TRUE
-Prunus,virginiana,Prunus virginiana,,14222,2021-06-04,TRUE
-Pseudocymopterus,montanus,Pseudocymopterus montanus,,789,2021-06-04,TRUE
-Ptelea,crenulata,Ptelea crenulata,,401,2021-06-04,TRUE
-Ptelea,trifoliata,Ptelea trifoliata,Includes P. baldwinii,4558,2021-06-04,TRUE
-Pteryxia,hendersonii,Pteryxia hendersonii,,131,2021-06-04,TRUE
-Pteryxia,petraea,Pteryxia petraea,,227,2021-06-04,TRUE
-Pteryxia,terebinthina,Pteryxia terebinthina,,550,2021-06-04,TRUE
-Ptilimnium,capillaceum,Ptilimnium capillaceum,,660,2021-06-04,TRUE
-Rhamnus,californica,Rhamnus californica,,542,2021-06-04,TRUE
-Ridolfia,segetum,Ridolfia segetum,Mediterranean species,0,2021-06-04,FALSE
-Ruta,angustifolia,Ruta angustifolia,Mediterranean species,0,2021-06-04,FALSE
-Ruta,chalepensis,Ruta chalepensis,,275,2021-06-04,TRUE
-Ruta,graveolens,Ruta graveolens,,184,2021-06-04,TRUE
-Salix,babylonica,Salix babylonica,,672,2021-06-04,TRUE
-Salix,exigua,Salix exigua,,6082,2021-06-04,TRUE
-Salix,hookeriana,Salix hookeriana,,288,2021-06-04,TRUE
-Salix,lasiandra,Salix lasiandra,,818,2021-06-04,TRUE
-Salix,lasiolepis,Salix lasiolepis,,5284,2021-06-04,TRUE
-Salix,scouleriana,Salix scouleriana,,669,2021-06-04,TRUE
-Sassafras,albidum,Sassafras albidum,,16802,2021-06-04,TRUE
-Seseli,libanotis,Seseli libanotis,Eurasian species,3,2021-06-04,FALSE
-Seseli,varium,Seseli varium,Mediterranean species,0,2021-06-04,FALSE
-Silaum,silaus,Silaum silaus,European species,2,2021-06-04,FALSE
-Sium,suave,Sium suave,,2495,2021-06-04,TRUE
-Sleinum,carvifolia,Sleinum carvifolia,Eurasian species,0,2021-06-04,FALSE
-Sorbus,americana,Sorbus americana,,1798,2021-06-04,TRUE
-Spermolepis,divaricata,Spermolepis divaricata,,115,2021-06-04,TRUE
-Sphenosciadium,capitellatum,Sphenosciadium capitellatum,,351,2021-06-04,TRUE
-Syringa,vulgaris,Syringa vulgaris,,9247,2021-06-04,TRUE
-Taenidia,integerrima,Taenidia integerrima,,1080,2021-06-04,TRUE
-Tauschia,arguta,Tauschia arguta,,812,2021-06-04,TRUE
-Tauschia,parishii,Tauschia parishii,,428,2021-06-04,TRUE
-Thamnosma,montana,Thamnosma montana,,1790,2021-06-04,TRUE
-Thamnosma,texana,Thamnosma texana,,701,2021-06-04,TRUE
-Thaspium,barbinode,Thaspium barbinode,,669,2021-06-04,TRUE
-Tilia,americana,Tilia americana,,15539,2021-06-04,TRUE
-Trinia,glauca,Trinia glauca,Eurasian species,2,2021-06-04,FALSE
-Vauquelinia,californica,Vauquelinia californica,,352,2021-06-04,TRUE
-Zanthoxylum,americanum,Zanthoxylum americanum,,2335,2021-06-04,TRUE
-Zanthoxylum,clava-herculis,Zanthoxylum clava-herculis,,2731,2021-06-04,TRUE
-Zanthoxylum,fagara,Zanthoxylum fagara,,1591,2021-06-04,TRUE
-Zizia,aptera,Zizia aptera,,1269,2021-06-04,TRUE
-Zizia,aurea,Zizia aurea,,5206,2021-06-04,TRUE
+"genus","species","gbif_name","accepted_name","notes","gbif_count","gbif_date","include"
+"Aegopodium","podagraria","Aegopodium podagraria","Aegopodium podagraria","",4227,2022-05-18,TRUE
+"Aletes","acaulis","Aletes acaulis","Aletes acaulis","",104,2022-05-18,TRUE
+"Alnus","alnobetula","Alnus alnobetula","Alnus alnobetula","includes A. crispa and A. viridis",4934,2022-05-18,TRUE
+"Alnus","incana","Alnus incana","Alnus incana","Includes A. rugosa and A. tenuifolia",6464,2022-05-18,TRUE
+"Alnus","rubra","Alnus rubra","Alnus rubra","",4741,2022-05-18,TRUE
+"Amelanchier","canadensis","Amelanchier canadensis","Amelanchier canadensis","",845,2022-05-18,TRUE
+"Ammi","visnaga","Ammi visnaga","Ammi visnaga","Mediterranean species",0,2022-05-18,FALSE
+"Amyris","elemifera","Amyris elemifera","Amyris elemifera","",347,2022-05-18,TRUE
+"Amyris","texana","Amyris texana","Amyris texana","",176,2022-05-18,TRUE
+"Anethum","graveolens","Anethum graveolens","Anethum graveolens","",269,2022-05-18,TRUE
+"Angelica","ampla","Angelica ampla","Angelica ampla","",101,2022-05-18,TRUE
+"Angelica","archangelica","Angelica archangelica","Angelica archangelica","European species",12,2022-05-18,FALSE
+"Angelica","arguta","Angelica arguta","Angelica arguta","",278,2022-05-18,TRUE
+"Angelica","atropurpurea","Angelica atropurpurea","Angelica atropurpurea","",1571,2022-05-18,TRUE
+"Angelica","hendersonii","Angelica hendersonii","Angelica hendersonii","",497,2022-05-18,TRUE
+"Angelica","kingii","Angelica kingii","Angelica kingii","",65,2022-05-18,TRUE
+"Angelica","lineariloba","Angelica lineariloba","Angelica lineariloba","",240,2022-05-18,TRUE
+"Angelica","lucida","Angelica lucida","Angelica lucida","",962,2022-05-18,TRUE
+"Angelica","sylvestris","Angelica sylvestris","Angelica sylvestris","",327,2022-05-18,TRUE
+"Angelica","tomentosa","Angelica tomentosa","Angelica tomentosa","",261,2022-05-18,TRUE
+"Angelica","venenosa","Angelica venenosa","Angelica venenosa","",576,2022-05-18,TRUE
+"Apium","graveolens","Apium graveolens","Apium graveolens","",936,2022-05-18,TRUE
+"Artemisia","dracunculus","Artemisia dracunculus","Artemisia dracunculus","",3127,2022-05-18,TRUE
+"Artemisia","norvegica","Artemisia norvegica","Artemisia norvegica","",1226,2022-05-18,TRUE
+"Berula","erecta","Berula erecta","Berula erecta","",1358,2022-05-18,TRUE
+"Betula","alba","Betula pubescens","Betula pubescens","Eurasian species, potentially syn of B. pubescens",136,2022-05-18,FALSE
+"Betula","alleghaniensis","Betula alleghaniensis","Betula alleghaniensis","",10447,2022-05-18,TRUE
+"Betula","lenta","Betula lenta","Betula lenta","",2992,2022-05-18,TRUE
+"Betula","papyrifera","Betula papyrifera","Betula papyrifera","",12136,2022-05-18,TRUE
+"Bupleurum","falcatum","Bupleurum falcatum","Bupleurum falcatum","Eurasian species",0,2022-05-18,FALSE
+"Bupleurum","fruticescens","Bupleurum fruticescens","Bupleurum fruticescens","European species",4,2022-05-18,FALSE
+"Carpinus","caroliniana","Carpinus caroliniana","Carpinus caroliniana","",10147,2022-05-18,TRUE
+"Carum","carvi","Carum carvi","Carum carvi","",616,2022-05-18,TRUE
+"Casimiroa","greggii","Casimiroa greggii","Casimiroa greggii","",142,2022-05-18,TRUE
+"Catalpa","bignonioides","Catalpa bignonioides","Catalpa bignonioides","",1575,2022-05-18,TRUE
+"Cicuta","bulbifera","Cicuta bulbifera","Cicuta bulbifera","",1588,2022-05-18,TRUE
+"Cicuta","douglasii","Cicuta douglasii","Cicuta douglasii","",767,2022-05-18,TRUE
+"Cicuta","maculata","Cicuta maculata","Cicuta maculata","",4992,2022-05-18,TRUE
+"Cinnamomum","camphora","Cinnamomum camphora","Cinnamomum camphora","",900,2022-05-18,TRUE
+"Conioselinum","chinense","Conioselinum chinense","Conioselinum chinense","",443,2022-05-18,TRUE
+"Conioselinum","scopulorum","Conioselinum scopulorum","Conioselinum scopulorum","",376,2022-05-18,TRUE
+"Conium","maculatum","Conium maculatum","Conium maculatum","",8702,2022-05-18,TRUE
+"Crithmum","maritimum","Crithmum maritimum","Crithmum maritimum","Mediterranean species",5,2022-05-18,FALSE
+"Cryptotaenia","canadensis","Cryptotaenia canadensis","Cryptotaenia canadensis","",4134,2022-05-18,TRUE
+"Cydonia","oblonga","Cydonia oblonga","Cydonia oblonga","",332,2022-05-18,TRUE
+"Cymopterus","panamintensis","Cymopterus panamintensis","Cymopterus panamintensis","",32,2022-05-18,TRUE
+"Cymopterus","purpureus","Cymopterus purpureus","Cymopterus purpureus","Originally referred to as C. purpurea",253,2022-05-18,TRUE
+"Daucus","carota","Daucus carota","Daucus carota","",29202,2022-05-18,TRUE
+"Daucus","pusillus","Daucus pusillus","Daucus pusillus","",4075,2022-05-18,TRUE
+"Dictamnus","albus","Dictamnus albus","Dictamnus albus","Eurasian species",23,2022-05-18,FALSE
+"Eriodictyon","californicum","Eriodictyon californicum","Eriodictyon californicum","",4199,2022-05-18,TRUE
+"Falcaria","vulgaris","Falcaria vulgaris","Falcaria vulgaris","Eurasian species",13,2022-05-18,FALSE
+"Ferula","communis","Ferula communis","Ferula communis","Mediterranean species",5,2022-05-18,FALSE
+"Foeniculum","vulgare","Foeniculum vulgare","Foeniculum vulgare","",9021,2022-05-18,TRUE
+"Fraxinus","americana","Fraxinus americana","Fraxinus americana","",9156,2022-05-18,TRUE
+"Fraxinus","anomala","Fraxinus anomala","Fraxinus anomala","",978,2022-05-18,TRUE
+"Fraxinus","caroliniana","Fraxinus caroliniana","Fraxinus caroliniana","",711,2022-05-18,TRUE
+"Fraxinus","latifolia","Fraxinus latifolia","Fraxinus latifolia","",1309,2022-05-18,TRUE
+"Fraxinus","nigra","Fraxinus nigra","Fraxinus nigra","",3231,2022-05-18,TRUE
+"Fraxinus","pennsylvanica","Fraxinus pennsylvanica","Fraxinus pennsylvanica","",60868,2022-05-18,TRUE
+"Haplophyllum","balcanicum","Haplophyllum balcanicum","Haplophyllum balcanicum","Eurasian species",0,2022-05-18,FALSE
+"Haplophyllum","linifolium","Haplophyllum linifolium","Haplophyllum linifolium","European species",0,2022-05-18,FALSE
+"Haplophyllum","tuberculatum","Haplophyllum tuberculatum","Haplophyllum tuberculatum","Eurasian species",0,2022-05-18,FALSE
+"Harbouria","trachypleura","Harbouria trachypleura","Harbouria trachypleura","",268,2022-05-18,TRUE
+"Heracleum","maximum","Heracleum sphondylium subsp. montanum","Heracleum maximum","Includes H. lanatum and H. maximum",10831,2022-05-18,TRUE
+"Heracleum","sphondylium","Heracleum sphondylium subsp. sibiricum","Heracleum sphondylium","European species",14,2022-05-18,FALSE
+"Holodiscus","discolor","Holodiscus discolor","Holodiscus discolor","",10660,2022-05-18,TRUE
+"Laserpitium","halleri","Laserpitium halleri","Laserpitium halleri","Mediterranean species",0,2022-05-18,FALSE
+"Laserpitium","latifolium","Laserpitium latifolium","Laserpitium latifolium","European species",0,2022-05-18,FALSE
+"Levisticum","officinale","Levisticum officinale","Levisticum officinale","Eurasian species",73,2022-05-18,FALSE
+"Ligusticum","grayi","Ligusticum grayi","Ligusticum grayi","",647,2022-05-18,TRUE
+"Ligusticum","porteri","Ligusticum porteri","Ligusticum porteri","",434,2022-05-18,TRUE
+"Ligusticum","scoticum","Ligusticum scoticum","Ligusticum scoticum","",950,2022-05-18,TRUE
+"Ligustrum","lucidum","Ligustrum lucidum","Ligustrum lucidum","",5310,2022-05-18,TRUE
+"Ligustrum","vulgare","Ligustrum vulgare","Ligustrum vulgare","",1319,2022-05-18,TRUE
+"Lindera","benzoin","Lindera benzoin","Lindera benzoin","",14250,2022-05-18,TRUE
+"Liriodendron","tulipifera","Liriodendron tulipifera","Liriodendron tulipifera","",33836,2022-05-18,TRUE
+"Lomatium","californicum","Lomatium californicum","Lomatium californicum","",408,2022-05-18,TRUE
+"Lomatium","dasycarpum","Lomatium dasycarpum","Lomatium dasycarpum","",1665,2022-05-18,TRUE
+"Lomatium","dissectum","Lomatium dissectum","Lomatium dissectum","",683,2022-05-18,TRUE
+"Lomatium","eastwoodiae","Lomatium eastwoodiae","Lomatium eastwoodiae","",36,2022-05-18,TRUE
+"Lomatium","grayi","Lomatium grayi","Lomatium grayi","",658,2022-05-18,TRUE
+"Lomatium","junceum","Lomatium junceum","Lomatium junceum","Fairly restricted range in Utah",24,2022-05-18,TRUE
+"Lomatium","latilobum","Lomatium latilobum","Lomatium latilobum","Fairly restricted range in Utah and Colorado",53,2022-05-18,TRUE
+"Lomatium","lucidum","Lomatium lucidum","Lomatium lucidum","",460,2022-05-18,TRUE
+"Lomatium","marginatum","Lomatium marginatum","Lomatium marginatum","",184,2022-05-18,TRUE
+"Lomatium","nuttallii","Lomatium nuttallii","Lomatium nuttallii","",81,2022-05-18,TRUE
+"Lomatium","parryi","Lomatium parryi","Lomatium parryi","",275,2022-05-18,TRUE
+"Lomatium","scabrum","Lomatium scabrum","Lomatium scabrum","",124,2022-05-18,TRUE
+"Lomatium","triternatum","Lomatium triternatum","Lomatium triternatum","",1473,2022-05-18,TRUE
+"Lomatium","utriculatum","Lomatium utriculatum","Lomatium utriculatum","",2722,2022-05-18,TRUE
+"Magnolia","acuminata","Magnolia acuminata","Magnolia acuminata","",1332,2022-05-18,TRUE
+"Magnolia","virginiana","Magnolia virginiana","Magnolia virginiana","",2516,2022-05-18,TRUE
+"Malus","pumila","Malus pumila","Malus domestica","",831,2022-05-18,TRUE
+"Meum","athamanticum","Meum athamanticum","Meum athamanticum","European species",0,2022-05-18,FALSE
+"Oenanthe","sarmentosa","Oenanthe sarmentosa","Oenanthe sarmentosa","",1360,2022-05-18,TRUE
+"Osmorhiza","longistylis","Osmorhiza longistylis","Osmorhiza longistylis","",2790,2022-05-18,TRUE
+"Tiedemannia","canbyi","Tiedemannia canbyi","Tiedemannia canbyi","Rare, also known as Oxypolis canbyi",8,2022-05-18,TRUE
+"Papilio","appalachiensis","Papilio appalachiensis","Papilio appalachiensis","",128,2022-05-18,TRUE
+"Papilio","aristodemus","Papilio aristodemus","Papilio aristodemus","",44,2022-05-18,TRUE
+"Papilio","brevicauda","Papilio brevicauda","Papilio brevicauda","",647,2022-05-18,TRUE
+"Papilio","canadensis","Papilio canadensis","Papilio canadensis","",15835,2022-05-18,TRUE
+"Papilio","cresphontes","Papilio cresphontes","Papilio cresphontes","includes some observations that are likely P. rumiko",16747,2022-05-18,TRUE
+"Papilio","eurymedon","Papilio eurymedon","Papilio eurymedon","",5300,2022-05-18,TRUE
+"Papilio","glaucus","Papilio glaucus","Papilio glaucus","",51676,2022-05-18,TRUE
+"Papilio","indra","Papilio indra","Papilio indra","",1336,2022-05-18,TRUE
+"Papilio","machaon","Papilio machaon","Papilio machaon","for now, including P. machaon oregonius",3404,2022-05-18,TRUE
+"Papilio","multicaudata","Papilio multicaudata","Papilio multicaudata","",7417,2022-05-18,TRUE
+"Papilio","palamedes","Papilio palamedes","Papilio palamedes","",5091,2022-05-18,TRUE
+"Papilio","polyxenes","Papilio polibetes","Papilio polyxenes","note incorrect specific epithet for gbif name",30906,2022-05-18,TRUE
+"Papilio","rumiko","Papilio rumiko","Papilio rumiko","includes at least some P. cresphontes – see Long Island observation",5533,2022-05-18,TRUE
+"Papilio","rutulus","Papilio rutulus","Papilio rutulus","",10638,2022-05-18,TRUE
+"Papilio","troilus","Papilio troilus","Papilio troilus","",19385,2022-05-18,TRUE
+"Papilio","zelicaon","Papilio zelicaon","Papilio zelicaon","",9142,2022-05-18,TRUE
+"Pastinaca","sativa","Pastinaca sativa","Pastinaca sativa","",4367,2022-05-18,TRUE
+"Perideridia","bolanderi","Perideridia bolanderi","Perideridia bolanderi","",372,2022-05-18,TRUE
+"Perideridia","gairdneri","Perideridia gairdneri","Perideridia gairdneri","",663,2022-05-18,TRUE
+"Perideridia","kelloggii","Perideridia kelloggii","Perideridia kelloggii","",314,2022-05-18,TRUE
+"Persea","americana","Persea americana","Persea americana","",2662,2022-05-18,TRUE
+"Persea","borbonia","Persea borbonia","Persea borbonia","",897,2022-05-18,TRUE
+"Petroselinum","crispum","Petroselinum crispum","Petroselinum crispum","",193,2022-05-18,TRUE
+"Peucedanum","cervaria","Peucedanum cervaria","Peucedanum cervaria","Mediterranean species",0,2022-05-18,FALSE
+"Peucedanum","officinale","Peucedanum officinale","Peucedanum officinale","European species",0,2022-05-18,FALSE
+"Peucedanum","oreoselinum","Peucedanum oreoselinum","Peucedanum oreoselinum","European species",2,2022-05-18,FALSE
+"Pimpinella","saxifraga","Pimpinella saxifraga","Pimpinella saxifraga","",162,2022-05-18,TRUE
+"Platanus","racemosa","Platanus racemosa","Platanus racemosa","",4778,2022-05-18,TRUE
+"Platanus","wrightii","Platanus wrightii","Platanus wrightii","",1018,2022-05-18,TRUE
+"Populus","angustifolia","Populus angustifolia","Populus angustifolia","",2088,2022-05-18,TRUE
+"Populus","balsamifera","Populus balsamifera","Populus balsamifera","",4374,2022-05-18,TRUE
+"Populus","deltoides","Populus deltoides","Populus deltoides","",12274,2022-05-18,TRUE
+"Populus","grandidentata","Populus grandidentata","Populus grandidentata","",6017,2022-05-18,TRUE
+"Populus","tremuloides","Populus tremuloides","Populus tremuloides","",18677,2022-05-18,TRUE
+"Populus","trichocarpa","Populus trichocarpa","Populus trichocarpa","",2590,2022-05-18,TRUE
+"Prunus","americana","Prunus americana","Prunus americana","",2519,2022-05-18,TRUE
+"Prunus","armeniaca","Prunus armeniaca","Prunus armeniaca","European species",503,2022-05-18,FALSE
+"Prunus","caroliniana","Prunus caroliniana","Prunus caroliniana","",3426,2022-05-18,TRUE
+"Prunus","cerasus","Prunus cerasus","Prunus cerasus","",224,2022-05-18,TRUE
+"Prunus","domestica","Prunus domestica","Prunus domestica","",607,2022-05-18,TRUE
+"Prunus","emarginata","Prunus emarginata","Prunus emarginata","",3412,2022-05-18,TRUE
+"Prunus","ilicifolia","Prunus ilicifolia","Prunus ilicifolia","",4927,2022-05-18,TRUE
+"Prunus","pensylvanica","Prunus pensylvanica","Prunus pensylvanica","",3823,2022-05-18,TRUE
+"Prunus","persica","Prunus persica","Prunus persica","",3653,2022-05-18,TRUE
+"Prunus","serotina","Prunus serotina","Prunus serotina","Includes P. capuli",24015,2022-05-18,TRUE
+"Prunus","virginiana","Prunus virginiana","Prunus virginiana","",23205,2022-05-18,TRUE
+"Pseudocymopterus","montanus","Pseudocymopterus montanus","Pseudocymopterus montanus","",558,2022-05-18,TRUE
+"Ptelea","crenulata","Ptelea crenulata","Ptelea crenulata","",498,2022-05-18,TRUE
+"Ptelea","trifoliata","Ptelea trifoliata","Ptelea trifoliata","Includes P. baldwinii",5588,2022-05-18,TRUE
+"Pteryxia","hendersonii","Pteryxia hendersonii","Pteryxia hendersonii","",138,2022-05-18,TRUE
+"Pteryxia","petraea","Pteryxia petraea","Pteryxia petraea","",247,2022-05-18,TRUE
+"Pteryxia","terebinthina","Pteryxia terebinthina","Pteryxia terebinthina","",605,2022-05-18,TRUE
+"Ptilimnium","capillaceum","Ptilimnium capillaceum","Ptilimnium capillaceum","",1013,2022-05-18,TRUE
+"Rhamnus","californica","Rhamnus californica","Frangula californica","",667,2022-05-18,TRUE
+"Ridolfia","segetum","Ridolfia segetum","Ridolfia segetum","Mediterranean species",0,2022-05-18,FALSE
+"Ruta","angustifolia","Ruta angustifolia","Ruta angustifolia","Mediterranean species",0,2022-05-18,FALSE
+"Ruta","chalepensis","Ruta chalepensis","Ruta chalepensis","",305,2022-05-18,TRUE
+"Ruta","graveolens","Ruta graveolens","Ruta graveolens","",279,2022-05-18,TRUE
+"Salix","babylonica","Salix babylonica","Salix babylonica","",1052,2022-05-18,TRUE
+"Salix","exigua","Salix exigua","Salix exigua","",6627,2022-05-18,TRUE
+"Salix","hookeriana","Salix hookeriana","Salix hookeriana","",339,2022-05-18,TRUE
+"Salix","lasiandra","Salix lasiandra","Salix lasiandra","",930,2022-05-18,TRUE
+"Salix","lasiolepis","Salix lasiolepis","Salix lasiolepis","",6032,2022-05-18,TRUE
+"Salix","scouleriana","Salix scouleriana","Salix scouleriana","",3296,2022-05-18,TRUE
+"Sassafras","albidum","Sassafras albidum","Sassafras albidum","",22040,2022-05-18,TRUE
+"Seseli","libanotis","Seseli libanotis","Seseli libanotis","Eurasian species",3,2022-05-18,FALSE
+"Seseli","varium","Seseli varium","Seseli varium","Mediterranean species",0,2022-05-18,FALSE
+"Silaum","silaus","Silaum silaus","Silaum silaus","European species",2,2022-05-18,FALSE
+"Sium","suave","Sium suave","Sium suave","",2895,2022-05-18,TRUE
+"Selinum","carvifolia","Selinum carvifolia","Selinum carvifolia","Eurasian species",0,2022-05-18,FALSE
+"Sorbus","americana","Sorbus americana","Sorbus americana","",2237,2022-05-18,TRUE
+"Spermolepis","divaricata","Spermolepis divaricata","Spermolepis divaricata","",236,2022-05-18,TRUE
+"Sphenosciadium","capitellatum","Sphenosciadium capitellatum","Sphenosciadium capitellatum","",373,2022-05-18,TRUE
+"Syringa","vulgaris","Syringa vulgaris","Syringa vulgaris","",9596,2022-05-18,TRUE
+"Taenidia","integerrima","Taenidia integerrima","Taenidia integerrima","",1311,2022-05-18,TRUE
+"Tauschia","arguta","Tauschia arguta","Tauschia arguta","",900,2022-05-18,TRUE
+"Tauschia","parishii","Tauschia parishii","Tauschia parishii","",435,2022-05-18,TRUE
+"Thamnosma","montana","Thamnosma montana","Thamnosma montana","",2042,2022-05-18,TRUE
+"Thamnosma","texana","Thamnosma texana","Thamnosma texana","",816,2022-05-18,TRUE
+"Thaspium","barbinode","Thaspium barbinode","Thaspium barbinode","",757,2022-05-18,TRUE
+"Tilia","americana","Tilia americana","Tilia americana","",32363,2022-05-18,TRUE
+"Trinia","glauca","Trinia glauca","Trinia glauca","Eurasian species",0,2022-05-18,FALSE
+"Vauquelinia","californica","Vauquelinia californica","Vauquelinia californica","",388,2022-05-18,TRUE
+"Zanthoxylum","americanum","Zanthoxylum americanum","Zanthoxylum americanum","",3048,2022-05-18,TRUE
+"Zanthoxylum","clava-herculis","Zanthoxylum clava-herculis","Zanthoxylum clava-herculis","",3682,2022-05-18,TRUE
+"Zanthoxylum","fagara","Zanthoxylum fagara","Zanthoxylum fagara","",1951,2022-05-18,TRUE
+"Zizia","aptera","Zizia aptera","Zizia aptera","",1510,2022-05-18,TRUE
+"Zizia","aurea","Zizia aurea","Zizia aurea","",6061,2022-05-18,TRUE

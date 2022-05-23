@@ -25,7 +25,7 @@ model_names <- c("svm", "glm")
 insects_hosts <- read.csv(file = "data/insect-host.csv")
 
 # identify all host plants used for each insect
-host_species <- insects_hosts$host[insects_hosts$insect %in% insect_species]
+host_species <- insects_hosts$accepted_host[insects_hosts$insect %in% insect_species]
 rm(insects_hosts)
 
 # drop duplicates, as some insects may share host plant species
