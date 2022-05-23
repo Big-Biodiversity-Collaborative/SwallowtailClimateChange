@@ -34,7 +34,7 @@ overlap_raster <- function(species_name,
 
   # identify all host plants used by that insect
   insects_hosts <- read.csv(file = "data/insect-host.csv")
-  hosts <- insects_hosts$host[insects_hosts$insect == species_name]
+  hosts <- insects_hosts$accepted_host[insects_hosts$insect == species_name]
   
   # Make sure we have the distribution of the insect before proceeding  
   insect_dist_file <- paste0("output/distributions/",
