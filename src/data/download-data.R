@@ -6,16 +6,10 @@
 # require(dplyr) # currently only needed for testing subset
 
 # Load up the functions from the functions folder
-function_files <- list.files(path = "./functions", 
-                             pattern = ".R$", 
-                             full.names = TRUE)
-for(fun_file in function_files) {
-  message(paste0("Loading function from ", fun_file))
-  source(file = fun_file)
-}
+source(file = "load_functions.R")
 
 gbif_data <- read.csv(file = "data/gbif-reconcile.csv")
-replace <- FALSE
+replace <- TRUE
 
 # For testing with subset
 # gbif_data <- gbif_data %>%
