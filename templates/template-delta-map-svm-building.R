@@ -3,12 +3,14 @@
 # jcoliver@arizona.edu
 # 2021-07-09
 
+library(ggplot2)
+library(dplyr)
 source(file = "load_functions.R")
 
 genus <- "GENUS"
 species <- "SPECIES"
 
-model <- "svm"
+method <- "svm"
 output_format <- "png" # "pdf"
 
 # Name for reporting
@@ -16,34 +18,44 @@ species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
 nice_name <- tolower(paste0(genus, "_", species))
 
-# Load in the two overlap rasters
-predictors = c("current", "GFDL-ESM4_RCP45")
+# Get the climate models; will want to do pairwise comparison of current climate 
+# to each of the forecast models
+climate_models <- read.csv(file = "data/climate-models.csv")
 
+# The index of the current climate model
+current_climate_i <- which(climate_models$name == "current")
+# The indicies of the forecast climate models
+forecast_climate_i <- which(climate_models$name != "current")
+
+# Current climate model will not vary
 current_file <- paste0("output/ranges/",
                        nice_name, 
                        "-overlap-",
-                       model, 
+                       method, 
                        "-",
-                       predictors[1], 
+                       climate_models$name[current_climate_i], 
                        ".rds")
 
-forecast_file <- paste0("output/ranges/",
-                       nice_name, 
-                       "-overlap-",
-                       model, 
-                       "-",
-                       predictors[2], 
-                       ".rds")
+current_raster <- readRDS(file = current_file)
 
-if (file.exists(current_file) & file.exists(forecast_file)) {
-  current_raster <- readRDS(file = current_file)
-  forecast_raster <- readRDS(file = forecast_file)  
+# For current raster
+# Change values of 1 and 2 to 0
+# Change values of 3 to 1
+current_raster[current_raster < 3] <- 0
+current_raster[current_raster == 3] <- 1
+
+for (i in forecast_climate_i) {
+  model_name <- climate_models$name[i]
   
-  # For current raster
-  # Change values of 1 and 2 to 0
-  # Change values of 3 to 1
-  current_raster[current_raster < 3] <- 0
-  current_raster[current_raster == 3] <- 1
+  forecast_file <- paste0("output/ranges/",
+                          nice_name, 
+                          "-overlap-",
+                          method, 
+                          "-",
+                          model_name, 
+                          ".rds")
+  
+  forecast_raster <- readRDS(file = forecast_file)  
   
   # For forecast raster
   # Change values of 1 and 2 to 0
@@ -58,12 +70,12 @@ if (file.exists(current_file) & file.exists(forecast_file)) {
   # 3: both current and forecast raster had insect overlapping with host
   combined_raster <- stack_rasters(r = list(current_raster, forecast_raster),
                                    out = "total")
-    
+  
   # Create a ggplot object, borrowing code from overlap_map
   # Convert to data frame (two steps to do so)
   # First, to a SpatialPointsDataFrame
   combined_points <- raster::rasterToPoints(x = combined_raster, 
-                                           spatial = TRUE)
+                                            spatial = TRUE)
   # Then to a dataframe
   combined_df <- data.frame(combined_points)
   rm(combined_points)
@@ -100,30 +112,28 @@ if (file.exists(current_file) & file.exists(forecast_file)) {
   names(color_vec) <- status_levels
   
   combined_plot <- ggplot(data = combined_df, 
-                         mapping = aes(x = Longitude, 
-                                       y = Latitude, 
-                                       fill = Status)) +
+                          mapping = aes(x = Longitude, 
+                                        y = Latitude, 
+                                        fill = Status)) +
     geom_raster() +
     scale_fill_manual(values = color_vec) +
-    labs(title = paste0(abbr_name, " range dynamics")) +
+    labs(title = paste0(abbr_name, " range dynamics"),
+         subtitle = paste0(method, ", ", model_name)) +
     coord_equal() + 
     theme_bw() +
     theme(axis.title = element_blank(),
           legend.title = element_blank()) +
     xlim(c(-170, -50)) +
     ylim(c(10, 70))
- 
+  
   plot_file <- paste0("output/maps/",
                       nice_name,
                       "-delta-",
-                      model, 
+                      method, "-",
+                      model_name,
                       ".", 
                       output_format)
   ggsave(filename = plot_file,
          plot = combined_plot)
   
-} else {
-  warning(paste0("One or more overlap files for ", 
-                 species_name, 
-                 " could not be found; no delta map created."))
 }
