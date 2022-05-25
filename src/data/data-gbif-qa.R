@@ -47,6 +47,10 @@ for (one_file in gbif_files) {
   }
 }
 
-# Create a zip file of all the gbif flies
+# Create a zip file of all the gbif flies (first removing previous archive)
+zipfile <- "data/gbif.zip"
+if (file.exists(zipfile)) {
+  invisible(file.remove(zipfile))
+}
 zip(zipfile = "data/gbif.zip",
     files = gbif_files)
