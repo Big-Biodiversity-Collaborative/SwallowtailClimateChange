@@ -25,7 +25,7 @@ colnames(spp_nocc) <- c("species",
 
 for(i in 1:length(gbif_files)){
   dat <- read.csv(file = gbif_files[i])
-  spp_nocc[i,1] <- dat$species[1]
+  spp_nocc[i,1] <- dat$accepted_name[1]
   
   # Count the number of occurrence records in each decade
   spp_nocc[i,2:15] <- as.numeric(table(cut(dat$year, 
