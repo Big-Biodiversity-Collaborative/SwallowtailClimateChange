@@ -72,12 +72,12 @@ linear model and "svm" for support vector machine.
    build R scripts that create overlap rasters for each species of insect with 
    its respective host plant(s)
 3. Bulk processing of single-species analyses
-   1. **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each script 
-   that was generated in previous step (operates in parallel using 
-   `parallel::mclapply`)
-   2. **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Use species 
-   distribution model to predict presence / absence for current and forecast 
-   climate conditions
+   1. **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each species 
+   distribution model creation script created in 2.i (operates in parallel 
+   using `parallel::mclapply`)
+   2. **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Run each 
+   prediction script for individual species for current and forecast climate 
+   conditions
    3. **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
    predicted presence / absence rasters for each insect and associated host 
    plants into a single raster per insect species
@@ -90,7 +90,7 @@ linear model and "svm" for support vector machine.
    (km<sup>2</sup>) of the insect's range that overlaps with at least one host 
    plant species' range and the area of the insect's range that overlaps with 
    zero host plant species' ranges
-   3. **src/summary/compare-range-sizes.R**: Compare the range sizes of 
+   3. **src/summary/compare-range-changes.R**: Compare the range sizes of 
    current and forecast distributions, both considering insect ranges alone, 
    and considering only the areas where insects are predicted to overlap with 
    one or more host plant species

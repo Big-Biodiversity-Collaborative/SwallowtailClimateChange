@@ -9,7 +9,7 @@
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
 overlap_map <- function(species_name, 
-                            predictor = c("current", "GFDL-ESM4_RCP45"),
+                            predictor,
                             model = c("glm", "svm"),
                             crop_to_insect = FALSE) {
   if (!require(raster)) {
@@ -24,7 +24,7 @@ overlap_map <- function(species_name,
   # Load up the functions from the functions folder
   source(file = "load_functions.R")
   
-  predictor <- match.arg(predictor)
+  # predictor <- match.arg(predictor)
   model <- match.arg(model)
   
   nice_name <- tolower(x = gsub(pattern = " ",
