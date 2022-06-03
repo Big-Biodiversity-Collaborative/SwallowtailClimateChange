@@ -9,9 +9,9 @@
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
 overlap_map <- function(species_name, 
-                            predictor,
-                            model = c("glm", "svm"),
-                            crop_to_insect = FALSE) {
+                        predictor,
+                        model = c("glm", "svm"),
+                        crop_to_insect = FALSE) {
   if (!require(raster)) {
     stop("overlap_map requires raster package, but it could not be loaded")
   }

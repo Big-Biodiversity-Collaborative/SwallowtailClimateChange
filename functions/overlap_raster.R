@@ -73,7 +73,8 @@ overlap_raster <- function(species_name,
       if (file.exists(host_dist_file)) {
         host_pa_list[[host_nice_name]] <- readRDS(file = host_dist_file)
       } else {
-        message(paste0("Skipping host ", host_name, ", no distribution found."))
+        message(paste0("Skipping host ", host_name, 
+                       ", no distribution found for ", predictor))
       }
     } # end iterating over all host species
     

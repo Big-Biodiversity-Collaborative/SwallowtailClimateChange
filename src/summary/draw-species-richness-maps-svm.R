@@ -1,4 +1,4 @@
-# Create species richness maps of current & forecast insect species richness GLM
+# Create species richness maps of current & forecast insect species richness SVM
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-06
@@ -9,7 +9,7 @@ require(dplyr)
 
 source(file = "load_functions.R")
 
-method <- "glm"
+method <- "svm"
 output_format <- "png" # "pdf"
 # The name of the current (contemporary) global climate model for comparisons 
 # with forecast models

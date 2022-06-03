@@ -77,7 +77,7 @@ linear model and "svm" for support vector machine.
    using `parallel::mclapply`)
    2. **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Run each 
    prediction script for individual species for current and forecast climate 
-   conditions
+   conditions; generate presence / absence rasters for all species
    3. **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
    predicted presence / absence rasters for each insect and associated host 
    plants into a single raster per insect species
@@ -90,10 +90,10 @@ linear model and "svm" for support vector machine.
    (km<sup>2</sup>) of the insect's range that overlaps with at least one host 
    plant species' range and the area of the insect's range that overlaps with 
    zero host plant species' ranges
-   3. **src/summary/compare-range-changes.R**: Compare the range sizes of 
-   current and forecast distributions, both considering insect ranges alone, 
-   and considering only the areas where insects are predicted to overlap with 
-   one or more host plant species
+   3. **src/summary/compare-range-changes.R**: **DEPRECATED** Compare the range 
+   sizes of current and forecast distributions, both considering insect ranges 
+   alone, and considering only the areas where insects are predicted to overlap 
+   with one or more host plant species
    4. **src/summary/draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ 
    species richness for current and forecast climate conditions and a map 
    showing the change between current and forecast estimates
@@ -103,7 +103,7 @@ linear model and "svm" for support vector machine.
 + data
     + cmip5/2_5m: forecast climate data (not under version control)
     + wc2-1: current climate data
-    + wc2-5: DEPRECATED current climate data (not under version control)
+    + wc2-5: **DEPRECATED** current climate data (not under version control)
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
 (files with .log extension are not under version control)
@@ -112,7 +112,7 @@ linear model and "svm" for support vector machine.
     species
     + maps: distribution maps (image files) for insect species and hosts
     + models: species distribution model objects
-    + overlaps: DEPRECATED
+    + overlaps: **DEPRECATED**
     + plots: miscellaneous data visualizations
     + ranges: composite rasters of insect and host species and estimates of 
     range areas
