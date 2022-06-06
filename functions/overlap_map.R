@@ -9,9 +9,9 @@
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
 overlap_map <- function(species_name, 
-                            predictor = c("current", "GFDL-ESM4_RCP45"),
-                            model = c("glm", "svm"),
-                            crop_to_insect = FALSE) {
+                        predictor,
+                        model = c("glm", "svm"),
+                        crop_to_insect = FALSE) {
   if (!require(raster)) {
     stop("overlap_map requires raster package, but it could not be loaded")
   }
@@ -24,7 +24,7 @@ overlap_map <- function(species_name,
   # Load up the functions from the functions folder
   source(file = "load_functions.R")
   
-  predictor <- match.arg(predictor)
+  # predictor <- match.arg(predictor)
   model <- match.arg(model)
   
   nice_name <- tolower(x = gsub(pattern = " ",

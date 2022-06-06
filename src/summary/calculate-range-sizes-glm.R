@@ -7,16 +7,15 @@ require(raster)
 require(parallel)
 require(dplyr)
 
-model <- "glm"
-output_file <- paste0("output/ranges/range-areas-", model, ".csv") 
-predictors <- c("current", "GFDL-ESM4_RCP45")
+method <- "glm"
+output_file <- paste0("output/ranges/range-areas-", method, ".csv") 
 
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
 # Function to perform calculations for each species of insect; allows 
 # vectorization and list output that we'll turn into a data frame later
-range_calcs <- function(species_name, model, predictors) {
+range_calcs <- function(species_name, method, predictors) {
 
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
@@ -27,7 +26,7 @@ range_calcs <- function(species_name, model, predictors) {
   for (predictor in predictors) {
     overlap_file <- paste0("output/ranges/",
                            nice_name, "-overlap-",
-                           model, 
+                           method, 
                            "-",
                            predictor,
                            ".rds")
@@ -94,6 +93,10 @@ insects_hosts <- read.csv(file = "data/insect-host.csv")
 insect_species <- unique(insects_hosts$insect)
 insect_species_list <- as.list(insect_species)
 
+# Iterate over all climate models listed in data/climate-models.csv
+climate_models <- read.csv(file = "data/climate-models.csv")
+predictors <- climate_models$name
+
 # For parallel processing, do two fewer cores or eight (whichever is lower)
 num_cores <- parallel::detectCores() - 2
 if (num_cores > 8) {
@@ -103,7 +106,7 @@ if (num_cores > 8) {
 ranges_list <- parallel::mclapply(X = insect_species_list,
                                   FUN = range_calcs,
                                   mc.cores = num_cores,
-                                  model = model,
+                                  method = method,
                                   predictors = predictors)
 
 # Bind all the elements into a data frame

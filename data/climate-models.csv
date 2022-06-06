@@ -1,0 +1,6 @@
+name,description,directory
+current,Contemporary climate; average of annual data for 2000-2018,wc2-1
+ensemble_ssp245_2041,"Ensemble forecast for SSP 4.5, 2041-2070",ensemble/ssp245/2041
+ensemble_ssp245_2071,"Ensemble forecast for SSP 4.5, 2071-2100",ensemble/ssp245/2071
+ensemble_ssp370_2041,"Ensemble forecast for SSP 7.0, 2041-2070",ensemble/ssp370/2041
+ensemble_ssp370_2071,"Ensemble forecast for SSP 7.0, 2071-2100",ensemble/ssp370/2071

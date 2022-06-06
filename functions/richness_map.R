@@ -15,7 +15,7 @@
 #' 
 #' @return A ggplot object
 richness_map <- function(r, 
-                         predictor = c("current", "GFDL-ESM4_RCP45"),
+                         predictor,
                          xlim = c(-170, -50),
                          ylim = c(10, 70),
                          pal_limits = NULL) {
@@ -31,7 +31,7 @@ richness_map <- function(r,
 
   source(file = "load_functions.R")
 
-  predictor <- match.arg(predictor)
+  # predictor <- match.arg(predictor)
   
   # Stack the rasters on top of one another
   # bio_raster <- stack_rasters(r = r, out = "total")

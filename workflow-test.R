@@ -217,7 +217,8 @@ if (length(missing_overlaps > 0)) {
 ########################################
 # make maps based on the overlap rasters
 
-predictors = c("current", "GFDL-ESM4_RCP45")
+climate_models <- read.csv(file = "data/climate-models.csv")
+predictors = climate_models$name
 
 for (i in 1:nrow(insect_species)) {
   species_name <- insect_species$species_name[i]

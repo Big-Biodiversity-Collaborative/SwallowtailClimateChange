@@ -11,88 +11,53 @@ source(file = "load_functions.R")
 genus <- "GENUS"
 species <- "SPECIES"
 
-model <- "glm"
+method <- "glm"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
 nice_name <- tolower(paste0(genus, "_", species))
 
-message(paste0("Predicting presence / absence based on ", toupper(model), 
+message(paste0("Predicting presence / absence based on ", toupper(method), 
                " for ", species_name))
+
+################################################################################
+# Iterate over all climate models listed in data/climate-models.csv
+climate_models <- read.csv(file = "data/climate-models.csv")
+
 # To keep track if any returned presence / absence rasters were NULL
-success <- TRUE 
+success <- rep(x = FALSE, times = nrow(climate_models))
 
-################################################################################
-# Start by doing prediction for current conditions (worldclim data)
-current_predictors <- raster::stack(list.files(path = "data/wc2-1",
-                                               pattern = ".tif$",
-                                               full.names = TRUE))
-
-# Estimate presence / absence
-current_pa <- predict_pa(nice_name = nice_name,
-                         model = model,
-                         predictors = current_predictors)
-
-if (!is.null(current_pa)) {
-  # Save presence / absence raster
-  current_pa_file <- paste0("output/distributions/", nice_name,
-                            "-distribution-",
-                            model, "-current.rds")
-  saveRDS(object = current_pa,
-          file = current_pa_file)
-} else {
-  success <- FALSE
-}
-
-################################################################################
-# Do forecast model, with GFDL-ESM4_RCP45 as forecast data
-# Load forecast data, download if it does not exist
-# For now, want to suppress warning messages about Discarded datum unknown...
-suppressWarnings({
-  gfdl_data <- raster::getData(name = "CMIP5",
-                               var = "bio",
-                               res = 2.5,
-                               rcp = 45,
-                               model = "GD",
-                               year = 70,
-                               path = "data/")
-})
-
-# Need to rename variables in forecast climate data so our predictions work
-# (these are the same names as the bioclim data, used for the creation of our
-# species distribution model)
-names(gfdl_data) <- paste0("bio", 1:19)
-
-# Need to transform temperature variables, which come in from CMIP5 as degrees
-# C x 10.
-temp_biovars <- c("bio1", "bio2", "bio4", "bio5", "bio6", "bio7", "bio8", 
-                  "bio9", "bio10", "bio11")
-for (temp_biovar in temp_biovars) {
-  gfdl_data[[temp_biovar]] <- 0.1 * gfdl_data[[temp_biovar]]
-}
-
-# Estimate presence / absence
-forecast_pa <- predict_pa(nice_name = nice_name,
-                         model = model,
-                         predictors = gfdl_data)
-
-if (!is.null(forecast_pa)) {
-  # Save presence / absence raster
-  forecast_pa_file <- paste0("output/distributions/", nice_name,
-                             "-distribution-", model, 
-                             "-GFDL-ESM4_RCP45.rds")
-  saveRDS(object = forecast_pa,
-          file = forecast_pa_file)
-} else {
-  success <- FALSE
+for (i in 1:nrow(climate_models)) {
+  model_name <- climate_models$name[i]
+  model_directory <- paste0("data/", climate_models$directory[i])
+  message(paste0("Running ", model_name, " from ", model_directory))
+  predictors <- raster::stack(list.files(path = model_directory,
+                                         pattern = ".tif$",
+                                         full.names = TRUE))
+  pa <- predict_pa(nice_name = nice_name,
+                   model = method,
+                   predictors = predictors)
+  if (!is.null(pa)) {
+    # Save presence / absence raster
+    pa_file <- paste0("output/distributions/", nice_name,
+                      "-distribution-",
+                      method, "-", 
+                      model_name, ".rds")
+    saveRDS(object = pa,
+            file = pa_file)
+    success[i] <- TRUE
+  } else {
+    warning(paste0("No raster produced for ", species_name, " and ",
+                   model_name, " model."))
+  }
 }
 
 ################################################################################
 # Reporting
-completion_message <- paste0("Prediction process based on ", toupper(model), 
+completion_message <- paste0("Prediction process based on ", toupper(method), 
                              " for ", species_name, " complete.")
-if (!success) {
+if (!all(success)) {
   completion_message <- paste0(completion_message, 
                                " But one or more rasters were null; check for warnings.")
 }

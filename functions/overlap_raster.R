@@ -3,7 +3,7 @@
 #' 
 #' @param species_name character vector with name of insect species, e.g. 
 #' "Papilio multicaudata"
-#' @param predictor character vector indicating which climate variables on 
+#' @param predictor character vector indicating which global climate models on 
 #' which predictions are based
 #' @param model character vector of model used to generate species distribution
 #' model
@@ -17,7 +17,7 @@
 #'   \item{3}{Insect and at least one host plant species present}
 #' } 
 overlap_raster <- function(species_name, 
-                           predictor = c("current", "GFDL-ESM4_RCP45"),
+                           predictor,
                            model = c("glm", "svm")) {
   if (!require(raster)) {
     stop("overlap_raster requires raster package, but it could not be loaded")
@@ -25,7 +25,7 @@ overlap_raster <- function(species_name,
   # Load up the functions from the functions folder
   source(file = "load_functions.R")
 
-  predictor <- match.arg(predictor)
+  # predictor <- match.arg(predictor)
   model <- match.arg(model)
   
   nice_name <- tolower(x = gsub(pattern = " ",
@@ -34,7 +34,7 @@ overlap_raster <- function(species_name,
 
   # identify all host plants used by that insect
   insects_hosts <- read.csv(file = "data/insect-host.csv")
-  hosts <- insects_hosts$accepted_host[insects_hosts$insect == species_name]
+  hosts <- insects_hosts$host_accepted[insects_hosts$insect == species_name]
   
   # Make sure we have the distribution of the insect before proceeding  
   insect_dist_file <- paste0("output/distributions/",
@@ -73,7 +73,8 @@ overlap_raster <- function(species_name,
       if (file.exists(host_dist_file)) {
         host_pa_list[[host_nice_name]] <- readRDS(file = host_dist_file)
       } else {
-        message(paste0("Skipping host ", host_name, ", no distribution found."))
+        message(paste0("Skipping host ", host_name, 
+                       ", no distribution found for ", predictor))
       }
     } # end iterating over all host species
     
