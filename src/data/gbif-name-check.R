@@ -6,6 +6,9 @@
 require(dplyr)
 require(stringr)
 
+# This script is no longer needed as we now include the accepted name of the
+# hostplant (or insects) in each gbif file.
+
 # Extracts data/gbif folder (that contains individual csvs) from zip file
 unzip(zipfile = "data/gbif.zip") 
 
