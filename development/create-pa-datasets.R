@@ -35,7 +35,7 @@ for (species in species_list$accepted_name) {
   # Only proceed if file doesn't exist or we want to replace existing files
   if (!file.exists(filename) | replace) {
     if (verbose) {
-      message(paste0("\n****   Beginning process for ", species, "  ****"))
+      message(paste0("\n****  Beginning process for ", species, "  ****"))
     }    
   }
   
