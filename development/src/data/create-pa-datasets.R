@@ -101,3 +101,5 @@ for (species in species_list$accepted_name) {
                    filename, "  ****"))
   }
 }
+
+# Will likely want to put all the csv files into data/pa-datasets.zip
