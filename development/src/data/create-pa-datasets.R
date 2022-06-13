@@ -14,7 +14,7 @@ replace <- FALSE
 verbose <- TRUE
 
 # Read in gbif-reconcile
-species_list <- read.csv("development/gbif-reconcile-4spp.csv")
+species_list <- read.csv("development/data/gbif-reconcile-4spp.csv")
 
 # Using the first bil file to create a raster to use as mask for sampling 
 # background points
@@ -29,9 +29,8 @@ for (species in species_list$accepted_name) {
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species))
-  filename <- paste0("development/data/", nice_name, "-pa.csv") 
-  # Will probably want this to be in data/presence-absence/ (or something like that) 
-  
+  filename <- paste0("development/data/presence-absence/", nice_name, "-pa.csv") 
+
   # Only proceed if file doesn't exist or we want to replace existing files
   if (!file.exists(filename) | replace) {
     if (verbose) {
@@ -57,17 +56,13 @@ for (species in species_list$accepted_name) {
   # ext:   Spatially restricts sampling
   # extf:  Expands sampling a little bit
   absence <- dismo::randomPoints(mask = mask,  
-                                 n = 5000, # will want to make this bigger
+                                 n = 5000, # Will want to make this bigger
                                  ext = obs_extent, 
                                  extf = 1.25)
   
   # Convert to data frame
   absence <- as.data.frame(absence) 
-  # summary(absence)  
-  # For Angelica lucida, note that observations include Alaska & Aleutians
-  # Also note that background points never extend west of western obs
-  # Is there an issue with negative longitude values? Or some other bound?
-  
+
   # Grab worldclim data to use as predictors
   predictors <- raster::stack(list.files(path = "data/wc2-1",
                                          pattern = ".tif$",
