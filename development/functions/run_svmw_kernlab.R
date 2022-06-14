@@ -61,13 +61,7 @@ run_svmw_kernlab <- function(full_data, verbose = TRUE) {
   pNum_train <- nrow(presence_train)
   aNum_train <- nrow(absence_train)
   wt_train <- c("1" = 1, "0" = pNum_train / aNum_train)
-  
-  # Calculate weights for testing dataset 
-  # (presence and pseudoabsence data equally weighted)
-  pNum_test <- nrow(presence_test)
-  aNum_test <- nrow(absence_test)
-  wt_test <- c("1" = 1, "0" = pNum_test / aNum_test)
-  
+
   if(verbose) {
     message("Running support vector machine model.")
   }  
@@ -90,7 +84,6 @@ run_svmw_kernlab <- function(full_data, verbose = TRUE) {
   # Evaluate model performance with testing data
   svm_eval <- dismo::evaluate(p = presence_test, 
                               a = absence_test,
-                              class.weights = wt_test,
                               model = svm_model)
   
   # Calculate threshold so we can make a P/A map later
