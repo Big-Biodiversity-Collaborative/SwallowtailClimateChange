@@ -77,8 +77,8 @@ run_svmw_e1071 <- function(full_data, verbose = TRUE) {
                           # class.weights = wt_train,
                           data = sdmtrain)
   
-  # GETTING ERROR: ‘class.weights’ are set to NULL for regression mode
-  # Need to check data structure in Valavi paper
+  # ERROR: ‘class.weights’ are set to NULL for regression mode
+  # Similar error when running code from Valavi et al.
   # Other potential options: kernlab::ksvm or WeightSVM::wsvm
   
   if(verbose) {
