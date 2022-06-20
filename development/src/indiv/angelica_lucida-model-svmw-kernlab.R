@@ -33,14 +33,14 @@ full_data <- full_data %>%
   dplyr::filter(!is.na(bio1))
 
 # Run support vector machine model
-svmwk_model <- run_svmw_kernlab(full_data = full_data,
-                                verbose = TRUE)
+svmw_model <- run_svmw_kernlab(full_data = full_data,
+                               verbose = FALSE)
 
 # Save the model to file in output/models/
-model_file <- paste0("output/models/", nice_name,
-                     "-model-svmwk-current.rds")
-saveRDS(object = svmwk_model,
+model_file <- paste0("output/SDMs/", nice_name,
+                     "-sdm-svmw-current.rds")
+saveRDS(object = svmw_model,
         file = model_file)
 
-message(paste0("SVM model for ", species_name, 
+message(paste0("Weighted SVM model for ", species_name, 
                " complete; saved to ", model_file))
