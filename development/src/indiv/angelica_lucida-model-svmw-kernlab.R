@@ -37,7 +37,7 @@ svmw_model <- run_svmw_kernlab(full_data = full_data,
                                verbose = FALSE)
 
 # Save the model to file in output/models/
-model_file <- paste0("output/SDMs/", nice_name,
+model_file <- paste0("development/output/SDMs/", nice_name,
                      "-sdm-svmw-current.rds")
 saveRDS(object = svmw_model,
         file = model_file)
