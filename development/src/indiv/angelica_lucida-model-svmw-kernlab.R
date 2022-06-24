@@ -5,7 +5,7 @@
 
 require(dplyr)
 
-# Load up the functions from the functions folder
+# Load functions from the functions folder
 source(file = "load_functions.R")
 source("development/functions/run_svmw_kernlab.R")
 
@@ -27,10 +27,6 @@ pa_file <- paste0("development/data/presence-absence/",
 #   unzip(zipfile = "development/data/pa-datasets.zip")
 # }
 full_data <- read.csv(file = pa_file)
-
-# For now (until changes are made to data-gbif-qa.R), remove records with NAs
-full_data <- full_data %>%
-  dplyr::filter(!is.na(bio1))
 
 # Run support vector machine model
 svmw_model <- run_svmw_kernlab(full_data = full_data,
