@@ -4,9 +4,7 @@
 # 2022-06-13
 
 require(terra)
-# require(raster)
-require(dplyr)  # load *after* raster for easier use of select
-# require(dismo)  # background point sampling
+require(dplyr)
 
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
@@ -46,7 +44,8 @@ for (species in species_list$accepted_name) {
     dplyr::select(longitude, latitude)
   
   # Get the geographic extent of the observation data
-  obs_extent <- get_extent(data = presence)  
+  obs_extent <- get_extent(data = presence)
+    # NOTE: this function uses the raster and sp packages
   
   # Grab worldclim data to use as predictors
   predictors <- terra::rast(list.files(path = "data/wc2-1",
