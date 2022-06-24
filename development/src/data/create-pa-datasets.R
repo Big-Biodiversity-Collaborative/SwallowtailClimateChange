@@ -65,7 +65,7 @@ for (species in species_list$accepted_name) {
   # Use random sampling to generate pseudo-absence points and extract predictor 
   # values
   absence <- terra::spatSample(x = predictors,  
-                               size = 5000, # Will want to make this bigger
+                               size = 20000, # Might want to make this bigger
                                method = "random",
                                na.rm = TRUE,
                                values = TRUE,
