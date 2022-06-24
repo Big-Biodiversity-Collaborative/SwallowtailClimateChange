@@ -48,11 +48,12 @@ for (i in 1:length(gbif_files)) {
 
     # If appropriate, update files, removing records that are out of bounds
     data <- data %>%
-      filter(!(gbifID %in% any_oob$gbifID))
+      filter(!(gbifID %in% any_oob$gbifID)) %>%
+      select(-climate)
     
-    # write.csv(x = data,
-    #           file = gbif_files[i],
-    #           row.names = FALSE)
+    write.csv(x = data,
+              file = gbif_files[i],
+              row.names = FALSE)
   }
 }
 
@@ -65,9 +66,9 @@ arrange(gbif_obs, desc(perc_excluded))
   # 93% of species with < 1% of records excluded
 
 # Create a zip file of all the gbif flies (first removing previous archive)
-# zipfile <- "data/gbif.zip"
-# if (file.exists(zipfile)) {
-#   invisible(file.remove(zipfile))
-# }
-# zip(zipfile = "data/gbif.zip",
-#     files = gbif_files)
+zipfile <- "data/gbif.zip"
+if (file.exists(zipfile)) {
+  invisible(file.remove(zipfile))
+}
+zip(zipfile = "data/gbif.zip",
+    files = gbif_files)
