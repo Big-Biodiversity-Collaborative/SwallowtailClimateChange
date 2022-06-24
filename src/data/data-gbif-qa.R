@@ -48,11 +48,12 @@ for (i in 1:length(gbif_files)) {
 
     # If appropriate, update files, removing records that are out of bounds
     data <- data %>%
-      filter(!(gbifID %in% any_oob$gbifID))
+      filter(!(gbifID %in% any_oob$gbifID)) %>%
+      select(-climate)
     
-    # write.csv(x = data,
-    #           file = gbif_files[i],
-    #           row.names = FALSE)
+    write.csv(x = data,
+              file = gbif_files[i],
+              row.names = FALSE)
   }
 }
 
