@@ -30,6 +30,7 @@ The project uses the following additional R packages:
 + raster
 + RColorBrewer
 + rgdal
++ Rtools (needed to use the zip() function on Windows machines)
 + sp
 + spocc
 + stringr
