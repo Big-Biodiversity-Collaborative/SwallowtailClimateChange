@@ -4,14 +4,12 @@
 #' all lowercase with spaces replaced by underscores (i.e. 
 #' "papilio_multicaudata" for Papilio multicaudata)
 #' @param predictors bioclimatic data to use for predictions
-#' @param model character indicating model (e.g. "glm" or "svm") to use for 
-#' predictions
+#' @param model saved SDM model 
 #' @param pred_extf numeric indicating how far beyond current observations to 
 #' make predictions. e.g. a value of 1.1 will extend the geographic extent by 
 #' 5% on all four sides of the extent of current observations
 predict_sdm <- function(nice_name, 
                         predictors, 
-                        # model = c("glm", "svmw"), 
                         model,
                         pred_extf = 1.5) {
   if (!require(raster)) {
@@ -24,8 +22,6 @@ predict_sdm <- function(nice_name,
     stop("predict_sdm requires dismo package, but it could not be loaded")
   }
   source(file = "functions/get_extent.R")
-  
-  # model <- match.arg(arg = model)
 
   # Get the current observations, to dictate the geographic extent of the 
   # predicted presence / absence
@@ -46,19 +42,7 @@ predict_sdm <- function(nice_name,
     p_extent <- get_extent(data = pa)
     rm(pa)
   }
-  
-  # # Load the model that includes the threshold for determining 
-  # # presence / absence
-  # model_file <- paste0("development/output/SDMs/", nice_name,
-  #                      "-sdm-", model,".rds")
-  # if (!file.exists(model_file)) {
-  #   warning(paste0("No model file found for ", nice_name, "; ", model, 
-  #                  " predictions not made"))
-  #   return(NULL)
-  # }
-  # 
-  # sdm_model <- readRDS(file = model_file)
-  
+
   # Calculate probabilities based on predictors and model
   if (is.null(p_extent)) {
     # For some reason, obs not found, so cannot restrict extent
@@ -71,10 +55,7 @@ predict_sdm <- function(nice_name,
   }
     # Note: predict() above is using the raster package
   
-  # Send back this raster (with the predicted values, not 0/1)?
+  # Send back this raster with the predicted values
   return(preds)
-  
-  # # Make a raster of presence / absence values?
-  # pa_raster <- preds > sdm_model$thresh
-  
+
 }
