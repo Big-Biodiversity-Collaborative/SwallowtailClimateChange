@@ -9,8 +9,11 @@
 #' @param pred_extf numeric indicating how far beyond current observations to 
 #' make predictions. e.g. a value of 1.1 will extend the geographic extent by 
 #' 5% on all four sides of the extent of current observations
-predict_sdm <- function(nice_name, predictors, model = c("glm", "svm"), 
-                       pred_extf = 1.5) {
+predict_sdm <- function(nice_name, 
+                        predictors, 
+                        # model = c("glm", "svmw"), 
+                        model,
+                        pred_extf = 1.5) {
   if (!require(raster)) {
     stop("predict_sdm requires raster package, but it could not be loaded")
   }
@@ -22,7 +25,7 @@ predict_sdm <- function(nice_name, predictors, model = c("glm", "svm"),
   }
   source(file = "functions/get_extent.R")
   
-  model <- match.arg(arg = model)
+  # model <- match.arg(arg = model)
 
   # Get the current observations, to dictate the geographic extent of the 
   # predicted presence / absence
@@ -44,26 +47,26 @@ predict_sdm <- function(nice_name, predictors, model = c("glm", "svm"),
     rm(pa)
   }
   
-  # Load the model that includes the threshold for determining 
-  # presence / absence
-  model_file <- paste0("development/output/SDMs/", nice_name,
-                       "-sdm-", model,".rds")
-  if (!file.exists(model_file)) {
-    warning(paste0("No model file found for ", nice_name, "; ", model, 
-                   " predictions not made"))
-    return(NULL)
-  }
-
-  sdm_model <- readRDS(file = model_file)
+  # # Load the model that includes the threshold for determining 
+  # # presence / absence
+  # model_file <- paste0("development/output/SDMs/", nice_name,
+  #                      "-sdm-", model,".rds")
+  # if (!file.exists(model_file)) {
+  #   warning(paste0("No model file found for ", nice_name, "; ", model, 
+  #                  " predictions not made"))
+  #   return(NULL)
+  # }
+  # 
+  # sdm_model <- readRDS(file = model_file)
   
   # Calculate probabilities based on predictors and model
   if (is.null(p_extent)) {
     # For some reason, obs not found, so cannot restrict extent
     preds <- predict(predictors, 
-                     sdm_model$model)
+                     model)
   } else {
     preds <- predict(predictors, 
-                     sdm_model$model, 
+                     model, 
                      ext = p_extent * pred_extf)
   }
     # Note: predict() above is using the raster package
