@@ -21,6 +21,8 @@ predict_sdm <- function(nice_name, predictors, model = c("glm", "svm"),
     stop("predict_sdm requires dismo package, but it could not be loaded")
   }
   source(file = "functions/get_extent.R")
+  
+  model <- match.arg(arg = model)
 
   # Get the current observations, to dictate the geographic extent of the 
   # predicted presence / absence
