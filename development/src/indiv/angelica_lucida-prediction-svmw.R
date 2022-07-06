@@ -42,15 +42,15 @@ current_predictors <- raster::stack(list.files(path = "data/wc2-1",
                                                full.names = TRUE))
 
 # Using predict_sdm to return predictions from SDM model
-  # Note that this is different than predict_pa() outside of development folder, 
-  # where the function returned a presence-absence raster using the spec_sens
-  # threshold
+  # Note that this is different than predict_pa() function, which returned a  
+  # presence-absence raster using the spec_sens threshold
 current_preds <- predict_sdm(nice_name = nice_name,
                              model = sdm_model$model,
                              predictors = current_predictors)
 
 # Map model predictions
 # plot(current_preds)
+# Note: I'm not sure what these values are/mean for the weighted SVM
 
 # Make a raster of presence / absence values
 current_pa <- current_preds > sdm_model$thresh
