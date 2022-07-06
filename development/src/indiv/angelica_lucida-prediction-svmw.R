@@ -7,6 +7,7 @@ require(raster)
 
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
+source(file = "development/functions/predict_sdm.R")
 
 genus <- "Angelica"
 species <- "lucida"
@@ -23,33 +24,41 @@ message(paste0("Predicting presence / absence based on ", toupper(model),
 # To keep track if any returned presence / absence rasters were NULL
 success <- TRUE 
 
+# Load the SDM model, which includes the threshold for determining 
+# presence / absence
+model_file <- paste0("development/output/SDMs/", nice_name,
+                     "-sdm-", model,".rds")
+if (!file.exists(model_file)) {
+  warning(paste0("No model file found for ", species_name, "; ", toupper(model), 
+                 " predictions cannot be made"))
+}
+
+sdm_model <- readRDS(file = model_file)
+
 ################################################################################
 # Start by doing prediction for current conditions (worldclim data)
 current_predictors <- raster::stack(list.files(path = "data/wc2-1",
                                                pattern = ".tif$",
                                                full.names = TRUE))
 
+# Using predict_sdm to return predictions from SDM model
+  # Note that this is different than predict_pa() outside of development folder, 
+  # where the function returned a presence-absence raster using the spec_sens
+  # threshold
+current_preds <- predict_sdm(nice_name = nice_name,
+                             model = sdm_model$model,
+                             predictors = current_predictors)
 
-current_preds <- predict_pa(nice_name = nice_name,
-                            model = model,
-                            predictors = current_predictors)
+# Map model predictions
+# plot(current_preds)
 
-# Need to figure out whether we're returning a pa raster (0/1)
-# or a raster with predicted values.  If the latter, we need to load 
-# the model so the threshold value is available...
-
-
-  # Plot predictions
-  plot(current_preds)
-  
-  # Make a raster of presence / absence values
-  pa_raster <- current_preds > sdm_model$thresh
-   # Can't do this without loading model list 
-   # Should we do that in this script instead of 
+# Make a raster of presence / absence values
+current_pa <- current_preds > sdm_model$thresh
 
 if (!is.null(current_pa)) {
   # Save presence / absence raster
-  current_pa_file <- paste0("output/distributions/", nice_name,
+  current_pa_file <- paste0("development/output/distributions/", 
+                            nice_name,
                             "-distribution-",
                             model, "-current.rds")
   saveRDS(object = current_pa,
