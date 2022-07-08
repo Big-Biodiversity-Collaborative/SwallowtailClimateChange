@@ -59,3 +59,10 @@ logs/*.log
 # Auto-generated scripts for individual species
 scripts/*.R
 src/indiv/*.R
+
+# Output in the development folder
+development/output/distributions/*
+!development/output/distributions/.gitkeep
+development/output/SDMs/*
+!development/output/SDMs/.gitkeep
+
