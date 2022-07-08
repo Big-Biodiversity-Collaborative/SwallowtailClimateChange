@@ -67,3 +67,40 @@ if (!is.null(current_pa)) {
   success <- FALSE
 }
 
+################################################################################
+# Predict values under future conditions (2 emissions scenarios, 2 time periods)
+
+ssps <- c("ssp245", "ssp370")
+yrs <- c("2041", "2071")
+
+for (ssp in ssps) {
+  for (yr in yrs) {
+    predictor_filepath <- paste0("data/ensemble/",
+                                 ssp, "/",
+                                 yr)
+    predictors <- raster::stack(list.files(path = predictor_filepath,
+                                           pattern = ".tif$",
+                                           full.names = TRUE))  
+    
+    preds <- predict_sdm(nice_name = nice_name,
+                         model = sdm_model$model,
+                         predictors = predictors)
+    
+    # Make a raster of presence / absence values
+    future_pa <- preds > sdm_model$thresh
+    
+    if (!is.null(future_pa)) {
+      # Save presence / absence raster
+      future_pa_file <- paste0("development/output/distributions/", 
+                                nice_name,
+                                "-distribution-",
+                                model, "-",
+                                ssp, "-",
+                                yr, ".rds")
+      saveRDS(object = future_pa,
+              file = future_pa_file)
+    } else {
+      success <- FALSE
+    }    
+  }
+}
