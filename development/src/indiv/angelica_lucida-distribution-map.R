@@ -11,13 +11,15 @@ species <- "lucida"
 
 model <- "svmw"
 
-time_period <- "current"
+time_periods <- c("current", 
+                  "ssp245-2041", "ssp245-2071", 
+                  "ssp370-2041", "ssp370-2071")
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
 
 distribution_map <- single_map_devel(species_name,
-                                     time_period, 
+                                     time_period = time_periods[5], 
                                      model)
 print(distribution_map)
 
