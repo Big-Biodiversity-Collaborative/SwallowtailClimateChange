@@ -47,7 +47,7 @@ run_maxent_notune <- function(full_data, verbose = TRUE) {
   
   # Arrange predictor columns in full_data (so they appear in order)
   predvars <- paste0("bio", 1:19)
-  full_data <- select(full_data, c("pa","fold",all_of(predvars)))
+  full_data <- dplyr::select(full_data, c("pa","fold",all_of(predvars)))
   
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
@@ -56,7 +56,7 @@ run_maxent_notune <- function(full_data, verbose = TRUE) {
   presence_test <- full_data %>%
     filter(pa == 1) %>%
     filter(fold == 1) %>%
-    dplyr::select(predvars)
+    dplyr::select(all_of(predvars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
@@ -64,13 +64,13 @@ run_maxent_notune <- function(full_data, verbose = TRUE) {
   absence_test <- full_data %>%
     filter(pa == 0) %>%
     filter(fold == 1) %>%
-    dplyr::select(predvars)
+    dplyr::select(all_of(predvars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
 
-  # Identify a folder to store maxent files
-  max_file <- "development/output/maxent"
+  # Identify a folder to store maxent files (Do we need to store these?)
+  # max_file <- "development/output/maxent"
   
   if(verbose) {
     message("Running MaxExt model.")
@@ -80,7 +80,7 @@ run_maxent_notune <- function(full_data, verbose = TRUE) {
   maxent_model <- dismo::maxent(x = sdmtrain[,3:ncol(sdmtrain)],
                                 p = sdmtrain$pa,
                                 removeDuplicates = FALSE,
-                                path = max_file,
+                                # path = max_file,
                                 args = "nothreshold")
 
   if(verbose) {
