@@ -1,4 +1,4 @@
-# Create a distribution map for Angelica lucida
+# Create a distribution map for Papilio brevicauda
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-07-07
@@ -9,7 +9,7 @@ source(file = "development/functions/single_map_devel.R")
 genus <- "Papilio"
 species <- "brevicauda"
 
-model <- "svmw"
+model <- "maxent"
 
 time_periods <- c("current", 
                   "ssp245-2041", "ssp245-2071", 
