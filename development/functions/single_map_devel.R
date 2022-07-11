@@ -18,7 +18,7 @@
 #' }
 single_map_devel <- function(species_name, 
                              time_period,
-                             model = c("glm", "svmw")) {
+                             model = c("glm", "svmw", "maxent")) {
   if (!require(raster)) {
     stop("single_map_devel requires raster package, but it could not be loaded")
   }
