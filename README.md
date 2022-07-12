@@ -117,8 +117,10 @@ linear model and "svm" for support vector machine.
    species richness for current and forecast climate conditions and a map 
    showing the change between current and forecast estimates
 
-
-Example of analysis workflow with _Papilio rumiko_ and one of its host plants, _Ptelea trifoliata_.
+### Analysis workflow example
+Analysis workflow with _Papilio rumiko_ and one of its host plants, 
+_Ptelea trifoliata_, from bulk processing of single-species analyses (step 3, 
+above).
 ![Example of analysis workflow with _Papilio rumiko_ and one of its host plants, _Ptelea trifoliata_](docs/analysis-workflow.svg)
 
 ## Directory structure
