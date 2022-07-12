@@ -37,10 +37,6 @@ output/maps/*
 output/models/*.rds
 !output/models/.gitkeep
 
-# Proportion of range overlaps
-output/overlaps/*
-!output/overlaps/.gitkeep
-
 # General data visualization
 output/plots/*
 !output/plots/.gitkeep

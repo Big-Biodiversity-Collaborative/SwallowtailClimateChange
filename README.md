@@ -68,12 +68,17 @@ linear model and "svm" for support vector machine.
    1. **src/data/download-data.R**: Download observational data from GBIF to 
    the data folder; note by default the data files that are downloaded by this 
    script are _not_ under version control
-   2. **src/data/prep-climate-data.R**: Download monthly climate data for time 
-   span of interest (2000-2018) and calculate the average values for the 19 
-   standard bioclimatic variables
-   3. **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, 
+   2. **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, 
    to ensure observations fall within geographic area of interest, in this 
    case, North America
+   3. **src/data/prep-climate-data.R**: Download monthly climate data for time 
+   span of interest (2000-2018) and calculate the average values for the 19 
+   standard bioclimatic variables (should not need to be run locally; data are 
+   available in data/wc2-1 directory)
+   4. **src/data/prep-forecast-data.R**: Download monthly climate data for 
+   ensemble of forecast climate models and calculate the average values for the 
+   19 standard bioclimatic variables (should not need to be run locally; data 
+   are available in data/ensemble sub-directories)
 2. Preparing R scripts for analyses of individual species
    1. **src/bash/build-scripts-model.sh**: bash shell scripts to build species 
    distribution models for individual species; one script is built for each 
@@ -112,6 +117,8 @@ linear model and "svm" for support vector machine.
    species richness for current and forecast climate conditions and a map 
    showing the change between current and forecast estimates
 
+![Example of analysis workflow with _Papilio rumiko_ and one of its host plants, _Ptelea trifoliata_](docs/analysis-workflow.svg)
+
 ## Directory structure
 
 + data
@@ -127,6 +134,7 @@ linear model and "svm" for support vector machine.
         + distributions: predicted distributions based on species distribution 
         models (from SDMs folder) and climate data (either current or forecast)
     + src: 
++ docs: additional detailed documentation
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
 (files with .log extension are not under version control)
