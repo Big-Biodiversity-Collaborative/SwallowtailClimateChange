@@ -90,7 +90,7 @@ linear model and "svm" for support vector machine.
    3. **src/bash/build-scripts-overlap-raster.sh**: bash shell scripts to 
    build R scripts that create overlap rasters for each species of insect with 
    its respective host plant(s)
-3. Bulk processing of single-species analyses
+3. Bulk processing of single-species analyses (see below for example graphic)
    1. **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each species 
    distribution model creation script created in 2.i (operates in parallel 
    using `parallel::mclapply`)
@@ -117,6 +117,8 @@ linear model and "svm" for support vector machine.
    species richness for current and forecast climate conditions and a map 
    showing the change between current and forecast estimates
 
+
+Example of analysis workflow with _Papilio rumiko_ and one of its host plants, _Ptelea trifoliata_.
 ![Example of analysis workflow with _Papilio rumiko_ and one of its host plants, _Ptelea trifoliata_](docs/analysis-workflow.svg)
 
 ## Directory structure
