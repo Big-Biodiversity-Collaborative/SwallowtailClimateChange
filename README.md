@@ -27,6 +27,7 @@ The project uses the following additional R packages:
 + kernlab
 + maptools
 + parallel (usually part of R distribution, but needs explicit loading)
++ randomForest
 + raster
 + RColorBrewer
 + rgdal
@@ -34,7 +35,19 @@ The project uses the following additional R packages:
 + sp
 + spocc
 + stringr
++ terra
 + tidyr
+
+To run models implementing the MaxEnt approach, you will also need the MaxEnt 
+program, which can be downloaded from 
+[https://biodiversityinformatics.amnh.org/open_source/maxent/](https://biodiversityinformatics.amnh.org/open_source/maxent/).
+The file maxent.jar then needs to be moved (or copied) to the java folder of 
+the dismo package. You can find where that folder exists on your machine by 
+typing, in an R console:
+
+```{r}
+system.file("java", package = "dismo")
+```
 
 ## Workflow
 
@@ -102,9 +115,18 @@ linear model and "svm" for support vector machine.
 ## Directory structure
 
 + data
-    + cmip5/2_5m: forecast climate data (not under version control)
+    + ensemble: forecast climate data
     + wc2-1: current climate data
-    + wc2-5: **DEPRECATED** current climate data (not under version control)
++ development: directory for script development
+    + data: data for developmental purposes
+    + functions: R functions under development
+    + output: destination folders for output from developmental scripts/
+    functions; generally files are not under version control, although 
+    directory structure is.
+        + SDMs: model objects from species distribution modeling
+        + distributions: predicted distributions based on species distribution 
+        models (from SDMs folder) and climate data (either current or forecast)
+    + src: 
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
 (files with .log extension are not under version control)
@@ -113,7 +135,6 @@ linear model and "svm" for support vector machine.
     species
     + maps: distribution maps (image files) for insect species and hosts
     + models: species distribution model objects
-    + overlaps: **DEPRECATED**
     + plots: miscellaneous data visualizations
     + ranges: composite rasters of insect and host species and estimates of 
     range areas

@@ -4,9 +4,6 @@
 .Ruserdata
 
 # Climate data
-data/wc2-5
-data/cmip5
-data/envirem
 data/wc2-1/annual/*
 !data/wc2-1/annual/.gitkeep
 data/wc2-1/monthly/*
