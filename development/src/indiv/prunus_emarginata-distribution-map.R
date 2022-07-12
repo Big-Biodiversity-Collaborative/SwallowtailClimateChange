@@ -1,4 +1,4 @@
-# Create a distribution map for Angelica lucida
+# Create a distribution map for Prunus emarginata
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-07-07

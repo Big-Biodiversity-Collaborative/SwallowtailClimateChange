@@ -1,4 +1,4 @@
-# Generate predicted distributions for Angelica lucida from a weighted SVM
+# Generate predicted distributions for Prunus emarginata from a weighted SVM
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-07-05
