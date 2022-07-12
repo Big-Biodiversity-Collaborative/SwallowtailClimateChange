@@ -6,6 +6,8 @@
 #' on current climate or future climate (projections)
 #' @param model character vector of model used to generate species distribution
 #' model
+#' @param show_obs logical indicating whether GBIF observations that were used 
+#' in the SDM should be overlaid on the current predicted distribution map
 #' 
 #' @return a ggplot object of a species' distribution
 #' 
@@ -13,12 +15,14 @@
 #' \dontrun{
 #' my_plot <- single_map(species_name = "Papilio brevicauda",
 #'                       time_period = "current",
-#'                       model = "svmw")
+#'                       model = "maxent",
+#'                       show_obs = TRUE)
 #' print(my_plot)
 #' }
 single_map_devel <- function(species_name, 
                              time_period,
-                             model = c("glm", "svmw", "maxent")) {
+                             model = c("glm", "svmw", "maxent"),
+                             show_obs = FALSE) {
   if (!require(raster)) {
     stop("single_map_devel requires raster package, but it could not be loaded")
   }
@@ -28,12 +32,24 @@ single_map_devel <- function(species_name,
   if (!require(ggplot2)) {
     stop("single_map_devel requires ggplot2 package, but it could not be loaded")
   }
-
+  
   model <- match.arg(model)
   
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
+  
+  if (show_obs == TRUE & time_period == "current") {
+    
+    pa_file <- paste0("development/data/presence-absence/",
+                      tolower(genus), "_", species, "-pa.csv")
+    
+    pa <- read.csv(pa_file)
+    
+    obs <- pa %>%
+      dplyr::filter(pa == 1) %>%
+      dplyr::rename(Longitude = x, Latitude = y)
+  }  
   
   distribution_file <- paste0("development/output/distributions/",
                               nice_name, 
@@ -97,5 +113,16 @@ single_map_devel <- function(species_name,
     theme_bw() +
     theme(axis.title = element_blank(),
           legend.title = element_blank())
-  return(distribution_plot)  
+  
+  if (show_obs == TRUE & time_period == "current") {  
+    obs_points <- geom_point(data = obs,
+                             aes(x = Longitude, 
+                                 y = Latitude,
+                                 fill = NULL),
+                             show.legend = FALSE)
+    distribution_wpoints <- distribution_plot + obs_points
+    return(distribution_wpoints)
+  } else {
+    return(distribution_plot)
+  }
 }
