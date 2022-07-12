@@ -9,18 +9,21 @@ source(file = "development/functions/single_map_devel.R")
 genus <- "Angelica"
 species <- "lucida"
 
-model <- "svmw"
+model <- "maxent"
 
 time_periods <- c("current", 
                   "ssp245-2041", "ssp245-2071", 
                   "ssp370-2041", "ssp370-2071")
+
+show_obs <- TRUE
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
 
 distribution_map <- single_map_devel(species_name,
                                      time_period = time_periods[5], 
-                                     model)
+                                     model,
+                                     show_obs = TRUE)
 print(distribution_map)
 
 
