@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="7.301868in"
+   width="7.274159in"
    height="4.6327162in"
-   viewBox="0 0 185.46745 117.67099"
+   viewBox="0 0 184.76364 117.67099"
    version="1.1"
    id="svg8862"
    inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
@@ -311,9 +311,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="502.45288"
-     inkscape:cy="352.09245"
+     inkscape:zoom="1.4"
+     inkscape:cx="444.16258"
+     inkscape:cy="164.87124"
      inkscape:document-units="mm"
      inkscape:current-layer="g9768"
      showgrid="false"
@@ -343,45 +343,45 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-15.216275,-32.016277)">
+     transform="translate(-15.450869,-32.016277)">
     <g
        id="g9768"
        transform="translate(-13.758331,-26.987511)">
       <text
          id="text1036-3-0-9-0-5-6-2"
          y="81.281456"
-         x="36.136955"
+         x="36.371555"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
          xml:space="preserve"><tspan
            id="tspan1895-8"
            style="stroke-width:0.26458332"
            y="81.281456"
-           x="36.136955"
-           sodipodi:role="line">src/indiv/Papilio_rumiko-model-glm.R</tspan></text>
+           x="36.371555"
+           sodipodi:role="line">src/indiv/papilio_rumiko-model-glm.R</tspan></text>
       <text
          id="text1036-3-0-9-0-5-6-6-4"
          y="118.36516"
-         x="32.724236"
+         x="32.958843"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
          xml:space="preserve"><tspan
            id="tspan1895-5-4"
            style="stroke-width:0.26458332"
            y="118.36516"
-           x="32.724236"
-           sodipodi:role="line">src/indiv/Papilio_rumiko-prediction-glm.R</tspan></text>
+           x="32.958843"
+           sodipodi:role="line">src/indiv/papilio_rumiko-prediction-glm.R</tspan></text>
       <text
          id="text1036-3-0-9-0-5-6-9-9"
          y="155.67854"
-         x="28.844381"
+         x="29.078976"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
          xml:space="preserve"><tspan
            id="tspan1895-7-4"
            style="stroke-width:0.26458332"
            y="155.67854"
-           x="28.844381"
-           sodipodi:role="line">src/indiv/Papilio_rumiko-overlap-raster-glm.R</tspan></text>
+           x="29.078976"
+           sodipodi:role="line">src/indiv/papilio_rumiko-overlap-raster-glm.R</tspan></text>
       <g
-         transform="translate(-345.82991,-60.891967)"
+         transform="translate(-345.82993,-60.891967)"
          id="g3818">
         <text
            xml:space="preserve"
@@ -456,7 +456,7 @@
            y="157.15121" />
       </g>
       <g
-         transform="translate(-354.30795,-23.996083)"
+         transform="translate(-354.30797,-23.996083)"
          id="g3818-8">
         <text
            xml:space="preserve"
@@ -480,7 +480,7 @@
            y="157.57187" />
       </g>
       <g
-         transform="translate(-242.54911,-60.891967)"
+         transform="translate(-242.5491,-60.891967)"
          id="g3818-68">
         <text
            xml:space="preserve"
@@ -528,7 +528,7 @@
            y="157.15121" />
       </g>
       <g
-         transform="translate(-142.89969,-7.7431077)"
+         transform="translate(-142.89968,-7.7431077)"
          id="g3818-8-6">
         <text
            xml:space="preserve"
@@ -583,18 +583,18 @@
            style="stroke-width:0.26458332"
            y="118.36516"
            x="136.38377"
-           sodipodi:role="line">src/indiv/Ptelea_trifoliata-prediction-glm.R</tspan></text>
+           sodipodi:role="line">src/indiv/ptelea_trifoliata-prediction-glm.R</tspan></text>
       <text
          id="text1036-3-0-9-0-5-6-2-6"
          y="81.281456"
-         x="139.79646"
+         x="140.0311"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
          xml:space="preserve"><tspan
            id="tspan1895-8-8"
            style="stroke-width:0.26458332"
            y="81.281456"
-           x="139.79646"
-           sodipodi:role="line">src/indiv/Ptelea_trifoliata-model-glm.R</tspan></text>
+           x="140.0311"
+           sodipodi:role="line">src/indiv/ptelea_trifoliata-model-glm.R</tspan></text>
       <g
          transform="translate(-362.01913,13.373889)"
          id="g3818-8-7">
@@ -627,7 +627,7 @@
       <path
          inkscape:connector-curvature="0"
          id="path4139-8"
-         d="m 71.110534,66.744664 v 8.882441"
+         d="m 71.110519,66.744664 v 8.882441"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0)" />
       <path
          sodipodi:nodetypes="cc"
@@ -644,27 +644,27 @@
       <path
          inkscape:connector-curvature="0"
          id="path4139-8-7"
-         d="m 71.110534,84.600214 v 8.882449"
+         d="m 71.110519,84.600214 v 8.882449"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0-9)" />
       <path
          inkscape:connector-curvature="0"
          id="path4139-8-74"
-         d="m 71.110534,103.75011 v 8.88244"
+         d="m 71.110519,103.75011 v 8.88244"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0-8)" />
       <path
          inkscape:connector-curvature="0"
          id="path4139-8-7-9"
-         d="m 71.110534,121.91675 v 8.88246"
+         d="m 71.110519,121.91675 v 8.88246"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0-9-9)" />
       <path
          inkscape:connector-curvature="0"
          id="path4139-8-74-6"
-         d="m 71.110534,141.06666 v 8.88244"
+         d="m 71.110519,141.06666 v 8.88244"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0-8-5)" />
       <path
          inkscape:connector-curvature="0"
          id="path4139-8-7-9-2"
-         d="m 71.110534,159.2333 v 8.88245"
+         d="m 71.110519,159.2333 v 8.88245"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0-9-9-8)" />
       <path
          sodipodi:nodetypes="cc"
@@ -700,7 +700,7 @@
          d="m 175.47803,141.06666 -59.9175,7.29494"
          style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend-0-8-5-1)" />
       <g
-         transform="translate(-143.5229,8.2558072)"
+         transform="translate(-143.52289,8.2558072)"
          id="g3818-8-6-8">
         <text
            xml:space="preserve"
