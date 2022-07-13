@@ -137,7 +137,7 @@ above).
         + SDMs: model objects from species distribution modeling
         + distributions: predicted distributions based on species distribution 
         models (from SDMs folder) and climate data (either current or forecast)
-    + src: 
+    + src: R scripts under development
 + docs: additional detailed documentation
 + functions: R functions used by the project
 + logs: Log files from parallel processing of modeling and forecasting steps 
