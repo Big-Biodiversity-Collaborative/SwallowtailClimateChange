@@ -46,11 +46,11 @@ current_predictors <- raster::stack(list.files(path = "data/wc2-1",
 # presence-absence raster using the spec_sens threshold
 current_preds <- predict_sdm(nice_name = nice_name,
                              model = sdm_model$model,
-                             predictors = current_predictors)
+                             predictors = current_predictors,
+                             yr = "current")
 
 # Map model predictions
 # plot(current_preds)
-# Note: 
 
 # Make a raster of presence / absence values
 current_pa <- current_preds > sdm_model$thresh
@@ -84,7 +84,8 @@ for (ssp in ssps) {
     
     preds <- predict_sdm(nice_name = nice_name,
                          model = sdm_model$model,
-                         predictors = predictors)
+                         predictors = predictors,
+                         yr = yr)
     
     # Make a raster of presence / absence values
     future_pa <- preds > sdm_model$thresh
