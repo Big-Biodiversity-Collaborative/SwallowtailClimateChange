@@ -8,10 +8,10 @@
 #' @param yr character indicating year for which predictions are being made 
 #' (eg, current, 2041, 2071)
 
-predict_sdm_insect <- function(nice_name, 
-                               predictors, 
-                               model,
-                               yr) {
+predict_sdm <- function(nice_name, 
+                        predictors, 
+                        model,
+                        yr) {
   if (!require(raster)) {
     stop("predict_sdm requires raster package, but it could not be loaded")
   }
