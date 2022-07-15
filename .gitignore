@@ -64,5 +64,7 @@ development/output/SDMs/*
 !development/output/SDMs/.gitkeep
 development/output/overlap/*
 !development/output/overlap/.gitkeep
+development/output/maps/*
+!development/output/maps/.gitkeep
 
 
