@@ -9,11 +9,11 @@ require(dplyr)
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-replace <- TRUE
+replace <- FALSE
 verbose <- TRUE
 
 # Read in gbif-reconcile
-species_list <- read.csv("development/data/gbif-reconcile-4spp.csv")
+species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
 
 for (species in species_list$accepted_name) {
   nice_name <- tolower(x = gsub(pattern = " ",
@@ -22,12 +22,12 @@ for (species in species_list$accepted_name) {
   filename <- paste0("development/data/presence-absence/", nice_name, "-pa.csv") 
 
   # Only proceed if file doesn't exist or we want to replace existing files
-  if (!file.exists(filename) | replace) {
+  if (file.exists(filename) & replace == FALSE) next
+    
     if (verbose) {
       message(paste0("\n****  Beginning process for ", species, "  ****"))
     }    
-  }
-  
+
   # Load observation data
   obs_file <- paste0("data/gbif/",
                      nice_name,
@@ -65,12 +65,16 @@ for (species in species_list$accepted_name) {
   # Use random sampling to generate pseudo-absence points and extract predictor 
   # values
   absence <- terra::spatSample(x = predictors,  
-                               size = 20000, # Might want to make this bigger
+                               size = 20000,
                                method = "random",
                                na.rm = TRUE,
                                values = TRUE,
                                xy = TRUE,
                                ext = obs_extent * 1.25)
+  # Note: if extent is small, function may not be able to generate the indicated 
+  # number of points (size, here 20000) because the default is to select cells
+  # without replacement. If this happens, R will return a warning:
+  # [spatSample] fewer cells returned than requested
 
   # Make a vector of appropriate length with 0/1 values for 
   # (pseudo)absence/presence
