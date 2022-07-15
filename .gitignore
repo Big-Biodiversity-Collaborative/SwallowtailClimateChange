@@ -53,6 +53,10 @@ logs/*.log
 scripts/*.R
 src/indiv/*.R
 
+# Presence-absence data in development folder
+development/data/presence-absence/*
+!development/data/presence-absence/.gitkeep
+
 # Output in the development folder
 development/output/distributions/*
 !development/output/distributions/.gitkeep
