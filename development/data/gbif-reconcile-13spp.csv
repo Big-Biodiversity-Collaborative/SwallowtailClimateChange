@@ -1,0 +1,14 @@
+"genus","species","gbif_name","accepted_name","notes","gbif_count","gbif_date","include"
+"Amyris","texana","Amyris texana","Amyris texana","",176,"2022-05-18",TRUE
+"Angelica","lucida","Angelica lucida","Angelica lucida","",962,"2022-05-18",TRUE
+"Casimiroa","greggii","Casimiroa greggii","Casimiroa greggii","",142,"2022-05-18",TRUE
+"Papilio","brevicauda","Papilio brevicauda","Papilio brevicauda","",647,"2022-05-18",TRUE
+"Papilio","cresphontes","Papilio cresphontes","Papilio cresphontes","includes some observations that are likely P. rumiko",16747,"2022-05-18",TRUE
+"Papilio","multicaudata","Papilio multicaudata","Papilio multicaudata","",7417,"2022-05-18",TRUE
+"Papilio","rumiko","Papilio rumiko","Papilio rumiko","includes at least some P. cresphontes – see Long Island observation",5533,"2022-05-18",TRUE
+"Prunus","emarginata","Prunus emarginata","Prunus emarginata","",3412,"2022-05-18",TRUE
+"Ptelea","trifoliata","Ptelea trifoliata","Ptelea trifoliata","Includes P. baldwinii",5588,"2022-05-18",TRUE
+"Ruta","graveolens","Ruta graveolens","Ruta graveolens","",279,"2022-05-18",TRUE
+"Zanthoxylum","americanum","Zanthoxylum americanum","Zanthoxylum americanum","",3048,"2022-05-18",TRUE
+"Zanthoxylum","clava-herculis","Zanthoxylum clava-herculis","Zanthoxylum clava-herculis","",3682,"2022-05-18",TRUE
+"Zanthoxylum","fagara","Zanthoxylum fagara","Zanthoxylum fagara","",1951,"2022-05-18",TRUE
