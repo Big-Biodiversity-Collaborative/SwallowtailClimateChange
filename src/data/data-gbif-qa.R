@@ -5,23 +5,28 @@
 
 require(MASS)
 require(terra)
+require(raster)
 require(dplyr)
 
 # Need to check each gbif file to make sure 
 #     observations are restricted to CA, MX, US
 #     in locations where climate data are available
+#     inside the 99% contour of observations
 
-# Logical indicating whether or not to update data files, removing any 
-# observations that are out of bounds
+# Logical indicating whether or not to remove any observations that are out of 
+# bounds as defined by those in locations with no (terrestrial) climate data
 remove_oob <- TRUE
 
 # Logical indicating whether or not to apply envelope filtering; set to TRUE
-# to filter by kernel density estimate envelop; EXPERIMENTAL!!!
+# to filter by kernel density estimate envelop. EXPERIMENTAL!!!
 envelope_filter <- FALSE
 # The cutoff for envelope; proportion of observations that defines envelope; 
-# i.e. value of 0.98 will remove observations falling outside the 98% density 
-# ellipse
-envelope_cutoff <- 0.98
+# i.e. value of 0.99 will remove observations falling outside the 99% density 
+# contour
+envelope_cutoff <- 0.99
+# Problems with kernel density envelope when few observations are present; skip
+# the envelope filtering if number of observations is below this
+envelope_min <- 10
 
 # Get list of files with gbif data
 gbif_files <- list.files(path = "data/gbif",
@@ -39,11 +44,12 @@ gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 3))
 colnames(gbif_obs) <- c("species", "n_orig", "n_filtered")
 
 for (i in 1:length(gbif_files)) {
-  
   data <- read.csv(file = gbif_files[i])
   gbif_obs$species[i] <- data$accepted_name[1]
   gbif_obs$n_orig[i] <- nrow(data)
+  gbif_obs$n_filtered[i] <- NA
   
+  # message(paste0("Running ", gbif_obs$species[i]))
   # Extract climate data associated with each gbif record location
   # terra::extract will return a two-column data frame in this case, but we 
   # only need the values from column 2 (the value of the bio1 variable)
@@ -54,39 +60,51 @@ for (i in 1:length(gbif_files)) {
   any_oob <- data %>%
     filter(is.na(climate))
 
-  # TODO: Need to update this with envelope considerations in mind  
-  gbif_obs$n_filtered[i] <- nrow(data) - nrow(any_oob)
-
   # Will use this logical to decide if we need to update the file on disk
   removed_any <- FALSE  
   if (nrow(any_oob) > 0 & remove_oob == TRUE) {
     # If appropriate, update files, removing records that are out of bounds
     data <- data %>%
       filter(!(gbifID %in% any_oob$gbifID))
-    
     removed_any <- TRUE
+    # Update count of observations post-filtering
+    gbif_obs$n_filtered[i] <- gbif_obs$n_orig[i] - nrow(any_oob)
   }
   # Drop the climate column (some collisions possible on select function)
   data <- data %>%
     dplyr::select(-climate)
   
-  if (envelope_filter) {
-    # Calculate density envelope
-    # TODO: Need to convert to km before anything else...
-    # TODO: n parameter should be something smarter to allow for the same
-    # grid cell width in km
+  if (envelope_filter & nrow(data) >= envelope_min) {
+    # Calculate density envelope; using a 0.5 degree resolution
+    
+    # Widespread species suffer from rounding errors, where density estimates 
+    # fall below R's limits of precision. Can be demonstrated by comparing 
+    # contours for full species range and half range (lat or lon filtering) of
+    # widespread species such as Populus angustifolia and Fraxinus 
+    # pennsylvanica
+
+    # library(Rmpfr)
+    # Attempt to wrap values passed to MASS::kde2d in mpfr gives
+    # Error in var(x) : is.atomic(x) is not TRUE
+    
+    # TODO: MASS::kde2d is a fairly short function, may be able to re-write 
+    # using the Rmpfr functionality...
     obs_kde <- MASS::kde2d(x = data$longitude,
-                           y = data$latitude,
-                           n = c(abs(max(data$longitude) - min(data$longitude)),
-                                 abs(max(data$latitude) - min(data$latitude))))
+                           y = data$latitude, 
+                           n = c(abs(max(data$longitude) - min(data$longitude)) * 2,
+                                 abs(max(data$latitude) - min(data$latitude))) * 2)
+    # The projection string for raster conversion
+    wgs_crs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
     # Transform this to a raster; not quite sure why, but need to do 90 degree 
     # counter-clockwise rotation of the z matrix...
-    kde_raster <-raster::raster(x = apply(t(obs_kde$z),2,rev),
-                       xmn = min(obs_kde$x), 
-                       xmx = max(obs_kde$x),
-                       ymn = min(obs_kde$y), 
-                       ymx = max(obs_kde$y), 
-                       crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+    kde_raster <-raster::raster(x = apply(X = t(obs_kde$z),
+                                          MARGIN = 2,
+                                          FUN = rev),
+                                xmn = min(obs_kde$x), 
+                                xmx = max(obs_kde$x),
+                                ymn = min(obs_kde$y), 
+                                ymx = max(obs_kde$y), 
+                                crs = wgs_crs)
     # From https://mhallwor.github.io/_pages/activities_GenerateTerritories
     # Set zeros to NA
     kde_raster[kde_raster == 0] <- NA
@@ -103,27 +121,39 @@ for (i in 1:length(gbif_files)) {
     kde_envelope <- raster::setValues(kde_raster, 
                                       kde_values >= sorted_values[cutoff_index])
 
-    plot(kde_envelope)
-    points(x = data$longitude, y = data$latitude)
+    # Reality check
+    plot(kde_envelope, col = c("white", "grey50"))
+    points(x = data$longitude, y = data$latitude, pch = 16,
+           cex = 0.75, col = "red")
 
     # Pull out values from the kde_envelope raster and add them to data; 
     # 0 = outside envelope, 1 = inside envelope
     data$envelope <- terra::extract(x = kde_envelope, 
                                     y = data[,c('longitude','latitude')])
     # Do data reduction as necessary
+    n_outside <- 0
     if (any(data$envelope == 0)) {
+      n_outside <- sum(data$envelope == 0)
       data <- data %>%
         dplyr::filter(envelope == 1) %>%
         dplyr::select(-envelope)
       removed_any <- TRUE
+      # Update count of observations post-filtering
+      if (is.na(gbif_obs$n_filtered[i])){
+        # No observations filtered via climate filtering, so make anew
+        gbif_obs$n_filtered[i] <- gbif_obs$n_orig[i] - n_outside
+      } else {
+        # Already done some filtering, update that column
+        gbif_obs$n_filtered[i] <- gbif_obs$n_filtered[i] - n_outside
+      }
     }
   }
   
-  if (removed_any) {
-    write.csv(x = data,
-              file = gbif_files[i],
-              row.names = FALSE)
-  }
+  # if (removed_any) {
+  #   write.csv(x = data,
+  #             file = gbif_files[i],
+  #             row.names = FALSE)
+  # }
 }
 
 # How many records were excluded?
