@@ -20,6 +20,12 @@ data/ensemble/bioclim/*
 
 # Data downloaded from GBIF via download_gbif
 data/gbif/*-gbif.csv
+data/gbif/downloaded/*-gbif.csv
+!data/gbif/downloaded/.gitkeep
+data/gbif/filtered/*-gbif.csv
+!data/gbif/filtered/.gitkeep
+data/gbif/presence-absence/*-pa.csv
+!data/gbif/presence-absence/.gitkeep
 
 # Measurements of species' aridity
 output/aridity/*.csv

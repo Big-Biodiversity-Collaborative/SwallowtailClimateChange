@@ -5,8 +5,8 @@
 #' @return a \code{raster::extent} object based on the minimum and maximum 
 #' values in latitude and longitude coordinates of \code{data}
 get_extent <- function(data) {
-  if (!require(raster)) {
-    stop("get_extent requires raster package, but it could not be loaded")
+  if (!require(terra)) {
+    stop("get_extent requires terra package, but it could not be loaded")
   }
   # make sure latitude & longitude are there
   if (!("longitude" %in% colnames(data))) {
@@ -16,7 +16,7 @@ get_extent <- function(data) {
     stop("get_extent requires column named 'latitude' in passed data argument)")
   }
   
-  obs_extent <- raster::extent(x = c(floor(min(data$longitude)),
+  obs_extent <- terra::ext(x = c(floor(min(data$longitude)),
                                      ceiling(max(data$longitude)),
                                      floor(min(data$latitude)),
                                      ceiling(max(data$latitude))))
