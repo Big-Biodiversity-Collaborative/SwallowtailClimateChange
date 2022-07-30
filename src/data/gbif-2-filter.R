@@ -19,14 +19,15 @@ require(dismo)   # thinning for kernel density estimate
 #       disk?
 
 # Filter observations for each species, so observations
+#     occur between 2000-2022
 #     in locations where climate data are available
 #     are inside the 95% contour of observations
-#     occur between 2000-2022
-# All observations are first categorized as whether or not they meet each of 
-# the criteria, *then* filters are applied. That is, the filtering process does 
-# not occur in serial, so an individual observation may be excluded for failing 
-# to meet one or more of the criteria. This is primarily done because I can't 
-# decide when to do the envelope filtering step.
+# The date filter is applied first, then any remaining observations are 
+# simultaneously assessed for the data availability and 95% contour criteria, 
+# *then* filters are applied. That is, the filtering for data availability and 
+# contour does not occur in serial, so an individual observation may be 
+# excluded for failing to meet one or more of the criteria. This is primarily 
+# done because I can't decide when to do the envelope filtering step.
 
 # First extract the zip file that has downloaded data
 unzip(zipfile = "data/gbif-downloaded.zip")
@@ -101,6 +102,20 @@ for (i in 1:length(gbif_files)) {
   gbif_obs$n_orig[i] <- nrow(data)
 
   ########################################
+  # Determine if observation is recent enough
+  data <- data %>%
+    dplyr::mutate(outside_dates = !(year %in% year_range))
+
+  # Record the number of records that are too old
+  gbif_obs$n_old[i] <- sum(data$outside_dates)
+  
+  # Remove records that are too old
+  if (remove_old) {
+    data <- data %>%
+      dplyr::filter(!outside_dates)
+  }
+  
+  ########################################
   # Determine if observation has climate data
   # Extract climate data associated with each gbif record location
   # terra::extract will return a two-column data frame in this case, but we 
@@ -109,8 +124,8 @@ for (i in 1:length(gbif_files)) {
                                  y = data[,c('longitude','latitude')])[,2]
 
   data <- data %>%
-    mutate(missing_climate = is.na(climate)) %>%
-    select(-climate)
+    dplyr::mutate(missing_climate = is.na(climate)) %>%
+    dplyr::select(-climate)
 
   ########################################
   # Determine if observation is in envelope
@@ -165,7 +180,7 @@ for (i in 1:length(gbif_files)) {
     # Sometimes values for envelope are NA if point is on edge of the defined 
     # envelope; count those as outliers, too
     data <- data %>%
-      mutate(envelope = if_else(is.na(envelope), 0, envelope))
+      dplyr::mutate(envelope = if_else(is.na(envelope), 0, envelope))
     
     # Reality check
     # plot(kde_envelope, col = c("white", "grey75"))
@@ -177,42 +192,33 @@ for (i in 1:length(gbif_files)) {
 
     # Create the column indicating if observation is outside envelope
     data <- data %>% 
-      mutate(outside_envelope = !as.logical(envelope)) %>%
-      select(-envelope)
+      dplyr::mutate(outside_envelope = !as.logical(envelope)) %>%
+      dplyr::select(-envelope)
   } else { 
     # for subsequent processing, need to add the outside_envelope column to any 
     # dataset that had too few observations for envelope calculations
     data <- data %>%
-      mutate(outside_envelope = FALSE)
+      dplyr::mutate(outside_envelope = FALSE)
   }
-  ########################################
-  # Determine if observation is recent enough
-  data <- data %>%
-    mutate(outside_dates = !(year %in% year_range))
   
   ########################################
-  # Filter columns are all now created. Collect some summary statistics
+  # Collect some summary statistics
   gbif_obs$n_oob[i] <- sum(data$missing_climate)
   gbif_obs$n_outlier[i] <- sum(data$outside_envelope)
-  gbif_obs$n_old[i] <- sum(data$outside_dates)
   
   # Do filtering based on logicals
   if (remove_oob) {
     data <- data %>%
-      filter(!missing_climate)
+      dplyr::filter(!missing_climate)
   }
   if (envelope_filter) {
     data <- data %>%
-      filter(!outside_envelope)
-  }
-  if (remove_old) {
-    data <- data %>%
-      filter(!outside_dates)
+      dplyr::filter(!outside_envelope)
   }
   
   # Drop those filtering columns
   data <- data %>%
-    select(-c(missing_climate, outside_envelope, outside_dates))
+    dplyr::select(-c(missing_climate, outside_envelope, outside_dates))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
@@ -224,7 +230,9 @@ for (i in 1:length(gbif_files)) {
 }
 
 # How many records were excluded?
-gbif_obs$perc_excluded <- round(gbif_obs$n_excluded / gbif_obs$n_orig * 100, 2)
+gbif_obs <- gbif_obs %>%
+  dplyr::mutate(n_remaining = n_orig - n_excluded,
+         perc_excluded = round(n_excluded/n_orig * 100, digits = 2))
 arrange(gbif_obs, desc(perc_excluded))
   # Papilio brevicauda: 7.23% (46 records) excluded
   # All other species with < 5% of records excluded 
