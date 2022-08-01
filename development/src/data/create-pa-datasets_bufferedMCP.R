@@ -3,8 +3,8 @@
 # ezylstra@arizona.edu
 # 2022-06-13
 
-# Testing the buffered MCP approach for P. rumiko (instead of looping through
-# all species in the gbif-reconcile file)
+# Testing the buffered MCP approach for P. rumiko or some other species 
+# (instead of looping through all species in the gbif-reconcile file)
 
 require(terra)
 require(sp)
@@ -41,14 +41,28 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
   }
   obs <- read.csv(file = obs_file)
   
-  # Just for testing, filter out observation with latitude >= 35 deg
-    # plot(latitude~longitude,obs,pch=19,cex=0.6)
-    # abline(h=35,col='blue')
-  # TODO: replace with some kind of kernel density filtering process?
+  # Outside the development folder, we'll be using observations that have
+  # already been filtered by date and location (where climate data are avail)
+  # and a ~95% density envelope. To avoid including outliers when testing this 
+  # MCP approach, I'll manually restrict observations to certain lat/longs
+    # For testing P. rumiko, filter out observation with latitude >= 35 deg
+    # For testing P. cresphontes, filter lat >= 48 deg, long > -121
+    # For testing A. texana, filter >32, long outside -100.5 to -96.5
+    # For testing C. greggii, filter lat < 20
+    # For testing P. trifoliata, filter lat > 48, long < -115
+    # For testing R. graveolens, filter long < -130
+    # For testing Z. americanum, filter long < -100
+    # For testing Z. clava-herculis, filter long < -104, lat >39
+    # For testing Z. fagara, filter lat > 35, long < -115
   
+    plot(latitude~longitude,obs,pch=19,cex=0.6)
+    abline(h=35,col='blue')
+    abline(v=-115, col = "blue")
+
   obs <- obs %>%
+    # dplyr::filter(longitude > (-115)) %>%
     dplyr::filter(latitude < 35)
-  
+
   # Restrict observations to the most recent 23-year period (2000-2022) and
   # retain just the geographic coordinates
   presence <- obs %>%
@@ -90,7 +104,7 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
                                        pattern = ".tif$",
                                        full.names = TRUE))  
   
-  # Tranform the buffered MCP back to lat/long 
+  # Transform the buffered MCP back to lat/long 
   ch_buffer_latlong <- st_transform(ch_buffer, 4326)
   
   # Convert the buffered MCP to a SpatVector
@@ -98,7 +112,7 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
   
   # Crop and mask predictors to the buffered MCP polygon
   pred_mask <- predictors %>%
-    terra::crop(ch_buffer_latlong) %>%
+    terra::crop(ch_buffer_sv) %>%
     terra::mask(ch_buffer_sv)
   rm(predictors)
   
@@ -111,8 +125,7 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
   presence <- presence %>%
     dplyr::select(-ID) %>%
     dplyr::relocate(c(x,y), .before = bio1)  
-  
-  
+
   # Generate pseudo-absence points and extract predictor values
   absence <- terra::spatSample(x = pred_mask,  
                                size = 5000,
