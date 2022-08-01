@@ -19,7 +19,7 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
 
 #for (species in species_list$accepted_name) {
 
-  species <- "Papilio rumiko"
+  species <- "Ruta graveolens"
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species))
@@ -57,10 +57,10 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
   
     plot(latitude~longitude,obs,pch=19,cex=0.6)
     abline(h=35,col='blue')
-    abline(v=-115, col = "blue")
+    abline(v=-130, col = "blue")
 
   obs <- obs %>%
-    # dplyr::filter(longitude > (-115)) %>%
+    dplyr::filter(longitude > (-130)) %>%
     dplyr::filter(latitude < 35)
 
   # Restrict observations to the most recent 23-year period (2000-2022) and
@@ -68,6 +68,8 @@ species_list <- read.csv("development/data/gbif-reconcile-13spp.csv")
   presence <- obs %>%
     dplyr::filter(year %in% 2000:2022) %>%
     dplyr::select(longitude, latitude)
+  
+  # TODO: remove duplicate locations first? (JUST FOR BUFFER CALCS)
 
   # Convert to a SpatialPoints object
   obs_spatial <- SpatialPoints(coords = presence,
