@@ -166,6 +166,8 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       }
       
       # Select only those columns we want to write to file
+      # TODO: Could add column with state information here if we want to be 
+      # able to filter out Hawaii observations
       obs <- obs %>%
         dplyr::select(gbifID, species, longitude, latitude, 
                       year, month, day, countryCode)
