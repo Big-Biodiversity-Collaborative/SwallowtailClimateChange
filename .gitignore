@@ -42,6 +42,8 @@ output/maps/*
 # Output of modeling
 output/models/*.rds
 !output/models/.gitkeep
+output/SDMs/*.rds
+!output/SDMs/.gitkeep
 
 # General data visualization
 output/plots/*

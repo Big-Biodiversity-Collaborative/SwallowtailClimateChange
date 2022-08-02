@@ -20,76 +20,25 @@ species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
 nice_name <- tolower(paste0(genus, "_", species))
 
-# Load in observation data
-obs_file <- paste0("data/gbif/",
-                   nice_name,
-                   "-gbif.csv")
-if (!file.exists(obs_file)) {
-  unzip(zipfile = "data/gbif.zip")
-}
-obs <- read.csv(file = obs_file)
+# Load in presence/absence data
+pa_file <- paste0("data/gbif/presence-absence/",
+                  nice_name,
+                  "-pa.csv")
+# TODO: Need to check to see if file exists and what to do if not
+full_data <- read.csv(file = pa_file)
 
 # A note to let folks know you are alive
-n_obs <- nrow(obs)
+n_obs <- nrow(full_data %>% filter(pa == 1))
 message(paste0("\n**** Running GLM SDM on ", n_obs, " observations of ", 
                species_name, " ****"))
 
-# Get the geographic extent of this beast
-obs_extent <- get_extent(data = obs)
-
-# Will use bioclim data files to create masks for sampling resolution of 
-# background points. Check for bioclim data and download if it isn't there
-# if (!file.exists("data/wc2-5/bio1.bil")) {
-#   bioclim_data <- raster::getData(name = "worldclim",
-#                                   var = "bio",
-#                                   res = 2.5,
-#                                   path = "data/")
-#   # Will load in the predictor variables as a RasterStack later, so removing 
-#   # to free up memory
-#   rm(bioclim_data)
-# }
-
-# Using the first bil file to create a raster to use as mask for sampling 
-# background points
-bil_file <- list.files(path = "data/wc2-1", 
-                       pattern = ".tif$", 
-                       full.names = TRUE)[1]
-mask <- raster(bil_file)
-# Do not need this anymore
-rm(bil_file)
-
-# Use random sampling to generate pseudo-absence points
-# mask:  Provides resolution of sampling points
-# n:     Number of random points
-# ext:   Spatially restricts sampling
-# extf:  Expands sampling a little bit
-background_points <- dismo::randomPoints(mask = mask,  
-                                         n = nrow(obs),
-                                         ext = obs_extent, 
-                                         extf = 1.25)
-
-# Will want to use this with dplyr::bind_rows, so convert to data frame
-background_points <- as.data.frame(background_points)
-
-# Make background points conform to column names of observed data
-background_points <- background_points %>%
-  dplyr::rename(longitude = x,
-                latitude = y)
-
-# Grab worldclim data to use as predictors
-predictors <- raster::stack(list.files(path = "data/wc2-1",
-                                       pattern = ".tif$",
-                                       full.names = TRUE))
-
 # Run generalized linear model
-glm_model <- run_glm(obs = obs,
-                     absence = background_points,
-                     predictors = predictors,
+glm_model <- run_glm(full_data = full_data,
                      verbose = FALSE)
 
 # Save the model to file in output/models/
-model_file <- paste0("output/models/", nice_name,
-                     "-model-glm-current.rds")
+model_file <- paste0("output/SDMs/", nice_name,
+                     "-glm.rds")
 saveRDS(object = glm_model,
         file = model_file)
 

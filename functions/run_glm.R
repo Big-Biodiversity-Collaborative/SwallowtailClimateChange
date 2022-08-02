@@ -1,10 +1,7 @@
 #' Run generalized linear model species distribution model
 #' 
-#' @param obs data frame with longitude and latitude coordinates of occurrence
-#' data
-#' @param absence absence or pseudo-absence data longitude and latitude 
-#' coordinates
-#' @param predictors environmental predictor data to use for modeling
+#' @param full_data dataframe with presence-absence data (1/0), fold (for 
+#' separating testing and training data), and 19 columns with climate data
 #' @param verbose logical indicating whether or not to print processing messages
 #' 
 #' @details Uses \code{stats::glm()} for generalized linear model
@@ -18,7 +15,7 @@
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
-run_glm <- function(obs, absence, predictors, verbose = TRUE) {
+run_glm <- function(full_data, verbose = TRUE) {
   if (!require(raster)) {
     stop("run_glm requires raster package, but it could not be loaded")
   }
@@ -28,70 +25,46 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
   if (!require(dismo)) {
     stop("run_glm requires dismo package, but it could not be loaded")
   }
-  # make sure latitude & longitude are there
-  if (!("longitude" %in% colnames(obs))) {
-    stop("get_extent requires column named 'longitude' in passed data argument)")
+
+  # Make sure presence-absence data are there
+  if (!("pa" %in% colnames(full_data))) {
+    stop("run_maxent_notune requires column named 'pa' in full_data")
   }
-  if (!("latitude" %in% colnames(obs))) {
-    stop("get_extent requires column named 'latitude' in passed data argument)")
+  # Make sure fold indicators are there
+  if (!("fold" %in% colnames(full_data))) {
+    stop("run_maxent_notune requires column named 'fold' in full_data")
+  }
+  # Make sure data for all 19 climate variables are there
+  if (length(setdiff(paste0("bio",1:19),colnames(full_data))) > 0) {
+    stop("run_maxent_notune requires bio1:bio19 columns in full_data")
   }
 
-  # Only need geo coordinates, so extract those (in x, y order)
-  presence <- obs %>%
-    dplyr::select(longitude, latitude)
+  # Arrange predictor columns in full_data (so they appear in order)
+  predvars <- paste0("bio", 1:19)
+  full_data <- dplyr::select(full_data, c("pa","fold",all_of(predvars)))
   
-  if (verbose) {
-    message("Extracting predictor values based on data. (Step 1 of 3)")
-  }
-  
-  # Will do some cropping / limiting based on the extent of the (pseudo)absence 
-  # data, so get the geographic extent
-  absence_extent <- get_extent(data = absence)
-  
-  # Predictors won't be needed beyond the extent of the (pseudo)absence points
-  model_predictors <- raster::crop(x = predictors, y = absence_extent)
-  
-  # Use the observed points to pull out relevant predictor values
-  predictors_presence <- raster::extract(x = model_predictors, y = presence)
-  predictors_absence <- raster::extract(x = model_predictors, y = absence)
-
-  # Make a vector of appropriate length with 0/1 values for 
-  # (pseudo)absence/presence
-  pa_data <- c(rep(x = 1, times = nrow(presence)), 
-               rep(x = 0, times = nrow(absence)))
-  
-  # Create a vector of folds for easier splitting into testing/training
-  num_folds <- 5 # for 20/80 split
-  fold <- c(rep(x = 1:num_folds, length.out = nrow(presence)),
-            rep(x = 1:num_folds, length.out = nrow(absence)))
-  
-  # Combine our presence / absence and fold vectors with environmental data we 
-  # extracted
-  full_data <- data.frame(cbind(pa = pa_data,
-                                fold = fold,
-                                rbind(predictors_presence, predictors_absence)))
-
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
     filter(fold != 1)
   presence_test <- full_data %>%
     filter(pa == 1) %>%
-    filter(fold == 1)
+    filter(fold == 1) %>%
+    dplyr::select(all_of(predvars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
     filter(fold != 1)
   absence_test <- full_data %>%
     filter(pa == 0) %>%
-    filter(fold == 1)
+    filter(fold == 1) %>%
+    dplyr::select(all_of(predvars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
-  sdmtest <- rbind(presence_test, absence_test)
-
+  
   if(verbose) {
-    message("Running generalized linear model. (Step 2 of 3)")
+    message("Running generalized linear model.")
   }  
   # Run an GLM model, specifying model with standard formula syntax
   # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
@@ -104,18 +77,17 @@ run_glm <- function(obs, absence, predictors, verbose = TRUE) {
                           family = binomial(link = "logit"))
 
   if(verbose) {
-    message("Model complete. Evaluating GLM model with testing data. (Step 3 of 3)")
+    message("Model complete. Evaluating GLM model with testing data.")
   }
-  
   # Evaluate model performance with testing data
   glm_eval <- dismo::evaluate(p = presence_test, 
                               a = absence_test, 
                               model = glm_model)
-
+  
   # Calculate threshold so we can make a P/A map later
   pres_threshold <- dismo::threshold(x = glm_eval, 
                                      stat = "spec_sens")
-
+  
   # Bind everything together and return as list  
   results <- list(model = glm_model,
                   evaluation = glm_eval,
