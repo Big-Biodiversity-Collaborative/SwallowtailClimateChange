@@ -24,7 +24,7 @@ num_overlaps <- 0
 
 # For each of the predictors, want to create the overlap raster then save it 
 # to a file. 
-predictors <- c("current", "ssp370-2041")
+predictors <- c("current", "ssp370-2071")
 for (predictor in predictors) {
   overlap <- overlap_raster_devel(species_name = species_name,
                                   predictor = predictor,
