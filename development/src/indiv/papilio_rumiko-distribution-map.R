@@ -19,7 +19,7 @@ time_periods <- c("current",
 species_name <- paste0(genus, " ", species)
 
 distribution_map <- single_map_devel(species_name,
-                                     time_period = time_periods[4], 
+                                     time_period = time_periods[5], 
                                      model,
                                      show_obs = TRUE)
 print(distribution_map)

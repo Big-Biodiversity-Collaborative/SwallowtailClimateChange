@@ -3,15 +3,14 @@
 # ezylstra@arizona.edu
 # 2022-07-11
 
-require(raster)
 require(dplyr)
 
 # Load functions from the functions folder
 source(file = "load_functions.R")
-source("development/functions/run_maxent_notune.R")
+source("development/functions/run_rf.R")
 
 genus <- "Papilio"
-species <- "rumiko"
+species <- "brevicauda"
 
 set.seed(20220614)
 
@@ -27,32 +26,18 @@ pa_file <- paste0("development/data/presence-absence/",
 # if (!file.exists(pa_file)) {
 #   unzip(zipfile = "development/data/pa-datasets.zip")
 # }
-pa_data <- read.csv(file = pa_file)
-
-# Only need geo coordinates, so extract those (in x, y order)
-pa_locs <- pa_data %>%
-  dplyr::select(x, y)
-
-# Grab worldclim data to use as predictors
-predictors <- raster::stack(list.files(path = "data/wc2-1",
-                                       pattern = ".tif$",
-                                       full.names = TRUE))
-
-# Extract climate values
-pa_climate <- raster::extract(x = predictors, y = pa_locs) 
-
-# Combine pa and fold data with climate values
-full_data <- cbind(pa_data, pa_climate)
+full_data <- read.csv(file = pa_file)
 
 # Run support vector machine model
-maxent_model <- run_maxent_notune(full_data = full_data,
-                                  verbose = TRUE)
+# TODO update with rf function
+rf_model <- run_rf(full_data = full_data,
+                                  verbose = FALSE)
 
 # Save the model to file in output/models/
 model_file <- paste0("development/output/SDMs/", nice_name,
-                     "-sdm-maxent.rds")
-saveRDS(object = maxent_model,
+                     "-sdm-rf.rds")
+saveRDS(object = rf_model,
         file = model_file)
 
-message(paste0("Maxent model for ", species_name, 
+message(paste0("Random forest model for ", species_name, 
                " complete; saved to ", model_file))

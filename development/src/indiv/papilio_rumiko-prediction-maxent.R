@@ -4,9 +4,9 @@
 # 2022-07-11
 
 require(raster)
+require(sf)
 
 # Load up the functions from the functions folder
-source(file = "load_functions.R")
 source(file = "development/functions/predict_sdm.R")
 
 genus <- "Papilio"
@@ -74,7 +74,7 @@ if (!is.null(current_pa)) {
 # yrs <- c("2041", "2071")
 
 ssps <- "ssp370"
-yrs <- "2041"
+yrs <- "2071"
 
 
 for (ssp in ssps) {
@@ -82,6 +82,7 @@ for (ssp in ssps) {
     predictor_filepath <- paste0("data/ensemble/",
                                  ssp, "/",
                                  yr)
+    
     predictors <- raster::stack(list.files(path = predictor_filepath,
                                            pattern = ".tif$",
                                            full.names = TRUE))  

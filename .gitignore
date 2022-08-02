@@ -74,5 +74,7 @@ development/output/overlap/*
 !development/output/overlap/.gitkeep
 development/output/maps/*
 !development/output/maps/.gitkeep
+development/output/shapefiles/*
+!development/output/shapefiles/.gitkeep
 
 
