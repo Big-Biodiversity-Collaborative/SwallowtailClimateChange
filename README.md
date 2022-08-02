@@ -23,7 +23,6 @@ The project uses the following additional R packages:
 
 + dismo
 + dplyr
-+ fields
 + ggplot2
 + kernlab
 + maptools
@@ -33,6 +32,7 @@ The project uses the following additional R packages:
 + RColorBrewer
 + rgdal
 + Rtools (needed to use the zip() function on Windows machines)
++ sf
 + sp
 + spocc
 + stringr
