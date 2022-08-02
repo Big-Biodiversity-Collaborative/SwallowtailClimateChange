@@ -86,6 +86,11 @@ for (species in species_list$accepted_name) {
   # Transform the buffered MCP back to lat/long 
   ch_buffer_latlong <- st_transform(ch_buffer, 4326)
   
+  # Save buffered MCP as shapefile
+  shapefile_name <- paste0("development/output/shapefiles/", 
+                           nice_name, "-buffered-mcp.shp") 
+  st_write(ch_buffer_latlong, shapefile_name, append = FALSE)
+
   # Convert the buffered MCP to a SpatVector
   ch_buffer_sv <- terra::vect(ch_buffer_latlong)
   
@@ -108,10 +113,10 @@ for (species in species_list$accepted_name) {
   # [spatSample] fewer cells returned than requested
 
     # Check:
-    plot(ch_buffer_sv)
-    plot(ch_polygon, add = TRUE)
-    points(y ~ x, data = absence, cex = 0.5, col = "gray")
-    points(y ~ x, data = presence, cex = 0.5, col = "blue")
+    # plot(ch_buffer_sv)
+    # plot(ch_polygon, add = TRUE)
+    # points(y ~ x, data = absence, cex = 0.5, col = "gray")
+    # points(y ~ x, data = presence, cex = 0.5, col = "blue")
 
   # Make a vector of appropriate length with 0/1 values for 
   # (pseudo)absence/presence
@@ -123,14 +128,16 @@ for (species in species_list$accepted_name) {
   fold <- c(rep(x = 1:num_folds, length.out = nrow(presence)),
             rep(x = 1:num_folds, length.out = nrow(absence)))
   
-  # Combine our presence / absence and fold vectors with environmental data
+  # Combine our presence / absence data
   full_data <- data.frame(cbind(pa = pa_data,
                                 fold = fold,
                                 rbind(presence, absence)))
+  
+  # Save presence-absence data to a csv file
   write.csv(x = full_data,
             file = filename,
             row.names = FALSE)
-
+  
   if (verbose) {
     message(paste0("\n****  ",nrow(presence), " gbif records and ",
                    nrow(absence), " pseudo-absence records written to ",
