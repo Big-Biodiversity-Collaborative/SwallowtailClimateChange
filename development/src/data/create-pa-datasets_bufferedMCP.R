@@ -8,7 +8,7 @@ require(sp)
 require(sf)
 require(dplyr)
 
-replace <- FALSE
+replace <- TRUE
 verbose <- TRUE
 
 # Read in gbif-reconcile
@@ -127,15 +127,15 @@ for (species in species_list$accepted_name) {
   full_data <- data.frame(cbind(pa = pa_data,
                                 fold = fold,
                                 rbind(presence, absence)))
-  # write.csv(x = full_data,
-  #           file = filename,
-  #           row.names = FALSE)
-  # 
-  # if (verbose) {
-  #   message(paste0("\n****  ",nrow(presence), " gbif records and ",
-  #                  nrow(absence), " pseudo-absence records written to ",
-  #                  filename, "  ****"))
-  # }
+  write.csv(x = full_data,
+            file = filename,
+            row.names = FALSE)
+
+  if (verbose) {
+    message(paste0("\n****  ",nrow(presence), " gbif records and ",
+                   nrow(absence), " pseudo-absence records written to ",
+                   filename, "  ****"))
+  }
 }
 
 # Will likely want to put all the csv files into data/pa-datasets.zip
