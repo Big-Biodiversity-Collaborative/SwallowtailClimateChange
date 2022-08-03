@@ -3,6 +3,8 @@
 # jcoliver@arizona.edu
 # 2021-06-02
 
+stop("Need to update to grab climate data")
+
 require(raster)
 require(dplyr)  # load *after* raster for easier use of select
 require(dismo)  # background point sampling
