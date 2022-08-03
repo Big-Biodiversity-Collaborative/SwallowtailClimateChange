@@ -53,6 +53,11 @@ output/plots/*
 output/ranges/*
 !output/ranges/.gitkeep
 
+# Shapefiles of minimum convex polygons
+output/shapefiles/*
+!output/shapefiles/.gitkeep
+
+
 # Log files
 logs/*.log
 !/logs/.gitkeep
