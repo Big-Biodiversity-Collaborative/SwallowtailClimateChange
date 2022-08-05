@@ -18,14 +18,19 @@ data/ensemble/monthly/*
 data/ensemble/*.zip
 data/ensemble/bioclim/*
 
-# Data downloaded from GBIF via download_gbif
+# Data downloaded from GBIF
 data/gbif/*-gbif.csv
 data/gbif/downloaded/*-gbif.csv
 !data/gbif/downloaded/.gitkeep
+# Filtered gbif data
 data/gbif/filtered/*-gbif.csv
 !data/gbif/filtered/.gitkeep
+# Observation data plus pseudo-absence points
 data/gbif/presence-absence/*-pa.csv
 !data/gbif/presence-absence/.gitkeep
+# Shapefiles of minimum convex polygons
+data/gbif/shapefiles/*
+!data/gbif/shapefiles/.gitkeep
 
 # Measurements of species' aridity
 output/aridity/*.csv
@@ -52,11 +57,6 @@ output/plots/*
 # Predicted ranges and range area calculations
 output/ranges/*
 !output/ranges/.gitkeep
-
-# Shapefiles of minimum convex polygons
-output/shapefiles/*
-!output/shapefiles/.gitkeep
-
 
 # Log files
 logs/*.log

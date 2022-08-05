@@ -103,7 +103,7 @@ for (species in species_list$accepted_name) {
       ch_buffer_latlong <- st_transform(ch_buffer, 4326)
       
       # Save buffered MCP as shapefile
-      shapefile_name <- paste0("output/shapefiles/", 
+      shapefile_name <- paste0("data/gbif/shapefiles/", 
                                nice_name, "-buffered-mcp.shp") 
       st_write(obj = ch_buffer_latlong, 
                dsn = shapefile_name, 
@@ -167,6 +167,7 @@ for (species in species_list$accepted_name) {
 
 # Create list of all those files we just created so we can write them to a zip
 # archive
+# Start with the presence / absence files
 pa_files <- list.files(path = "data/gbif/presence-absence", 
                        pattern = "*-pa.csv",
                        full.names = TRUE)
@@ -176,3 +177,12 @@ if (file.exists(zipfile)) {
 }
 zip(zipfile = zipfile,
     files = pa_files)
+# Next archive the shapefiles (which include more than just .shp files)
+shapefiles <- list.files(path = "data/gbif/shapefiles",
+                         full.names = TRUE)
+zipfile <- "data/gbif-shapefiles.zip"
+if (file.exists(zipfile)) {
+  invisible(file.remove(zipfile))
+}
+zip(zipfile = zipfile,
+    files = shapefiles)

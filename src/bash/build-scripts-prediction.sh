@@ -34,7 +34,7 @@ do
     
     # Read in the template file contents into the MODELFILE variable, 
     # skipping very first line
-    TEMPLATE="templates/template-${SCRIPTTYPE}-${MODEL}-building.R"
+    TEMPLATE="templates/template-${SCRIPTTYPE}-${MODEL}.R"
     MODELFILE=$(cat "$TEMPLATE" | tail -n +2)
     
     # Add lines at top of file explaining script & message warning against 
