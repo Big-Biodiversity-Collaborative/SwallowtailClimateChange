@@ -4,7 +4,7 @@
 # 2021-07-08
 
 SCRIPTTYPE="overlap-raster"
-MODELS=("glm" "svm")
+MODELS=("glm" "svm" "maxent-notune")
 PRODUCT="overlap raster"
 
 # Read the file with insect names in as an array, skipping the header row 
