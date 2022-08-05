@@ -9,10 +9,8 @@ require(raster)
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-# genus <- "GENUS"
-# species <- "SPECIES"
-genus <- "Papilio"
-species <- "rumiko"
+genus <- "GENUS"
+species <- "SPECIES"
 
 SDM <- "maxent-notune"
 
