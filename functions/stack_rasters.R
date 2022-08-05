@@ -1,9 +1,6 @@
 #' Stack rasters of predicted presence / absence
 #' 
 #' @param r \code{list} of \code{Raster*} objects
-#' @param neg_values DEPRECATED character indicating how to treat negative values; 
-#' "missing" will ignore values below zero when summing values for a cell, 
-#' while "as-is" will use negative values as one normally would in addition
 #' @param out character indicating output format; "binary" returns raster where 
 #' cells with summed values >= 1 are reported as 1, while "total" will return 
 #' the total summed value of the cell
@@ -23,12 +20,10 @@
 #' 
 #' @param A \code{RasterLayer} with cell values reflecting the sum of values 
 #' across rasters in \code{r}
-stack_rasters <- function(r, neg_values = c("missing", "as-is"), 
-                          out = c("total", "binary")) {
+stack_rasters <- function(r, out = c("total", "binary")) {
   if (!require(raster)) {
     stop("stack_rasters requires raster package, but it could not be loaded")
   }
-  neg_values <- match.arg(neg_values)
   out <- match.arg(out)
 
   # if r is length 1, no need to extend rasters, just assign to our sum_r 
@@ -45,6 +40,8 @@ stack_rasters <- function(r, neg_values = c("missing", "as-is"),
     x$fun = sum
     x$na.rm = TRUE
     
+    # Make a RasterLayer that is the sum of all values; missing and values of 
+    # zero all become zero
     mosaic_raster <- do.call(raster::mosaic, x)
     
     # We use this to keep track of the sum of cell values  
@@ -54,21 +51,25 @@ stack_rasters <- function(r, neg_values = c("missing", "as-is"),
       one_raster <- r[[i]]
       
       if (is.null(sum_r)) {
-        # First one, so just extend the raster to the appropriate extent, leaving
-        # missing values as missing, and assign to sum_r
+        # First one, so just extend the raster to the appropriate extent, 
+        # leaving missing values as missing, and assign to sum_r
         sum_r <- raster::extend(x = one_raster,
                                 y = mosaic_raster)
       } else {
-        # for each additional raster, need to have two extentions: One with missing 
-        # values as missing, one with missing values as zero
+        # for each additional raster, need to have two extensions: One with 
+        # missing values as missing, one with missing values as zero
         
-        # We use the 0 raster for actual addition, but the NA raster to then turn all 
-        # zeros back to that should be NA afterwards
+        # We use the 0 raster for actual addition, but the NA raster to then 
+        # turn any 0 that should be an NA *back* to NA
         one_raster_NA <- raster::extend(x = one_raster,
                                         y = mosaic_raster)
         one_raster_0 <- raster::extend(x = one_raster,
                                        y = mosaic_raster,
                                        value = 0)
+        # Because one_raster_0 only has 0s in the *extended* area, we need to 
+        # manually set any remaining NAs to 0
+        one_raster_0[is.na(one_raster_0)] <- 0
+        
         # We're adding to the sum_r raster, which has zeros and NAs at this point.
         # Make a copy of sum_r, and convert the NAs to zeros, so we can sum the 
         # rasters

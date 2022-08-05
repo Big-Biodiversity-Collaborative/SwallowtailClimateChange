@@ -18,12 +18,14 @@ require(parallel)
 source(file = "load_functions.R")
 
 insect_names <- c("Papilio rumiko")
-model_names <- c("svm", "glm")
+sdm_names <- c("glm")
 
 ########################################
 # extract data
-# start by unzipping the GBIF data archive
-unzip(zipfile = "data/gbif.zip")
+# start by unzipping the data archives that have presence / absence data
+unzip(zipfile = "data/gbif-pa.zip")
+# and the shapefiles of minimum convex polygons
+unzip(zipfile = "data/gbif-shapefiles.zip")
 
 ########################################
 # find hosts
@@ -55,11 +57,11 @@ all_species$nice_name <- tolower(x = gsub(pattern = " ",
 # this will keep track of which host plants we lack data for
 rows_to_exclude <- integer(0)
 
-message(paste0("Checking data files for ", nrow(all_species), " species."))
+message("Checking data files for ", nrow(all_species), " species.")
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
-  data_filename <- paste0("data/gbif/", nice_name, "-gbif.csv")
+  data_filename <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv")
   if (!file.exists(data_filename)) {
     # If this is a host species, remove it from the list of hosts to include 
     # in subsequent steps
@@ -82,31 +84,22 @@ if (length(rows_to_exclude) > 0) {
 }
 
 ########################################
-# do any data qa/qc
-# Data download restricts observations to those in Canada, Mexico, and the 
-# United States. It further discards any observations outside a rough rectangle 
-# of North America (latitude: 14-80, longitude: -170, -52). See 
-# functions/download_gbif.R for details.
-
-# TODO
-
-########################################
 # build sdm models for all remaining species (insects and plants)
 message(paste0("\n*** Estimating SDMs for ", nrow(all_species), " species and ",
-               length(model_names), " models."))
+               length(sdm_names), " models."))
 
 # Set up cluster for parallel processing of SDMs
 n <- parallel::detectCores() - 2
 clust <- parallel::makeCluster(n)
 # Write a short function to use for running individual species scripts
-run_sdms <- function(x, model_names) {
+run_sdms <- function(x, sdm_names) {
   nice_name <- x
   message_out <- ""
-  for (model_name in model_names) {
-    model_filename <- paste0("src/indiv/", nice_name, "-model-", model_name, ".R")
+  for (sdm_name in sdm_names) {
+    model_filename <- paste0("src/indiv/", nice_name, "-SDM-", sdm_name, ".R")
     if (!file.exists(model_filename)) {
       message_out <- paste0("Model file ", model_filename,
-                            " is missing. Has build-scripts-model-", model_name, 
+                            " is missing. Has build-scripts-SDM-", sdm_name, 
                             ".sh been run locally?")
       warning(message_out)
     } else {
@@ -120,14 +113,14 @@ run_sdms <- function(x, model_names) {
 s <- parallel::parLapply(cl = clust,
                          X = all_species$nice_name,
                          fun = run_sdms,
-                         model_names = model_names)
+                         sdm_names = sdm_names)
 # TODO: Could do a better job of reporting problems than just requiring folks 
 # to read every element in resultant list...
 # unlist(s)
 stopCluster(cl = clust)
 
 message(paste0("Fininshed estimating SDMs for ", nrow(all_species), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_names), " models."))
 
 ########################################
 # do current distributions for bug (all bugs)
@@ -145,18 +138,18 @@ message(paste0("Fininshed estimating SDMs for ", nrow(all_species),
 # scripts run *all* the forecast climate models
 
 message(paste0("\n*** Predicting distributions for ", nrow(all_species), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_names), " models."))
 
 missing_predictions <- integer(0)
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
-  for (model_name in model_names) {
+  for (sdm_name in sdm_names) {
     prediction_filename <- paste0("src/indiv/", nice_name, "-prediction-",
-                                  model_name, ".R")
+                                  sdm_name, ".R")
     if (!file.exists(prediction_filename)) {
       warning(paste0("Prediction file ", prediction_filename,
-                     " is missing. Has build-prediction-", model_name, 
+                     " is missing. Has build-prediction-", sdm_name, 
                      "-files.sh been run locally?"))
       missing_predictions <- c(missing_predictions, i)
     } else {
@@ -167,7 +160,7 @@ for (i in 1:nrow(all_species)) {
 }
 message(paste0("Finished predicting distributions for ", 
                nrow(all_species) - length(missing_predictions), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_names), " models."))
 if (length(missing_predictions > 0)) {
   warning(paste0("Predictions for ", length(missing_predictions), 
                  " species not made, due to missing prediction scripts."))
@@ -187,17 +180,17 @@ if (length(missing_predictions > 0)) {
 insect_species <- all_species[all_species$category == "insect",]
 
 message(paste0("\n*** Estimating overlaps for ", nrow(insect_species), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_names), " models."))
 missing_overlaps <- integer(0)
 for (i in 1:nrow(insect_species)) {
   species_name <- insect_species$species_name[i]
   nice_name <- insect_species$nice_name[i]
-  for (model_name in model_names) {
+  for (sdm_name in sdm_names) {
     overlap_filename <- paste0("src/indiv/", nice_name, "-overlap-raster-",
-                               model_name, ".R")
+                               sdm_name, ".R")
     if (!file.exists(overlap_filename)) {
       warning(paste0("Overlap raster file ", overlap_filename,
-                     " is missing. Has build-overlap-raster-", model_name, 
+                     " is missing. Has build-overlap-raster-", sdm_name, 
                      "-files.sh been run locally?"))
       missing_overlaps <- c(missing_overlaps, i)
     } else {
@@ -208,7 +201,7 @@ for (i in 1:nrow(insect_species)) {
 }
 message(paste0("Finished creating overlap rasters for ", 
                nrow(insect_species) - length(missing_overlaps), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_names), " models."))
 if (length(missing_overlaps > 0)) {
   warning(paste0("Overlap rasters for ", length(missing_overlaps), 
                  " species not made, due to missing overlap raster scripts."))
@@ -223,18 +216,18 @@ predictors = climate_models$name
 for (i in 1:nrow(insect_species)) {
   species_name <- insect_species$species_name[i]
   nice_name <- insect_species$nice_name[i]
-  for (model_name in model_names) {
+  for (sdm_name in sdm_names) {
     for (predictor in predictors) {
       one_map <- overlap_map(species_name = species_name,
                              predictor = predictor,
-                             model = model_name, 
+                             model = sdm_name, 
                              crop_to_insect = TRUE)
       # Write to file if not null
       if (!is.null(one_map)) {
         mapfile <- paste0("output/maps/",
                           nice_name, 
                           "-overlap-",
-                          model_name, 
+                          sdm_name, 
                           "-",
                           predictor, 
                           ".png")

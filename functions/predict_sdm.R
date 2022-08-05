@@ -31,7 +31,7 @@ predict_sdm <- function(nice_name, model, yr = c("current", "2041", "2071"),
   ssp <- match.arg(arg = ssp)
 
   # Get MCP shapefile for geographic extent
-  shapefile_name <- paste0("output/shapefiles/",
+  shapefile_name <- paste0("data/gbif/shapefiles/",
                            nice_name, 
                            "-buffered-mcp.shp")
   # TODO: Could do better job for when this file does not exist?

@@ -15,7 +15,7 @@
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
-run_glm <- function(full_data, verbose = TRUE) {
+run_glm <- function(full_data, predictors, verbose = TRUE) {
   if (!require(raster)) {
     stop("run_glm requires raster package, but it could not be loaded")
   }
@@ -39,10 +39,7 @@ run_glm <- function(full_data, verbose = TRUE) {
     stop("run_maxent_notune requires bio1:bio19 columns in full_data")
   }
 
-  # Arrange predictor columns in full_data (so they appear in order)
   predvars <- paste0("bio", 1:19)
-  full_data <- dplyr::select(full_data, c("pa","fold",all_of(predvars)))
-  
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
