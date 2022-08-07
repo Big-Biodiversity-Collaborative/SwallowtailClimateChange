@@ -18,7 +18,7 @@ require(parallel)
 source(file = "load_functions.R")
 
 insect_names <- c("Papilio rumiko")
-sdm_names <- c("glm")
+sdm_names <- c("maxent-notune")
 
 ########################################
 # extract data
@@ -119,7 +119,7 @@ s <- parallel::parLapply(cl = clust,
 # unlist(s)
 stopCluster(cl = clust)
 
-message(paste0("Fininshed estimating SDMs for ", nrow(all_species), 
+message(paste0("Finished estimating SDMs for ", nrow(all_species), 
                " species and ", length(sdm_names), " models."))
 
 ########################################
