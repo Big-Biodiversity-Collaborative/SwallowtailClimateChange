@@ -8,7 +8,7 @@
 readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
 
 SCRIPTTYPE="SDM"
-MODELS=("glm" "svm" "maxent-notune")
+MODELS=("glm" "maxent-notune")
 PRODUCT="SDM"
 
 # Iterate over all the types of models (e.g. glm, svm)
