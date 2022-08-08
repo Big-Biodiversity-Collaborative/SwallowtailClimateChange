@@ -8,10 +8,21 @@
 #' model
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
+#' @param include_legend logical indicating whether legend should be included
+#' or not
+#' @param generic_legend logical indicating whether the legend should refer to
+#' butterflies (generic_legend = TRUE) or a particular butterfly species  
+#' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE 
+#' @param title_scenarioyear logical indicating whether the title (for future
+#' maps only) should include the scenario and year (title_scenarioyear = TRUE)
+#' or just say "future" (title_scenarioyear = FALSE)
 overlap_map <- function(species_name, 
                         predictor,
-                        model = c("glm", "svm"),
-                        crop_to_insect = FALSE) {
+                        model = c("glm", "svm", "maxent-notune"),
+                        crop_to_insect = FALSE,
+                        include_legend = TRUE,
+                        generic_legend = FALSE,
+                        title_scenarioyear = TRUE) {
   if (!require(raster)) {
     stop("overlap_map requires raster package, but it could not be loaded")
   }
@@ -21,9 +32,7 @@ overlap_map <- function(species_name,
   if (!require(ggplot2)) {
     stop("overlap_map requires ggplot2 package, but it could not be loaded")
   }
-  # Load up the functions from the functions folder
-  source(file = "load_functions.R")
-  
+
   # predictor <- match.arg(predictor)
   model <- match.arg(model)
   
@@ -96,10 +105,17 @@ overlap_map <- function(species_name,
   and_hosts <- paste0(abbr_name, " & hosts")
   
   # Create column indicating what each layer means
-  status_levels <- c("Absent", 
-                     "Hosts only",
-                     abbr_name, 
-                     and_hosts)
+  if (generic_legend) {
+    status_levels <- c("Absent", 
+                       "Hosts only",
+                       "Butterfly only", 
+                       "Butterfly and hosts")    
+  } else {
+    status_levels <- c("Absent", 
+                       "Hosts only",
+                       abbr_name, 
+                       and_hosts)     
+  }
 
   # TODO: Better way of doing this?
   # NOTE NOTE NOTE!!! level indexes differ from layer values
@@ -117,18 +133,33 @@ overlap_map <- function(species_name,
                  "#1f78b4")   # Hosts and insect
   
   names(color_vec) <- status_levels
+
+  if (title_scenarioyear) {
+    title_text <- labs(title = paste0(abbr_name, " and hosts ", predictor))
+  } else {
+    future_text <- ifelse(predictor == "current", "current", "future")
+    title_text <- labs(title = paste0(abbr_name, " and hosts ",future_text)) 
+  }
   
-  overlap_plot <- ggplot(data = overlap_df, 
-                         mapping = aes(x = Longitude, 
-                                       y = Latitude, 
-                                       fill = Status)) +
+  overlap_plot_base <- ggplot(data = overlap_df, 
+                              mapping = aes(x = Longitude, 
+                                            y = Latitude, 
+                                            fill = Status)) +
     geom_raster() +
     scale_fill_manual(values = color_vec) +
-    labs(title = paste0(abbr_name, " ", predictor)) +
+    title_text +
     coord_equal() + 
-    theme_bw() +
-    theme(axis.title = element_blank(),
-          legend.title = element_blank())
+    theme_bw()
   
+  if (include_legend) {
+    overlap_plot <- overlap_plot_base +
+        theme(axis.title = element_blank(),
+              legend.title = element_blank())
+  } else {
+    overlap_plot <- overlap_plot_base +
+      theme(axis.title = element_blank(),
+            legend.position = "None")    
+  }
+
   return(overlap_plot)  
 }

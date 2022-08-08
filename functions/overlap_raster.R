@@ -18,7 +18,7 @@
 #' } 
 overlap_raster <- function(species_name, 
                            predictor,
-                           model = c("glm", "svm")) {
+                           model = c("glm", "svm", "maxent-notune")) {
   if (!require(raster)) {
     stop("overlap_raster requires raster package, but it could not be loaded")
   }

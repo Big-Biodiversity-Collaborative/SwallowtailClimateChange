@@ -70,7 +70,7 @@ run_maxent_notune <- function(full_data, verbose = TRUE) {
   sdmtrain <- rbind(presence_train, absence_train)
 
   # Identify a folder to store maxent files (Do we need to store these?)
-  # max_file <- "development/output/maxent"
+  # max_file <- "output/maxent"
   
   if(verbose) {
     message("Running MaxExt model.")

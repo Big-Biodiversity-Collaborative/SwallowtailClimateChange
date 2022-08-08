@@ -32,6 +32,10 @@ data/gbif/presence-absence/*-pa.csv
 data/gbif/shapefiles/*
 !data/gbif/shapefiles/.gitkeep
 
+# Estimated range areas
+output/areas/*.csv
+!output/areas/.gitkeep
+
 # Measurements of species' aridity
 output/aridity/*.csv
 !output/aridity/.gitkeep

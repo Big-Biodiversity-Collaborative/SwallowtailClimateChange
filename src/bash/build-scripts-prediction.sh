@@ -8,7 +8,7 @@
 readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
 
 SCRIPTTYPE="prediction"
-MODELS=("glm" "svm")
+MODELS=("glm" "maxent-notune")
 PRODUCT="predicted distributions"
 
 # Iterate over all the types of models (e.g. glm, svm)

@@ -7,9 +7,9 @@
 # each step. Before running _this_ script, the bash scripts to generate R 
 # scripts for individual species will need to be run. These three scripts are 
 # in the src/bash folder and can be run from a bash command line:
-# src/bash/build-scripts-model.sh
-# src/bash/build-scripts-overlap-raster.sh
+# src/bash/build-scripts-SDM.sh
 # src/bash/build-scripts-prediction.sh
+# src/bash/build-scripts-overlap-raster.sh
 
 require(dplyr)
 require(ggplot2)
@@ -18,7 +18,7 @@ require(parallel)
 source(file = "load_functions.R")
 
 insect_names <- c("Papilio rumiko", "Papilio cresphontes")
-sdm_names <- c("glm")
+sdm_names <- c("glm") # "maxent-notune"
 
 ########################################
 # extract data
@@ -119,7 +119,7 @@ s <- parallel::parLapply(cl = clust,
 # unlist(s)
 stopCluster(cl = clust)
 
-message(paste0("Fininshed estimating SDMs for ", nrow(all_species), 
+message(paste0("Finished estimating SDMs for ", nrow(all_species), 
                " species and ", length(sdm_names), " models."))
 
 ########################################
@@ -221,7 +221,10 @@ for (i in 1:nrow(insect_species)) {
       one_map <- overlap_map(species_name = species_name,
                              predictor = predictor,
                              model = sdm_name, 
-                             crop_to_insect = TRUE)
+                             crop_to_insect = TRUE,
+                             include_legend = TRUE,
+                             generic_legend = TRUE,
+                             title_scenarioyear = FALSE)
       # Write to file if not null
       if (!is.null(one_map)) {
         mapfile <- paste0("output/maps/",
@@ -237,3 +240,56 @@ for (i in 1:nrow(insect_species)) {
     }
   }
 }
+
+################################################################################
+# Calculate areas of ranges (in km2)
+# TODO: Probably worth throwing all this into some sort of a script, maybe in 
+# templates & indiv
+
+# Iterate over all insect species
+for (insect_i in 1:nrow(insect_species)) {
+  species_name <- insect_species$species_name[insect_i]
+  nice_name <- insect_species$nice_name[insect_i]
+  
+  # Iterate over all SDMS
+  for (sdm_name in sdm_names) {
+    # Iterate over all the climate models
+    message("Calculating areas for ", length(climate_models), 
+            " climate models for ", species_name, " with ", sdm_name, " SDM.")
+    
+    # list that will hold results, this will be built up as a list of data frames
+    # (one element for each climate model) that will be combined after all 
+    # calculations are finished
+    areas_list <- list()
+    
+    for (gcm_i in 1:nrow(climate_models)) {
+      # Extract relevant parts of the model
+      gcm_year <- climate_models$yr[gcm_i]
+      gcm_ssp <- climate_models$ssp[gcm_i]
+      gcm_name <- climate_models$name[gcm_i]
+      # Build filename of overlap raster for this species & gcm
+      overlap_file <- paste0("output/ranges/", nice_name, "-overlap-",
+                             sdm_name, "-", gcm_name, ".rds")
+      if (!file.exists(overlap_file)) {
+        warning("No overlap raster file for ", species_name, ", ", gcm_name)
+      } else {
+        overlap_raster <- readRDS(overlap_file)
+        overlap_areas <- range_area(overlap = overlap_raster)
+        gcm_df <- data.frame(areas = overlap_areas,
+                             area_type = names(overlap_areas),
+                             year = gcm_year,
+                             ssp = gcm_ssp)
+        rownames(gcm_df) <- NULL # pull off names that come from area vector
+        areas_list[[gcm_name]] <- gcm_df
+      }
+    } # end iterating over global climate models
+    # Combine all the data frames in the list for this species
+    areas_df <- dplyr::bind_rows(areas_list, .id = "gcm_name")
+    
+    # Write that output to a file
+    area_file <- paste0("output/areas/", nice_name, "-areas-", sdm_name, ".csv")
+    write.csv(x = areas_df,
+              file = area_file,
+              row.names = FALSE)
+  } # end iterating over SDMs
+} # end iterating over species

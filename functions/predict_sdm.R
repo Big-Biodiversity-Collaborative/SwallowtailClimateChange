@@ -34,21 +34,16 @@ predict_sdm <- function(nice_name, model, yr = c("current", "2041", "2071"),
   shapefile_name <- paste0("data/gbif/shapefiles/",
                            nice_name, 
                            "-buffered-mcp.shp")
-  # TODO: Could do better job for when this file does not exist?
-  if (!file.exists(shapefile_name)) {
-    message("Shapefile ", shapefile_name, " does not exist on disk.")
-    return(NULL)
-  }
   buffered_mcp <- sf::st_read(shapefile_name, quiet = TRUE)
 
   # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
   # for more distant time periods
   if (yr %in% c("2041", "2071")) {
-    # Project buffered mcp to NA Albers Equal Area Conic 
+    # Project buffered MCP to NA Albers Equal Area Conic 
     buffered_mcp_proj <- sf::st_transform(buffered_mcp, crs = "ESRI:102008")
     dist_mult <- dplyr::if_else(yr == "2041",
-                                true = 350,  # 350 for 2041
-                                false = 900) # 900 for 2071
+                                true = 350,  # 350 km for 2041
+                                false = 900) # 900 km for 2071
     
     # Add to the buffer, based on appropriate distance multiplier
     buffered_mcp <- sf::st_buffer(buffered_mcp_proj,

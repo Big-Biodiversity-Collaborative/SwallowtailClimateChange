@@ -4,7 +4,7 @@
 # 2021-07-08
 
 SCRIPTTYPE="overlap-raster"
-MODELS=("glm" "svm")
+MODELS=("glm" "maxent-notune")
 PRODUCT="overlap raster"
 
 # Read the file with insect names in as an array, skipping the header row 
@@ -30,7 +30,7 @@ do
   
       # Read in the template file contents into the MODELFILE variable, 
       # skipping very first line
-      TEMPLATE="templates/template-${SCRIPTTYPE}-${MODEL}-building.R"
+      TEMPLATE="templates/template-${SCRIPTTYPE}-${MODEL}.R"
       MODELFILE=$(cat "$TEMPLATE" | tail -n +2)
   
       # Add lines at top of file explaining script & message warning against 

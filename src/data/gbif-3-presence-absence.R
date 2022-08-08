@@ -119,7 +119,7 @@ for (species in species_list$accepted_name) {
         terra::mask(ch_buffer_sv)
       rm(predictor)
       
-      # Generate pseudo-absence points and extract predictor values
+      # Generate pseudo-absence points
       absence <- terra::spatSample(x = pred_mask,  
                                    size = 5000,
                                    method = "random",
