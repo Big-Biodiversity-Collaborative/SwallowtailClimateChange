@@ -41,7 +41,7 @@ predictors <- terra::rast(list.files(path = "data/wc2-1",
 predictors <- terra::extract(x = predictors, 
                              y = full_data[, c("x", "y")], 
                              xy = TRUE) %>%
-  select(-ID)
+  dplyr::select(-ID)
 
 # Join bioclim data with original full_data (which has pa and fold info)
 # Specifying join columns isn't necessary, but keeps things quiet

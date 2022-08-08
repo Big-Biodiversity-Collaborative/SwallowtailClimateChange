@@ -18,7 +18,8 @@ require(parallel)
 source(file = "load_functions.R")
 
 insect_names <- c("Papilio rumiko", "Papilio cresphontes")
-sdm_names <- c("glm") # "maxent-notune"
+# Possible values: "glm", "maxent-notune"
+sdm_names <- c("maxent-notune")
 
 ########################################
 # extract data

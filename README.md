@@ -31,6 +31,7 @@ The project uses the following additional R packages:
 + raster
 + RColorBrewer
 + rgdal
++ rJava (for MaxEnt models)
 + Rtools (needed to use the zip() function on Windows machines)
 + sf
 + sp
