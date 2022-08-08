@@ -32,7 +32,10 @@ overlap_maps_maxent_notune <- function(species_name,
     one_map <- overlap_map(species_name = species_name,
                            predictor = predictor,
                            model = sdm_model, 
-                           crop_to_insect = TRUE)
+                           crop_to_insect = TRUE,
+                           include_legend = TRUE,
+                           generic_legend = TRUE,
+                           title_scenarioyear = FALSE)
     
     # Write to file if not null
     if (!is.null(one_map)) {
