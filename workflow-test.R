@@ -17,7 +17,7 @@ require(tidyr)
 require(parallel)
 source(file = "load_functions.R")
 
-insect_names <- c("Papilio rumiko")
+insect_names <- c("Papilio rumiko", "Papilio cresphontes")
 sdm_names <- c("glm")
 
 ########################################
