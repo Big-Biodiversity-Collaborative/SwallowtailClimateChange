@@ -34,6 +34,7 @@ overlap_maps_maxent_notune <- function(species_name,
                            model = sdm_model, 
                            crop_to_insect = TRUE,
                            include_legend = TRUE,
+                           horizontal_legend = TRUE,
                            generic_legend = TRUE,
                            title_scenarioyear = FALSE)
     

@@ -224,6 +224,7 @@ for (i in 1:nrow(insect_species)) {
                              model = sdm_name, 
                              crop_to_insect = TRUE,
                              include_legend = TRUE,
+                             horizontal_legend = TRUE,
                              generic_legend = TRUE,
                              title_scenarioyear = FALSE)
       # Write to file if not null

@@ -10,9 +10,12 @@
 #' range of the insect
 #' @param include_legend logical indicating whether legend should be included
 #' or not
+#' @param horizontal_legend logical indicating whether legend should be 
+#' below the plotting area and oriented horizontally. Argument will be ignored
+#' if include_legend = FALSE.
 #' @param generic_legend logical indicating whether the legend should refer to
 #' butterflies (generic_legend = TRUE) or a particular butterfly species  
-#' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE 
+#' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE. 
 #' @param title_scenarioyear logical indicating whether the title (for future
 #' maps only) should include the scenario and year (title_scenarioyear = TRUE)
 #' or just say "future" (title_scenarioyear = FALSE)
@@ -21,6 +24,7 @@ overlap_map <- function(species_name,
                         model = c("glm", "svm", "maxent-notune"),
                         crop_to_insect = FALSE,
                         include_legend = TRUE,
+                        horizontal_legend = FALSE,
                         generic_legend = FALSE,
                         title_scenarioyear = TRUE) {
   if (!require(raster)) {
@@ -151,10 +155,15 @@ overlap_map <- function(species_name,
     coord_equal() + 
     theme_bw()
   
-  if (include_legend) {
+  if (include_legend == TRUE & horizontal_legend == TRUE) {
     overlap_plot <- overlap_plot_base +
         theme(axis.title = element_blank(),
-              legend.title = element_blank())
+              legend.title = element_blank(),
+              legend.position = "bottom")
+  } else if (include_legend == TRUE & horizontal_legend == FALSE) {
+    overlap_plot <- overlap_plot_base +
+      theme(axis.title = element_blank(),
+            legend.title = element_blank())    
   } else {
     overlap_plot <- overlap_plot_base +
       theme(axis.title = element_blank(),
