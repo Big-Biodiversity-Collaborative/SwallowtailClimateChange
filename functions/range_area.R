@@ -18,14 +18,14 @@ range_area <- function(overlap) {
   # Pull out area of those cells for insect only (== 1)
   insect_only <- cell_areas["1"]
   # In case where there are NO pixels of insect only, need to set this to 0
-  if (length(insect_only) == 0) {
+  if (is.na(insect_only)) {
     insect_only <- 0
   }
   
   # Pull out area of those cells for plant AND insect (== 3)
   insect_plant <- cell_areas["3"]
   # If there are no pixels with both, set to 0
-  if (length(insect_plant) == 0) {
+  if (is.na(insect_plant)) {
     insect_plant <- 0
   }
   
