@@ -44,16 +44,11 @@ predictors <- terra::rast(list.files(path = "data/wc2-1",
 # Extract bioclim data for presence/absence data; can take a moment
 predictors <- terra::extract(x = predictors, 
                              y = full_data[, c("x", "y")], 
-                             xy = TRUE) %>%
+                             xy = FALSE) %>%
   dplyr::select(-ID)
 
 # Join bioclim data with original full_data (which has pa and fold info)
-# Specifying join columns isn't necessary, but keeps things quiet
-# Need to include distinct since there are often multiple gbif observations at 
-# one location (leading to duplicated rows in predictors)
-full_data <- full_data %>%
-  dplyr::left_join(dplyr::distinct(predictors),
-                   by = c("x" = "x", "y" = "y"))
+full_data <- cbind(full_data, predictors)
 
 # Arrange predictor columns in full_data (so they appear in order)
 # use all_of to ensure all all bioclim variables are there
