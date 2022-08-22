@@ -68,7 +68,8 @@ predict_sdm <- function(nice_name, model, yr = c("current", "2041", "2071"),
 
   # Make predictions with the remaining predictor data and model  
   preds <- predict(pred_mask, 
-                   model)
+                   model,
+                   type = "response")
   
   # Send back this raster with the predicted values
   return(preds)

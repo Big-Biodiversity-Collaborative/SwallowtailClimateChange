@@ -28,15 +28,15 @@ run_glm <- function(full_data, predictors, verbose = TRUE) {
 
   # Make sure presence-absence data are there
   if (!("pa" %in% colnames(full_data))) {
-    stop("run_maxent_notune requires column named 'pa' in full_data")
+    stop("run_glm requires column named 'pa' in full_data")
   }
   # Make sure fold indicators are there
   if (!("fold" %in% colnames(full_data))) {
-    stop("run_maxent_notune requires column named 'fold' in full_data")
+    stop("run_glm requires column named 'fold' in full_data")
   }
   # Make sure data for all 19 climate variables are there
   if (length(setdiff(paste0("bio",1:19),colnames(full_data))) > 0) {
-    stop("run_maxent_notune requires bio1:bio19 columns in full_data")
+    stop("run_glm requires bio1:bio19 columns in full_data")
   }
 
   predvars <- paste0("bio", 1:19)
@@ -77,9 +77,13 @@ run_glm <- function(full_data, predictors, verbose = TRUE) {
     message("Model complete. Evaluating GLM model with testing data.")
   }
   # Evaluate model performance with testing data
+  # The type = "response" is passed to predict.glm so the values are on the 
+  # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
+  # sure the threshold is on the same scale of output from predict_sdm
   glm_eval <- dismo::evaluate(p = presence_test, 
                               a = absence_test, 
-                              model = glm_model)
+                              model = glm_model,
+                              type = "response") 
   
   # Calculate threshold so we can make a P/A map later
   pres_threshold <- dismo::threshold(x = glm_eval, 

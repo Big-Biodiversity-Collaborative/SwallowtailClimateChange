@@ -19,7 +19,7 @@ source(file = "load_functions.R")
 
 insect_names <- c("Papilio rumiko", "Papilio cresphontes")
 # Possible values: "glm", "maxent-notune"
-sdm_names <- c("maxent-notune")
+sdm_names <- c("glm")
 
 ########################################
 # extract data
