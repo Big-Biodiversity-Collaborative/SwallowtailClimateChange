@@ -15,7 +15,6 @@
 #'   \code{dismo::maxent}}
 #'   \item{evaluation}{Evaluation of model using testing data; the output of 
 #'   \code{dismo::evaluate}}
-#'   \item{probs}{Occurrence probabilities predicted from SVM model}
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with 
 #'   \code{stat = "spec_sens"}}
