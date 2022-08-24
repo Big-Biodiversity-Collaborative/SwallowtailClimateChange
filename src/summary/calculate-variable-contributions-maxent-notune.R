@@ -1,8 +1,9 @@
-# Extract and store variable contributions from MaxEnt models
+# Extract and store variable importance metrics from MaxEnt models
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-08-23
 
+require(dplyr)
 require(stringr)
 require(dismo)
 
@@ -12,10 +13,10 @@ maxent_files <- list.files(path = "./output/SDMs/",
                            full.names = TRUE)
 
 # Create empty dataframe to store variable contributions from each model:
-contributions <- data.frame(matrix(NA, nrow = length(maxent_files), ncol = 21))
-colnames(contributions) <- c("species", 
-                             "SDM", 
-                             paste0("bio", 1:19))
+var_impt <- data.frame(matrix(NA, nrow = length(maxent_files), ncol = 21))
+colnames(var_impt) <- c("species", 
+                        "SDM", 
+                        paste0("bio", 1:19))
 
 # Loop through files
 for (i in 1:length(maxent_files)) {
@@ -30,19 +31,30 @@ for (i in 1:length(maxent_files)) {
   # Read in .rds file
   model_object <- readRDS(maxent_files[i])
   
-  # Extract values from plot of variable contributions
-  model_contrib <- plot(model_object[["model"]])
-  model_contrib <- model_contrib[paste0("bio", 1:19)]
+  # Extract measures of variable importance from maxent model 
+  # (using permutation methods: see 
+  # https://biodiversityinformatics.amnh.org/open_source/maxent/Maxent_tutorial_2021.pdf)
+  all_metrics <- model_object[["model"]]@results
+  permute_impt <- all_metrics[grepl("permutation", row.names(all_metrics)),]
+  names(permute_impt) <- str_replace(names(permute_impt), 
+                                     pattern = ".permutation.importance",
+                                     replacement = "") 
+  permute_df <- data.frame(variable = names(permute_impt), 
+                           permutation_impt = permute_impt, 
+                           row.names = NULL)
+  permute_df <- left_join(data.frame(variable = paste0("bio", 1:19)),
+                          permute_df,
+                          by = "variable")
   
   # Put everything in dataframe
-  contributions[i,1] <- species_name
-  contributions[i,2] <- "maxent-notune"
-  contributions[i,3:21] <- model_contrib
+  var_impt[i,1] <- species_name
+  var_impt[i,2] <- "maxent-notune"
+  var_impt[i,3:21] <- permute_df$permutation_impt
   
 }
 
 # Save contributions to file
 write.csv(contributions, 
-          file = "output/variable-contributions-maxent-notune.csv",
+          file = "output/variable-importance-maxent-notune.csv",
           row.names = FALSE)
   
