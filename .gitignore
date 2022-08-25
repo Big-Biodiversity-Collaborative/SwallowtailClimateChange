@@ -54,11 +54,15 @@ output/models/*.rds
 output/SDMs/*.rds
 !output/SDMs/.gitkeep
 
+# Predicted overlaps of insects and hosts
+output/overlaps/*
+!output/overlaps/.gitkeep
+
 # General data visualization
 output/plots/*
 !output/plots/.gitkeep
 
-# Predicted ranges and range area calculations
+# Range area calculations
 output/ranges/*
 !output/ranges/.gitkeep
 

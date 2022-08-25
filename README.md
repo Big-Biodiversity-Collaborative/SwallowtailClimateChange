@@ -150,8 +150,9 @@ above).
     species
     + maps: distribution maps (image files) for insect species and hosts
     + plots: miscellaneous data visualizations
-    + ranges: composite rasters of insect and host species and estimates of 
-    range areas
+    + overlaps: composite rasters of insect and host species
+    + ranges: estimates of range areas
+    + SDMs: species distribution models
 + src: 
     + bash: bash scripts to generate individual species R scripts
     + data: R scripts for data download and assessment
