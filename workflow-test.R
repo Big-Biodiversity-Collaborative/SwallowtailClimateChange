@@ -146,7 +146,7 @@ for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
   for (sdm_name in sdm_names) {
-    prediction_filename <- paste0("src/indiv/", nice_name, "-prediction-",
+    prediction_filename <- paste0("src/indiv/", nice_name, "-distribution-",
                                   sdm_name, ".R")
     if (!file.exists(prediction_filename)) {
       warning(paste0("Prediction file ", prediction_filename,
@@ -187,12 +187,11 @@ for (i in 1:nrow(insect_species)) {
   species_name <- insect_species$species_name[i]
   nice_name <- insect_species$nice_name[i]
   for (sdm_name in sdm_names) {
-    overlap_filename <- paste0("src/indiv/", nice_name, "-overlap-raster-",
+    overlap_filename <- paste0("src/indiv/", nice_name, "-overlap-",
                                sdm_name, ".R")
     if (!file.exists(overlap_filename)) {
       warning(paste0("Overlap raster file ", overlap_filename,
-                     " is missing. Has build-overlap-raster-", sdm_name, 
-                     "-files.sh been run locally?"))
+                     " is missing. Has build-scripts-overlap.sh been run locally?"))
       missing_overlaps <- c(missing_overlaps, i)
     } else {
       # message(paste0("Running overlap raster script ", overlap_filename))
