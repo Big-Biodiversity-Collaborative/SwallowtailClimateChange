@@ -1,15 +1,15 @@
-# Run all overlap raster scripts for SVM
-# Jeff Oliver
-# jcoliver@arizona.edu
-# 2021-07-08
+# Run all overlap raster scripts for MaxEnt (no tune) models
+# Jeff Oliver & Erin Zylstra
+# jcoliver@arizona.edu; ezylstra@arizona.edu
+# 2022-08-05
 
 require(parallel)
 
-logfile <- "logs/overlap-raster-svm-out.log"
+logfile <- "logs/overlap-maxent-notune-out.log"
 remove_log <- FALSE
 
 script_files <- list.files(path = "./src/indiv",
-                           pattern = "*-overlap-raster-svm.R",
+                           pattern = "*-overlap-maxent-notune.R",
                            full.names = TRUE)
 
 # For testing, subset this vector

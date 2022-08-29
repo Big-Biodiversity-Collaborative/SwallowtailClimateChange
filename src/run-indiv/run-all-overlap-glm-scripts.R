@@ -5,11 +5,11 @@
 
 require(parallel)
 
-logfile <- "logs/overlap-raster-glm-out.log"
+logfile <- "logs/overlap-glm-out.log"
 remove_log <- FALSE
 
 script_files <- list.files(path = "./src/indiv",
-                           pattern = "*-overlap-raster-glm.R",
+                           pattern = "*-overlap-glm.R",
                            full.names = TRUE)
 
 # For testing, subset this vector

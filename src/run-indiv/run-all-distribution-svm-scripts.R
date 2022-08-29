@@ -10,13 +10,13 @@
 
 require(parallel)
 
-logfile <- "logs/prediction-svm-out.log"
+logfile <- "logs/distribution-svm-out.log"
 remove_log <- FALSE
 rerun <- TRUE
 
 pred_scripts <- list.files(path = "./src/indiv",
-                         pattern = "*-prediction-svm.R",
-                         full.names = TRUE)
+                           pattern = "*-distribution-svm.R",
+                           full.names = TRUE)
 
 # For testing, use only a subset 
 # pred_scripts <- pred_scripts[1:12]
@@ -24,30 +24,27 @@ pred_scripts <- list.files(path = "./src/indiv",
 pred_script_list <- as.list(pred_scripts)
 
 run_svm_prediction <- function(script_name,
-                            log_file,
-                            rerun) {
+                               log_file,
+                               rerun) {
   
-  one_file <- script_name
   # Need to extract nice name to find model
-  nice_name <- strsplit(x = basename(one_file),
+  nice_name <- strsplit(x = basename(script_name),
                         split = "-")[[1]][1]
   
   # Make sure model output exists
-  model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
+  model_out <- paste0("output/SDMs/", nice_name, "-svm.rds")
   if (file.exists(model_out)) {
-    # TODO: Seems duplicated with one_file and script_name...
-    prediction_script <- paste0("src/indiv/", nice_name, "-prediction-svm.R")
-    if (file.exists(prediction_script)) {
+    if (file.exists(script_name)) {
       # In this one case, we want to let user know that we are running
-      write(x = paste0("About to run ", prediction_script), 
+      write(x = paste0("About to run ", script_name), 
             file = log_file,
             append = TRUE)
-      message(paste0("About to run ", prediction_script))
-      source(file = prediction_script)
-      message_out <- paste0("Finished running script: ", prediction_script)
+      message(paste0("About to run ", script_name))
+      source(file = script_name)
+      message_out <- paste0("Finished running script: ", script_name)
       message(message_out)
     } else {
-      message_out <- paste0("Could not find script: ", prediction_script)
+      message_out <- paste0("Could not find script: ", script_name)
       warning(message_out)
     }
   } else {

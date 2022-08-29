@@ -33,10 +33,10 @@ maxent_file_list <- as.list(maxent_files)
 run_maxent_script <- function(script_name,
                               log_file,
                               rerun, min_obs) {
-  one_file <- script_name
+  maxent_script <- script_name
 
   # Need to extract species name from file to see if model has already been run
-  nice_name <- strsplit(x = basename(one_file),
+  nice_name <- strsplit(x = basename(maxent_script),
                         split = "-")[[1]][1]
   
   # Need to count the number of observations in data file to see if it meets 
@@ -56,8 +56,6 @@ run_maxent_script <- function(script_name,
       model_out <- paste0("output/SDMs/", nice_name, "-maxent-notune.rds")
       
       if (!file.exists(model_out) | rerun) {
-        # TODO: Seems duplicated with one_file and script_name...
-        maxent_script <- paste0("src/indiv/", nice_name, "-SDM-maxent-notune.R")
         if (file.exists(maxent_script)) {
           # In this one case, we want to let user know that we are running
           write(x = paste0("About to run ", maxent_script), 

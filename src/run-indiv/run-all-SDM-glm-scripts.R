@@ -10,7 +10,7 @@
 
 require(parallel)
 
-logfile <- "logs/model-glm-out.log"
+logfile <- "logs/sdm-glm-out.log"
 remove_log <- FALSE
 
 # Logical indicating whether or not to for re-running script if the model 
@@ -21,7 +21,7 @@ rerun <- TRUE
 min_obs <- 50
 
 glm_files <- list.files(path = "./src/indiv",
-                        pattern = "*-model-glm.R",
+                        pattern = "*-SDM-glm.R",
                         full.names = TRUE)
 
 # For testing, subset this vector
@@ -33,30 +33,28 @@ glm_file_list <- as.list(glm_files)
 run_glm_script <- function(script_name,
                            log_file,
                            rerun, min_obs) {
-  one_file <- script_name
+  glm_script <- script_name
 
   # Need to extract species name from file to see if model has already been run
-  nice_name <- strsplit(x = basename(one_file),
+  nice_name <- strsplit(x = basename(glm_script),
                         split = "-")[[1]][1]
   
   # Need to count the number of observations in data file to see if it meets 
   # minimums
-  obs_file <- paste0("data/",
-                     nice_name,
-                     "-gbif.csv")
+  pa_file <- paste0("data/gbif/presence-absence/",
+                    nice_name,
+                    "-pa.csv")
   
   # Will hold message for log file
   message_out <- ""
-  if (file.exists(obs_file)) {
-    n_obs <- nrow(x = read.csv(file = obs_file))
+  if (file.exists(pa_file)) {
+    n_obs <- nrow(x = read.csv(file = pa_file))
     
     if (n_obs >= min_obs) {
       # the file name that would be used for model output
-      model_out <- paste0("output/models/", nice_name, "-model-glm-current.rds")
+      model_out <- paste0("output/SDMs/", nice_name, "-maxent-notune.rds")
       
       if (!file.exists(model_out) | rerun) {
-        # TODO: Seems duplicated with one_file and script_name...
-        glm_script <- paste0("src/indiv/", nice_name, "-model-glm.R")
         if (file.exists(glm_script)) {
           # In this one case, we want to let user know that we are running
           write(x = paste0("About to run ", glm_script), 
@@ -79,7 +77,7 @@ run_glm_script <- function(script_name,
     }
   } else {
     message_out <- paste0("No data file found for ", nice_name, " (", 
-                          obs_file, ").")
+                          pa_file, ").")
     message(message_out)
   }
 

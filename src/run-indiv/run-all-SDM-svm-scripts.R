@@ -10,7 +10,7 @@
 
 require(parallel)
 
-logfile <- "logs/model-svm-out.log"
+logfile <- "logs/sdm-svm-out.log"
 remove_log <- FALSE
 
 # Logical indicating whether or not to for re-running script if the model 
@@ -21,7 +21,7 @@ rerun <- TRUE
 min_obs <- 50
 
 svm_files <- list.files(path = "./src/indiv",
-                        pattern = "*-model-svm.R",
+                        pattern = "*-SDM-svm.R",
                         full.names = TRUE)
 
 # For testing, subset this vector
@@ -33,30 +33,28 @@ svm_file_list <- as.list(svm_files)
 run_svm_script <- function(script_name,
                            log_file,
                            rerun, min_obs) {
-  one_file <- script_name
+  svm_script <- script_name
 
   # Need to extract species name from file to see if model has already been run
-  nice_name <- strsplit(x = basename(one_file),
+  nice_name <- strsplit(x = basename(svm_script),
                         split = "-")[[1]][1]
   
   # Need to count the number of observations in data file to see if it meets 
   # minimums
-  obs_file <- paste0("data/",
-                     nice_name,
-                     "-gbif.csv")
+  pa_file <- paste0("data/gbif/presence-absence/",
+                    nice_name,
+                    "-pa.csv")
   
   # Will hold message for log file
   message_out <- ""
-  if (file.exists(obs_file)) {
-    n_obs <- nrow(x = read.csv(file = obs_file))
+  if (file.exists(pa_file)) {
+    n_obs <- nrow(x = read.csv(file = pa_file))
     
     if (n_obs >= min_obs) {
       # the file name that would be used for model output
-      model_out <- paste0("output/models/", nice_name, "-model-svm-current.rds")
+      model_out <- paste0("output/SDMs/", nice_name, "-maxent-notune.rds")
       
       if (!file.exists(model_out) | rerun) {
-        # TODO: Seems duplicated with one_file and script_name...
-        svm_script <- paste0("src/indiv/", nice_name, "-model-svm.R")
         if (file.exists(svm_script)) {
           # In this one case, we want to let user know that we are running
           write(x = paste0("About to run ", svm_script), 
@@ -79,7 +77,7 @@ run_svm_script <- function(script_name,
     }
   } else {
     message_out <- paste0("No data file found for ", nice_name, " (", 
-                          obs_file, ").")
+                          pa_file, ").")
     message(message_out)
   }
 
