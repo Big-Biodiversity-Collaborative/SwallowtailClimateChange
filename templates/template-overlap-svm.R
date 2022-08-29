@@ -30,7 +30,7 @@ for (model_name in model_names) {
   
   # As long as there is something there, write to file
   if (!is.null(overlap)) {
-    overlap_file <- paste0("output/ranges/",
+    overlap_file <- paste0("output/overlaps/",
                            nice_name, 
                            "-overlap-",
                            method, 

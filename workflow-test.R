@@ -270,7 +270,7 @@ for (insect_i in 1:nrow(insect_species)) {
       gcm_ssp <- climate_models$ssp[gcm_i]
       gcm_name <- climate_models$name[gcm_i]
       # Build filename of overlap raster for this species & gcm
-      overlap_file <- paste0("output/ranges/", nice_name, "-overlap-",
+      overlap_file <- paste0("output/overlaps/", nice_name, "-overlap-",
                              sdm_name, "-", gcm_name, ".rds")
       if (!file.exists(overlap_file)) {
         warning("No overlap raster file for ", species_name, ", ", gcm_name)

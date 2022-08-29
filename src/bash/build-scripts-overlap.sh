@@ -3,7 +3,7 @@
 # jcoliver@arizona.edu
 # 2021-07-08
 
-SCRIPTTYPE="overlap-raster"
+SCRIPTTYPE="overlap"
 MODELS=("glm" "maxent-notune")
 PRODUCT="overlap raster"
 

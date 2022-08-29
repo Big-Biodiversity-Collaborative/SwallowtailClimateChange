@@ -44,7 +44,7 @@ overlap_map <- function(species_name,
                                 replacement = "_",
                                 x = species_name))
   
-  overlap_file <- paste0("output/ranges/",
+  overlap_file <- paste0("output/overlaps/",
                          nice_name, 
                          "-overlap-",
                          model, 

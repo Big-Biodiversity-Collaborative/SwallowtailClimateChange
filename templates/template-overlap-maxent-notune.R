@@ -1,14 +1,15 @@
-# A template for building overlap rasters for an insect species & hosts from GLM
-# Jeff Oliver
-# jcoliver@arizona.edu
-# 2021-07-08
+# A template for building overlap rasters for an insect species & hosts from a
+# MaxEnt model (no tune)
+# Jeff Oliver & Erin Zylstra
+# jcoliver@arizona.edu; ezylstra@arizona.edu
+# 2022-08-05
 
 source(file = "load_functions.R")
 
 genus <- "GENUS"
 species <- "SPECIES"
 
-sdm_name <- "glm"
+sdm_name <- "maxent-notune"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
@@ -19,7 +20,7 @@ message(paste0("Creating overlap rasters based on ", toupper(sdm_name),
                " for ", species_name))
 
 # For each of the global climate change models, want to create the overlap 
-# raster then save it to a file. 
+# raster then save it to a file 
 climate_models <- read.csv(file = "data/climate-models.csv")
 gcm_names <- climate_models$name
 
@@ -30,7 +31,7 @@ for (gcm_name in gcm_names) {
   
   # As long as there is something there, write to file
   if (!is.null(overlap)) {
-    overlap_file <- paste0("output/ranges/",
+    overlap_file <- paste0("output/overlaps/",
                            nice_name, 
                            "-overlap-",
                            sdm_name, 

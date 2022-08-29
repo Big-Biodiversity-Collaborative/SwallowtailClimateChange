@@ -7,7 +7,7 @@
 # (hence -n +2 in call to tail)
 readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
 
-SCRIPTTYPE="prediction"
+SCRIPTTYPE="distribution"
 MODELS=("glm" "maxent-notune")
 PRODUCT="predicted distributions"
 
@@ -48,4 +48,4 @@ do
       sed "s/SPECIES/${SPECIES}/g" > "$FILENAME"
     echo "Wrote to ${FILENAME}"
   done; # end iterating over all species names
-done; # end iterating over all modelsdone; 
+done; # end iterating over all models
