@@ -67,29 +67,34 @@ model used for species distribution modeling, e.g. "glm" for generalized
 linear model and "svm" for support vector machine.
 
 1. Data retrieval and cleaning (in src/data)
-   1. **src/data/download-data.R**: Download observational data from GBIF to 
+   1. **src/data/gbif-1-download.R**: Download observational data from GBIF to 
    the data folder; note by default the data files that are downloaded by this 
    script are _not_ under version control
-   2. **src/data/data-gbif-qa.R**: Run quality assurance on downloaded data, 
-   to ensure observations fall within geographic area of interest, in this 
-   case, North America
-   3. **src/data/prep-climate-data.R**: Download monthly climate data for time 
+   2. **src/data/gbif-2-filter.R**: Run quality assurance on downloaded data, 
+   and retain only those records that:
+       1. are observations from 2000-2022,
+       2. are in locations with climate data (which effectively restricts 
+       observations to North America), and
+       3. are inside the 95% contour of observations
+   3. **src/data/gbif-3-presence-absence.R**: Generate a presence/absence 
+   dataset for each species, to be used in any species distribution model
+   4. **src/data/prep-climate-data.R**: Download monthly climate data for time 
    span of interest (2000-2018) and calculate the average values for the 19 
    standard bioclimatic variables (should not need to be run locally; data are 
    available in data/wc2-1 directory)
-   4. **src/data/prep-forecast-data.R**: Download monthly climate data for 
+   5. **src/data/prep-forecast-data.R**: Download monthly climate data for 
    ensemble of forecast climate models and calculate the average values for the 
    19 standard bioclimatic variables (should not need to be run locally; data 
    are available in data/ensemble sub-directories)
 2. Preparing R scripts for analyses of individual species
-   1. **src/bash/build-scripts-model.sh**: bash shell scripts to build species 
+   1. **src/bash/build-scripts-SDM.sh**: bash shell scripts to build species 
    distribution models for individual species; one script is built for each 
    row (species) in data/gbif-reconcile.csv
-   2. **src/bash/build-scripts-prediction.sh**: bash shell scripts to build R 
+   2. **src/bash/build-scripts-distribution.sh**: bash shell scripts to build R 
    scripts that predict presence / absence of species based on species 
    distribution models and predictor data (e.g. current bioclimatic data and
    forecast data)
-   3. **src/bash/build-scripts-overlap-raster.sh**: bash shell scripts to 
+   3. **src/bash/build-scripts-overlap.sh**: bash shell scripts to 
    build R scripts that create overlap rasters for each species of insect with 
    its respective host plant(s)
 3. Bulk processing of single-species analyses (see below for example graphic)
@@ -153,6 +158,8 @@ above).
     + overlaps: composite rasters of insect and host species
     + ranges: estimates of range areas
     + SDMs: species distribution models
+    + variable-contributions: summary of SDMs' relative contribution of each 
+    bioclimatic variable in predicting presence / absence
 + src: 
     + bash: bash scripts to generate individual species R scripts
     + data: R scripts for data download and assessment
