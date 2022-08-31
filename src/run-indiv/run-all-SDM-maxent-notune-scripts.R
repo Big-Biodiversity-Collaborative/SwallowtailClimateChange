@@ -3,11 +3,6 @@
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
 
-# TODO: An open question of whether we want to run *all* the appropriate 
-# scripts that are found in the scripts folder (as implemented below) or if 
-# we want to use another file (such as data/gbif-reconcile.csv) to dictate 
-# which scripts to run...
-
 require(parallel)
 
 logfile <- "logs/SDM-maxent-notune-out.log"
@@ -47,8 +42,8 @@ run_maxent_script <- function(script_name,
   
   # Will hold message for log file
   message_out <- ""
-  if (file.exists(obs_file)) {
-    pa_data <- read.csv(file = obs_file)
+  if (file.exists(pa_file)) {
+    pa_data <- read.csv(file = pa_file)
     n_obs <- nrow(pa_data[pa_data$pa == 1, ])
     
     if (n_obs >= min_obs) {
@@ -78,7 +73,7 @@ run_maxent_script <- function(script_name,
     }
   } else {
     message_out <- paste0("No data file found for ", nice_name, " (", 
-                          obs_file, ").")
+                          pa_file, ").")
     message(message_out)
   }
 
@@ -88,24 +83,25 @@ run_maxent_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
-num_cores <- detectCores() - 2
-if (num_cores > 8) {
-  num_cores <- 8
-}
-
 # Create that log file before running the parallel processes
 f <- file.create(logfile)
 
-r <- parallel::mclapply(X = maxent_file_list,
-                        FUN = run_maxent_script,
-                        mc.cores = num_cores,
-                        log_file = logfile,
-                        rerun = rerun,
-                        min_obs = min_obs)
+# For parallel processing, do two fewer cores or eight (whichever is lower)
+num_cores <- parallel::detectCores() - 2
+if (num_cores > 8) {
+  num_cores <- 8
+}
+clust <- parallel::makeCluster(num_cores)
+
+# Run each script in parallel
+r <- parallel::parLapply(cl = clust,
+                         X = maxent_file_list,
+                         fun = run_maxent_script,
+                         log_file = logfile,
+                         rerun = rerun,
+                         min_obs = min_obs)
+stopCluster(cl = clust)
 
 if (remove_log && file.exists(logfile)) {
   file.remove(logfile)
 }
-
-# TODO: After running, should extract any errors that happened...

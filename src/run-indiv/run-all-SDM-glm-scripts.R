@@ -3,14 +3,9 @@
 # jcoliver@arizona.edu
 # 2021-06-03
 
-# TODO: An open question of whether we want to run *all* the appropriate 
-# scripts that are found in the scripts folder (as implemented below) or if 
-# we want to use another file (such as data/gbif-reconcile.csv) to dictate 
-# which scripts to run...
-
 require(parallel)
 
-logfile <- "logs/sdm-glm-out.log"
+logfile <- "logs/SDM-glm-out.log"
 remove_log <- FALSE
 
 # Logical indicating whether or not to for re-running script if the model 
@@ -87,24 +82,25 @@ run_glm_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
-num_cores <- detectCores() - 2
-if (num_cores > 8) {
-  num_cores <- 8
-}
-
 # Create that log file before running the parallel processes
 f <- file.create(logfile)
 
-r <- parallel::mclapply(X = glm_file_list,
-                        FUN = run_glm_script,
-                        mc.cores = num_cores,
-                        log_file = logfile,
-                        rerun = rerun,
-                        min_obs = min_obs)
+# For parallel processing, do two fewer cores or eight (whichever is lower)
+num_cores <- parallel::detectCores() - 2
+if (num_cores > 8) {
+  num_cores <- 8
+}
+clust <- parallel::makeCluster(num_cores)
+
+# Run each script in parallel
+r <- parallel::parLapply(cl = clust,
+                         X = glm_file_list,
+                         fun = run_glm_script,
+                         log_file = logfile,
+                         rerun = rerun,
+                         min_obs = min_obs)
+stopCluster(cl = clust)
 
 if (remove_log && file.exists(logfile)) {
   file.remove(logfile)
 }
-
-# TODO: After running, should extract any errors that happened...

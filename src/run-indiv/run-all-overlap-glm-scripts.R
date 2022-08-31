@@ -43,19 +43,22 @@ run_scripts <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
-num_cores <- detectCores() - 2
-if (num_cores > 8) {
-  num_cores <- 8
-}
-
 # Create that log file before running the parallel processes
 f <- file.create(logfile)
 
-r <- parallel::mclapply(X = script_file_list,
-                        FUN = run_scripts,
-                        mc.cores = num_cores,
-                        log_file = logfile)
+# For parallel processing, do two fewer cores or eight (whichever is lower)
+num_cores <- parallel::detectCores() - 2
+if (num_cores > 8) {
+  num_cores <- 8
+}
+clust <- parallel::makeCluster(num_cores)
+
+# Run each script in parallel
+r <- parallel::parLapply(cl = clust,
+                         X = script_file_list,
+                         fun = run_scripts,
+                         log_file = logfile)
+stopCluster(cl = clust)
 
 if (remove_log && file.exists(logfile)) {
   file.remove(logfile)
