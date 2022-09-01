@@ -3,14 +3,15 @@
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-06-21
 
-require(MASS)    # kernel density estimateion
+require(MASS)    # kernel density estimation
 require(terra)   # extracting observations with climate data
 require(raster)  # you know, raster stuff
 require(dplyr)   # data wrangling
 require(dismo)   # thinning for kernel density estimate
 
 # TODO: Resolution of envelope is based on 0.5 degrees, but climate data are in 
-#       1km resolution. Should we make higher resolution envelope?
+#       0.04167 degree resolution (2.5 min, ~ 4.5km). Should we make higher
+#       resolution envelope?
 # TODO: Thinning, for defining the kernel density estimate, samples one 
 #       observation from every cell in climate raster. Should this be 
 #       increased? Note that if it increased too high (i.e. to 1000 points), 
