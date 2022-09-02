@@ -120,6 +120,7 @@ for (ssp in ssps) {
                                   one_var, month_vec, ".tif"))
       raster_list[[one_var_name]] <- raster::stack(x = var_files)
       # Reproject the raster to the resolution & CRS of the contemporary data
+      # This changes the resolution from 30s to 2.5 minutes
       # Can take a a couple of minutes, so let user know progress
       message(paste0(Sys.time(), " | Reprojecting ", one_var_name, ", ", ssp, ", ", time_per))
       raster_list[[one_var_name]] <- raster::projectRaster(from = raster_list[[one_var_name]],

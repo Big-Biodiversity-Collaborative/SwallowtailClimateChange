@@ -11,11 +11,11 @@ Information Facility, [GBIF](https://gbif.org)) and perform quality control
 processes to ensure observations are only from Canada, Mexico, and the United 
 States of America. The data are analyzed to create species distribution models 
 based on presence and pseudo-absence data using a variety of models (e.g. 
-generalized linear model, support vector machine). The models are then used to 
-predict presence or absence under a variety of conditions, including current 
-climate and forecast climate models. These predictions are used to estimate 
-change in the range sizes of individual butterfly species and the relative size 
-of range overlap of their known host plant species.
+Maximum Entropy, generalized linear model). The models are then used to predict 
+presence or absence under a variety of conditions, including current climate 
+and forecast climate models. These predictions are used to estimate change in 
+the range sizes of individual butterfly species and the relative size of range 
+overlap of their known host plant species.
 
 ## Dependencies
 
@@ -81,11 +81,13 @@ linear model and "svm" for support vector machine.
    4. **src/data/prep-climate-data.R**: Download monthly climate data for time 
    span of interest (2000-2018) and calculate the average values for the 19 
    standard bioclimatic variables (should not need to be run locally; data are 
-   available in data/wc2-1 directory)
+   available in data/wc2-1 directory); resulting rasters are in 2.5 minute 
+   resolution
    5. **src/data/prep-forecast-data.R**: Download monthly climate data for 
    ensemble of forecast climate models and calculate the average values for the 
    19 standard bioclimatic variables (should not need to be run locally; data 
-   are available in data/ensemble sub-directories)
+   are available in data/ensemble sub-directories); resulting rasters are in 
+   2.5 minute resolution
 2. Preparing R scripts for analyses of individual species
    1. **src/bash/build-scripts-SDM.sh**: bash shell scripts to build species 
    distribution models for individual species; one script is built for each 
