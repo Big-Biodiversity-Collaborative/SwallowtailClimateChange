@@ -10,7 +10,7 @@ require(dplyr)   # data wrangling
 require(dismo)   # thinning for kernel density estimate
 
 # TODO: Resolution of envelope is based on 0.5 degrees, but climate data are in 
-#       0.04167 degree resolution (2.5 min, ~ 4.5km). Should we make higher
+#       ~ 0.04 degree resolution (2.5 min, ~ 4.5km). Should we make higher
 #       resolution envelope?
 # TODO: Thinning, for defining the kernel density estimate, samples one 
 #       observation from every cell in climate raster. Should this be 
@@ -21,14 +21,16 @@ require(dismo)   # thinning for kernel density estimate
 
 # Filter observations for each species, so observations
 #     occur between 2000-2022
-#     in locations where climate data are available
+#     aren't duplicates (same location and date)
+#     are in locations where climate data are available
 #     are inside the 95% contour of observations
-# The date filter is applied first, then any remaining observations are 
-# simultaneously assessed for the data availability and 95% contour criteria, 
-# *then* filters are applied. That is, the filtering for data availability and 
-# contour does not occur in serial, so an individual observation may be 
-# excluded for failing to meet one or more of the criteria. This is primarily 
-# done because I can't decide when to do the envelope filtering step.
+# The date and duplicate filters are applied first, then any remaining 
+# observations are simultaneously assessed for the data availability and 95% 
+# contour criteria, *then* filters are applied. That is, the filtering for data 
+# availability and contour does not occur in serial, so an individual 
+# observation may be excluded for failing to meet one or more of the criteria. 
+# This is primarily done because I can't decide when to do the envelope 
+# filtering step.
 
 # First extract the zip file that has downloaded data
 unzip(zipfile = "data/gbif-downloaded.zip")
@@ -57,6 +59,12 @@ remove_old <- TRUE
 year_range <- 2000:2022
 
 ########################################
+# Duplicated observation settings
+# Logical indicating whether or not to remove observations of species on the
+# same date at the same location
+remove_dup <- TRUE
+
+########################################
 # Climate data filter settings
 # Logical indicating whether or not to remove any observations that are out of 
 # bounds as defined by those in locations with no (terrestrial) climate data
@@ -71,7 +79,7 @@ gbif_files <- list.files(path = "data/gbif/downloaded",
                          full.names = TRUE)
 
 # Will need to create filename for filtered data. Going to cheat and just 
-# replace "downloaded" with "filtered" in the filname
+# replace "downloaded" with "filtered" in the filename
 filtered_files <- gsub(pattern = "downloaded",
                        replacement = "filtered",
                        x = gbif_files)
@@ -83,9 +91,9 @@ tif_file <- list.files(path = "data/wc2-1",
 clim_data <- terra::rast(tif_file)
 
 # Create a table that will summarize the number of excluded records per spp
-gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 6))
+gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 7))
 colnames(gbif_obs) <- c("species", "n_orig", "n_excluded",
-                        "n_oob", "n_outlier", "n_old")
+                        "n_oob", "n_outlier", "n_old", "n_dup")
 
 for (i in 1:length(gbif_files)) {
   # Start with reading in raw data
@@ -115,6 +123,20 @@ for (i in 1:length(gbif_files)) {
     data <- data %>%
       dplyr::filter(!outside_dates)
   }
+
+  ########################################
+  # Determine if observation is unique (with respect to date, location)
+  data <- data %>%
+    dplyr::mutate(dup = duplicated(data[,c("latitude", "longitude", "month", "day")]))
+  
+  # Record the number of records that duplicates
+  gbif_obs$n_dup[i] <- sum(data$dup)
+  
+  # Remove records that are duplicates
+  if (remove_dup) {
+    data <- data %>%
+      dplyr::filter(!dup)
+  }  
   
   ########################################
   # Determine if observation has climate data
@@ -206,7 +228,12 @@ for (i in 1:length(gbif_files)) {
   # Collect some summary statistics
   gbif_obs$n_oob[i] <- sum(data$missing_climate)
   gbif_obs$n_outlier[i] <- sum(data$outside_envelope)
-  
+
+  # NOTE: sum of n_oob, n_outlier, n_old, and n_dup may not equal n_excluded
+  # because some observations may be counted in both n_oob and n_outlier (we 
+  # didn't count and remove these records sequentially). However, I don't think 
+  # this matters since we don't seem to be using that information later.
+
   # Do filtering based on logicals
   if (remove_oob) {
     data <- data %>%
@@ -219,7 +246,7 @@ for (i in 1:length(gbif_files)) {
   
   # Drop those filtering columns
   data <- data %>%
-    dplyr::select(-c(missing_climate, outside_envelope, outside_dates))
+    dplyr::select(-c(missing_climate, outside_envelope, outside_dates, dup))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
@@ -235,9 +262,6 @@ gbif_obs <- gbif_obs %>%
   dplyr::mutate(n_remaining = n_orig - n_excluded,
          perc_excluded = round(n_excluded/n_orig * 100, digits = 2))
 arrange(gbif_obs, desc(perc_excluded))
-  # Papilio brevicauda: 7.23% (46 records) excluded
-  # All other species with < 5% of records excluded 
-  # 93% of species with < 1% of records excluded
 
 # Create a zip archive of all the filtered files (first removing previous 
 # archive)
