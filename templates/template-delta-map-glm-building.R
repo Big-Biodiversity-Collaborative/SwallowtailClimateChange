@@ -10,7 +10,7 @@ source(file = "load_functions.R")
 genus <- "GENUS"
 species <- "SPECIES"
 
-method <- "glm"
+sdm_method <- "glm"
 output_format <- "png" # "pdf"
 
 # Name for reporting
@@ -31,7 +31,7 @@ forecast_climate_i <- which(climate_models$name != "current")
 current_file <- paste0("output/ranges/",
                        nice_name, 
                        "-overlap-",
-                       method, 
+                       sdm_method, 
                        "-",
                        climate_models$name[current_climate_i], 
                        ".rds")
@@ -50,7 +50,7 @@ for (i in forecast_climate_i) {
   forecast_file <- paste0("output/ranges/",
                           nice_name, 
                           "-overlap-",
-                          method, 
+                          sdm_method, 
                           "-",
                           model_name, 
                           ".rds")
@@ -118,7 +118,7 @@ for (i in forecast_climate_i) {
     geom_raster() +
     scale_fill_manual(values = color_vec) +
     labs(title = paste0(abbr_name, " range dynamics"),
-         subtitle = paste0(method, ", ", model_name)) +
+         subtitle = paste0(sdm_method, ", ", model_name)) +
     coord_equal() + 
     theme_bw() +
     theme(axis.title = element_blank(),
@@ -129,7 +129,7 @@ for (i in forecast_climate_i) {
   plot_file <- paste0("output/maps/",
                       nice_name,
                       "-delta-",
-                      method, "-",
+                      sdm_method, "-",
                       model_name,
                       ".", 
                       output_format)
