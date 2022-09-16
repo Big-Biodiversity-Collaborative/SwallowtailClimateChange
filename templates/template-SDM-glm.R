@@ -24,7 +24,11 @@ nice_name <- tolower(paste0(genus, "_", species))
 pa_file <- paste0("data/gbif/presence-absence/",
                   nice_name,
                   "-pa.csv")
-# TODO: Need to check to see if file exists and what to do if not
+# Check to see if file exists and what to do if not
+if (!file.exists(pa_file)) {
+  unzip(zipfile = "data/gbif-pa.zip")
+}
+  
 full_data <- read.csv(file = pa_file)
 
 # A note to let folks know you are alive
