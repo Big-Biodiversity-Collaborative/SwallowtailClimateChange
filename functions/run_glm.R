@@ -16,7 +16,10 @@
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
 run_glm <- function(full_data, verbose = TRUE) {
-  function_name <- "run_glm"
+  # Extract the name of this function for reporting
+  function_name <- as.character(match.call())[1]
+  
+  # Libraries required for this function to work
   method_name <- "generalized linear model"
   dependencies <- c("dplyr", "dismo")
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
