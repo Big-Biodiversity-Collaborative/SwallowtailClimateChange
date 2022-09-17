@@ -8,14 +8,14 @@ source(file = "load_functions.R")
 genus <- "GENUS"
 species <- "SPECIES"
 
-sdm_name <- "glm"
+sdm_method <- "glm"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
 nice_name <- tolower(paste0(genus, "_", species))
 
-message(paste0("Creating overlap rasters based on ", toupper(sdm_name), 
+message(paste0("Creating overlap rasters based on ", sdm_method, 
                " for ", species_name))
 
 # For each of the global climate change models, want to create the overlap 
@@ -26,14 +26,14 @@ gcm_names <- climate_models$name
 for (gcm_name in gcm_names) {
   overlap <- overlap_raster(species_name = species_name,
                             predictor = gcm_name,
-                            model = sdm_name)
+                            model = sdm_method)
   
   # As long as there is something there, write to file
   if (!is.null(overlap)) {
     overlap_file <- paste0("output/overlaps/",
                            nice_name, 
                            "-overlap-",
-                           sdm_name, 
+                           sdm_method, 
                            "-",
                            gcm_name, 
                            ".rds")

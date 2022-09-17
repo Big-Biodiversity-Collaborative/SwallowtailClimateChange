@@ -14,6 +14,7 @@ genus <- "GENUS"
 species <- "SPECIES"
 
 set.seed(20210603)
+sdm_method <- "glm"
 
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
@@ -33,8 +34,9 @@ full_data <- read.csv(file = pa_file)
 
 # A note to let folks know you are alive
 n_obs <- nrow(full_data %>% dplyr::filter(pa == 1))
-message("\n**** Running GLM SDM on ", n_obs, " observations of ", 
-               species_name, " ****")
+message("\n**** Running ", sdm_method, " SDM on ", 
+        n_obs, " observations of ", 
+        species_name, " ****")
 
 # Grab worldclim data to use as predictors
 predictors <- terra::rast(list.files(path = "data/wc2-1",
@@ -48,7 +50,6 @@ predictors <- terra::extract(x = predictors,
   dplyr::select(-ID)
 
 # Join bioclim data with original full_data (which has pa and fold info)
-# Specifying join columns isn't necessary, but keeps things quiet
 full_data <- cbind(full_data, predictors)
 
 # Arrange predictor columns in full_data (so they appear in order)
@@ -58,14 +59,15 @@ full_data <- full_data %>%
   dplyr::select(c("pa", "fold", all_of(paste0("bio", 1:19))))
 
 # Run generalized linear model
-glm_model <- run_glm(full_data = full_data,
-                     verbose = FALSE)
+model_result <- run_glm(full_data = full_data,
+                        verbose = FALSE)
 
 # Save the model to file in output/models/
 model_file <- paste0("output/SDMs/", nice_name,
-                     "-glm.rds")
-saveRDS(object = glm_model,
+                     "-", sdm_method, 
+                     ".rds")
+saveRDS(object = model_result,
         file = model_file)
 
-message(paste0("GLM model for ", species_name, 
+message(paste0(sdm_method, " model for ", species_name, 
                " complete; saved to ", model_file))
