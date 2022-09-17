@@ -23,6 +23,7 @@ The project uses the following additional R packages:
 
 + dismo
 + dplyr
++ ENMeval
 + ggplot2
 + kernlab
 + maptools
