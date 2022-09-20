@@ -1,4 +1,4 @@
-#' Run generalized linear model species distribution model
+#' Run generalized additive model species distribution model
 #' 
 #' @param full_data dataframe with presence-absence data (1/0), fold (for 
 #' separating testing and training data), and 19 columns with climate data
@@ -15,12 +15,12 @@
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
-run_glm <- function(full_data, verbose = TRUE) {
+run_gam <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
   function_name <- as.character(match.call())[1]
   
   # Libraries required for this function to work
-  method_name <- "generalized linear model"
+  method_name <- "generalized additive model"
   dependencies <- c("dplyr", "dismo")
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
