@@ -7,30 +7,19 @@ require(MASS)    # kernel density estimation
 require(terra)   # extracting observations with climate data
 require(raster)  # you know, raster stuff
 require(dplyr)   # data wrangling
-require(dismo)   # thinning for kernel density estimate
 
 # TODO: Resolution of envelope is based on 0.5 degrees, but climate data are in 
 #       ~ 0.04 degree resolution (2.5 min, ~ 4.5km). Should we make higher
 #       resolution envelope?
-# TODO: Thinning, for defining the kernel density estimate, samples one 
-#       observation from every cell in climate raster. Should this be 
-#       increased? Note that if it increased too high (i.e. to 1000 points), 
-#       areas of extremely (artificially?) high density will break algorithm
 # TODO: If zero observations are left after filtering, do we write a file to 
 #       disk?
 
-# Filter observations for each species, so observations
+# Filter observations for each species, so observations:
 #     occur between 2000-2022
-#     aren't duplicates (same location and date)
 #     are in locations where climate data are available
+#     are thinned to one location per grid cell (of climate raster)
 #     are inside the 95% contour of observations
-# The date and duplicate filters are applied first, then any remaining 
-# observations are simultaneously assessed for the data availability and 95% 
-# contour criteria, *then* filters are applied. That is, the filtering for data 
-# availability and contour does not occur in serial, so an individual 
-# observation may be excluded for failing to meet one or more of the criteria. 
-# This is primarily done because I can't decide when to do the envelope 
-# filtering step.
+# Filters are applied in the order above.
 
 # First extract the zip file that has downloaded data
 unzip(zipfile = "data/gbif-downloaded.zip")
@@ -41,7 +30,7 @@ unzip(zipfile = "data/gbif-downloaded.zip")
 ########################################
 # Kernel density estimate envelope settings
 # Logical indicating whether or not to apply envelope filtering; set to TRUE
-# to filter by kernel density estimate envelop.
+# to filter by kernel density estimate envelope.
 envelope_filter <- TRUE
 # The cutoff for envelope; proportion of observations that defines envelope; 
 # i.e. value of 0.95 will remove observations falling outside the 95% density 
@@ -60,9 +49,9 @@ year_range <- 2000:2022
 
 ########################################
 # Duplicated observation settings
-# Logical indicating whether or not to remove observations of species on the
-# same date at the same location
-remove_dup <- TRUE
+# Logical indicating whether or not to remove observations of species in the 
+# same grid cell (i.e., left with a maximum of one observation per grid cell)
+remove_celldup <- TRUE
 
 ########################################
 # Climate data filter settings
@@ -90,10 +79,10 @@ tif_file <- list.files(path = "data/wc2-1",
                        full.names = TRUE)[1]
 clim_data <- terra::rast(tif_file)
 
-# Create a table that will summarize the number of excluded records per spp
+# Create a table that will summarize the number of excluded records per species
 gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 7))
 colnames(gbif_obs) <- c("species", "n_orig", "n_excluded",
-                        "n_oob", "n_outlier", "n_old", "n_dup")
+                        "n_old", "n_oob", "n_celldup", "n_outlier")
 
 for (i in 1:length(gbif_files)) {
   # Start with reading in raw data
@@ -125,20 +114,6 @@ for (i in 1:length(gbif_files)) {
   }
 
   ########################################
-  # Determine if observation is unique (with respect to date, location)
-  data <- data %>%
-    dplyr::mutate(dup = duplicated(data[,c("latitude", "longitude", "month", "day")]))
-  
-  # Record the number of records that duplicates
-  gbif_obs$n_dup[i] <- sum(data$dup)
-  
-  # Remove records that are duplicates
-  if (remove_dup) {
-    data <- data %>%
-      dplyr::filter(!dup)
-  }  
-  
-  ########################################
   # Determine if observation has climate data
   # Extract climate data associated with each gbif record location
   # terra::extract will return a two-column data frame in this case, but we 
@@ -150,21 +125,43 @@ for (i in 1:length(gbif_files)) {
     dplyr::mutate(missing_climate = is.na(climate)) %>%
     dplyr::select(-climate)
 
+  # Record the number of records that don't have climate data
+  gbif_obs$n_oob[i] <- sum(data$missing_climate)
+  
+  # Remove records that don't have climate data
+  if (remove_oob) {
+    data <- data %>%
+      dplyr::filter(!missing_climate)
+  }
+  
+  ########################################
+  # Thin observations so there's a maximum of one observation per grid cell
+  data <- data %>%
+    dplyr::mutate(cell_no <- terra::extract(x = clim_data,
+                                            y = data[ ,c("longitude", "latitude")],
+                                            cells = TRUE,
+                                            ID = FALSE)) %>%
+    dplyr::mutate(cell_dup = duplicated(cell)) %>%
+    dplyr::select(-c(bio1, cell))
+
+  # Record the number of cell duplicates
+  gbif_obs$n_celldup[i] <- sum(data$cell_dup)
+  
+  # Remove duplicate observations within the same cell (thin to 1 per cell)
+  if (remove_celldup) {
+    data <- data %>%
+      dplyr::filter(!cell_dup)
+  }
+  
   ########################################
   # Determine if observation is in envelope
   if (nrow(data) >= envelope_min) {
-    # Start by thinning out observations; some very high density areas can 
-    # wreck the kernel density estimates, e.g. Fraxinus pennsylvanica
-    # We'll use another data frame to thin coordinates and build the envelope
-    thinned <- data %>%
-      dplyr::select(longitude, latitude) %>%
-      dismo::gridSample(r = clim_data, n = 1) # Takes a couple seconds for >10k points
-    
+
     # Calculate density envelope; using a 0.5 degree resolution
-    n_points <- c(abs(max(thinned$longitude) - min(thinned$longitude)) * 2,
-                  abs(max(thinned$latitude) - min(thinned$latitude)) * 2)
-    obs_kde <- MASS::kde2d(x = thinned$longitude,
-                           y = thinned$latitude, 
+    n_points <- c(abs(max(data$longitude) - min(data$longitude)) * 2,
+                  abs(max(data$latitude) - min(data$latitude)) * 2)
+    obs_kde <- MASS::kde2d(x = data$longitude,
+                           y = data$latitude, 
                            n = n_points)
     
     # The projection string for raster conversion
@@ -224,29 +221,19 @@ for (i in 1:length(gbif_files)) {
       dplyr::mutate(outside_envelope = FALSE)
   }
   
-  ########################################
-  # Collect some summary statistics
-  gbif_obs$n_oob[i] <- sum(data$missing_climate)
+  # Record the number of observations that are outside the envelope
   gbif_obs$n_outlier[i] <- sum(data$outside_envelope)
-
-  # NOTE: sum of n_oob, n_outlier, n_old, and n_dup may not equal n_excluded
-  # because some observations may be counted in both n_oob and n_outlier (we 
-  # didn't count and remove these records sequentially). However, I don't think 
-  # this matters since we don't seem to be using that information later.
-
-  # Do filtering based on logicals
-  if (remove_oob) {
-    data <- data %>%
-      dplyr::filter(!missing_climate)
-  }
+  
+  # Remove records that are outside the envelope
   if (envelope_filter) {
     data <- data %>%
       dplyr::filter(!outside_envelope)
   }
-  
+
+  ########################################
   # Drop those filtering columns
   data <- data %>%
-    dplyr::select(-c(missing_climate, outside_envelope, outside_dates, dup))
+    dplyr::select(-c(outside_dates, missing_climate, cell_dup, outside_envelope))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
