@@ -17,7 +17,7 @@ require(dplyr)   # data wrangling
 # Filter observations for each species, so observations:
 #     occur between 2000-2022
 #     are in locations where climate data are available
-#     are thinned to one location per grid cell (of climate raster)
+#     are thinned to a max of X observations per grid cell (of climate raster)
 #     are inside the 95% contour of observations
 # Filters are applied in the order above.
 
@@ -48,10 +48,12 @@ remove_old <- TRUE
 year_range <- 2000:2022
 
 ########################################
-# Duplicated observation settings
-# Logical indicating whether or not to remove observations of species in the 
-# same grid cell (i.e., left with a maximum of one observation per grid cell)
-remove_celldup <- TRUE
+# Thinning settings
+# Logical indicating whether or not to remove excess observations of species 
+# in the same grid cell (i.e., so we're left with a maximum of X observations 
+# per grid cell)
+thin <- TRUE
+max_obs_per_cell <- 1
 
 ########################################
 # Climate data filter settings
@@ -82,7 +84,7 @@ clim_data <- terra::rast(tif_file)
 # Create a table that will summarize the number of excluded records per species
 gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 7))
 colnames(gbif_obs) <- c("species", "n_orig", "n_excluded",
-                        "n_old", "n_oob", "n_celldup", "n_outlier")
+                        "n_old", "n_oob", "n_thin", "n_outlier")
 
 for (i in 1:length(gbif_files)) {
   # Start with reading in raw data
@@ -122,8 +124,7 @@ for (i in 1:length(gbif_files)) {
                                  y = data[,c('longitude','latitude')])[,2]
 
   data <- data %>%
-    dplyr::mutate(missing_climate = is.na(climate)) %>%
-    dplyr::select(-climate)
+    dplyr::mutate(missing_climate = is.na(climate))
 
   # Record the number of records that don't have climate data
   gbif_obs$n_oob[i] <- sum(data$missing_climate)
@@ -135,22 +136,30 @@ for (i in 1:length(gbif_files)) {
   }
   
   ########################################
-  # Thin observations so there's a maximum of one observation per grid cell
+  # Thin observations so there's a maximum of X observations per grid cell
+    # Could use duplicated() if we were only retaining one observation
+    # per grid cell, but I made this a little more general so that we can keep
+    # more than one observation per grid cell if desired.  
   data <- data %>%
-    dplyr::mutate(cell_no <- terra::extract(x = clim_data,
-                                            y = data[ ,c("longitude", "latitude")],
-                                            cells = TRUE,
-                                            ID = FALSE)) %>%
-    dplyr::mutate(cell_dup = duplicated(cell)) %>%
-    dplyr::select(-c(bio1, cell))
+    # Extract the cell number associated with each observation
+    dplyr::mutate(terra::extract(x = clim_data,
+                                 y = data[ ,c("longitude", "latitude")],
+                                 cells = TRUE,
+                                 ID = FALSE)) %>%
+    dplyr::arrange(cell) %>%
+    # Assign each observation in a grid cell a unique number, from 1 to the 
+    # total number of observations in that grid cell
+    dplyr::mutate(obs_no = sequence(from = 1, rle(cell)$lengths)) %>%
+    # Identify which observations should removed to retain X per grid cell
+    dplyr::mutate(thin = obs_no > max_obs_per_cell)
 
-  # Record the number of cell duplicates
-  gbif_obs$n_celldup[i] <- sum(data$cell_dup)
+  # Record the number of records to be thinned (ie, removed)
+  gbif_obs$n_thin[i] <- sum(data$thin)
   
   # Remove duplicate observations within the same cell (thin to 1 per cell)
-  if (remove_celldup) {
+  if (thin) {
     data <- data %>%
-      dplyr::filter(!cell_dup)
+      dplyr::filter(!thin)
   }
   
   ########################################
@@ -231,9 +240,10 @@ for (i in 1:length(gbif_files)) {
   }
 
   ########################################
-  # Drop those filtering columns
+  # Drop those columns needed for filtering
   data <- data %>%
-    dplyr::select(-c(outside_dates, missing_climate, cell_dup, outside_envelope))
+    dplyr::select(-c(outside_dates, missing_climate, thin, outside_envelope,
+                     climate, bio1, cell, obs_no))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
@@ -248,7 +258,7 @@ for (i in 1:length(gbif_files)) {
 gbif_obs <- gbif_obs %>%
   dplyr::mutate(n_remaining = n_orig - n_excluded,
          perc_excluded = round(n_excluded/n_orig * 100, digits = 2))
-arrange(gbif_obs, desc(perc_excluded))
+# arrange(gbif_obs, desc(perc_excluded))
 
 # Create a zip archive of all the filtered files (first removing previous 
 # archive)
