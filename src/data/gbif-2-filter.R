@@ -150,13 +150,13 @@ for (i in 1:length(gbif_files)) {
     # Assign each observation in a grid cell a unique number, from 1 to the 
     # total number of observations in that grid cell
     dplyr::mutate(obs_no = sequence(from = 1, rle(cell)$lengths)) %>%
-    # Identify which observations should removed to retain X per grid cell
+    # Identify which observations should be removed to retain X per grid cell
     dplyr::mutate(thin = obs_no > max_obs_per_cell)
 
   # Record the number of records to be thinned (ie, removed)
   gbif_obs$n_thin[i] <- sum(data$thin)
   
-  # Remove duplicate observations within the same cell (thin to 1 per cell)
+  # Remove excess observations within the same cell
   if (thin) {
     data <- data %>%
       dplyr::filter(!thin)
