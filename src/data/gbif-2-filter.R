@@ -11,8 +11,6 @@ require(dplyr)   # data wrangling
 # TODO: Resolution of envelope is based on 0.5 degrees, but climate data are in 
 #       ~ 0.04 degree resolution (2.5 min, ~ 4.5km). Should we make higher
 #       resolution envelope?
-# TODO: If zero observations are left after filtering, do we write a file to 
-#       disk?
 
 # Filter observations for each species, so observations:
 #     occur between 2000-2022
@@ -248,10 +246,16 @@ for (i in 1:length(gbif_files)) {
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
   
-  # Finally, write these filtered data to file
-  write.csv(x = data,
+  # Finally, write these filtered data to file (ONLY if there's a least one
+  # location left after filtering)
+  if (nrow(data) > 0) {
+      write.csv(x = data,
             file = filtered_files[i],
             row.names = FALSE)
+  } else {
+    message(paste0("** Zero filtered records of ", gbif_obs$species[i], 
+                   ". No csv written to file. **"))
+  }
 }
 
 # How many records were excluded?
