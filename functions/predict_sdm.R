@@ -34,6 +34,10 @@ predict_sdm <- function(nice_name, model, yr = c("current", "2041", "2071"),
   shapefile_name <- paste0("data/gbif/shapefiles/",
                            nice_name, 
                            "-buffered-mcp.shp")
+  # If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
+  if (!file.exists(shapefile_name)) {
+    unzip(zipfile = "data/gbif-shapefiles.zip")
+  }
   buffered_mcp <- sf::st_read(shapefile_name, quiet = TRUE)
 
   # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
