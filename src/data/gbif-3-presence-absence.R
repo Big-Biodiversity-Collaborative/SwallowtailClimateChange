@@ -14,18 +14,40 @@ verbose <- TRUE
 # Read in gbif-reconcile
 species_list <- read.csv("data/gbif-reconcile.csv")
 
-for (species in species_list$accepted_name) {
+# Grab one of the climate tif files to use as a mask to generate 
+# pseudo-absence points
+tif_file <- list.files(path = "data/wc2-1", 
+                       pattern = ".tif$", 
+                       full.names = TRUE)[1]
+predictor <- terra::rast(tif_file)
+
+# Create/amend a table that summarizes data/information available for each 
+# species
+gbif_pa_file <- "data/gibf-pa-summary.csv"
+if (file.exists(gbif_pa_file)) {
+  gbif_pa <- read.csv(gbif_pa_file)
+} else {
+gbif_pa <- as.data.frame(matrix(NA, nrow = nrow(species_list), ncol = 6))
+colnames(gbif_pa) <- c("species", "n_filtered", "n_background",
+                       "filtered_csv", "pa_csv", "mcp_shapefile")
+}
+
+# Loop through all species in gbif_reconcile
+for (i in 1:nrow(species_list)) {
+  species <- species_list$accepted_name[i]
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species))
-  filename <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv") 
-
+  filename <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv")
+  
   # Only proceed if file doesn't exist or we want to replace existing files
   if (file.exists(filename) & replace == FALSE) next
   
   if (verbose) {
     message(paste0("\n****  Beginning process for ", species, "  ****"))
   }    
+  
+  gbif_pa$species[i] <- species_list$accepted_name[i]
   
   # Load observation data
   obs_file <- paste0("data/gbif/filtered/",
@@ -38,12 +60,24 @@ for (species in species_list$accepted_name) {
   # There's a chance that a file might not be present, even after unzipping; 
   # note this and move on.
   if (!file.exists(obs_file)) {
+    gbif_pa$n_filtered[i] <- 0
+    gbif_pa$n_background[i] <- 0
+    gbif_pa$filtered_csv[i] <- "no"
+    gbif_pa$pa_csv[i] <- "no"
+    gbif_pa$mcp_shapefile[i] <- "no"
     message(paste0("No filtered data for ", species, " on disk"))
   } else {
     obs <- read.csv(file = obs_file)
 
-    if (nrow(obs) == 0) {
-      message(paste0("Filtered data for ", species, " has zero rows"))
+    # Skip species that have fewer than 10 filtered records
+    if (nrow(obs) < 10) {
+      gbif_pa$n_filtered[i] <- nrow(obs)
+      gbif_pa$n_background[i] <- 0
+      gbif_pa$filtered_csv[i] <- "yes"
+      gbif_pa$pa_csv[i] <- "no"
+      gbif_pa$mcp_shapefile[i] <- "no"
+      message(paste0("Less than 10 records for ", species, 
+                     ". No background points created."))
     } else {
       # Retain just the geographic coordinates
       presence <- obs %>%
@@ -51,29 +85,13 @@ for (species in species_list$accepted_name) {
         dplyr::rename(x = longitude,
                       y =latitude)
 
-      # Remove duplicate locations just for calculating nearest neighbor distances
-      # presence1 <- distinct(presence)
-
-      # Grab one of the climate tif files to use 
-      # 1 - for thinning to create the MCP and 
-      # 2 - as a mask to generate pseudo-absence points
-      tif_file <- list.files(path = "data/wc2-1", 
-                             pattern = ".tif$", 
-                             full.names = TRUE)[1]
-      predictor <- terra::rast(tif_file)
-      
-      # Sample one observation from each of the climate data grid cells
-      presence1 <- presence %>%
-        dplyr::select(x, y) %>%
-        dismo::gridSample(r = predictor, n = 1)
-      
-      # Convert to a SpatialPoints object using the WGS84 CRS
-      presence1_sp <- SpatialPoints(coords = presence1,
+      # Convert to a SpatialPoints object using WGS84 CRS
+      presence_sp <- SpatialPoints(coords = presence,
                                     proj4string = CRS("+init=epsg:4326"))
 
       # Calculate the GreatCircle distance (in km) between points (can take
       # minutes for larger data sets)
-      gc_dist <- sp::spDists(presence1_sp, longlat = TRUE) 
+      gc_dist <- sp::spDists(presence_sp, longlat = TRUE) 
       
       # Calculate the maximum of nearest neighbor distances (in km)
       buffer <- gc_dist %>%
@@ -117,19 +135,19 @@ for (species in species_list$accepted_name) {
       pred_mask <- predictor %>%
         terra::crop(ch_buffer_sv) %>%
         terra::mask(ch_buffer_sv)
-      rm(predictor)
-      
+
       # Generate pseudo-absence points
-      absence <- terra::spatSample(x = pred_mask,  
-                                   size = 5000,
-                                   method = "random",
-                                   na.rm = TRUE,
-                                   values = FALSE,
-                                   xy = TRUE)
-      # Note: if buffered area is small, function may not be able to generate the 
-      # indicated number of points (size) because the default is to select cells
-      # without replacement. If this happens, R will return a warning:
-      # [spatSample] fewer cells returned than requested
+      absence <- suppressWarnings(terra::spatSample(x = pred_mask,  
+                                                    size = 10000,
+                                                    method = "random",
+                                                    na.rm = TRUE,
+                                                    values = FALSE,
+                                                    xy = TRUE))
+      # Note: if buffered area is small, function may not be able to generate 
+      # the indicated number of points (size) because the default is to select 
+      # cells without replacement. If this happens, R will return a warning:
+      # [spatSample] fewer cells returned than requested, so wrapped everything
+      # in suppressWarnings()
       
       # Reality check:
       # plot(ch_buffer_sv)
@@ -147,14 +165,19 @@ for (species in species_list$accepted_name) {
       fold <- c(rep(x = 1:num_folds, length.out = nrow(presence)),
                 rep(x = 1:num_folds, length.out = nrow(absence)))
       
-      # Combine our presence / absence data
+      # Combine presence / pseudo-absence data
       full_data <- data.frame(cbind(pa = pa_data,
                                     fold = fold,
                                     rbind(presence, absence)))
-      
       write.csv(x = full_data,
                 file = filename,
                 row.names = FALSE)
+      
+      gbif_pa$n_filtered[i] <- nrow(presence)
+      gbif_pa$n_background[i] <- nrow(absence)
+      gbif_pa$filtered_csv[i] <- "yes"
+      gbif_pa$pa_csv[i] <- "yes"
+      gbif_pa$mcp_shapefile[i] <- "yes"
       
       if (verbose) {
         message(paste0("****  ",nrow(presence), " gbif records and ", 
@@ -177,6 +200,7 @@ if (file.exists(zipfile)) {
 }
 zip(zipfile = zipfile,
     files = pa_files)
+
 # Next archive the shapefiles (which include more than just .shp files)
 shapefiles <- list.files(path = "data/gbif/shapefiles",
                          full.names = TRUE)
@@ -186,3 +210,9 @@ if (file.exists(zipfile)) {
 }
 zip(zipfile = zipfile,
     files = shapefiles)
+
+# Write gbif_pa to file
+write.csv(x = gbif_pa,
+          file = gbif_pa_file,
+          row.names = FALSE)
+
