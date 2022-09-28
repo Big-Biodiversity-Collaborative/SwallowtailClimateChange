@@ -1,5 +1,4 @@
-# A template for building MaxEnt species distribution models (no tuning) for 
-# a single species
+# A template for building Maxent species distribution models (no tuning) for a single species
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
@@ -29,35 +28,21 @@ pa_file <- paste0("data/gbif/presence-absence/",
 if (!file.exists(pa_file)) {
   unzip(zipfile = "data/gbif-pa.zip")
 }
-full_data <- read.csv(file = pa_file)
-
-# A note to let folks know you are alive
-n_obs <- nrow(full_data %>% dplyr::filter(pa == 1))
-message("\n**** Running MaxEnt SDM on ", n_obs, " observations of ", 
-        species_name, " ****")
+pa_data <- read.csv(file = pa_file)
 
 # Grab worldclim data to use as predictors
 predictors <- terra::rast(list.files(path = "data/wc2-1",
                                      pattern = ".tif$",
                                      full.names = TRUE))
 
-# Extract bioclim data for presence/absence data; can take a moment
-predictors <- terra::extract(x = predictors, 
-                             y = full_data[, c("x", "y")], 
-                             xy = FALSE) %>%
-  dplyr::select(-ID)
+# A note to let folks know you are alive
+n_obs <- nrow(pa_data %>% dplyr::filter(pa == 1))
+message("\n**** Running Maxent SDM on ", n_obs, " observations of ", 
+        species_name, " ****")
 
-# Join bioclim data with original full_data (which has pa and fold info)
-full_data <- cbind(full_data, predictors)
-
-# Arrange predictor columns in full_data (so they appear in order)
-# use all_of to ensure all all bioclim variables are there
-# We can drop x, y columns at this point
-full_data <- full_data %>%
-  dplyr::select(c("pa", "fold", all_of(paste0("bio", 1:19))))
-
-# Run MaxEnt model
-maxent_model <- run_maxent_notune(full_data = full_data,
+# Run Maxent model
+maxent_model <- run_maxent_notune(pa_data = pa_data,
+                                  predictors = predictors,
                                   verbose = FALSE)
 
 # Save the model to file in output/models/
@@ -66,5 +51,5 @@ model_file <- paste0("output/SDMs/", nice_name,
 saveRDS(object = maxent_model,
         file = model_file)
 
-message(paste0("MaxEnt model for ", species_name, 
+message(paste0("Maxent model for ", species_name, 
                " complete; saved to ", model_file))

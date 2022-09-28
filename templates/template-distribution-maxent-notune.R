@@ -1,5 +1,4 @@
-# A template for building predicted distributions for a single species from a
-# MaxEnt model (no tuning)
+# A template for building predicted distributions for a single species from a Maxent model (no tuning)
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
