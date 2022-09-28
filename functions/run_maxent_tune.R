@@ -40,16 +40,16 @@ run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
 
   jar <- paste(system.file(package="dismo"), "/java/maxent.jar", sep="")
   if(!file.exists(jar)) {
-    stop("run_maxent_notune requires maxent.jar file, but it doesn't exist")
+    stop("run_maxent_tune requires maxent.jar file, but it doesn't exist")
   }
 
   # Make sure presence-absence data are there
   if (!("pa" %in% colnames(pa_data))) {
-    stop("run_maxent_notune requires column named 'pa' in pa_data")
+    stop("run_maxent_tune requires column named 'pa' in pa_data")
   }
   # Make sure fold indicators are there
   if (!("fold" %in% colnames(pa_data))) {
-    stop("run_maxent_notune requires column named 'fold' in pa_data")
+    stop("run_maxent_tune requires column named 'fold' in pa_data")
   }
 
   criteria <- match.arg(arg = criteria)
@@ -133,10 +133,10 @@ run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
 
   # Note: We could use permutation importance of each variable along with 
   # pairwise correlations to reduce the number of covariates in the model 
-  # (like Warren et al. 2014 did). If you wanted to extract permutation 
+  # (like Warren et al. 2014 did). If we wanted to extract permutation 
   # importance for each variable: 
   # best_model@results[grep("permutation", rownames(best_model@results)),]
-  # Then you could re-run the model with testing data using only a subset of 
+  # Then we could re-run the model with testing data using only a subset of 
   # the climate variables.
   
   if(verbose) {
