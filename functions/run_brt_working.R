@@ -65,7 +65,9 @@ run_brt <- function(full_data, verbose = TRUE) {
   
   # create weights
   # set parameters (tc, lr, n.tree, max.trees, n.folds, )
-  
+  prNum <- as.numeric(table(model_data$occ)["1"]) # number of presences
+  bgNum <- as.numeric(table(model_data$occ)["0"]) # number of backgrounds
+  wt <- ifelse(model_data$occ == 1, 1, prNum / bgNum)
   
   
   
@@ -88,7 +90,7 @@ run_brt <- function(full_data, verbose = TRUE) {
   # The type = "response" is passed to predict.glm so the values are on the 
   # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
   # sure the threshold is on the same scale of output from predict_sdm
-  model_eval <- dismo::evaluate(data...
+  model_eval <- dismo::evaluate(data = data, ###########
                                 model = model_fit,
                                 n.trees = model_fit$gmb.call$best.trees,
                                 type = "response") 
