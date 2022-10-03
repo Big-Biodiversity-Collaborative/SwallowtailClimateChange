@@ -4,7 +4,11 @@
 #' separating testing and training data), and 19 columns with climate data
 #' @param verbose logical indicating whether or not to print processing messages
 #' 
-#' @details Uses \code{dismo::gbm.step()} for boosted regression tree model.
+#' @details Uses \code{dismo::gbm.step()} for a boosted regression tree model.
+#' This function assesses the optimal number of boosting trees (that
+#' minimizes deviance) using k-fold cross validation. Then it fits a model with 
+#' this number of trees and returns it as a gbm model (along with additional 
+#' information from the cross-validation selection process).
 #' 
 #' @return a list with the following elements:
 #' \describe{
@@ -15,6 +19,7 @@
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with 
 #'   \code{stat = "spec_sens"}}
+#'   \item{trees}{number of trees}
 #' }
 run_brt <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
@@ -62,37 +67,63 @@ run_brt <- function(full_data, verbose = TRUE) {
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
+
+  # Creating values to downweight background points (so total (summed) 
+  # weight of background pts equal to the total weight of presence pts)
+  prNum <- sum(sdmtrain$pa == 1)
+  bgNum <- sum(sdmtrain$pa == 0)
+  wt <- ifelse(sdmtrain$pa == 1, 1, prNum / bgNum)
   
-  # create weights
-  # set parameters (tc, lr, n.tree, max.trees, n.folds, )
-  prNum <- as.numeric(table(model_data$occ)["1"]) # number of presences
-  bgNum <- as.numeric(table(model_data$occ)["0"]) # number of backgrounds
-  wt <- ifelse(model_data$occ == 1, 1, prNum / bgNum)
-  
-  
-  
+  # Set model parameters
+    # Tree complexity (number of nodes in a tree)
+    tc <- ifelse(prNum < 50, 2, 5)
+    # Learning rate (weights applied to individual trees)
+    lr <- 0.01
+    # Number of initial trees (and number to add at each step)
+    n_trees <- 50
+    # Maximum number of trees to fit before stopping
+    max_trees <- 10000
+    # Number of folds for cross-validation (to find optimal number of trees)
+    n_folds <- 5
+ 
   if(verbose) {
     message("Running ", method_name, ".")
   }  
+  
   # Run the model
-  #### NEED TO PUT IN WHILE LOOP to see if optimal number of trees is > 1000?
-  #### AND see whether model_fit == NULL?  (under what circumstances could this happen?)
-  model_fit <- gbm.step(data = ,
-                        gbm.x = 3:ncol(data),
-                        gbm.y = 1,
-                        family = "bernoulli")
+  #### NEED TO PUT IN WHILE LOOP to see if optimal number of trees is > 1000
+  #### and less than max_trees (meaning it never found an optimal # trees)?
+  start_time <- Sys.time()
+    model_fit <- gbm.step(data = sdmtrain,
+                        gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
+                        gbm.y = 1,                # Columns with pa data
+                        family = "bernoulli",
+                        tree.complexity = tc,
+                        learning.rate = lr,
+                        n.trees = n_trees,
+                        max.trees = max_trees,
+                        n.folds = n_folds,
+                        verbose = TRUE)
+  end_time <- Sys.time()
+  end_time - start_time
+  
+  # For PARU, the optimal number of trees wasn't identified with lr = 0.001
+  # Increasing lr to 0.01 resulted in a 4400 optimal trees
+
+  # Extract the optimal number of trees
+  opt_trees <- model_fit$gbm.call$best.trees
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
             " with testing data.")
   }
   # Evaluate model performance with testing data
-  # The type = "response" is passed to predict.glm so the values are on the 
-  # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
-  # sure the threshold is on the same scale of output from predict_sdm
-  model_eval <- dismo::evaluate(data = data, ###########
+  # Need to specify the optimal number of trees and the type of predictions (so
+  # they're on a [0, 1] scale)
+  model_eval <- dismo::evaluate(p = presence_test,
+                                a = absence_test,
                                 model = model_fit,
-                                n.trees = model_fit$gmb.call$best.trees,
+                                n.trees = opt_trees,
                                 type = "response") 
   
   # Calculate threshold so we can make a P/A map later
@@ -100,9 +131,11 @@ run_brt <- function(full_data, verbose = TRUE) {
                                      stat = "spec_sens")
   
   # Bind everything together and return as list  
+  # For BRT models, including the number of trees
   results <- list(model = model_fit,
                   evaluation = model_eval,
-                  thresh = pres_threshold)
+                  thresh = pres_threshold,
+                  trees = opt_trees)
   
   return(results)
 }
