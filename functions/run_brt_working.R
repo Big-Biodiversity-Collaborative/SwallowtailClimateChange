@@ -19,7 +19,7 @@
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with 
 #'   \code{stat = "spec_sens"}}
-#'   \item{trees}{number of trees}
+#'   \item{trees}{number of trees used in final model}
 #' }
 run_brt <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
@@ -76,9 +76,11 @@ run_brt <- function(full_data, verbose = TRUE) {
   
   # Set model parameters
     # Tree complexity (number of nodes in a tree)
-    tc <- ifelse(prNum < 50, 2, 5)
+    tc <- ifelse(prNum < 50, 1, 5)
     # Learning rate (weights applied to individual trees)
-    lr <- 0.01
+    poss_lr_values <- c(0.001, 0.01, 0.05, 0.10)
+    lr_index <- 3
+    lr <- poss_lr_values[lr_index]
     # Number of initial trees (and number to add at each step)
     n_trees <- 50
     # Maximum number of trees to fit before stopping
@@ -86,56 +88,92 @@ run_brt <- function(full_data, verbose = TRUE) {
     # Number of folds for cross-validation (to find optimal number of trees)
     n_folds <- 5
  
-  if(verbose) {
+  if (verbose) {
     message("Running ", method_name, ".")
   }  
   
   # Run the model
-  #### NEED TO PUT IN WHILE LOOP to see if optimal number of trees is > 1000
-  #### and less than max_trees (meaning it never found an optimal # trees)?
-  start_time <- Sys.time()
-    model_fit <- gbm.step(data = sdmtrain,
-                        gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
-                        gbm.y = 1,                # Columns with pa data
-                        family = "bernoulli",
-                        tree.complexity = tc,
-                        learning.rate = lr,
-                        n.trees = n_trees,
-                        max.trees = max_trees,
-                        n.folds = n_folds,
-                        verbose = TRUE)
-  end_time <- Sys.time()
-  end_time - start_time
-  
-  # For PARU, the optimal number of trees wasn't identified with lr = 0.001
-  # Increasing lr to 0.01 resulted in a 4400 optimal trees
-
-  # Extract the optimal number of trees
-  opt_trees <- model_fit$gbm.call$best.trees
-  
-  if(verbose) {
-    message("Model complete. Evaluating ", method_name, 
-            " with testing data.")
+  # Note: using try() function so if model fails to fit the loop will continue
+  model_fit <- NULL  
+  opt_trees <- 0 
+  no_model <-  FALSE
+  while (is.null(model_fit) | opt_trees < 1000 | opt_trees == max_trees)  {
+    # Run gbm.step
+    try(
+      model_fit <- gbm.step(data = sdmtrain,
+                            gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
+                            gbm.y = 1,                # Columns with pa data
+                            family = "bernoulli",
+                            tree.complexity = tc,
+                            learning.rate = lr,
+                            n.trees = n_trees,
+                            max.trees = max_trees,
+                            n.folds = n_folds,
+                            verbose = TRUE)
+    )
+    
+    # Extract the optimal number of trees
+    opt_trees <- ifelse(is.null(model_fit), 0, model_fit$gbm.call$best.trees)
+    
+    # If the algorithm is unable to find an optimum number with the fastest 
+    # learning rate (0.10) within 10,000 trees, then exit. 
+    if (lr_index == 4 & opt_trees == max_trees) {
+      no_model <- TRUE
+      message("Unable to find optimal number of trees with learning rate = 0.1 and max trees = 10,000.")
+      break
+    }
+    
+    # If the optimal number of trees is < 1000 with a learning rate of 0.001, 
+    # save this model and exit.
+    if (lr_index == 1 & opt_trees < 1000) {
+      message("Optimal number of trees < 1000 with learning rate = 0.001. ",
+              "Saving model with < 1000 trees.")
+      break      
+    }
+    
+    # Adjust the learning rate if the optimal number of trees is < 1000 or 
+    # optimal number couldn't be identified (ie, equal to max_trees) 
+    lr_index <- ifelse(opt_trees < 1000, 
+                       max(lr_index - 1, 1), 
+                       ifelse(opt_trees == max_trees, 
+                              min(lr_index + 1, 4),
+                              lr_index))
+    lr <- poss_lr_values[lr_index]
   }
-  # Evaluate model performance with testing data
-  # Need to specify the optimal number of trees and the type of predictions (so
-  # they're on a [0, 1] scale)
-  model_eval <- dismo::evaluate(p = presence_test,
-                                a = absence_test,
-                                model = model_fit,
-                                n.trees = opt_trees,
-                                type = "response") 
-  
-  # Calculate threshold so we can make a P/A map later
-  pres_threshold <- dismo::threshold(x = model_eval, 
-                                     stat = "spec_sens")
-  
-  # Bind everything together and return as list  
-  # For BRT models, including the number of trees
-  results <- list(model = model_fit,
-                  evaluation = model_eval,
-                  thresh = pres_threshold,
-                  trees = opt_trees)
-  
+    
+  if (no_model | is.null(model_fit)) {
+    message("Unable to find optimal number of trees. Model not saved.")
+    results <- NULL
+  } else {
+    if (verbose) {
+      message("Model complete. Evaluating ", method_name, 
+              " with testing data.")
+    }
+    
+    # Evaluate model performance with testing data
+    # Need to specify the optimal number of trees and the type of predictions 
+    # (so they're on a [0, 1] scale)
+    model_eval <- dismo::evaluate(p = presence_test,
+                                  a = absence_test,
+                                  model = model_fit,
+                                  n.trees = opt_trees,
+                                  type = "response") 
+    
+    # Calculate threshold so we can make a P/A map later
+    pres_threshold <- dismo::threshold(x = model_eval, 
+                                       stat = "spec_sens")
+    
+    ### TODO: Everything seems to be working BUT the model objects are huge 
+    ### (many MB). Need to figure out whether there are parts of the gbm model 
+    ### object we can drop
+    
+    # Bind everything together and return as list  
+    # For BRT models, including the number of trees
+    results <- list(model = model_fit,
+                    evaluation = model_eval,
+                    thresh = pres_threshold,
+                    trees = opt_trees)
+  }
+
   return(results)
 }
