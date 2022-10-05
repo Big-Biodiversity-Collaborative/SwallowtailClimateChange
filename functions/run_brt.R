@@ -164,8 +164,7 @@ run_brt <- function(full_data, verbose = TRUE) {
                                        stat = "spec_sens")
     
     ### TODO: Everything seems to be working BUT the model objects are huge 
-    ### (many MB). Need to figure out whether there are parts of the gbm model 
-    ### object we can drop
+    ### (many MB). Need to figure out whether there are ways to reduce the size.
     
     # Bind everything together and return as list  
     # For BRT models, including the number of trees
