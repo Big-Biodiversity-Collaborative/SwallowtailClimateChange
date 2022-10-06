@@ -25,6 +25,7 @@ The project uses the following additional R packages:
 + dplyr
 + ENMeval
 + gam
++ gbm (for BRT models)
 + ggplot2
 + kernlab
 + maptools
