@@ -42,6 +42,7 @@ if (!file.exists(sdm_file)) {
     message("\tRunning ", model_name)
     preds <- predict_sdm(nice_name = nice_name,
                          model = sdm_model$model,
+                         sdm_type = SDM,
                          yr = as.character(model_yr),
                          ssp = as.character(model_ssp))
   
