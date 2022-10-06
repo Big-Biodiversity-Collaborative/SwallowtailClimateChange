@@ -21,7 +21,8 @@
 #' }
 single_map <- function(species_name, 
                        predictor,
-                       model = c("glm", "svmw", "maxent-notune"),
+                       model = c("brt", "gam", "glm", "maxent-notune", 
+                                 "maxent-tune", "rf", "svmw"),
                        show_obs = FALSE) {
   if (!require(raster)) {
     stop("single_map requires raster package, but it could not be loaded")
