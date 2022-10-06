@@ -34,14 +34,6 @@ if (!file.exists(sdm_file)) {
   
   # To keep track if any returned presence / absence rasters were NULL
   success <- rep(x = FALSE, times = nrow(climate_models))
-  
-  # If necessary, unzip folder with shapefile needed to define geographic extent
-  shapefile_name <- paste0("data/gbif/shapefiles/",
-                           nice_name, 
-                           "-buffered-mcp.shp")
-  if (!file.exists(shapefile_name)) {
-    unzip(zipfile = "data/gbif-shapefiles.zip")
-  }
 
   for (i in 1:nrow(climate_models)) {
     model_name <- climate_models$name[i]
