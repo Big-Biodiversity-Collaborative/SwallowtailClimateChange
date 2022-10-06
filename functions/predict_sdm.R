@@ -5,6 +5,8 @@
 #' "papilio_multicaudata" for Papilio multicaudata)
 #' @param model species distribution model object; generally output from model
 #' function such as maxent or glm
+#' @param sdm_type character indicating the type of SDM ("brt", "glm", "gam", 
+#' "maxent-notune", "maxent-tune", "rf", "svm")
 #' @param yr character indicating year for which predictions are being made 
 #' ("current", "2041", "2071")
 #' @param ssp character indicating shared socioeconomic pathway of global 
@@ -12,23 +14,33 @@
 #' 
 #' @return raster of predicted probabilities of occurrence based on given 
 #' species distribution model and global climate model data
-predict_sdm <- function(nice_name, model, yr = c("current", "2041", "2071"), 
-                       ssp = c(NA, "245", "370")) {
-  if (!require(raster)) {
-    stop("predict_pa requires raster package, but it could not be loaded")
-  }
-  if (!require(dplyr)) {
-    stop("predict_pa requires dplyr package, but it could not be loaded")
-  }
-  if (!require(sf)) {
-    stop("predict_pa requires sf package, but it could not be loaded")
-  }
-  if (!require(dismo)) {
-    stop("predict_pa requires dismo package, but it could not be loaded")
-  }
-
+predict_sdm <- function(nice_name, model, 
+                        sdm_type = c("brt", "glm", "gam", "maxent-notune", 
+                                     "maxent-tune", "rf", "svm"),
+                        yr = c("current", "2041", "2071"), 
+                        ssp = c(NA, "245", "370")) {
+  
+  sdm_type <- match.arg(arg = sdm_type)
   yr <- match.arg(arg = yr)
   ssp <- match.arg(arg = ssp)
+  
+  if (!require(raster)) {
+    stop("predict_sdm requires raster package, but it could not be loaded")
+  }
+  if (!require(dplyr)) {
+    stop("predict_sdm requires dplyr package, but it could not be loaded")
+  }
+  if (!require(sf)) {
+    stop("predict_sdm requires sf package, but it could not be loaded")
+  }
+  if (!require(dismo)) {
+    stop("predict_sdm requires dismo package, but it could not be loaded")
+  }
+  if (sdm_type == "brt") {
+    if (!require(gbm)) {
+      stop("predict_sdm requires gbm package, but it could not be loaded")    
+    }
+  }
 
   # Get MCP shapefile for geographic extent
   shapefile_name <- paste0("data/gbif/shapefiles/",
@@ -70,11 +82,20 @@ predict_sdm <- function(nice_name, model, yr = c("current", "2041", "2071"),
   pred_mask <- raster::crop(predictors, buffered_mcp)
   pred_mask <- raster::mask(pred_mask, buffered_mcp)
 
-  # Make predictions with the remaining predictor data and model  
-  preds <- predict(pred_mask, 
-                   model,
-                   type = "response")
+  # Create list of arguments for predict function
+  params <- list(object = pred_mask, 
+                 model = model,
+                 type = "response")
   
+  # If using a BRT model, specify the number of trees and add to list of args
+  if (sdm_type == "brt") {
+    n_trees <- model$n.trees
+    params <- c(params, n.trees = n_trees)
+  }  
+
+  # Make predictions with the predictor data and model  
+  preds <- do.call(predict, params)
+
   # Send back this raster with the predicted values
   return(preds)
 }
