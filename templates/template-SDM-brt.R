@@ -14,7 +14,7 @@ genus <- "GENUS"
 species <- "SPECIES"
 
 set.seed(20210603)
-sdm_method <- "BRT"
+sdm_method <- "brt"
 
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
@@ -34,7 +34,7 @@ full_data <- read.csv(file = pa_file)
 
 # A note to let folks know you are alive
 n_obs <- nrow(full_data %>% dplyr::filter(pa == 1))
-message("\n**** Running ", sdm_method, " SDM on ", 
+message("\n**** Running ", toupper(sdm_method), " SDM on ", 
         n_obs, " observations of ", 
         species_name, " ****")
 
