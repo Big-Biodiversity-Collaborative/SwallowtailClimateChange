@@ -14,6 +14,7 @@ genus <- "GENUS"
 species <- "SPECIES"
 
 set.seed(20220916)
+sdm_method <- "maxent-tune"
 
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
@@ -37,23 +38,24 @@ predictors <- terra::rast(list.files(path = "data/wc2-1",
 
 # A note to let folks know you are alive
 n_obs <- nrow(pa_data %>% dplyr::filter(pa == 1))
-message("
-**** Running Maxent SDM on ", n_obs, " observations of ", 
+message("\n**** Running ", sdm_method, " SDM on ", 
+        n_obs, " observations of ", 
         species_name, " ****")
 
-# Run and evaluate Maxent models with different tuning parameters; select
-# the best one with optimal parameter values; evaluate.
+# Run and evaluate Maxent models with different tuning parameters; select the 
+# best one with optimal parameter values; evaluate.
 # Note: this can take a while to run (eg, 3-5 min for P. rumiko)
-maxent_model <- run_maxent_tune(pa_data = pa_data,
+model_result <- run_maxent_tune(pa_data = pa_data,
                                 predictors = predictors, 
                                 criteria = "AICc",
                                 verbose = FALSE)
 
 # Save the model to file in output/models/
 model_file <- paste0("output/SDMs/", nice_name,
-                     "-maxent-tune.rds")
-saveRDS(object = maxent_model,
+                     "-", sdm_method, 
+                     ".rds")
+saveRDS(object = model_result,
         file = model_file)
 
-message(paste0("Maxent model for ", species_name, 
+message(paste0(sdm_method, " model for ", species_name, 
                " complete; saved to ", model_file))
