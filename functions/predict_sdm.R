@@ -5,7 +5,7 @@
 #' "papilio_multicaudata" for Papilio multicaudata)
 #' @param model species distribution model object; generally output from model
 #' function such as maxent or glm
-#' @param sdm_type character indicating the type of SDM ("brt", "glm", "gam", 
+#' @param sdm_method character indicating the type of SDM ("brt", "glm", "gam", 
 #' "maxent-notune", "maxent-tune", "rf", "svm")
 #' @param yr character indicating year for which predictions are being made 
 #' ("current", "2041", "2071")
@@ -14,13 +14,14 @@
 #' 
 #' @return raster of predicted probabilities of occurrence based on given 
 #' species distribution model and global climate model data
-predict_sdm <- function(nice_name, model, 
-                        sdm_type = c("brt", "glm", "gam", "maxent-notune", 
-                                     "maxent-tune", "rf", "svm"),
+predict_sdm <- function(nice_name, 
+                        model, 
+                        sdm_method = c("brt", "glm", "gam", "maxent-notune", 
+                                       "maxent-tune", "rf", "svm"),
                         yr = c("current", "2041", "2071"), 
                         ssp = c(NA, "245", "370")) {
   
-  sdm_type <- match.arg(arg = sdm_type)
+  sdm_method <- match.arg(arg = sdm_method)
   yr <- match.arg(arg = yr)
   ssp <- match.arg(arg = ssp)
   
@@ -36,7 +37,7 @@ predict_sdm <- function(nice_name, model,
   if (!require(dismo)) {
     stop("predict_sdm requires dismo package, but it could not be loaded")
   }
-  if (sdm_type == "brt") {
+  if (sdm_method == "brt") {
     if (!require(gbm)) {
       stop("predict_sdm requires gbm package, but it could not be loaded")    
     }
@@ -88,7 +89,7 @@ predict_sdm <- function(nice_name, model,
                  type = "response")
   
   # If using a BRT model, specify the number of trees and add to list of args
-  if (sdm_type == "brt") {
+  if (sdm_method == "brt") {
     n_trees <- model$n.trees
     params <- c(params, n.trees = n_trees)
   }  

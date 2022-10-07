@@ -11,18 +11,18 @@ source(file = "load_functions.R")
 genus <- "GENUS"
 species <- "SPECIES"
 
-SDM <- "maxent-notune"
+sdm_method <- "maxent-notune"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
 nice_name <- tolower(paste0(genus, "_", species))
 
-message("Predicting presence / absence based on ", toupper(SDM), " for ", 
+message("Predicting presence / absence based on ", toupper(sdm_method), " for ", 
         species_name)
 
 # Grab the appropriate SDM model object from disk
-sdm_file <- paste0("output/SDMs/", nice_name, "-", SDM, ".rds")
+sdm_file <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
 if (!file.exists(sdm_file)) {
   warning("No model file for ", species_name, " on disk; no predictions made.")
 } else { # Only proceed if we can get the SDM file
@@ -42,7 +42,7 @@ if (!file.exists(sdm_file)) {
     message("\tRunning ", model_name)
     preds <- predict_sdm(nice_name = nice_name,
                          model = sdm_model$model,
-                         sdm_type = SDM,
+                         sdm_method = sdm_method,
                          yr = as.character(model_yr),
                          ssp = as.character(model_ssp))
   
@@ -53,7 +53,7 @@ if (!file.exists(sdm_file)) {
       # Save presence / absence raster
       pa_file <- paste0("output/distributions/", nice_name,
                         "-distribution-",
-                        SDM, "-", 
+                        sdm_method, "-", 
                         model_name, ".rds")
       saveRDS(object = pa,
               file = pa_file)
@@ -66,7 +66,8 @@ if (!file.exists(sdm_file)) {
   
   ################################################################################
   # Reporting
-  completion_message <- paste0("Prediction process based on ", toupper(SDM), 
+  completion_message <- paste0("Prediction process based on ", 
+                               toupper(sdm_method), 
                                " for ", species_name, " complete.")
   if (!all(success)) {
     completion_message <- paste0(completion_message, 
