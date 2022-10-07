@@ -121,8 +121,6 @@ run_maxent_notune <- function(pa_data, predictors, verbose = TRUE) {
                                  x = pred_mask)
   
   # Calculate threshold so we can make a P/A map later
-  # TODO: Maxent predictions should be on cloglog scale. Need to make sure 
-  # this threshold value is on the same scale.
   pres_threshold <- dismo::threshold(x = maxent_eval, 
                                      stat = "spec_sens")
   
