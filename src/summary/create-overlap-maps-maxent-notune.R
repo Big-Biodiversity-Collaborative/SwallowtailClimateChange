@@ -11,7 +11,7 @@ file_ext <- "png" # "pdf"
 
 logfile <- paste0("logs/maps-", sdm_method, "-out.log")
 
-# Function we use with mclapply to build overlap rasters in parallel
+# Function we use with parLapply to build overlap rasters in parallel
 overlap_maps <- function(species_name, 
                          sdm_method,
                          predictors,

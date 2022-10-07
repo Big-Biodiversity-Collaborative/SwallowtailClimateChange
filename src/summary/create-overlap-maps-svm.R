@@ -15,7 +15,7 @@ file_ext <- "png" # "pdf"
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-# Function we use with mclapply to build overlap rasters in parallel
+# Function we use to build overlap rasters in parallel
 overlap_maps_svm <- function(species_name, 
                              method,
                              predictors,
