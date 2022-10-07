@@ -4,21 +4,26 @@
 # 2022-08-05
 
 require(ggplot2)
+require(parallel)
 
-sdm_model <- "maxent-notune"
-logfile <- "logs/maps-maxent-notune-out.log"
+sdm_method <- "maxent-notune"
 file_ext <- "png" # "pdf"
 
-# Load up the functions from the functions folder
-source(file = "load_functions.R")
+logfile <- paste0("logs/maps-", sdm_method, "-out.log")
 
 # Function we use with mclapply to build overlap rasters in parallel
-overlap_maps_maxent_notune <- function(species_name, 
-                                       sdm_model,
-                                       predictors,
-                                       logfile,
-                                       file_ext) {
-  # Have species name
+overlap_maps <- function(species_name, 
+                         sdm_method,
+                         predictors,
+                         logfile,
+                         file_ext) {
+  
+  # Load up the functions from the functions folder, really just needed to load
+  # the overlap_map function; have to do this because of they way parLapply 
+  # works
+  source(file = "load_functions.R")
+
+  # Make the computer-friendly name
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
@@ -31,7 +36,7 @@ overlap_maps_maxent_notune <- function(species_name,
   for (predictor in predictors) {
     one_map <- overlap_map(species_name = species_name,
                            predictor = predictor,
-                           model = sdm_model, 
+                           sdm_method = sdm_method, 
                            crop_to_insect = TRUE,
                            include_legend = TRUE,
                            horizontal_legend = TRUE,
@@ -43,7 +48,7 @@ overlap_maps_maxent_notune <- function(species_name,
       mapfile <- paste0("output/maps/",
                         nice_name, 
                         "-overlap-",
-                        model, 
+                        sdm_method, 
                         "-",
                         predictor, 
                         ".",
@@ -89,10 +94,13 @@ if (num_cores > 8) {
 # Create that log file before running the parallel processes
 f <- file.create(logfile)
 
-r <- parallel::mclapply(X = insect_species_list,
-                        FUN = overlap_maps_maxent_notune,
-                        mc.cores = num_cores,
-                        method = method,
-                        predictors = predictors,
-                        logfile = logfile,
-                        file_ext = file_ext)
+# Run each script in parallel
+clust <- parallel::makeCluster(num_cores)
+r <- parallel::parLapply(cl = clust,
+                         X = insect_species_list,
+                         fun = overlap_maps,
+                         sdm_method = sdm_method,
+                         predictors = predictors,
+                         logfile = logfile,
+                         file_ext = file_ext)
+parallel::stopCluster(cl = clust)

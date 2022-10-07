@@ -3,6 +3,9 @@
 # jcoliver@arizona.edu
 # 2021-06-06
 
+# DEPRECATED
+# Work on support vector machines has stopped
+
 require(raster)
 require(ggplot2)
 require(dplyr)

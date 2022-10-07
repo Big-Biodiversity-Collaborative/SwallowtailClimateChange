@@ -3,19 +3,15 @@
 # jcoliver@arizona.edu
 # 2021-06-30
 
-require(raster)
 require(parallel)
 require(dplyr)
 
-method <- "glm"
-output_file <- paste0("output/ranges/range-areas-", method, ".csv") 
-
-# Load up the functions from the functions folder
-source(file = "load_functions.R")
+sdm_method <- "glm"
+output_file <- paste0("output/ranges/range-areas-", sdm_method, ".csv") 
 
 # Function to perform calculations for each species of insect; allows 
 # vectorization and list output that we'll turn into a data frame later
-range_calcs <- function(species_name, method, predictors) {
+range_calcs <- function(species_name, sdm_method, predictors) {
 
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
@@ -24,9 +20,10 @@ range_calcs <- function(species_name, method, predictors) {
   return_list <- NULL
   # Iterate over all predictors, naming output accordingly
   for (predictor in predictors) {
-    overlap_file <- paste0("output/ranges/",
-                           nice_name, "-overlap-",
-                           method, 
+    overlap_file <- paste0("output/overlaps/",
+                           nice_name, 
+                           "-overlap-",
+                           sdm_method, 
                            "-",
                            predictor,
                            ".rds")
@@ -103,11 +100,22 @@ if (num_cores > 8) {
   num_cores <- 8
 }
 
-ranges_list <- parallel::mclapply(X = insect_species_list,
-                                  FUN = range_calcs,
-                                  mc.cores = num_cores,
-                                  method = method,
-                                  predictors = predictors)
+# Run each script in parallel
+clust <- parallel::makeCluster(num_cores)
+# Need to explicitly load library to cluster; assign to variable so it doesn't 
+# print returned list of logicals
+l <- parallel::clusterEvalQ(clust, require(raster))
+if (!all(unlist(l))) {
+  warning("There was a problem loading libraries on cluster for ", sdm_method, 
+          "range size calculations")
+}
+
+ranges_list <- parallel::parLapply(cl = clust,
+                                   X = insect_species_list,
+                                   fun = range_calcs,
+                                   sdm_method = sdm_method,
+                                   predictors = predictors)
+parallel::stopCluster(cl = clust)
 
 # Bind all the elements into a data frame
 ranges_df <- dplyr::bind_rows(ranges_list)

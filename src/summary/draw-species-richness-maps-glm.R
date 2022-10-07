@@ -9,8 +9,9 @@ require(dplyr)
 
 source(file = "load_functions.R")
 
-method <- "glm"
+sdm_method <- "glm"
 output_format <- "png" # "pdf"
+
 # The name of the current (contemporary) global climate model for comparisons 
 # with forecast models
 current_climate_name <- "current"
@@ -35,8 +36,10 @@ for (climate_model in climate_models$name) {
     raster_file <- paste0("output/distributions/",
                           nice_name,
                           "-distribution-",
-                          method, "-",
-                          climate_model, ".rds")
+                          sdm_method, 
+                          "-",
+                          climate_model, 
+                          ".rds")
     # Read the species' raster into the list for this climate model
     distribution_rasters[[nice_name]] <- readRDS(file = raster_file)
   }
@@ -60,7 +63,7 @@ for (climate_model in climate_models$name) {
                                  predictor = climate_model,
                                  pal_limits = palette_limits)
   ggsave(filename = paste0("output/maps/richness-",
-                           method, 
+                           sdm_method, 
                            "-",
                            climate_model,
                            ".",
@@ -93,7 +96,7 @@ for (climate_model in climate_models$name) {
                                        fill = layer)) +
       geom_raster() +
       labs(title = "Change in species richness",
-           subtitle = paste0(method, ", current vs. ", climate_model)) +
+           subtitle = paste0(sdm_method, ", current vs. ", climate_model)) +
       scale_fill_distiller(palette = "PRGn", # PiYG is an alternative
                            direction = 1) +  # So green is increase, purple decrease
       coord_equal() +
@@ -105,7 +108,7 @@ for (climate_model in climate_models$name) {
     
     # delta_plot
     ggsave(filename = paste0("output/maps/delta-richness-",
-                             method, 
+                             sdm_method, 
                              ".",
                              output_format),
            plot = delta_plot)

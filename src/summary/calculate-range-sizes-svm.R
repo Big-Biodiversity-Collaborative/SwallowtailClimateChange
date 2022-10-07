@@ -3,6 +3,9 @@
 # jcoliver@arizona.edu
 # 2021-06-30
 
+# DEPRECATED
+# Work on support vector machines has stopped
+
 require(raster)
 require(parallel)
 require(dplyr)

@@ -4,8 +4,8 @@
 #' "Papilio multicaudata"
 #' @param predictor character vector indicating which climate variables on 
 #' which predictions are based
-#' @param model character vector of model used to generate species distribution
-#' model
+#' @param sdm_method character vector of the method used to generate species 
+#' distribution model
 #' @param crop_to_insect logical indicating whether plot should be cropped to 
 #' range of the insect
 #' @param include_legend logical indicating whether legend should be included
@@ -21,7 +21,7 @@
 #' or just say "future" (title_scenarioyear = FALSE)
 overlap_map <- function(species_name, 
                         predictor,
-                        model = c("glm", "svm", "maxent-notune"),
+                        sdm_method = c("glm", "svm", "maxent-notune", "brt"),
                         crop_to_insect = FALSE,
                         include_legend = TRUE,
                         horizontal_legend = FALSE,
@@ -38,7 +38,7 @@ overlap_map <- function(species_name,
   }
 
   # predictor <- match.arg(predictor)
-  model <- match.arg(model)
+  sdm_method <- match.arg(sdm_method)
   
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
@@ -47,7 +47,7 @@ overlap_map <- function(species_name,
   overlap_file <- paste0("output/overlaps/",
                          nice_name, 
                          "-overlap-",
-                         model, 
+                         sdm_method, 
                          "-",
                          predictor, 
                          ".rds")

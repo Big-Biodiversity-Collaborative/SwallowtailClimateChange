@@ -3,6 +3,9 @@
 # jcoliver@arizona.edu
 # 2021-06-18
 
+# DEPRECATED
+# Work on support vector machines has stopped
+
 require(dplyr)
 require(tidyr)
 require(ggplot2)

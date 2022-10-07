@@ -4,21 +4,26 @@
 # 2021-06-29
 
 require(ggplot2)
+require(parallel)
 
-method <- "glm"
-logfile <- "logs/maps-glm-out.log"
+sdm_method <- "glm"
 file_ext <- "png" # "pdf"
 
-# Load up the functions from the functions folder
-source(file = "load_functions.R")
+logfile <- paste0("logs/maps-", sdm_method, "-out.log")
 
-# Function we use with mclapply to build overlap rasters in parallel
-overlap_maps_glm <- function(species_name, 
-                             method,
-                             predictors,
-                             logfile,
-                             file_ext) {
-  # Have species name
+# Function we use with parLapply to build overlap rasters in parallel
+overlap_maps <- function(species_name, 
+                         sdm_method,
+                         predictors,
+                         logfile,
+                         file_ext) {
+  
+  # Load up the functions from the functions folder, really just needed to load
+  # the overlap_map function; have to do this because of they way parLapply 
+  # works
+  source(file = "load_functions.R")
+  
+  # Make the computer-friendly name
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
@@ -31,7 +36,7 @@ overlap_maps_glm <- function(species_name,
   for (predictor in predictors) {
     one_map <- overlap_map(species_name = species_name,
                            predictor = predictor,
-                           model = method, 
+                           sdm_method = sdm_method, 
                            crop_to_insect = TRUE)
     
     # Write to file if not null
@@ -39,7 +44,7 @@ overlap_maps_glm <- function(species_name,
       mapfile <- paste0("output/maps/",
                         nice_name, 
                         "-overlap-",
-                        method, 
+                        sdm_method, 
                         "-",
                         predictor, 
                         ".",
@@ -85,10 +90,13 @@ if (num_cores > 8) {
 # Create that log file before running the parallel processes
 f <- file.create(logfile)
 
-r <- parallel::mclapply(X = insect_species_list,
-                        FUN = overlap_maps_glm,
-                        mc.cores = num_cores,
-                        method = method,
-                        predictors = predictors,
-                        logfile = logfile,
-                        file_ext = file_ext)
+# Run each script in parallel
+clust <- parallel::makeCluster(num_cores)
+r <- parallel::parLapply(cl = clust,
+                         X = insect_species_list,
+                         fun = overlap_maps,
+                         sdm_method = sdm_method,
+                         predictors = predictors,
+                         logfile = logfile,
+                         file_ext = file_ext)
+parallel::stopCluster(cl = clust)
