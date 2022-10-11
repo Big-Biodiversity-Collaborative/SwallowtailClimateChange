@@ -22,6 +22,9 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Libraries required for this function to work
   method_name <- "generalized additive model"
   dependencies <- c("dplyr", "dismo", "mgcv")
+  
+  ###CHECK THAT ALL THESE DEPENDECIES ARE NEEDED HERE
+  
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
          " could not be loaded: ", paste(dependencies, collapse = ", "),
@@ -76,12 +79,23 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Run the model, specifying model with standard formula syntax
   # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
   # bio6)
-  model_fit <- stats::glm(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
-                            bio8 + bio9 + bio10 + bio11 + bio12 +
-                            bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
-                            bio19,
+  
+  
+  ### s is smoothing parameter, what do we want to use to smooth?? 
+  ### in video example they used x and y coords
+  ### lots of different smoothers/splines we could use - thin plate spline
+  ### is default
+  ### can play with k value, use gam.check
+  ### pull latest glm and compare to this code, check object names carefully
+  
+  model_fit <- gam(pa ~ s(bio1, bio2, bio4, bio5, bio6,
+                            bio8, bio9, bio10, bio11, bio12,
+                            bio13, bio14, bio15, bio16, bio17, bio18,
+                            bio19, k=100),
                           data = sdmtrain,
-                          family = binomial(link = "logit"))
+                          family = binomial,
+                   method = 'REML')
+                   
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
@@ -91,7 +105,11 @@ run_gam <- function(full_data, verbose = TRUE) {
   # The type = "response" is passed to predict.glm so the values are on the 
   # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
   # sure the threshold is on the same scale of output from predict_sdm
-  model_eval <- dismo::evaluate(p = presence_test, 
+  
+  
+  ### ADD ARGUMENTS FOR gam.check here
+  
+  model_eval <- gam.check(p = presence_test, 
                                 a = absence_test, 
                                 model = model_fit,
                                 type = "response") 
