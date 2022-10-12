@@ -11,15 +11,24 @@
 #' ("current", "2041", "2071")
 #' @param ssp character indicating shared socioeconomic pathway of global 
 #' climate model; ignored if \code{yr == "current"}
+#' @param stand_obj an object of class save_means_sds (created with the 
+#' save_means_sds function) that contains means and SDs for predictor variables 
+#' in a training dataset (Optional, except for lasso regression models)
+#' @param quad a logical indicating whether or not to quadratics were included 
+#' in model (Optional, except for lasso regression models)
 #' 
 #' @return raster of predicted probabilities of occurrence based on given 
 #' species distribution model and global climate model data
+
 predict_sdm <- function(nice_name, 
                         model, 
-                        sdm_method = c("brt", "glm", "gam", "maxent-notune", 
-                                       "maxent-tune", "rf", "svm"),
+                        sdm_method = c("brt", "glm", "gam", "lasso",
+                                       "maxent-notune", "maxent-tune", "rf",
+                                       "svm"),
                         yr = c("current", "2041", "2071"), 
-                        ssp = c(NA, "245", "370")) {
+                        ssp = c(NA, "245", "370"),
+                        stand_obj = NULL,
+                        quad = NULL) {
   
   sdm_method <- match.arg(arg = sdm_method)
   yr <- match.arg(arg = yr)
@@ -42,7 +51,15 @@ predict_sdm <- function(nice_name,
       stop("predict_sdm requires gbm package, but it could not be loaded")    
     }
   }
-
+  if (sdm_method == "lasso") {
+    if (!require(glmnet)) {
+      stop("predict_sdm requires glmnet package, but it could not be loaded")       
+    }
+    if(is.null(stand_obj) | is.null(quad)) {
+      stop("predict_sdm requires stand_obj and quad arguments")
+    }
+  }
+  
   # Get MCP shapefile for geographic extent
   shapefile_name <- paste0("data/gbif/shapefiles/",
                            nice_name, 
@@ -52,7 +69,7 @@ predict_sdm <- function(nice_name,
     unzip(zipfile = "data/gbif-shapefiles.zip")
   }
   buffered_mcp <- sf::st_read(shapefile_name, quiet = TRUE)
-
+  
   # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
   # for more distant time periods
   if (yr %in% c("2041", "2071")) {
@@ -69,7 +86,7 @@ predict_sdm <- function(nice_name,
     # Transform back to lat/long
     buffered_mcp <- sf::st_transform(buffered_mcp, 4326) 
   }
-
+  
   # Grab predictors
   gcm_directory <- dplyr::if_else(yr == "current",
                                   true = "data/wc2-1",
@@ -78,11 +95,17 @@ predict_sdm <- function(nice_name,
   predictors <- raster::stack(list.files(path = gcm_directory,
                                          pattern = ".tif$",
                                          full.names = TRUE))
-
+  
   # Crop and mask as appropriate (takes a few moments)
   pred_mask <- raster::crop(predictors, buffered_mcp)
   pred_mask <- raster::mask(pred_mask, buffered_mcp)
-
+  
+  # If using a lasso model, need to standardize predictors using means and SDs 
+  # based on training dataset
+  if (sdm_method == "lasso") {
+    pred_mask <- prep_predictors(stand_obj, pred_mask, quad = quad)
+  }
+  
   # Create list of arguments for predict function
   params <- list(object = pred_mask, 
                  model = model,
@@ -93,10 +116,24 @@ predict_sdm <- function(nice_name,
     n_trees <- model$n.trees
     params <- c(params, n.trees = n_trees)
   }  
-
-  # Make predictions with the predictor data and model  
-  preds <- do.call(predict, params)
-
+  
+  # Make predictions
+  if (sdm_method != "lasso") {
+    preds <- do.call(predict, params)
+  } else {
+    # For lasso regression models from cv.glmnet: 
+    # predict.cv.glmnet doesn't allow for rasters as input, so we need to
+    # convert pred_mask to a sparse matrix. Used code from Roozbeh Valavi: 
+    # https://github.com/rvalavi/myspatial/blob/master/R/prediction.R
+    pred_points <- raster::rasterToPoints(pred_mask, spatial = TRUE)
+    data_sparse <- sparse.model.matrix(~. -1, pred_points@data)
+    pred_points@data$pred = as.numeric(predict(object = model, 
+                                               newx = data_sparse, 
+                                               type = "response", 
+                                               s = model$lambda.1se))
+    preds <- raster::rasterize(pred_points, pred_mask, field = "pred")
+  }
+  
   # Send back this raster with the predicted values
   return(preds)
 }
