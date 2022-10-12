@@ -21,7 +21,7 @@
 #' }
 single_map <- function(species_name, 
                        predictor,
-                       model = c("brt", "gam", "glm", "maxent-notune", 
+                       model = c("brt", "gam", "glm", "lasso", "maxent-notune", 
                                  "maxent-tune", "rf", "svmw"),
                        show_obs = FALSE) {
   if (!require(raster)) {
