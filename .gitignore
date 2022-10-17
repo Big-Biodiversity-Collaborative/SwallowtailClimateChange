@@ -17,6 +17,10 @@ data/ensemble/monthly/*
 # Forecast data for QA/QC
 data/ensemble/*.zip
 data/ensemble/bioclim/*
+# Environmental rasters for aridity measures
+data/envirem/*
+!data/envirem/.gitkeep
+
 
 # Data downloaded from GBIF
 data/gbif/*-gbif.csv

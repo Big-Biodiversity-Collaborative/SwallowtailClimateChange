@@ -91,6 +91,9 @@ linear model and "svm" for support vector machine.
    19 standard bioclimatic variables (should not need to be run locally; data 
    are available in data/ensemble sub-directories); resulting rasters are in 
    2.5 minute resolution
+   6. **src/data/prep-aridity-data.R**: Download measure(s) of aridity and 
+   calculate mean and median values for each insect species; data stored as a 
+   csv in data/aridity-statistics.csv.
 2. Preparing R scripts for analyses of individual species
    1. **src/bash/build-scripts-SDM.sh**: bash shell scripts to build species 
    distribution models for individual species; one script is built for each 
