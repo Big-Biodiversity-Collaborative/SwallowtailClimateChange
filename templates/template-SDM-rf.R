@@ -58,8 +58,8 @@ full_data <- cbind(full_data, predictors)
 full_data <- full_data %>%
   dplyr::select(c("pa", "fold", all_of(paste0("bio", 1:19))))
 
-# Run generalized linear model
-model_result <- run_glm(full_data = full_data,
+# Run rf model
+model_result <- run_rf(full_data = full_data,
                         verbose = FALSE)
 
 # Save the model to file in output/models/

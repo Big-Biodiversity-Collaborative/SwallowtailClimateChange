@@ -15,13 +15,14 @@
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
 #'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
 #' }
+
 run_rf <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
   function_name <- as.character(match.call())[1]
   
   # Libraries required for this function to work
   method_name <- "random forest"
-  dependencies <- c("dplyr", "dismo")
+  dependencies <- c("dplyr", "dismo", "randomForest")
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
          " could not be loaded: ", paste(dependencies, collapse = ", "),
@@ -70,18 +71,36 @@ run_rf <- function(full_data, verbose = TRUE) {
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
+  # convert the response to factor for RF model to return probabilities
+  sdmtrain$pa <- as.factor(sdmtrain$pa)
+  
+  # calculating the class weights and sample size
+  prNum <- as.numeric(table(sdmtrain$pa)["1"]) # number of presences
+  
+  # cwt <- c("1" = 1, "0" = prNum / bgNum)
+  samsize <- c("0" = prNum, "1" = prNum)
+  
   if(verbose) {
     message("Running ", method_name, ".")
   }  
   # Run the model, specifying model with standard formula syntax
   # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
   # bio6)
-  model_fit <- stats::glm(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
-                            bio8 + bio9 + bio10 + bio11 + bio12 +
-                            bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
-                            bio19,
-                          data = sdmtrain,
-                          family = binomial(link = "logit"))
+  # model_fit <- stats::glm(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
+  #                           bio8 + bio9 + bio10 + bio11 + bio12 +
+  #                           bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
+  #                           bio19,
+  #                         data = sdmtrain,
+  #                         family = binomial(link = "logit"))
+  
+  model_fit <- randomForest(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
+                              bio8 + bio9 + bio10 + bio11 + bio12 +
+                              bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
+                              bio19,
+                            data = sdmtrain,
+                            ntree = 1000,
+                            sampsize = samsize,
+                            replace = TRUE)
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
@@ -94,7 +113,7 @@ run_rf <- function(full_data, verbose = TRUE) {
   model_eval <- dismo::evaluate(p = presence_test, 
                                 a = absence_test, 
                                 model = model_fit,
-                                type = "response") 
+                                type = "prob") 
   
   # Calculate threshold so we can make a P/A map later
   pres_threshold <- dismo::threshold(x = model_eval, 
