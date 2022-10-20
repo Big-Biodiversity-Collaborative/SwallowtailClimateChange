@@ -51,7 +51,7 @@ model_result <- run_maxent_notune(pa_data = pa_data,
 model_file <- paste0("output/SDMs/", nice_name,
                      "-", sdm_method, 
                      ".rds")
-saveRDS(object = maxent_model,
+saveRDS(object = model_result,
         file = model_file)
 
 message(paste0(sdm_method, " model for ", species_name, 
