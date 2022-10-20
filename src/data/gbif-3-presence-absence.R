@@ -11,6 +11,14 @@ require(dplyr)
 replace <- TRUE
 verbose <- TRUE
 
+# Minimum number of gbif records required to save a csv with presence-absence 
+# data to file (note that the number of of records in SDM training datasets will 
+# be 80% of this number)
+min_records <- 40
+
+# Number of background (pseudo-absence) points to generate for each species
+n_background <- 10000
+
 # Read in gbif-reconcile
 species_list <- read.csv("data/gbif-reconcile.csv")
 
@@ -21,11 +29,11 @@ tif_file <- list.files(path = "data/wc2-1",
                        full.names = TRUE)[1]
 predictor <- terra::rast(tif_file)
 
-# Create/amend a table that summarizes data/information available for each 
-# species
+# Create/amend a table that summarizes data available for each species
 gbif_pa_file <- "data/gibf-pa-summary.csv"
 if (file.exists(gbif_pa_file)) {
   gbif_pa <- read.csv(gbif_pa_file)
+  gbif_pa <- gbif_pa[order(match(gbif_pa$species, species_list$accepted_name)),]
 } else {
 gbif_pa <- as.data.frame(matrix(NA, nrow = nrow(species_list), ncol = 6))
 colnames(gbif_pa) <- c("species", "n_filtered", "n_background",
@@ -69,15 +77,16 @@ for (i in 1:nrow(species_list)) {
   } else {
     obs <- read.csv(file = obs_file)
 
-    # Skip species that have fewer than 10 filtered records
-    if (nrow(obs) < 10) {
+    # Skip species that have fewer than the minimum number of filtered records 
+    # indicated above
+    if (nrow(obs) < min_records) {
       gbif_pa$n_filtered[i] <- nrow(obs)
       gbif_pa$n_background[i] <- 0
       gbif_pa$filtered_csv[i] <- "yes"
       gbif_pa$pa_csv[i] <- "no"
       gbif_pa$mcp_shapefile[i] <- "no"
-      message(paste0("Less than 10 records for ", species, 
-                     ". No background points created."))
+      message(paste0("Less than ", min_records, " filtered records for ", 
+                     species, ". No background points created."))
     } else {
       # Retain just the geographic coordinates
       presence <- obs %>%
@@ -138,7 +147,7 @@ for (i in 1:nrow(species_list)) {
 
       # Generate pseudo-absence points
       absence <- suppressWarnings(terra::spatSample(x = pred_mask,  
-                                                    size = 10000,
+                                                    size = n_background,
                                                     method = "random",
                                                     na.rm = TRUE,
                                                     values = FALSE,
