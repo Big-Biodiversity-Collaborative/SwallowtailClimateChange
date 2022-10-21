@@ -74,7 +74,8 @@ run_lasso <- function(full_data, quad = TRUE, verbose = TRUE) {
   # Calculate (and save) means, SDs for standardizing covariates
   stand_obj <- save_means_sds(sdmtrain, cols = paste0("bio", 1:19), verbose = TRUE)
   # Standardize values in training dataset (to include quadratics, set quad = TRUE)
-  sdmtrain <- prep_predictors(stand_obj, sdmtrain, quad = quad) 
+  sdmtrain_preds <- prep_predictors(stand_obj, sdmtrain, quad = quad) 
+  sdmtrain <- cbind(sdmtrain[,1:2], sdmtrain_preds)
   
   # Creating values to downweight background points (so total (summed) 
   # weight of background pts equal to the total weight of presence pts)
