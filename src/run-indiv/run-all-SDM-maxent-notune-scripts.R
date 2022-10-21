@@ -5,37 +5,35 @@
 
 require(parallel)
 
-logfile <- "logs/SDM-maxent-notune-out.log"
+sdm_method <- "maxent-notune"
+
+logfile <- paste0("logs/SDM-", sdm_method, "-out.log")
 remove_log <- FALSE
 
-# Logical indicating whether or not to for re-running script if the model 
-# output already exists
+# Logical indicating whether or not to re-run script if the model output already 
+# exists
 rerun <- TRUE
 
-# Integer indicating minimum number of observations necessary to run script
-min_obs <- 50
-
-maxent_files <- list.files(path = "./src/indiv",
-                           pattern = "*-SDM-maxent-notune.R",
-                           full.names = TRUE)
+sdm_files <- list.files(path = "./src/indiv",
+                        pattern = paste0("*-SDM-", sdm_method, ".R"),
+                        full.names = TRUE)
 
 # For testing, subset this vector
-# maxent_files <- maxent_files[1:12]
+# sdm_files <- sdm_files[1:2]
 
-maxent_file_list <- as.list(maxent_files)
+sdm_file_list <- as.list(sdm_files)
 
 # Function we'll use to parallelize the process
-run_maxent_script <- function(script_name,
-                              log_file,
-                              rerun, min_obs) {
-  maxent_script <- script_name
+run_sdm_script <- function(script_name,
+                           log_file,
+                           rerun,
+                           sdm_method) {
+  sdm_script <- script_name
 
   # Need to extract species name from file to see if model has already been run
-  nice_name <- strsplit(x = basename(maxent_script),
+  nice_name <- strsplit(x = basename(sdm_script),
                         split = "-")[[1]][1]
   
-  # Need to count the number of observations in data file to see if it meets 
-  # minimums
   pa_file <- paste0("data/gbif/presence-absence/",
                      nice_name,
                      "-pa.csv")
@@ -44,31 +42,27 @@ run_maxent_script <- function(script_name,
   message_out <- ""
   if (file.exists(pa_file)) {
     pa_data <- read.csv(file = pa_file)
-    n_obs <- nrow(pa_data[pa_data$pa == 1, ])
-    
-    if (n_obs >= min_obs) {
-      # the file name that would be used for model output
-      model_out <- paste0("output/SDMs/", nice_name, "-maxent-notune.rds")
+
+    # the file name that would be used for model output
+    model_out <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
       
-      if (!file.exists(model_out) | rerun) {
-        if (file.exists(maxent_script)) {
-          # In this one case, we want to let user know that we are running
-          write(x = paste0("About to run ", maxent_script), 
-                file = log_file,
-                append = TRUE)
-          message(paste0("About to run ", maxent_script))
-          # Run the actual script
-          source(file = maxent_script)
-          message_out <- paste0("Finished running script: ", maxent_script)
-          message(message_out)
-        } else {
-          message_out <- paste0("Could not find script: ", maxent_script)
-          warning(message_out)
-        }
+    if (!file.exists(model_out) | rerun) {
+      if (file.exists(sdm_script)) {
+        # In this one case, we want to let user know that we are running
+        write(x = paste0("About to run ", sdm_script), 
+              file = log_file,
+              append = TRUE)
+        message(paste0("About to run ", sdm_script))
+        # Run the actual script
+        source(file = sdm_script)
+        message_out <- paste0("Finished running script: ", sdm_script)
+        message(message_out)
+      } else {
+        message_out <- paste0("Could not find script: ", sdm_script)
+        warning(message_out)
       }
     } else {
-      message_out <- paste0("Too few observations for ", nice_name, " (", 
-                            n_obs, " < ", min_obs, "). Skipping modeling.")
+      message_out <- paste0("SDM already exists and rerun set to FALSE.")
       message(message_out)
     }
   } else {
@@ -95,11 +89,11 @@ clust <- parallel::makeCluster(num_cores)
 
 # Run each script in parallel
 r <- parallel::parLapply(cl = clust,
-                         X = maxent_file_list,
-                         fun = run_maxent_script,
+                         X = sdm_file_list,
+                         fun = run_sdm_script,
                          log_file = logfile,
                          rerun = rerun,
-                         min_obs = min_obs)
+                         sdm_method = sdm_method)
 stopCluster(cl = clust)
 
 if (remove_log && file.exists(logfile)) {
