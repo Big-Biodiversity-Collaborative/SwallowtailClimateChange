@@ -94,4 +94,5 @@ development/output/maps/*
 development/output/shapefiles/*
 !development/output/shapefiles/.gitkeep
 
-
+# OS X Auto-generated
+.DS_Store
