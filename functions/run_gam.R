@@ -105,14 +105,15 @@ run_gam <- function(full_data, verbose = TRUE) {
   
   ### ADD ARGUMENTS FOR gam.check here
   
-  model_eval <- gam.check(p = presence_test, 
-                          a = absence_test, 
-                          model = model_fit,
-                          type = "response") 
-  
+ # model_eval <- gam.check(p = presence_test, 
+  #                        a = absence_test, 
+   #                       model = model_fit,
+    #                      type = "response") 
+  model_eval <- gam.check(model_fit)
   # Calculate threshold so we can make a P/A map later
   
   ### figure out what to do here
+  pres_threshold<-0
   ### pres_threshold <- dismo::threshold(x = model_eval, 
                                     ### stat = "spec_sens")
   
