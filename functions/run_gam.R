@@ -80,22 +80,18 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
   # bio6)
   
-  
   ### s is smoothing parameter, what do we want to use to smooth?? 
   ### in video example they used x and y coords
   ### lots of different smoothers/splines we could use - thin plate spline
   ### is default
   ### can play with k value, use gam.check
   ### pull latest glm and compare to this code, check object names carefully
+  ### Use tensor product smooths since variables are not all in the same units
   
-  model_fit <- gam(pa ~ s(bio1, bio2, bio4, bio5, bio6,
-                            bio8, bio9, bio10, bio11, bio12,
-                            bio13, bio14, bio15, bio16, bio17, bio18,
-                            bio19, k=100),
-                          data = sdmtrain,
-                          family = binomial,
-                   method = 'REML')
-                   
+  model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
+                   +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
+                   +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
+                   data = sdmtrain,family = binomial, method = 'REML')
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
@@ -110,13 +106,15 @@ run_gam <- function(full_data, verbose = TRUE) {
   ### ADD ARGUMENTS FOR gam.check here
   
   model_eval <- gam.check(p = presence_test, 
-                                a = absence_test, 
-                                model = model_fit,
-                                type = "response") 
+                          a = absence_test, 
+                          model = model_fit,
+                          type = "response") 
   
   # Calculate threshold so we can make a P/A map later
-  pres_threshold <- dismo::threshold(x = model_eval, 
-                                     stat = "spec_sens")
+  
+  ### figure out what to do here
+  ### pres_threshold <- dismo::threshold(x = model_eval, 
+                                    ### stat = "spec_sens")
   
   # Bind everything together and return as list  
   results <- list(model = model_fit,
