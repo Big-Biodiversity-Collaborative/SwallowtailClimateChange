@@ -80,42 +80,42 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
   # bio6)
   
-  ### s is smoothing parameter, what do we want to use to smooth?? 
-  ### in video example they used x and y coords
-  ### lots of different smoothers/splines we could use - thin plate spline
-  ### is default
-  ### can play with k value, use gam.check
-  ### pull latest glm and compare to this code, check object names carefully
-  ### Use tensor product smooths since variables are not all in the same units
   
-  model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
-                   +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
-                   +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
-                   data = sdmtrain,family = binomial, method = 'REML')
+  # Model below uses tensor product (te) smooths since variables have different
+  # units and also uses a double penalty to remove variables that don't
+  # add to the model
+  
+  model_fit <- gam(pa ~ te(bio1)+te(bio2)+te(bio4)+te(bio5)+te(bio6)+te(bio8)
+                   +te(bio9)+te(bio10)+te(bio11)+te(bio12)+te(bio13)+te(bio14)
+                   +te(bio15)+te(bio16)+te(bio17)+te(bio18)+te(bio19),
+                   data = sdmtrain,family = binomial, method = 'REML', 
+                   select = TRUE)
+  
+  # Model below uses standard smoothing and does not add a double penalty
+  
+ # model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
+  #                 +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
+   #                +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
+    #               data = sdmtrain,family = binomial, method = 'REML')
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
             " with testing data.")
   }
+  
   # Evaluate model performance with testing data
   # The type = "response" is passed to predict.glm so the values are on the 
   # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
   # sure the threshold is on the same scale of output from predict_sdm
   
+  model_eval <- dismo::evaluate(p = presence_test, 
+                                a = absence_test, 
+                                model = model_fit,
+                                type = "response")
   
-  ### ADD ARGUMENTS FOR gam.check here
-  
- # model_eval <- gam.check(p = presence_test, 
-  #                        a = absence_test, 
-   #                       model = model_fit,
-    #                      type = "response") 
-  model_eval <- gam.check(model_fit)
   # Calculate threshold so we can make a P/A map later
-  
-  ### figure out what to do here
-  pres_threshold<-0
-  ### pres_threshold <- dismo::threshold(x = model_eval, 
-                                    ### stat = "spec_sens")
+  pres_threshold <- dismo::threshold(x = model_eval, 
+                                     stat = "spec_sens")
   
   # Bind everything together and return as list  
   results <- list(model = model_fit,
