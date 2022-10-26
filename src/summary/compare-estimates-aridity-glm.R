@@ -1,7 +1,14 @@
-# Plot GLM coefficient estimate loadings
+# Plot GLM coefficient estimate loadings in relation to insect arid or not
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-14
+
+# DEPRECATED
+
+# Look at glm model results to see if the different predictor bioclim variables 
+# are behaving differently between arid vs. non-arid insect species.
+
+sdm_method <- "glm"
 
 require(dplyr)
 require(tidyr)
@@ -25,22 +32,32 @@ for (i in 1:length(insect_species)) {
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species_name))
-  model_file <- paste0("output/models/",
-                         nice_name, 
-                         "-model-glm-current.rds")
-  
-  # Read in the output of run_glm et al
-  glm_model <- readRDS(model_file)
-  glm_summary <- summary(glm_model$model)
-  coeff_est <- glm_summary$coefficients
+  model_file <- paste0("output/SDMs/",
+                       nice_name, "-",
+                       sdm_method,
+                       ".rds")
 
-  # Want all the coefficient estimates info
-  estimates <- data.frame(insect = species_name, 
-                          coefficient = rownames(coeff_est),
-                          estimate = coeff_est[, "Estimate"],
-                          se = coeff_est[, "Std. Error"],
-                          z_value = coeff_est[, "z value"],
-                          p_value = coeff_est[, "Pr(>|z|)"])
+  if (file.exists(model_file)) {
+    # Read in the output of run_glm et al
+    sdm_model <- readRDS(model_file)
+    sdm_summary <- summary(sdm_model$model)
+    coeff_est <- sdm_summary$coefficients
+    
+    # Want all the coefficient estimates info
+    estimates <- data.frame(insect = species_name, 
+                            coefficient = rownames(coeff_est),
+                            estimate = coeff_est[, "Estimate"],
+                            se = coeff_est[, "Std. Error"],
+                            z_value = coeff_est[, "z value"],
+                            p_value = coeff_est[, "Pr(>|z|)"])
+  } else { # no corresponding model on disk
+    estimates <- data.frame(insect = species_name, 
+                            coefficient = NA,
+                            estimate = NA,
+                            se = NA,
+                            z_value = NA,
+                            p_value = NA)
+  }
   rownames(estimates) <- NULL
   
   # Add those estimates to the data frame
@@ -55,12 +72,18 @@ for (i in 1:length(insect_species)) {
 
 # Add in data on whether the beast is arid or not; dropping intercept
 coeff_data <- coeff_estimates %>%
+  filter(!is.na(coefficient)) %>% # Dropping any species that didn't have model
   filter(coefficient != "(Intercept)") %>%
   inner_join(arid)
 
-# Find out which variables were significant across species
-num_arid <- sum(arid$arid)
-num_non_arid <- sum(!arid$arid)
+# Find out which variables were significant across species, need to count 
+# number of arid/non-arid in resulting coeff_dataset
+arid_non <- coeff_data %>%
+  select(insect, arid) %>%
+  distinct()
+num_arid <- sum(arid_non$arid)
+num_non_arid <- sum(arid_non$arid)
+
 sig_coeffs <- coeff_data %>%
   filter(p_value < 0.05) %>%
   group_by(coefficient, arid) %>%
