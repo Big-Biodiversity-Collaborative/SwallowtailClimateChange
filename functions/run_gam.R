@@ -1,3 +1,8 @@
+# Run generalized additive model species distribution model
+# Rachel Laura
+# rlaura@arizona.edu
+# 2022-10-25
+
 #' Run generalized additive model species distribution model
 #' 
 #' @param full_data dataframe with presence-absence data (1/0), fold (for 
@@ -85,18 +90,18 @@ run_gam <- function(full_data, verbose = TRUE) {
   # units and also uses a double penalty to remove variables that don't
   # add to the model
   
-  model_fit <- gam(pa ~ te(bio1)+te(bio2)+te(bio4)+te(bio5)+te(bio6)+te(bio8)
-                   +te(bio9)+te(bio10)+te(bio11)+te(bio12)+te(bio13)+te(bio14)
-                   +te(bio15)+te(bio16)+te(bio17)+te(bio18)+te(bio19),
-                   data = sdmtrain,family = binomial, method = 'REML', 
-                   select = TRUE)
+ # model_fit <- gam(pa ~ te(bio1)+te(bio2)+te(bio4)+te(bio5)+te(bio6)+te(bio8)
+#                   +te(bio9)+te(bio10)+te(bio11)+te(bio12)+te(bio13)+te(bio14)
+ #                  +te(bio15)+te(bio16)+te(bio17)+te(bio18)+te(bio19),
+  #                 data = sdmtrain,family = binomial, method = 'REML', 
+  #                 select = TRUE)
   
   # Model below uses standard smoothing and does not add a double penalty
   
- # model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
-  #                 +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
-   #                +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
-    #               data = sdmtrain,family = binomial, method = 'REML')
+  model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
+                  +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
+                  +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
+                   data = sdmtrain,family = binomial, method = 'REML')
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
