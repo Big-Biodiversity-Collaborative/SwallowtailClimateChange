@@ -14,7 +14,7 @@
 #' @param stand_obj an object of class save_means_sds (created with the 
 #' save_means_sds function) that contains means and SDs for predictor variables 
 #' in a training dataset (Optional, except for lasso regression models)
-#' @param quad a logical indicating whether or not to quadratics were included 
+#' @param quad a logical indicating whether or not quadratics were included 
 #' in model (Optional, except for lasso regression models)
 #' 
 #' @return raster of predicted probabilities of occurrence based on given 
