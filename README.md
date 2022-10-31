@@ -60,14 +60,26 @@ The workflow has the general structure of:
 
 1. Data retrieval and cleaning
 2. Preparing R scripts for analyses of individual species
-3. Bulk processing of single-species analyses
+3. Bulk processing of single-species analyses; for each species distribution 
+method (e.g. maximum entropy, boosted regression trees, random forest)
+    1. Estimate species distribution model for each species (referred to in 
+    scripts as the "SDM" step)
+    2. Predict distributions for each species based on the estimated species 
+    distribution model under a variety of global climate models, including 
+    contemporary climate ("current") and ensemble forecast climate models (this
+    is referred to in scripts as the "distribution" step)
+    3. Combine predicted distributions of each _insect_ species with the 
+    predictions for all of its respective host plants to create a single raster
+    with distributional information (see documentation in 
+    functions/overlap_raster.R for interpretations of values in those rasters) 
+    (referred to as the "overlap" step)
 4. Synthesizing results of single-species analyses
 
 ### Scripts, in order of use
 
-In descriptions below, \<model\> refers to a character string indicating the 
-model used for species distribution modeling, e.g. "glm" for generalized 
-linear model and "svm" for support vector machine.
+In descriptions below, \<method\> refers to a character string indicating the 
+method used for species distribution modeling, e.g. "glm" for generalized 
+linear model and "maxent-notune" for untuned MaxEnt model.
 
 1. Data retrieval and cleaning (in src/data)
    1. **src/data/gbif-1-download.R**: Download observational data from GBIF to 
@@ -106,31 +118,35 @@ linear model and "svm" for support vector machine.
    build R scripts that create overlap rasters for each species of insect with 
    its respective host plant(s)
 3. Bulk processing of single-species analyses (see below for example graphic)
-   1. **src/run-indiv/run-all-model-\<model\>-scripts.R**: Run each species 
+   1. **src/run-indiv/run-all-SDM-\<method\>-scripts.R**: Run each species 
    distribution model creation script created in 2.i (operates in parallel 
    using `parallel::mclapply`)
-   2. **src/run-indiv/run-all-prediction-\<model\>-scripts.R**: Run each 
+   2. **src/run-indiv/run-all-distribution-\<method\>-scripts.R**: Run each 
    prediction script for individual species for current and forecast climate 
    conditions; generate presence / absence rasters for all species
-   3. **src/run-indiv/run-all-overlap-raster-\<model\>-scripts.R**: Assemble 
+   3. **src/run-indiv/run-all-overlap-\<method\>-scripts.R**: Assemble 
    predicted presence / absence rasters for each insect and associated host 
-   plants into a single raster per insect species
+   plants into a single raster per insect species; see documentation in 
+   functions/overlap_raster.R for raster values
 4. Synthesizing results of single-species analyses
-   1. **src/summary/create-overlap-maps-\<model\>.R**: Use predicted overlap 
+   1. **src/summary/create-overlap-maps-\<method\>.R**: Use predicted overlap 
    rasters to generate maps (image files), one for each species of insect in 
    data/insect-host.csv
-   2. **src/summary/calculate-range-sizes.R**: Calculate range sizes (in 
-   square kilometers) for each insect species, as well as area 
+   2. **src/summary/calculate-range-sizes-\<method\>.R**: Calculate range sizes 
+   (in square kilometers) for each insect species, as well as area 
    (km<sup>2</sup>) of the insect's range that overlaps with at least one host 
    plant species' range and the area of the insect's range that overlaps with 
    zero host plant species' ranges
-   3. **src/summary/compare-range-changes.R**: **DEPRECATED** Compare the range 
-   sizes of current and forecast distributions, both considering insect ranges 
-   alone, and considering only the areas where insects are predicted to overlap 
-   with one or more host plant species
-   4. **src/summary/draw-species-richness-maps-glm.R**: Draw maps of _Papilio_ 
-   species richness for current and forecast climate conditions and a map 
-   showing the change between current and forecast estimates
+   3. **src/summary/calculate-variable-contributions-\<method\>.R**: Extract 
+   results of species distribution model to assess contributions of each 
+   predictor to model output
+   3. **src/summary/compare-range-changes-\<method\>.R**: **DEPRECATED** 
+   Compare the range sizes of current and forecast distributions, both 
+   considering insect ranges alone, and considering only the areas where 
+   insects are predicted to overlap with one or more host plant species
+   4. **src/summary/draw-species-richness-maps-\<method\>.R**: Draw maps of 
+   _Papilio_ species richness for current and forecast climate conditions and a 
+   map showing the change between current and forecast estimates
 
 ### Analysis workflow example
 Analysis workflow with _Papilio rumiko_ and one of its host plants, 
