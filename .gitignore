@@ -96,3 +96,5 @@ development/output/shapefiles/*
 
 # OS X Auto-generated
 .DS_Store
+.Rdata
+.httr-oauth
