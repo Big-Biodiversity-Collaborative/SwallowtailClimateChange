@@ -15,7 +15,7 @@
 #' save_means_sds function) that contains means and SDs for predictor variables 
 #' in a training dataset (Optional, except for lasso regression models)
 #' @param quad a logical indicating whether or not quadratics were included 
-#' in model (Optional, except for lasso regression models)
+#' in model (Optional, except for lasso regression and gam models)
 #' 
 #' @return raster of predicted probabilities of occurrence based on given 
 #' species distribution model and global climate model data
@@ -49,6 +49,11 @@ predict_sdm <- function(nice_name,
   if (sdm_method == "brt") {
     if (!require(gbm)) {
       stop("predict_sdm requires gbm package, but it could not be loaded")    
+    }
+  }
+  if (sdm_method == "gam") {
+    if (!require(mgcv)) {
+      stop("predict_sdm requires mgcv package, but it could not be loaded")    
     }
   }
   if (sdm_method == "lasso") {
@@ -102,8 +107,8 @@ predict_sdm <- function(nice_name,
   pred_mask <- raster::crop(predictors, buffered_mcp)
   pred_mask <- raster::mask(pred_mask, buffered_mcp)
   
-  # If using a lasso or gam model, need to standardize predictors using means and SDs 
-  # based on training dataset
+  # If using a lasso or gam model, need to standardize predictors using means 
+  # and SDs from training dataset
   if (sdm_method == "lasso" | sdm_method == "gam") {
     pred_mask <- prep_predictors(stand_obj, pred_mask, quad = quad)
   }
