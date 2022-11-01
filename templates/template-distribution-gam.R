@@ -44,7 +44,9 @@ if (!file.exists(sdm_file)) {
                          model = sdm_model$model,
                          sdm_method = sdm_method,
                          yr = as.character(model_yr),
-                         ssp = as.character(model_ssp))
+                         ssp = as.character(model_ssp),
+                         stand_obj = sdm_model$standardize_objects,
+                         quad = sdm_model$quad)
   
     # Make a raster of presence / absence values
     pa <- preds > sdm_model$thresh

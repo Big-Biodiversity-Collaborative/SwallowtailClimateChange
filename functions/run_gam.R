@@ -78,6 +78,14 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
+  
+  # Calculate (and save) means, SDs for standardizing covariates
+  stand_obj <- save_means_sds(sdmtrain, cols = paste0("bio", 1:19), verbose = TRUE)
+  # Standardize values in training dataset (to include quadratics, set quad = TRUE)
+  sdmtrain_preds <- prep_predictors(stand_obj, sdmtrain, quad = FALSE) 
+  sdmtrain <- cbind(sdmtrain[,1:2], sdmtrain_preds)
+  
+  
   if(verbose) {
     message("Running ", method_name, ".")
   }  
@@ -98,15 +106,19 @@ run_gam <- function(full_data, verbose = TRUE) {
   
   # Model below uses standard smoothing and adds a double penalty
   
-  model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
-                  +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
-                  +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
+  model_fit <- gam(pa ~ s(bio1_1)+s(bio2_1)+s(bio4_1)+s(bio5_1)+s(bio6_1)+s(bio8_1)
+                  +s(bio9_1)+s(bio10_1)+s(bio11_1)+s(bio12_1)+s(bio13_1)+s(bio14_1)
+                  +s(bio15_1)+s(bio16_1)+s(bio17_1)+s(bio18_1)+s(bio19_1),
                    data = sdmtrain,family = binomial, method = 'REML', select = TRUE)
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
             " with testing data.")
   }
+  
+  # Prep testing dataset
+  presence_test <- prep_predictors(stand_obj, presence_test, quad = FALSE) 
+  absence_test <- prep_predictors(stand_obj, absence_test, quad = FALSE)
   
   # Evaluate model performance with testing data
   # The type = "response" is passed to predict.glm so the values are on the 
@@ -125,7 +137,9 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Bind everything together and return as list  
   results <- list(model = model_fit,
                   evaluation = model_eval,
-                  thresh = pres_threshold)
+                  thresh = pres_threshold, 
+                  standardize_objects = stand_obj,
+                  quad = FALSE)
   
   return(results)
 }

@@ -55,6 +55,8 @@ predict_sdm <- function(nice_name,
     if (!require(glmnet)) {
       stop("predict_sdm requires glmnet package, but it could not be loaded")       
     }
+  }
+  if (sdm_method == "gam" | sdm_method == "lasso") {
     if(is.null(stand_obj) | is.null(quad)) {
       stop("predict_sdm requires stand_obj and quad arguments")
     }
@@ -100,9 +102,9 @@ predict_sdm <- function(nice_name,
   pred_mask <- raster::crop(predictors, buffered_mcp)
   pred_mask <- raster::mask(pred_mask, buffered_mcp)
   
-  # If using a lasso model, need to standardize predictors using means and SDs 
+  # If using a lasso or gam model, need to standardize predictors using means and SDs 
   # based on training dataset
-  if (sdm_method == "lasso") {
+  if (sdm_method == "lasso" | sdm_method == "gam") {
     pred_mask <- prep_predictors(stand_obj, pred_mask, quad = quad)
   }
   
