@@ -96,12 +96,12 @@ run_gam <- function(full_data, verbose = TRUE) {
   #                 data = sdmtrain,family = binomial, method = 'REML', 
   #                 select = TRUE)
   
-  # Model below uses standard smoothing and does not add a double penalty
+  # Model below uses standard smoothing and adds a double penalty
   
   model_fit <- gam(pa ~ s(bio1)+s(bio2)+s(bio4)+s(bio5)+s(bio6)+s(bio8)
                   +s(bio9)+s(bio10)+s(bio11)+s(bio12)+s(bio13)+s(bio14)
                   +s(bio15)+s(bio16)+s(bio17)+s(bio18)+s(bio19),
-                   data = sdmtrain,family = binomial, method = 'REML')
+                   data = sdmtrain,family = binomial, method = 'REML', select = TRUE)
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 

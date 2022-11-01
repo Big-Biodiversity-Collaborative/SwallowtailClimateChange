@@ -10,8 +10,8 @@ require(dplyr)
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-genus <- "papilio"
-species <- "rumiko"
+genus <- "GENUS"
+species <- "SPECIES"
 
 set.seed(20210603)
 sdm_method <- "gam"
