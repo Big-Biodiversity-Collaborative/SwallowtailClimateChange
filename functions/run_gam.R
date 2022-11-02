@@ -9,16 +9,21 @@
 #' separating testing and training data), and 19 columns with climate data
 #' @param verbose logical indicating whether or not to print processing messages
 #' 
-#' @details Uses \code{stats::glm()} for generalized linear model
+#' @details Uses \code{mgcv::gam()} for a generalized additive model
 #' 
 #' @return a list with the following elements:
 #' \describe{
-#'   \item{model}{Generalized linear model SDM; the output of \code{stats::glm}}
-#'   with family = "logit"
+#'   \item{model}{Generalized additive model SDM; the output of 
+#'   \code{mgcv::gam()}}
 #'   \item{evaluation}{Evaluation of model using testing data; the output of 
 #'   \code{dismo::evaluate}}
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
-#'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
+#'   presence; the output of \code{dismo::threshold} with 
+#'   \code{stat = "spec_sens"}}
+#'   \item{standardize_objects}{an object of class save_means_sds that contains
+#'   lists of predictor names with means and SDs based on training data}
+#'   \item{quad}{A logical indicating whether or not quadratics were included in
+#'   the model. Will always be set to FALSE for gam models}
 #' }
 run_gam <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
@@ -27,22 +32,12 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Libraries required for this function to work
   method_name <- "generalized additive model"
   dependencies <- c("dplyr", "dismo", "mgcv")
-  
-  ###CHECK THAT ALL THESE DEPENDECIES ARE NEEDED HERE
-  
+
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
          " could not be loaded: ", paste(dependencies, collapse = ", "),
          " are required.")
   }
-  
-  # 
-  # if (!require(dplyr)) {
-  #   stop("run_glm requires dplyr package, but it could not be loaded")
-  # }
-  # if (!require(dismo)) {
-  #   stop("run_glm requires dismo package, but it could not be loaded")
-  # }
 
   # Make sure presence-absence data are there
   if (!("pa" %in% colnames(full_data))) {
@@ -78,39 +73,40 @@ run_gam <- function(full_data, verbose = TRUE) {
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
-  
   # Calculate (and save) means, SDs for standardizing covariates
   stand_obj <- save_means_sds(sdmtrain, cols = paste0("bio", 1:19), verbose = TRUE)
-  # Standardize values in training dataset (to include quadratics, set quad = TRUE)
+  # Standardize values in training dataset
   sdmtrain_preds <- prep_predictors(stand_obj, sdmtrain, quad = FALSE) 
   sdmtrain <- cbind(sdmtrain[,1:2], sdmtrain_preds)
-  
-  
+
   if(verbose) {
     message("Running ", method_name, ".")
   }  
+
   # Run the model, specifying model with standard formula syntax
-  # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
-  # bio6)
+
+  # Select type of smooth functions
+    # Use "s" for a spline-based smooth
+    # Use "te" for a tensor product smooth (good when variables have diff units)
+  smooth <- "s"
+
+  # Create model formula
+    # Excluding bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 
+    # and bio6) 
+  model_formula <- paste0(smooth, "(", 
+                          predvars[!predvars %in% c("bio3", "bio7")], "_1)")
+  model_formula <- paste(model_formula, collapse = " + ")
+  model_formula <- as.formula(paste0("pa ~ ", model_formula))
   
-  
-  # Model below uses tensor product (te) smooths since variables have different
-  # units and also uses a double penalty to remove variables that don't
-  # add to the model
-  
- # model_fit <- gam(pa ~ te(bio1)+te(bio2)+te(bio4)+te(bio5)+te(bio6)+te(bio8)
-#                   +te(bio9)+te(bio10)+te(bio11)+te(bio12)+te(bio13)+te(bio14)
- #                  +te(bio15)+te(bio16)+te(bio17)+te(bio18)+te(bio19),
-  #                 data = sdmtrain,family = binomial, method = 'REML', 
-  #                 select = TRUE)
-  
-  # Model below uses standard smoothing and adds a double penalty
-  
-  model_fit <- gam(pa ~ s(bio1_1)+s(bio2_1)+s(bio4_1)+s(bio5_1)+s(bio6_1)+s(bio8_1)
-                  +s(bio9_1)+s(bio10_1)+s(bio11_1)+s(bio12_1)+s(bio13_1)+s(bio14_1)
-                  +s(bio15_1)+s(bio16_1)+s(bio17_1)+s(bio18_1)+s(bio19_1),
-                   data = sdmtrain,family = binomial, method = 'REML', select = TRUE)
-  
+  # Model below adds a double penalty to remove variables that don't add to the 
+  #model
+
+  model_fit <- gam(model_formula,
+                   data = sdmtrain,
+                   family = binomial, 
+                   method = 'REML', 
+                   select = TRUE)
+
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
             " with testing data.")
@@ -121,7 +117,7 @@ run_gam <- function(full_data, verbose = TRUE) {
   absence_test <- prep_predictors(stand_obj, absence_test, quad = FALSE)
   
   # Evaluate model performance with testing data
-  # The type = "response" is passed to predict.glm so the values are on the 
+  # The type = "response" is passed to predict.gam so the values are on the 
   # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
   # sure the threshold is on the same scale of output from predict_sdm
   
