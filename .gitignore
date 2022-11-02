@@ -98,3 +98,6 @@ development/output/shapefiles/*
 .DS_Store
 .Rdata
 .httr-oauth
+
+# Testing archive behavior
+tests/iris-test.csv
