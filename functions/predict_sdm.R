@@ -94,6 +94,10 @@ predict_sdm <- function(nice_name,
     buffered_mcp <- sf::st_transform(buffered_mcp, 4326) 
   }
   
+  # Get list of climate variables that were considered for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
   # Grab predictors
   gcm_directory <- dplyr::if_else(yr == "current",
                                   true = "data/wc2-1",
@@ -102,6 +106,9 @@ predict_sdm <- function(nice_name,
   predictors <- raster::stack(list.files(path = gcm_directory,
                                          pattern = ".tif$",
                                          full.names = TRUE))
+  
+  # Extract only those layers associated with climate variables in the model
+  predictors <- terra::subset(predictors, climate_vars)
   
   # Crop and mask as appropriate (takes a few moments)
   pred_mask <- raster::crop(predictors, buffered_mcp)
