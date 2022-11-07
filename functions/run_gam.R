@@ -24,6 +24,8 @@
 #'   lists of predictor names with means and SDs based on training data}
 #'   \item{quad}{A logical indicating whether or not quadratics were included in
 #'   the model. Will always be set to FALSE for gam models}
+#'   \item{climate_vars}{vector with names of all climate variables considered 
+#'   in the model}
 #' }
 run_gam <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
@@ -52,29 +54,34 @@ run_gam <- function(full_data, verbose = TRUE) {
     stop(function_name, " requires bio1:bio19 columns in full_data")
   }
 
-  predvars <- paste0("bio", 1:19)
+  # Get list of climate variables to consider for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   presence_test <- full_data %>%
     filter(pa == 1) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   absence_test <- full_data %>%
     filter(pa == 0) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
   # Calculate (and save) means, SDs for standardizing covariates
-  stand_obj <- save_means_sds(sdmtrain, cols = paste0("bio", 1:19), verbose = TRUE)
+  stand_obj <- save_means_sds(sdmtrain, cols = climate_vars, verbose = TRUE)
   # Standardize values in training dataset
   sdmtrain_preds <- prep_predictors(stand_obj, sdmtrain, quad = FALSE) 
   sdmtrain <- cbind(sdmtrain[,1:2], sdmtrain_preds)
@@ -91,16 +98,12 @@ run_gam <- function(full_data, verbose = TRUE) {
   smooth <- "s"
 
   # Create model formula
-    # Excluding bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 
-    # and bio6) 
-  model_formula <- paste0(smooth, "(", 
-                          predvars[!predvars %in% c("bio3", "bio7")], "_1)")
+  model_formula <- paste0(smooth, "(", climate_vars, "_1)")
   model_formula <- paste(model_formula, collapse = " + ")
   model_formula <- as.formula(paste0("pa ~ ", model_formula))
   
   # Model below adds a double penalty to remove variables that don't add to the 
   #model
-
   model_fit <- gam(model_formula,
                    data = sdmtrain,
                    family = binomial, 
@@ -135,7 +138,8 @@ run_gam <- function(full_data, verbose = TRUE) {
                   evaluation = model_eval,
                   thresh = pres_threshold, 
                   standardize_objects = stand_obj,
-                  quad = FALSE)
+                  quad = FALSE,
+                  climate_vars = climate_vars)
   
   return(results)
 }

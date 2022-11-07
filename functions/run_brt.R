@@ -20,6 +20,8 @@
 #'   presence; the output of \code{dismo::threshold} with 
 #'   \code{stat = "spec_sens"}}
 #'   \item{trees}{number of trees used in final model}
+#'   \item{climate_vars}{vector with names of all climate variables considered 
+#'   in the model}
 #' }
 run_brt <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
@@ -47,29 +49,34 @@ run_brt <- function(full_data, verbose = TRUE) {
     stop(function_name, " requires bio1:bio19 columns in full_data")
   }
 
-  predvars <- paste0("bio", 1:19)
+  # Get list of climate variables to consider for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   presence_test <- full_data %>%
     filter(pa == 1) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   absence_test <- full_data %>%
     filter(pa == 0) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
 
-  # Creating values to downweight background points (so total (summed) 
-  # weight of background pts equal to the total weight of presence pts)
+  # Creating values to downweight background points (so total [summed] weight of 
+  # background points is equal to the total weight of presence points)
   prNum <- sum(sdmtrain$pa == 1)
   bgNum <- sum(sdmtrain$pa == 0)
   wt <- ifelse(sdmtrain$pa == 1, 1, prNum / bgNum)
@@ -102,7 +109,7 @@ run_brt <- function(full_data, verbose = TRUE) {
     try(
       model_fit <- gbm.step(data = sdmtrain,
                             gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
-                            gbm.y = 1,                # Columns with pa data
+                            gbm.y = 1,                # Column with pa data
                             family = "bernoulli",
                             tree.complexity = tc,
                             learning.rate = lr,
@@ -163,15 +170,13 @@ run_brt <- function(full_data, verbose = TRUE) {
     pres_threshold <- dismo::threshold(x = model_eval, 
                                        stat = "spec_sens")
     
-    ### TODO: Everything seems to be working BUT the model objects are huge 
-    ### (many MB). Need to figure out whether there are ways to reduce the size.
-    
     # Bind everything together and return as list  
     # For BRT models, including the number of trees
     results <- list(model = model_fit,
                     evaluation = model_eval,
                     thresh = pres_threshold,
-                    trees = opt_trees)
+                    trees = opt_trees,
+                    climate_vars = climate_vars)
   }
 
   return(results)
