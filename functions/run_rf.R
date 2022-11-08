@@ -71,14 +71,19 @@ run_rf <- function(full_data, verbose = TRUE) {
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
-  # convert the response to factor for RF model to return probabilities
-  sdmtrain$pa <- as.factor(sdmtrain$pa)
+  #convert the response to factor for RF model to return probabilities -- 11/8/22 not doing this
+  #sdmtrain$pa <- as.factor(sdmtrain$pa)
+ 
+  # calculating the class weights and sample size
+  prNum <- sum(sdmtrain$pa == 1)
+  bgNum <- sum(sdmtrain$pa == 0)
+  wt <- ifelse(sdmtrain$pa == 1, 1, prNum/bgNum)
   
   # calculating the class weights and sample size
-  prNum <- as.numeric(table(sdmtrain$pa)["1"]) # number of presences
+  #prNum <- as.numeric(table(sdmtrain$pa)["1"]) # number of presences
   
-  # cwt <- c("1" = 1, "0" = prNum / bgNum)
-  samsize <- c("0" = prNum, "1" = prNum)
+  #cwt <- c("1" = 1, "0" = prNum / bgNum)
+  #samsize <- c("0" = prNum, "1" = prNum)
   
   if(verbose) {
     message("Running ", method_name, ".")
@@ -93,13 +98,13 @@ run_rf <- function(full_data, verbose = TRUE) {
   #                         data = sdmtrain,
   #                         family = binomial(link = "logit"))
   
-  model_fit <- randomForest(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
+ model_fit <- randomForest(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
                               bio8 + bio9 + bio10 + bio11 + bio12 +
                               bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
                               bio19,
                             data = sdmtrain,
                             ntree = 1000,
-                            sampsize = samsize,
+                            #sampsize = samsize,
                             replace = TRUE)
   
   if(verbose) {
@@ -113,7 +118,7 @@ run_rf <- function(full_data, verbose = TRUE) {
   model_eval <- dismo::evaluate(p = presence_test, 
                                 a = absence_test, 
                                 model = model_fit,
-                                type = "prob") 
+                                type = "response") 
   
   # Calculate threshold so we can make a P/A map later
   pres_threshold <- dismo::threshold(x = model_eval, 
