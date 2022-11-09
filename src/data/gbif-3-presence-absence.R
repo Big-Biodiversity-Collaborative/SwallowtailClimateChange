@@ -40,6 +40,8 @@ colnames(gbif_pa) <- c("species", "n_filtered", "n_background",
                        "filtered_csv", "pa_csv", "mcp_shapefile")
 }
 
+set.seed(20221109)
+
 # Loop through all species in gbif_reconcile
 for (i in 1:nrow(species_list)) {
   species <- species_list$accepted_name[i]
