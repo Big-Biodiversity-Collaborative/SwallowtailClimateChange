@@ -8,8 +8,8 @@ require(raster)
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-genus <- "Papilio"
-species <- "rumiko"
+genus <- "GENUS"
+species <- "SPECIES"
 
 sdm_method <- "gam"
 
@@ -21,7 +21,7 @@ nice_name <- tolower(paste0(genus, "_", species))
 message("Predicting presence / absence based on ", sdm_method, " for ", 
         species_name)
 
-# Grab the appopriate sdm model object from disk
+# Grab the appropriate sdm model object from disk
 sdm_file <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
 if (!file.exists(sdm_file)) {
   warning("No model file for ", species_name, " on disk; no predictions made.")
