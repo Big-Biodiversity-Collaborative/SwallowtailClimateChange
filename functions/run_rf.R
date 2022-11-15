@@ -98,13 +98,13 @@ run_rf <- function(full_data, verbose = TRUE) {
   #                         data = sdmtrain,
   #                         family = binomial(link = "logit"))
   
- model_fit <- randomForest(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
-                              bio8 + bio9 + bio10 + bio11 + bio12 +
-                              bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
+ model_fit <- randomForest(pa ~ bio1 + bio2 + bio3 + bio4 + bio5 + bio6 +
+                              bio7 + bio8 + bio9 + bio12 +
+                              bio13 + bio14 + bio15 + bio18 +
                               bio19,
                             data = sdmtrain,
-                            ntree = 1000,
-                            #sampsize = samsize,
+                            ntree = 100,
+                            weights = wt,
                             replace = TRUE)
   
   if(verbose) {
