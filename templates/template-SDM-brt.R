@@ -58,7 +58,7 @@ full_data <- full_data %>%
 # Run boosted regression tree model
 # Settings for the BRT (e.g., learning rate) are specified in the function
 model_result <- run_brt(full_data = full_data,
-                        verbose = TRUE)
+                        verbose = FALSE)
 
 # Save the model to file in output/models/
 model_file <- paste0("output/SDMs/", nice_name,
