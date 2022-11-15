@@ -21,7 +21,7 @@ nice_name <- tolower(paste0(genus, "_", species))
 message("Predicting presence / absence based on ", sdm_method, " for ", 
         species_name)
 
-# Grab the appopriate sdm model object from disk
+# Grab the appropriate sdm model object from disk
 sdm_file <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
 if (!file.exists(sdm_file)) {
   warning("No model file for ", species_name, " on disk; no predictions made.")
@@ -44,7 +44,9 @@ if (!file.exists(sdm_file)) {
                          model = sdm_model$model,
                          sdm_method = sdm_method,
                          yr = as.character(model_yr),
-                         ssp = as.character(model_ssp))
+                         ssp = as.character(model_ssp),
+                         stand_obj = sdm_model$standardize_objects,
+                         quad = sdm_model$quad)
   
     # Make a raster of presence / absence values
     pa <- preds > sdm_model$thresh

@@ -84,6 +84,8 @@ gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 7))
 colnames(gbif_obs) <- c("species", "n_orig", "n_excluded",
                         "n_old", "n_oob", "n_thin", "n_outlier")
 
+set.seed(20221109)
+
 for (i in 1:length(gbif_files)) {
   # Start with reading in raw data
   data <- read.csv(file = gbif_files[i])

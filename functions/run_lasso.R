@@ -22,6 +22,8 @@
 #'   lists of predictor names with means and SDs based on training data}
 #'   \item{quad}{a logical indicating whether or not quadratics were included in
 #'   the model}
+#'   \item{climate_vars}{vector with names of all climate variables considered 
+#'   in the model}
 #' }
 
 run_lasso <- function(full_data, quad = TRUE, verbose = TRUE) {
@@ -50,35 +52,40 @@ run_lasso <- function(full_data, quad = TRUE, verbose = TRUE) {
     stop(function_name, " requires bio1:bio19 columns in full_data")
   }
   
-  predvars <- paste0("bio", 1:19)
+  # Get list of climate variables to consider for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   presence_test <- full_data %>%
     filter(pa == 1) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   absence_test <- full_data %>%
     filter(pa == 0) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
   # Calculate (and save) means, SDs for standardizing covariates
-  stand_obj <- save_means_sds(sdmtrain, cols = paste0("bio", 1:19), verbose = TRUE)
+  stand_obj <- save_means_sds(sdmtrain, cols = climate_vars, verbose = TRUE)
   # Standardize values in training dataset (to include quadratics, set quad = TRUE)
   sdmtrain_preds <- prep_predictors(stand_obj, sdmtrain, quad = quad) 
   sdmtrain <- cbind(sdmtrain[,1:2], sdmtrain_preds)
   
-  # Creating values to downweight background points (so total (summed) 
-  # weight of background pts equal to the total weight of presence pts)
+  # Creating values to downweight background points (so total [summed] weight of 
+  # background points is equal to the total weight of presence points)
   prNum <- sum(sdmtrain$pa == 1)
   bgNum <- sum(sdmtrain$pa == 0)
   wt <- ifelse(sdmtrain$pa == 1, 1, prNum / bgNum)
@@ -129,7 +136,8 @@ run_lasso <- function(full_data, quad = TRUE, verbose = TRUE) {
                   evaluation = model_eval,
                   thresh = pres_threshold, 
                   standardize_objects = stand_obj,
-                  quad = quad)
+                  quad = quad,
+                  climate_vars = climate_vars)
   
   return(results)
 }

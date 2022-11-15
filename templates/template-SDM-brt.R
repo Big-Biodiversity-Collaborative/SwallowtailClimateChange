@@ -49,19 +49,16 @@ predictors <- terra::extract(x = predictors,
                              xy = FALSE) %>%
   dplyr::select(-ID)
 
-# Join bioclim data with original full_data (which has pa and fold info)
-full_data <- cbind(full_data, predictors)
-
-# Arrange predictor columns in full_data (so they appear in order)
-# use all_of to ensure all all bioclim variables are there
-# We can drop x, y columns at this point
+# Join bioclim data with original full_data (which has pa and fold info),
+# dropping x, y columns at the same time
 full_data <- full_data %>%
+  cbind(., predictors) %>%
   dplyr::select(c("pa", "fold", all_of(paste0("bio", 1:19))))
 
 # Run boosted regression tree model
 # Settings for the BRT (e.g., learning rate) are specified in the function
 model_result <- run_brt(full_data = full_data,
-                        verbose = TRUE)
+                        verbose = FALSE)
 
 # Save the model to file in output/models/
 model_file <- paste0("output/SDMs/", nice_name,

@@ -23,6 +23,8 @@
 #'   \code{stat = "spec_sens"}}
 #'   \item{feature_class}{feature class of the selected Maxent SDM}
 #'   \item{multiplier}{regularization multiplier of the selected Maxent SDM}
+#'   \item{climate_vars}{vector with names of all climate variables considered 
+#'   in the model}
 #' }
 run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
                             criteria = c("AICc", "AUC", "CBI")) {
@@ -81,6 +83,13 @@ run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
     unzip(zipfile = "data/gbif-shapefiles.zip")
   }
   buffered_mcp <- vect(shapefile_name)
+  
+  # Get list of climate variables to consider for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
+  # Extract only those climate variables we need
+  predictors <- terra::subset(predictors, climate_vars)
   
   # Crop and mask predictor rasters
   pred_mask <- terra::crop(predictors, buffered_mcp)
@@ -144,22 +153,23 @@ run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
   }
   
   # Evaluate model performance with testing data
-  maxent_eval <- dismo::evaluate(p = presence_test, 
-                                 a = absence_test,
-                                 model = best_model,
-                                 x = pred_mask)
+  model_eval <- dismo::evaluate(p = presence_test, 
+                                a = absence_test,
+                                model = best_model,
+                                x = pred_mask)
   
   # Calculate threshold so we can make a P/A map later
-  pres_threshold <- dismo::threshold(x = maxent_eval, 
+  pres_threshold <- dismo::threshold(x = model_eval, 
                                      stat = "spec_sens")
   
   # Bind everything together and return as list
   # For Maxent models, including the tuning parameters
   results <- list(model = best_model,
-                  evaluation = maxent_eval,
+                  evaluation = model_eval,
                   thresh = pres_threshold,
                   feature_class = fc_best,
-                  multiplier = rm_best)
+                  multiplier = rm_best,
+                  climate_vars = climate_vars)
 
   return(results)
 }    

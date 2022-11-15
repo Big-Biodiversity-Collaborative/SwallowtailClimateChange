@@ -13,7 +13,14 @@
 #'   \item{evaluation}{Evaluation of model using testing data; the output of 
 #'   \code{dismo::evaluate}}
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
-#'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
+#'   presence; the output of \code{dismo::threshold} with 
+#'   \code{stat = "spec_sens"}}
+#'   \item{standardize_objects}{an object of class save_means_sds that contains
+#'   lists of predictor names with means and SDs based on training data}
+#'   \item{quad}{A logical indicating whether or not quadratics were included in
+#'   the model. Will always be set to FALSE for glm models}
+#'   \item{climate_vars}{vector with names of all climate variables considered 
+#'   in the model}
 #' }
 run_glm <- function(full_data, verbose = TRUE) {
   # Extract the name of this function for reporting
@@ -27,14 +34,6 @@ run_glm <- function(full_data, verbose = TRUE) {
          " could not be loaded: ", paste(dependencies, collapse = ", "),
          " are required.")
   }
-  
-  # 
-  # if (!require(dplyr)) {
-  #   stop("run_glm requires dplyr package, but it could not be loaded")
-  # }
-  # if (!require(dismo)) {
-  #   stop("run_glm requires dismo package, but it could not be loaded")
-  # }
 
   # Make sure presence-absence data are there
   if (!("pa" %in% colnames(full_data))) {
@@ -49,37 +48,48 @@ run_glm <- function(full_data, verbose = TRUE) {
     stop(function_name, " requires bio1:bio19 columns in full_data")
   }
 
-  predvars <- paste0("bio", 1:19)
+  # Get list of climate variables to consider for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   presence_test <- full_data %>%
     filter(pa == 1) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   absence_test <- full_data %>%
     filter(pa == 0) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
   
+  # Calculate (and save) means, SDs for standardizing covariates
+  stand_obj <- save_means_sds(sdmtrain, cols = climate_vars, verbose = TRUE)
+  # Standardize values in training dataset
+  sdmtrain_preds <- prep_predictors(stand_obj, sdmtrain, quad = FALSE) 
+  sdmtrain <- cbind(sdmtrain[,1:2], sdmtrain_preds)
+  
   if(verbose) {
     message("Running ", method_name, ".")
   }  
-  # Run the model, specifying model with standard formula syntax
-  # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
-  # bio6)
-  model_fit <- stats::glm(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
-                            bio8 + bio9 + bio10 + bio11 + bio12 +
-                            bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
-                            bio19,
+
+  # Create model formula
+  model_formula <- paste0(climate_vars, "_1")
+  model_formula <- paste(model_formula, collapse = " + ")
+  model_formula <- as.formula(paste0("pa ~ ", model_formula))
+  
+  model_fit <- stats::glm(formula = model_formula,
                           data = sdmtrain,
                           family = binomial(link = "logit"))
   
@@ -87,6 +97,11 @@ run_glm <- function(full_data, verbose = TRUE) {
     message("Model complete. Evaluating ", method_name, 
             " with testing data.")
   }
+  
+  # Prep testing dataset
+  presence_test <- prep_predictors(stand_obj, presence_test, quad = FALSE) 
+  absence_test <- prep_predictors(stand_obj, absence_test, quad = FALSE)
+  
   # Evaluate model performance with testing data
   # The type = "response" is passed to predict.glm so the values are on the 
   # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
@@ -103,7 +118,10 @@ run_glm <- function(full_data, verbose = TRUE) {
   # Bind everything together and return as list  
   results <- list(model = model_fit,
                   evaluation = model_eval,
-                  thresh = pres_threshold)
+                  thresh = pres_threshold,
+                  standardize_objects = stand_obj,
+                  quad = FALSE,
+                  climate_vars = climate_vars)
   
   return(results)
 }
