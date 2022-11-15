@@ -29,7 +29,7 @@ run_brt <- function(full_data, verbose = TRUE) {
   
   # Libraries required for this function to work
   method_name <- "boosted regression tree"
-  dependencies <- c("dplyr", "dismo")
+  dependencies <- c("dplyr", "dismo", "gbm")
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
          " could not be loaded: ", paste(dependencies, collapse = ", "),
@@ -116,7 +116,8 @@ run_brt <- function(full_data, verbose = TRUE) {
                             n.trees = n_trees,
                             max.trees = max_trees,
                             n.folds = n_folds,
-                            verbose = TRUE)
+                            verbose = FALSE, 
+                            silent = TRUE)
     )
     
     # Extract the optimal number of trees
