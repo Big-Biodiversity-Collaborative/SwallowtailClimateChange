@@ -106,6 +106,8 @@ run_brt <- function(full_data, verbose = TRUE) {
   no_model <-  FALSE
   while (is.null(model_fit) | opt_trees < 1000 | opt_trees == max_trees)  {
     # Run gbm.step
+    # Note: set plot arguments below to FALSE to avoid creating an extraneous 
+    # file when running BRT models in parallel
     try(
       model_fit <- gbm.step(data = sdmtrain,
                             gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
@@ -117,7 +119,9 @@ run_brt <- function(full_data, verbose = TRUE) {
                             max.trees = max_trees,
                             n.folds = n_folds,
                             verbose = FALSE, 
-                            silent = TRUE)
+                            silent = TRUE,
+                            plot.main = FALSE,  
+                            plot.folds = FALSE)
     )
     
     # Extract the optimal number of trees
