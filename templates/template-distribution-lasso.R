@@ -1,4 +1,5 @@
-# A template for building predicted distributions for a single species from a lasso model
+# A template for predicting probability of occurrence and the distribution of a 
+# single species from a LASSO regression model
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-10-12
@@ -47,6 +48,16 @@ if (!file.exists(sdm_file)) {
                          ssp = as.character(model_ssp),
                          stand_obj = sdm_model$standardize_objects,
                          quad = sdm_model$quad)
+
+    if (!is.null(preds) & (is.na(model_ssp) | model_ssp == "370")) {
+      # Save raster with probabilities (only for current and ssp370 scenarios)
+      preds_file <- paste0("output/predicted-probabilities/", nice_name,
+                           "-pred-probs-",
+                           sdm_method, "-", 
+                           model_name, ".rds")
+      saveRDS(object = preds,
+              file = preds_file)
+    }
     
     # Make a raster of presence / absence values
     pa <- preds > sdm_model$thresh

@@ -1,4 +1,5 @@
-# A template for building predicted distributions for a single species from a BRT model
+# A template for predicting probability of occurrence and the distribution of a 
+# single species from a BRT model
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
@@ -32,7 +33,7 @@ if (!file.exists(sdm_file)) {
   # Iterate over all climate models listed in data/climate-models.csv
   climate_models <- read.csv(file = "data/climate-models.csv")
   
-  # To keep track if any returned presence / absence rasters were NULL
+  # To keep track if any returned presence-absence rasters were NULL
   success <- rep(x = FALSE, times = nrow(climate_models))
 
   for (i in 1:nrow(climate_models)) {
@@ -46,6 +47,16 @@ if (!file.exists(sdm_file)) {
                          yr = as.character(model_yr),
                          ssp = as.character(model_ssp))
   
+    if (!is.null(preds) & (is.na(model_ssp) | model_ssp == "370")) {
+      # Save raster with probabilities (only for current and ssp370 scenarios)
+      preds_file <- paste0("output/predicted-probabilities/", nice_name,
+                           "-pred-probs-",
+                           sdm_method, "-", 
+                           model_name, ".rds")
+      saveRDS(object = preds,
+              file = preds_file)
+    }
+    
     # Make a raster of presence / absence values
     pa <- preds > sdm_model$thresh
     
