@@ -20,7 +20,7 @@
 #'   presence; the output of \code{dismo::threshold} with 
 #'   \code{stat = "spec_sens"}}
 #' }
-run_maxent_notune <- function(full_data, verbose = TRUE) {
+run_rf <- function(full_data, verbose = TRUE) {
   if (!require(dplyr)) {
     stop("run_maxent_notune requires dplyr package, but it could not be loaded")
   }
