@@ -8,8 +8,8 @@ require(raster)
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-genus <- "Papilio"
-species <- "rumiko"
+genus <- "GENUS"
+species <- "SPECIES"
 
 sdm_method <- "rf"
 
