@@ -19,8 +19,9 @@ library(parallel)
 
 source(file = "load_functions.R")
 
-insect_names <- c("Papilio rumiko", "Papilio cresphontes")
+# insect_names <- c("Papilio rumiko", "Papilio cresphontes")
 sdm_names <- c("brt", "gam", "glm", "lasso", "maxent-notune", "maxent-tune")
+insect_names <- c("Papilio rumiko")
 
 ########################################
 # extract data
@@ -180,8 +181,8 @@ climate_models <- climate_models %>%
   filter(is.na(ssp) | ssp == 370)
 
 # Table that will contain model-specific values/summaries for each species
-sdm_table <- expand.grid(species = all_species$species_name, 
-                         method = sdm_names)
+sdm_table <- expand.grid(method = sdm_names,
+                         species = all_species$species_name)
 sdm_table <- sdm_table %>%
   mutate(threshold = NA,
          AUC_test = NA,
@@ -202,48 +203,45 @@ for (i in 1:nrow(all_species)) {
   # Restrict to just testing dataset
   pa <- pa %>%
     filter(fold == 1)
-  
-  for (j in 1:nrow(climate_models)) {
-    
-    scen <- climate_models$name[j]
-    scen_yr <- ifelse(scen != "current", str_sub(scen,-4,-1), scen)
-    
-    # Create list that will hold rasters with predicted probabilities
-    preds_list <- list()
-    
-    # Create list that will hold rasters with predicted distribution
-    dist_list <- list()
 
-    for (sdm_name in sdm_names) {
+  # Create lists that will hold rasters w/ predicted probabilities, distributions
+  preds_list <- list()
+  dist_list <- list()  
+  
+  for (sdm_name in sdm_names) {
+    
+    row_ind <- which(sdm_table$species == species_name & 
+                       sdm_table$method == sdm_name)
+    
+    # Read in sdm_model and fill in table
+    sdm_file <- paste0("output/SDMs/", nice_name, "-", sdm_name, ".rds")
+    sdm_model <- readRDS(sdm_file)
+    sdm_table$threshold[row_ind] <- sdm_model$thresh
+    sdm_table$AUC_test[row_ind] <- sdm_model$evaluation@auc    
+    
+    for (j in 1:nrow(climate_models)) {
       
-      row_ind <- which(sdm_table$species == species_name & 
-                         sdm_table$method == sdm_name)
-      
+      scen <- climate_models$name[j]
+      scen_yr <- ifelse(scen != "current", str_sub(scen,-4,-1), scen)    
+    
       # Read in raster with predicted probabilities
       preds_file <- paste0("output/predicted-probabilities/", nice_name, 
                            "-pred-probs-", sdm_name, "-", scen, ".rds")
       preds <- readRDS(preds_file)
-      preds <- rast(preds)
-      
+      preds <- rast(preds) 
+
       if (scen == "current") {
+
+        # Attach model predictions to pa dataset and 
+        probs <- terra::extract(x = preds, 
+                                y = pa[, c("x", "y")],
+                                cells = FALSE, 
+                                ID = FALSE)
+        pa$probs <- probs$layer
         
-        # Read in sdm_model and fill in table
-        sdm_file <- paste0("output/SDMs/", nice_name, "-", sdm_name, ".rds")
-        sdm_model <- readRDS(sdm_file)
-        sdm_table$threshold[row_ind] <- sdm_model$thresh
-        sdm_table$AUC_test[row_ind] <- sdm_model$evaluation@auc
-        
-        # Append model predictions to pa dataset
-        pa_append <- terra::extract(x = preds, 
-                                    y = pa[, c("x", "y")],
-                                    cells = FALSE, 
-                                    ID = FALSE)
-        names(pa_append) <- paste0("probs_", scen_yr)
-        pa <- cbind(pa, pa_append)
-        
-        # Calculate absolute error (predicted probability - observed) for the
-        # testing dataset 
-        pa$abs_error <- abs(pa$probs_current - pa$pa)
+        # Calculate absolute error (predicted probability - observed) for the 
+        # testing dataset
+        pa$abs_error <- abs(pa$probs - pa$pa)
 
         # Add mean absolute error (MAE) to sdm_table
         sdm_table$MAE_test[row_ind] <- mean(pa$abs_error, na.rm = TRUE)
@@ -267,28 +265,65 @@ for (i in 1:nrow(all_species)) {
       dist_list <- c(dist_list, dist)
       names(dist_list)[length(dist_list)] <- paste0(sdm_name, "_", scen_yr)
         
-    } # end sdm method loop
+    } # end climate scenarios loop (j)
     
+  } # end sdm_method loop
+  
+  # Save correlation matrix and rasters for each climate scenario
+  for (j in 1:nrow(climate_models)) {
+    
+    scen <- climate_models$name[j]
+    scen_yr <- ifelse(scen != "current", str_sub(scen,-4,-1), scen)    
+    
+    # Extract probability raster for climate scenario
+    preds_sub <- preds_list[grepl(scen_yr, names(preds_list))]
+    names(preds_sub) <- sdm_names
     # Combine probability rasters into a single SpatRaster
-    preds <- rast(preds_list)
+    preds_rast <- rast(preds_sub)
+    
     # Create a correlation matrix (Spearman's rho better than Pearson?)
     # (note that as.data.frame removes cells with NAs)
-    corrs <- cor(as.data.frame(preds), method = "spearman")
-
-    # Combine distribution rasters into a single SpatRaster
-    dist <- rast(dist_list)
-    # Look at predicted distributions (multi-panel figure)
-    # plot(dist)
-    # Look at model overlap raster (number of models predicting occurrence)
-    # plot(sum(dist))
+    corrs <- cor(as.data.frame(preds_rast), method = "spearman")
     
-    # Save objects specific to species and climate scenario
-    assign(paste0(nice_name, "_", scen_yr, "_corr"), corrs)
-    assign(paste0(nice_name, "_", scen_yr, "_preds"), preds)
-    assign(paste0(nice_name, "_", scen_yr, "_dist"), dist)
+    # Save object with species and scenario/yr in name
+    # (eg, corr_papilio_rumiko_2071)
+    assign(paste0("corr_", nice_name, "_", scen_yr), corrs)
     
-    # rm(preds, corrs, dist)
-
-  } # end climate scenario loop (j)
+    # Save probability rasters (as a single multi-layer SpatRaster)
+    assign(paste0("preds_", nice_name, "_", scen_yr), preds_rast)
+    
+    # Subset distribution rasters and save
+    dist_sub <- dist_list[grepl(scen_yr, names(dist_list))]
+    names(dist_sub) <- sdm_names
+    dist_rast <- rast(dist_sub)
+    assign(paste0("dists_", nice_name, "_", scen_yr), dist_rast)
+    
+  } # end climate scenarios loop (j)
 
 } # end species loop (i)
+
+# TODO decide whether we want to save some of these objects to file
+
+# Viewing some results
+  # First, pick a species
+  species <- all_species$nice_name[1]
+  
+  # View distribution maps for a climate scenario/yr (one panel per model)
+  plot(get(paste0("dists_", species, "_current")))
+  plot(get(paste0("dists_", species, "_2041")))
+  plot(get(paste0("dists_", species, "_2071")))
+  
+  # Another way to view model agreement/disagreement 
+  # (map with number of models predicting occurrence)
+  plot(as.factor(sum(get(paste0("dists_", species, "_current")))))
+  plot(as.factor(sum(get(paste0("dists_", species, "_2041")))))
+  plot(as.factor(sum(get(paste0("dists_", species, "_2071")))))
+  
+  # View correlation matrices
+  get(paste0("corr_", species, "_current"))
+  get(paste0("corr_", species, "_2041"))
+  get(paste0("corr_", species, "_2071"))
+  
+  # Table with summaries:
+  sdm_table
+  
