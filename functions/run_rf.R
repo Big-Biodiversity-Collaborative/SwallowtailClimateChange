@@ -4,16 +4,18 @@
 #' separating testing and training data), and 19 columns with climate data
 #' @param verbose logical indicating whether or not to print processing messages
 #' 
-#' @details Uses \code{stats::rf()} for random forest model
+#' @details Uses \code{randomForest::randomForest()} for regression-type 
+#' random forest model
 #' 
 #' @return a list with the following elements:
 #' \describe{
-#'   \item{model}{Random forest model SDM; the output of \code{stats::rf}}
-#'   with family = "logit"
+#'   \item{model}{Random forest model SDM; the output of 
+#'   \code{randomForest::randomForest()}}
 #'   \item{evaluation}{Evaluation of model using testing data; the output of 
 #'   \code{dismo::evaluate}}
 #'   \item{thresh}{Threshold value of probabilities for determining absence or 
-#'   presence; the output of \code{dismo::threshold} with \code{stat = "spec_sens"}}
+#'   presence; the output of \code{dismo::threshold} with 
+#'   \code{stat = "spec_sens"}}
 #' }
 
 run_rf <- function(full_data, verbose = TRUE) {
@@ -28,14 +30,6 @@ run_rf <- function(full_data, verbose = TRUE) {
          " could not be loaded: ", paste(dependencies, collapse = ", "),
          " are required.")
   }
-  
-  # 
-  # if (!require(dplyr)) {
-  #   stop("run_glm requires dplyr package, but it could not be loaded")
-  # }
-  # if (!require(dismo)) {
-  #   stop("run_glm requires dismo package, but it could not be loaded")
-  # }
 
   # Make sure presence-absence data are there
   if (!("pa" %in% colnames(full_data))) {
@@ -50,71 +44,63 @@ run_rf <- function(full_data, verbose = TRUE) {
     stop(function_name, " requires bio1:bio19 columns in full_data")
   }
 
-  predvars <- paste0("bio", 1:19)
+  # Get list of climate variables to consider for the SDM
+  all_climate_vars <- read.csv("data/climate-variables.csv")
+  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  
   # Create separate data frames for testing and training presence data
   presence_train <- full_data %>%
     filter(pa == 1) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   presence_test <- full_data %>%
     filter(pa == 1) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   # Create separate data frames for testing and training (pseudo)absence data
   absence_train <- full_data %>%
     filter(pa == 0) %>%
-    filter(fold != 1)
+    filter(fold != 1) %>%
+    dplyr::select(pa, fold, all_of(climate_vars))
   absence_test <- full_data %>%
     filter(pa == 0) %>%
     filter(fold == 1) %>%
-    dplyr::select(all_of(predvars))
+    dplyr::select(all_of(climate_vars))
   
   # Add presence and pseudoabsence training data into single data frame
   sdmtrain <- rbind(presence_train, absence_train)
-  
-  #convert the response to factor for RF model to return probabilities -- 11/8/22 not doing this
-  #sdmtrain$pa <- as.factor(sdmtrain$pa)
- 
-  # calculating the class weights and sample size
+
+  # Calculate sample sizes and weights
   prNum <- sum(sdmtrain$pa == 1)
   bgNum <- sum(sdmtrain$pa == 0)
   wt <- ifelse(sdmtrain$pa == 1, 1, prNum/bgNum)
-  
-  # calculating the class weights and sample size
-  #prNum <- as.numeric(table(sdmtrain$pa)["1"]) # number of presences
-  
-  #cwt <- c("1" = 1, "0" = prNum / bgNum)
-  #samsize <- c("0" = prNum, "1" = prNum)
-  
+
   if(verbose) {
     message("Running ", method_name, ".")
-  }  
-  # Run the model, specifying model with standard formula syntax
-  # Exclude bio3 (a function of bio2 & bio7) and bio7 (a function of bio5 and 
-  # bio6)
-  # model_fit <- stats::glm(pa ~ bio1 + bio2 + bio4 + bio5 + bio6 +
-  #                           bio8 + bio9 + bio10 + bio11 + bio12 +
-  #                           bio13 + bio14 + bio15 + bio16 + bio17 + bio18 +
-  #                           bio19,
-  #                         data = sdmtrain,
-  #                         family = binomial(link = "logit"))
+  } 
   
- model_fit <- randomForest(pa ~ bio1 + bio2 + bio3 + bio4 + bio5 + bio6 +
-                              bio7 + bio8 + bio9 + bio12 +
-                              bio13 + bio14 + bio15 + bio18 +
-                              bio19,
-                            data = sdmtrain,
-                            ntree = 100,
-                            weights = wt,
-                            replace = TRUE)
+  # Create model formula
+  model_formula <- paste(climate_vars, collapse = " + ")
+  model_formula <- as.formula(paste0("pa ~ ", model_formula))
+  
+  # Run model (set number of trees to 500 for now)
+  model_fit <- suppressWarnings(randomForest(formula = model_formula,
+                                             data = sdmtrain,
+                                             ntree = 500,
+                                             weights = wt,
+                                             replace = TRUE))
+  # Note: wrapping call to randomForest() in suppressWarnings() because
+  # R will produce the following, expected warning:
+  # In randomForest.default(m, y, ...) : The response has five or fewer unique 
+  # values.  Are you sure you want to do regression?
+  # See https://rspatial.org/raster/sdm/6_sdm_methods.html#random-forest
   
   if(verbose) {
     message("Model complete. Evaluating ", method_name, 
             " with testing data.")
   }
+  
   # Evaluate model performance with testing data
-  # The type = "response" is passed to predict.glm so the values are on the 
-  # scale of 0 to 1 (probabilities), rather than the log odds. Required to make
-  # sure the threshold is on the same scale of output from predict_sdm
   model_eval <- dismo::evaluate(p = presence_test, 
                                 a = absence_test, 
                                 model = model_fit,
