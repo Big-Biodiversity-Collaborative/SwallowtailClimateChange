@@ -318,12 +318,61 @@ for (i in 1:nrow(all_species)) {
   plot(as.factor(sum(get(paste0("dists_", species, "_current")))))
   plot(as.factor(sum(get(paste0("dists_", species, "_2041")))))
   plot(as.factor(sum(get(paste0("dists_", species, "_2071")))))
+
+# Table with summaries:
+  sdm_table %>%
+    mutate(across(threshold:lat_max_2071, ~ round(.x, 2)))
   
-  # View correlation matrices
-  get(paste0("corr_", species, "_current"))
-  get(paste0("corr_", species, "_2041"))
-  get(paste0("corr_", species, "_2071"))
+# Summarizing correlations
+  corrs <- expand.grid(species = all_species$species_name,
+                       scenario = c("current", "2041", "2071"),
+                       sdm_1 = sdm_names,
+                       sdm_2 = sdm_names)
+  corrs <- corrs %>%
+    filter(sdm_1 != sdm_2) %>%
+    rowwise() %>%
+    mutate(sdm1 = head(sort(c(sdm_1, sdm_2)),1),
+           sdm2 = tail(sort(c(sdm_1, sdm_2)),1)) %>%
+    dplyr::select(-c(sdm_1, sdm_2)) %>%
+    unique %>%
+    arrange(species, scenario, sdm1) %>%
+    data.frame
   
-  # Table with summaries:
-  sdm_table
+  corrs$nice_name <- all_species$nice_name[match(corrs$species, all_species$species_name)]
+  for (i in 1:nrow(corrs)) {
+    corr_mat <- get(paste0("corr_", corrs$nice_name[i], "_", corrs$scenario[i]))
+    corrs$corr[i] <- round(corr_mat[rownames(corr_mat) == corrs$sdm1[i],
+                                    colnames(corr_mat) == corrs$sdm2[i]], 2)
+  }
+  corrs$nice_name <- NULL
+  
+  # Summarize by method
+  corrs %>%
+    group_by(sdm1, sdm2) %>%
+    summarize(mn_corr = round(mean(corr), 2),
+              min_corr = min(corr),
+              max_corr = max(corr),
+              sd_corr = round(sd(corr), 2)) %>%
+    arrange(desc(mn_corr)) %>%
+    data.frame
+  
+  # Summarize by species
+  corrs %>%
+    group_by(species) %>%
+    summarize(mn_corr = round(mean(corr), 2),
+              min_corr = min(corr),
+              max_corr = max(corr),
+              sd_corr = round(sd(corr), 2)) %>%
+    arrange(desc(mn_corr)) %>%
+    data.frame
+  
+  # Summarize by scenario
+  corrs %>%
+    group_by(scenario) %>%
+    summarize(mn_corr = round(mean(corr), 2),
+              min_corr = min(corr),
+              max_corr = max(corr),
+              sd_corr = round(sd(corr), 2)) %>%
+    arrange(desc(mn_corr)) %>%
+    data.frame
   
