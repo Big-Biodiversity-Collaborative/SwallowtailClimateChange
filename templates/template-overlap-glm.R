@@ -1,14 +1,14 @@
-# A template for building overlap rasters for an insect species & hosts from GLM
-# Jeff Oliver
-# jcoliver@arizona.edu
-# 2021-07-08
+# A template for building overlap rasters for an insect species & hosts from GAM
+# Rachel Laura
+# rlaura@arizona.edu
+# 2022-11-22
 
 source(file = "load_functions.R")
 
 genus <- "GENUS"
 species <- "SPECIES"
 
-sdm_method <- "glm"
+sdm_method <- "gam"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
@@ -22,6 +22,7 @@ message(paste0("Creating overlap rasters based on ", sdm_method,
 # raster then save it to a file. 
 climate_models <- read.csv(file = "data/climate-models.csv")
 gcm_names <- climate_models$name
+
 
 for (gcm_name in gcm_names) {
   overlap <- overlap_raster(species_name = species_name,
