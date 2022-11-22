@@ -98,6 +98,9 @@ development/output/maps/*
 development/output/shapefiles/*
 !development/output/shapefiles/.gitkeep
 
+# Local development scripts
+*-local.R
+
 # OS X Auto-generated
 .DS_Store
 .Rdata
