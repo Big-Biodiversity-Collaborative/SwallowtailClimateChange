@@ -61,6 +61,11 @@ predict_sdm <- function(nice_name,
       stop("predict_sdm requires glmnet package, but it could not be loaded")       
     }
   }
+  if (sdm_method == "rf") {
+    if (!require(randomForest)) {
+      stop("predict_sdm requires randomForest package, but it could not be loaded")       
+    }
+  }
   if (sdm_method == "gam" | sdm_method == "lasso" | sdm_method == "glm") {
     if(is.null(stand_obj) | is.null(quad)) {
       stop("predict_sdm requires stand_obj and quad arguments")

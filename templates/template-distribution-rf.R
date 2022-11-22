@@ -1,8 +1,8 @@
 # A template for predicting probability of occurrence and the distribution of a 
-# single species from a GAM model
-# Rachel Laura
-# rlaura@arizona.edu
-# 2022-10-22
+# single species from a RF model
+# Natalie Melkonoff
+# nmelkonoff@arizona.edu
+# 2022-11-15
 
 require(raster)
 
@@ -12,7 +12,7 @@ source(file = "load_functions.R")
 genus <- "GENUS"
 species <- "SPECIES"
 
-sdm_method <- "gam"
+sdm_method <- "rf"
 
 # Name for reporting
 species_name <- paste0(genus, " ", species)
@@ -45,10 +45,8 @@ if (!file.exists(sdm_file)) {
                          model = sdm_model$model,
                          sdm_method = sdm_method,
                          yr = as.character(model_yr),
-                         ssp = as.character(model_ssp),
-                         stand_obj = sdm_model$standardize_objects,
-                         quad = sdm_model$quad)
-
+                         ssp = as.character(model_ssp))
+    
     if (!is.null(preds) & (is.na(model_ssp) | model_ssp == "370")) {
       # Save raster with probabilities (only for current and ssp370 scenarios)
       preds_file <- paste0("output/predicted-probabilities/", nice_name,

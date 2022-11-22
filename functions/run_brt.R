@@ -29,7 +29,7 @@ run_brt <- function(full_data, verbose = TRUE) {
   
   # Libraries required for this function to work
   method_name <- "boosted regression tree"
-  dependencies <- c("dplyr", "dismo")
+  dependencies <- c("dplyr", "dismo", "gbm")
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
          " could not be loaded: ", paste(dependencies, collapse = ", "),
@@ -106,6 +106,8 @@ run_brt <- function(full_data, verbose = TRUE) {
   no_model <-  FALSE
   while (is.null(model_fit) | opt_trees < 1000 | opt_trees == max_trees)  {
     # Run gbm.step
+    # Note: set plot arguments below to FALSE to avoid creating an extraneous 
+    # file when running BRT models in parallel
     try(
       model_fit <- gbm.step(data = sdmtrain,
                             gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
@@ -116,7 +118,10 @@ run_brt <- function(full_data, verbose = TRUE) {
                             n.trees = n_trees,
                             max.trees = max_trees,
                             n.folds = n_folds,
-                            verbose = TRUE)
+                            verbose = FALSE, 
+                            silent = TRUE,
+                            plot.main = FALSE,  
+                            plot.folds = FALSE)
     )
     
     # Extract the optimal number of trees

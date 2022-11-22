@@ -9,7 +9,7 @@ readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
 
 SCRIPTTYPE="distribution"
 MODELS=("brt" "gam" "glm" "lasso" "maxent-notune" "maxent-tune")
-PRODUCT="predicted distributions"
+PRODUCT="predicted probabilities and distributions"
 
 # Iterate over all the types of models (e.g. glm, svm)
 for MODEL in "${MODELS[@]}"
@@ -33,9 +33,9 @@ do
     FILENAME="src/indiv/${GENUSLOWER}_${SPECIES}-${SCRIPTTYPE}-${MODEL}.R"
     
     # Read in the template file contents into the MODELFILE variable, 
-    # skipping very first line
+    # skipping first two lines
     TEMPLATE="templates/template-${SCRIPTTYPE}-${MODEL}.R"
-    MODELFILE=$(cat "$TEMPLATE" | tail -n +2)
+    MODELFILE=$(cat "$TEMPLATE" | tail -n +3)
     
     # Add lines at top of file explaining script & message warning against 
     # editing

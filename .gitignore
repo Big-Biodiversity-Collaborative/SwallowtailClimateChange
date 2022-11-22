@@ -48,6 +48,10 @@ output/aridity/*.csv
 output/distributions/*.rds
 !output/distributions/.gitkeep
 
+# Predicted probabilities of occurrence
+output/predicted-probabilities/*.rds
+!output/predicted-probabilities/.gitkeep
+
 # Map files
 output/maps/*
 !output/maps/.gitkeep
@@ -93,6 +97,9 @@ development/output/maps/*
 !development/output/maps/.gitkeep
 development/output/shapefiles/*
 !development/output/shapefiles/.gitkeep
+
+# Local development scripts
+*-local.R
 
 # OS X Auto-generated
 .DS_Store
