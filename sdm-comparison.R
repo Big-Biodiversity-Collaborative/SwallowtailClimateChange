@@ -20,7 +20,7 @@ library(parallel)
 source(file = "load_functions.R")
 
 # insect_names <- c("Papilio rumiko", "Papilio cresphontes")
-sdm_names <- c("brt", "gam", "glm", "lasso", "maxent-notune", "maxent-tune")
+sdm_names <- c("brt", "gam", "glm", "lasso", "maxent-notune", "maxent-tune", "rf")
 insect_names <- c("Papilio rumiko")
 
 ########################################
