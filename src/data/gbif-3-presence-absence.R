@@ -30,7 +30,7 @@ tif_file <- list.files(path = "data/wc2-1",
 predictor <- terra::rast(tif_file)
 
 # Create/amend a table that summarizes data available for each species
-gbif_pa_file <- "data/gibf-pa-summary.csv"
+gbif_pa_file <- "data/gbif-pa-summary.csv"
 if (file.exists(gbif_pa_file)) {
   gbif_pa <- read.csv(gbif_pa_file)
   gbif_pa <- gbif_pa[order(match(gbif_pa$species, species_list$accepted_name)),]
