@@ -174,7 +174,7 @@ above).
 + logs: Log files from parallel processing of modeling and forecasting steps 
 (files with .log extension are not under version control)
 + output: most files are not under version control, but directory structure is
-    + areas: estimated ranges of insects and the overlap with hostplants
+    + areas: estimated areas and changes from contemporary distributions
     + distributions: raster files of predicted distributions for individual 
     species
     + maps: distribution maps (image files) for insect species and hosts
