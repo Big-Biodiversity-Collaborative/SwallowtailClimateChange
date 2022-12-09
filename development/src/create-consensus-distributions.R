@@ -19,6 +19,10 @@ all_insects <- FALSE
 # If not, identify which butterflies (and their host plants) to include
 insects <- c("Papilio rumiko")
 
+# Set the minimum number of SDMs that must predict presence for a cell to be
+# included in the consensus distribution
+min_models <- 3
+
 # Extract all species names
 if (all_insects) {
   species <- unique(c(ih$insect, ih$host_accepted))
@@ -65,7 +69,7 @@ for (spp in species) {
         consensus <- rast(dist_list)
         
         consensus <- sum(consensus)
-        consensus <- consensus > 3
+        consensus <- consensus > min_models
         
         consensus_file <- paste0("output/distributions-consensus/",
                                  nice_name, 
