@@ -108,3 +108,6 @@ development/output/shapefiles/*
 
 # Testing archive behavior
 tests/iris-test.csv
+
+# File that has path to OSF PAT
+osf-pat-path.txt
