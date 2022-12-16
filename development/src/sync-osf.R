@@ -60,11 +60,13 @@ osf_files <- osfr::osf_ls_files(osf_node)
 # still need to make a call of which one to use...)
 # For first file, the following might be useful:
 osf_files$meta[[1]]$attributes$date_modified
-# These don't seem to match up with locally-computed hashes...
+# Can use tools::md5sum for comparable hashes (don't use openssl, they don't match)
 osf_files$meta[[1]]$attributes$extra$hashes$md5
-openssl::md5(system.file("output/gbif-name-check.csv"))
-osf_files$meta[[1]]$attributes$extra$hashes$sha256
-openssl::sha256(system.file("output/gbif-name-check.csv"))
+tools::md5sum("output/gbif-name-check.csv")
+osf_files$meta[[1]]$attributes$extra$hashes$md5 == tools::md5sum("output/gbif-name-check.csv")
+# openssl::md5(system.file("output/gbif-name-check.csv"))
+# osf_files$meta[[1]]$attributes$extra$hashes$sha256
+# openssl::sha256(system.file("output/gbif-name-check.csv"))
 
 # Extract path + timestamp information for files on OSF
 
