@@ -1,11 +1,11 @@
-# Run all Maxent (no tuning) SDM scripts
+# Run all Random Forest SDM scripts
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
 
 require(parallel)
 
-sdm_method <- "maxent-notune"
+sdm_method <- "rf"
 
 logfile <- paste0("logs/SDM-", sdm_method, "-out.log")
 remove_log <- FALSE
