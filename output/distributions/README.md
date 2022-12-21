@@ -2,17 +2,18 @@
 
 ## Summary
 
-Destination director for the estimated species' distributions based on species
+Destination directory for the estimated species' distributions based on species
 distribution models and either current or future climate predictors. Likely not 
 under version control.
 
 ### File naming convention
 
-[genus]_[species]-distribution-[model type]-[predictors].rds
+[genus]_[species]-distribution-[sdm method name]-[predictors].rds
 
 + genus: Genus name
 + species: Specific epithet
-+ model type: Type of species distribution model; e.g. "bioclim", "svm", "glm"
++ sdm method name: Type of species distribution model; e.g. "gam", 
+"maxent-notune", "lasso"
 + predictors: Bioclimatic predictors; either "current" or the name of the 
 forcast model such as "GFDL-ESM4_RCP45", where the model name is left of the 
 underscore ("GFDL-ESM4") and the representative concentration pathway (RCP, 

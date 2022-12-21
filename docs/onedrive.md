@@ -47,6 +47,36 @@ i.e. `pwd` gives `$~/Documents/Work/SwallowtailClimateChange`:
 
 (the `-v` flag makes it verbose; otherwise rclone is silent)
 
+### Getting latest from remote
+
+Want to download any files to local system that are on the remote (OneDrive) 
+and update any local files that have newer version on remote. For now, we 
+ignore any local files that are not on remote (this may eventually change).
+
+Like initial migration (above), be sure to run this from within the 
+SwallowtailClimateChange directory.
+
+To test (no files changed, report of what would happen is printed):
+
+`rclone copy -v --dry-run onedrive:SwallowtailClimateChange/output output`
+
+To actually run:
+
+`rclone copy -v onedrive:SwallowtailClimateChange/output output`
+
+### Sending from local to remote
+
+Works like getting latest to remote, but reversing source and destination. Once 
+again, be sure this is run from SwallowtailClimateChange directory.
+
+To test (no files changed, report of what would happen is printed):
+
+`rclone copy -v --dry-run output onedrive:SwallowtailClimateChange/output`
+
+To actually run:
+
+`rclone copy -v output onedrive:SwallowtailClimateChange/output`
+
 ### Troubleshooting
 
 Tokens expire after 90 days if not used. To refresh tokens, run 
