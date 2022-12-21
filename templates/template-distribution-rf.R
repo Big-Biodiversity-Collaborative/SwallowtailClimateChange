@@ -14,6 +14,9 @@ species <- "SPECIES"
 
 sdm_method <- "rf"
 
+# Logical to indicate whether or not rasters with probabilities should be saved
+save_probs <- FALSE
+
 # Name for reporting
 species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
@@ -47,8 +50,8 @@ if (!file.exists(sdm_file)) {
                          yr = as.character(model_yr),
                          ssp = as.character(model_ssp))
     
-    if (!is.null(preds) & (is.na(model_ssp) | model_ssp == "370")) {
-      # Save raster with probabilities (only for current and ssp370 scenarios)
+    # Save raster with probabilities (only for current and ssp370 scenarios)
+    if (save_probs & !is.null(preds) & (is.na(model_ssp) | model_ssp == "370")) {
       preds_file <- paste0("output/predicted-probabilities/", nice_name,
                            "-pred-probs-",
                            sdm_method, "-", 
