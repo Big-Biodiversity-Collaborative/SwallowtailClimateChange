@@ -1,4 +1,5 @@
-# Create consensus distributions for a set of species and climate scenarios
+# Create consensus rasters (identifying the number of SDMs that predict 
+# presence) for a set of species and climate scenarios
 # Erin Zylstra
 # ezylstra@arizona.edu
 # 2022-12-20
@@ -49,10 +50,10 @@ for (i in 1:length(species)) {
   
   if (length(spp_dist_files) == 0) {
     message("*** No distribution files for ", species[i], 
-            ". Did not create consensus distributions.")
+            ". Did not create consensus rasters.")
   } else {
     
-    message("Creating consensus distributions for ", species[i], ".")
+    cat(paste0("Creating consensus rasters for ", species[i], ".\n"))
     
     for (clim_model in climate_models$name) {
       
@@ -61,7 +62,7 @@ for (i in 1:length(species)) {
       if (length(dist_files) < length(sdms)) {
         message("*** Missing at least one SDM distribution file for ", 
                 species[i], ", ", clim_model, 
-                " climate model. Did not create consensus distribution.")
+                ". Did not create consensus raster.")
       } else {
         dist_list <- list()
         
@@ -82,9 +83,7 @@ for (i in 1:length(species)) {
                                  ".rds")
         saveRDS(object = consensus, 
                 file = consensus_file)
-        # TODO: check whether it's okay to save as SpatRaster (object associated
-        # with the terra package) instead of a RasterLayer (raster package)
-        
+
       }
     }
   }
