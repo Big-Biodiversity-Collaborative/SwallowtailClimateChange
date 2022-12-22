@@ -1,0 +1,122 @@
+# Run all prediction scripts for random forest models
+# Jeff Oliver & Erin Zylstra
+# jcoliver@arizona.edu; ezylstra@arizona.edu
+# 2022-08-05
+
+require(parallel)
+
+sdm_method <- "rf"
+
+logfile <- paste0("logs/distribution-", sdm_method, "-out.log")
+remove_log <- FALSE
+
+# Create log file before running prediction scripts
+f <- file.create(logfile)
+# Create hold message for log file
+message_out <- ""
+
+# Logical indicating whether or not to re-run script if the model output already 
+# exists
+rerun <- TRUE
+
+# Logical indicating whether to run prediction scripts for all species or only a 
+# subset of insects and their host plants
+all_insects <- TRUE
+
+# Identify prediction scripts
+pred_scripts <- list.files(path = "./src/indiv",
+                         pattern = paste0("*-distribution-", sdm_method, ".R"),
+                         full.names = TRUE)
+
+# If not running SDMs for all species, identify which insects (and their host
+# plants) to include
+if (!all_insects) {
+  insects <- c("Papilio rumiko", "Papilio cresphontes")
+  
+  # Load insect-host file
+  ih <- read.csv("data/insect-host.csv")
+  
+  plants <- ih$host_accepted[ih$insect %in% insects]
+  species <- unique(c(insects, plants))
+  nice_names <- tolower(gsub(pattern = " ",
+                             replacement = "_",
+                             x = species))
+  
+  # Extract just those pred_scripts we'll need
+  file_index <- NULL
+  for (i in 1:length(species)) {
+    spp_index <- grep(nice_names[i], pred_scripts)
+    if (length(spp_index) == 0) {
+      message_out <- paste0("No prediction script for ", species[i], " (",
+                            nice_names[i], "-distribution-", sdm_method, ".R)")
+      message(message_out)
+      # Write message to log file if species prediction script doesn't exist
+      write(x = message_out,
+            file = logfile,
+            append = TRUE)
+    } else {
+      file_index <- c(file_index, spp_index)
+    }
+  }
+  pred_scripts <- pred_scripts[file_index]
+}
+
+pred_script_list <- as.list(pred_scripts)
+
+run_prediction_script <- function(script_name,
+                                  log_file,
+                                  rerun) {
+  
+  # Need to extract nice name and sdm_method to find model
+  filename_split <- strsplit(x = basename(script_name),
+                             split = "-")[[1]]
+  nice_name <- filename_split[1]
+  sdm_method <- paste(filename_split[3:length(filename_split)], collapse = "-")
+  sdm_method <- strsplit(x = sdm_method,
+                         split = "[.]")[[1]][1]
+  
+  # Make sure model output exists
+  model_out <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
+  if (file.exists(model_out)) {
+    if (file.exists(script_name)) {
+      # In this one case, we want to let user know that we are running
+      write(x = paste0("About to run ", script_name), 
+            file = log_file,
+            append = TRUE)
+      message(paste0("About to run ", script_name))
+      source(file = script_name)
+      message_out <- paste0("Finished running script: ", script_name)
+      message(message_out)
+    } else {
+      message_out <- paste0("Could not find script: ", script_name)
+      warning(message_out)
+    }
+  } else {
+    message_out <- paste0("No model found for ", nice_name, 
+                          ". Skipping prediction.")
+    message(message_out)
+  }
+  # Write any output messages to the log file  
+  write(x = message_out, 
+        file = log_file,
+        append = TRUE)
+}
+
+# For parallel processing, do two fewer cores or eight (whichever is lower)
+num_cores <- parallel::detectCores() - 2
+if (num_cores > 8) {
+  num_cores <- 8
+}
+clust <- parallel::makeCluster(num_cores)
+
+# Run each script in parallel
+r <- parallel::parLapply(cl = clust,
+                         X = pred_script_list,
+                         fun = run_prediction_script,
+                         log_file = logfile,
+                         rerun = rerun)
+stopCluster(cl = clust)
+
+if (remove_log && file.exists(logfile)) {
+  file.remove(logfile)
+}
