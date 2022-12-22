@@ -46,8 +46,8 @@ if (!all_insects) {
   for (i in 1:length(species)) {
     spp_index <- grep(nice_names[i], sdm_files)
     if (length(spp_index) == 0) {
-      message_out <- paste0("No SDM script for ", species[i], " (",
-                            nice_names[i], "-distribution-", sdm_method, ".R)")
+      message_out <- paste0("No SDM script for ", species[i], " (.src/indiv/",
+                            nice_names[i], "-SDM-", sdm_method, ".R)")
       message(message_out)
       # Write message to log file if species SDM script doesn't exist
       write(x = message_out,
