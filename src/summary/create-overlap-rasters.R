@@ -47,7 +47,7 @@ for (i in 1:length(insects)) {
     str_replace(pattern = " ", replacement = "_") %>%
     tolower()
   
-  insect_files <- list.files("output/consensus-distributions/", 
+  insect_files <- list.files("output/consensus-rasters/", 
                              pattern = paste(insect_nice_name, collapse = "|"),
                              full.names = TRUE)
   
@@ -64,7 +64,7 @@ for (i in 1:length(insects)) {
     plant_nice_names <- plants %>%
       str_replace(pattern = " ", replacement = "_") %>%
       tolower()
-    plant_files <- list.files("output/consensus-distributions/", 
+    plant_files <- list.files("output/consensus-rasters/", 
                                pattern = paste(plant_nice_names, collapse = "|"),
                                full.names = TRUE)    
     
