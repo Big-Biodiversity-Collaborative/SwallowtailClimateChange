@@ -20,7 +20,7 @@ climate_models <- read.csv(file = "data/climate-models.csv")
 # List of SDMs to include
 sdms <- c("brt", "gam", "lasso", "maxent-tune", "rf")
 
-# Logical indicating whether to create consensus distributions for all species 
+# Logical indicating whether to create consensus rasters for all species 
 # or just a subset of insects and their host plants
 all_insects <- FALSE
 
@@ -76,9 +76,9 @@ for (i in 1:length(species)) {
         # predicting presence (or suitability)
         consensus <- sum(consensus)
 
-        consensus_file <- paste0("output/consensus-distributions/",
+        consensus_file <- paste0("output/consensus-rasters/",
                                  nice_names[i], 
-                                 "-distribution-consensus-",
+                                 "-consensus-",
                                  clim_model,
                                  ".rds")
         saveRDS(object = consensus, 

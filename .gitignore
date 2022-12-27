@@ -48,9 +48,9 @@ output/aridity/*.csv
 output/distributions/*.rds
 !output/distributions/.gitkeep
 
-# Predicted consensus distributions
-output/consensus-distributions/*.rds
-!output/consensus-distributions/.gitkeep
+# Predicted consensus rasters
+output/consensus-rasters/*.rds
+!output/consensus-rasters/.gitkeep
 
 # Predicted probabilities of occurrence
 output/predicted-probabilities/*.rds
