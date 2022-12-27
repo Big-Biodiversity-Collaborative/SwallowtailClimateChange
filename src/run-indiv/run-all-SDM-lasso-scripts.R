@@ -1,4 +1,4 @@
-# Run all Lasso SDM scripts
+# Run all LASSO SDM scripts
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
@@ -21,7 +21,7 @@ rerun <- TRUE
 
 # Logical indicating whether to run SDMs for all species or only a subset of 
 # insects and their host plants
-all_insects <- TRUE
+all_insects <- FALSE
 
 # Identify scripts to run SDMs
 sdm_files <- list.files(path = "./src/indiv",
@@ -71,42 +71,40 @@ run_sdm_script <- function(script_name,
 
   # Need to extract species name from file to see if model has already been run
   nice_name <- strsplit(x = basename(sdm_script),
-                        split = "-")[[1]][1]
+                        split = "-SDM-")[[1]][1]
   
   pa_file <- paste0("data/gbif/presence-absence/",
                      nice_name,
                      "-pa.csv")
-  
 
   if (file.exists(pa_file)) {
     pa_data <- read.csv(file = pa_file)
 
-    # the file name that would be used for model output
+    # File name that would be used for model output
     model_out <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
       
     if (!file.exists(model_out) | rerun) {
       if (file.exists(sdm_script)) {
-        # In this one case, we want to let user know that we are running
+        # Let user know (in log file) what's being run 
+        # Note: sometimes these messages overwrite each other, so adding a small
+        # system delay to see if we can avoid the problem.
+        Sys.sleep(time = runif(1, 0 ,3))
         write(x = paste0("About to run ", sdm_script), 
               file = log_file,
               append = TRUE)
-        message(paste0("About to run ", sdm_script))
         # Run the actual script
         source(file = sdm_script)
         message_out <- paste0("Finished running script: ", sdm_script)
-        message(message_out)
       } else {
         message_out <- paste0("Could not find script: ", sdm_script)
-        warning(message_out)
       }
     } else {
-      message_out <- paste0("SDM already exists and rerun set to FALSE.")
-      message(message_out)
+      message_out <- paste0("SDM for ", nice_name, 
+                            " already exists and rerun set to FALSE.")
     }
   } else {
     message_out <- paste0("No data file found for ", nice_name, " (", 
                           pa_file, ").")
-    message(message_out)
   }
 
   # Write any output messages to the log file  
