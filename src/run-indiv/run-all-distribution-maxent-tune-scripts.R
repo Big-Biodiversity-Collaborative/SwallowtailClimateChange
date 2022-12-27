@@ -1,4 +1,4 @@
-# Run all prediction scripts for maxent (tuned) models
+# Run all prediction scripts for Maxent (tuned) models
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
@@ -15,21 +15,21 @@ f <- file.create(logfile)
 # Create hold message for log file
 message_out <- ""
 
-# Logical indicating whether or not to re-run script if the model output already 
-# exists
+# Logical indicating whether or not to re-run script if predictions already
+# exist
 rerun <- TRUE
 
 # Logical indicating whether to run prediction scripts for all species or only a 
 # subset of insects and their host plants
-all_insects <- TRUE
+all_insects <- FALSE
 
 # Identify prediction scripts
 pred_scripts <- list.files(path = "./src/indiv",
                          pattern = paste0("*-distribution-", sdm_method, ".R"),
                          full.names = TRUE)
 
-# If not running SDMs for all species, identify which insects (and their host
-# plants) to include
+# If not running predictions for all species, identify which insects (and their 
+# host plants) to include
 if (!all_insects) {
   insects <- c("Papilio rumiko", "Papilio cresphontes")
   
@@ -42,7 +42,7 @@ if (!all_insects) {
                              replacement = "_",
                              x = species))
   
-  # Extract just those pred_scripts we'll need
+  # Extract just those scripts we'll need
   file_index <- NULL
   for (i in 1:length(species)) {
     spp_index <- grep(nice_names[i], pred_scripts)
@@ -65,36 +65,44 @@ pred_script_list <- as.list(pred_scripts)
 
 run_prediction_script <- function(script_name,
                                   log_file,
-                                  rerun) {
+                                  rerun,
+                                  sdm_method) {
   
-  # Need to extract nice name and sdm_method to find model
-  filename_split <- strsplit(x = basename(script_name),
-                             split = "-")[[1]]
-  nice_name <- filename_split[1]
-  sdm_method <- paste(filename_split[3:length(filename_split)], collapse = "-")
-  sdm_method <- strsplit(x = sdm_method,
-                         split = "[.]")[[1]][1]
+  # Need to extract nice name
+  nice_name <- strsplit(x = basename(script_name),
+                        split = "-distribution-")[[1]][1]
 
-  # Make sure model output exists
-  model_out <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
-  if (file.exists(model_out)) {
-    if (file.exists(script_name)) {
-      # In this one case, we want to let user know that we are running
-      write(x = paste0("About to run ", script_name), 
-            file = log_file,
-            append = TRUE)
-      message(paste0("About to run ", script_name))
-      source(file = script_name)
-      message_out <- paste0("Finished running script: ", script_name)
-      message(message_out)
+  # File name that would be used for SDM model output
+  sdm_out <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
+  
+  if (file.exists(sdm_out)) {
+  
+    # See whether predictions have already been made
+    pred_out_files <- list.files(path = "output/distributions",
+                                 pattern = paste0(nice_name, 
+                                                  "-distribution-", 
+                                                  sdm_method))
+    if(length(pred_out_files) < 5 | rerun) {
+      if (file.exists(script_name)) {
+        # Let user know (in log file) what's being run 
+        # Note: sometimes these messages overwrite each other, so adding a small
+        # system delay to see if we can avoid the problem.
+        Sys.sleep(time = runif(1, 0, 3))
+        write(x = paste0("About to run ", script_name),
+              file = log_file,
+              append = TRUE)
+        source(file = script_name)
+        message_out <- paste0("Finished running script: ", script_name)
+      } else {
+        message_out <- paste0("Could not find script: ", script_name)
+      }
     } else {
-      message_out <- paste0("Could not find script: ", script_name)
-      warning(message_out)
-    }
+      message_out <- paste0("Predictions for ", nice_name, 
+                            " already exist and rerun set to FALSE.")
+    } 
   } else {
-    message_out <- paste0("No model found for ", nice_name, 
+    message_out <- paste0("No SDM found for ", nice_name, 
                           ". Skipping prediction.")
-    message(message_out)
   }
   # Write any output messages to the log file  
   write(x = message_out, 
@@ -114,7 +122,8 @@ r <- parallel::parLapply(cl = clust,
                          X = pred_script_list,
                          fun = run_prediction_script,
                          log_file = logfile,
-                         rerun = rerun)
+                         rerun = rerun,
+                         sdm_method = sdm_method)
 stopCluster(cl = clust)
 
 if (remove_log && file.exists(logfile)) {
