@@ -4,7 +4,7 @@
 # rlaura@arizona.edu
 # 2022-10-22
 
-require(raster)
+require(terra)
 
 # Load up the functions from the functions folder
 source(file = "load_functions.R")

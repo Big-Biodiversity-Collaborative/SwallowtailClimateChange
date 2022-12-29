@@ -3,7 +3,6 @@
 # nmelkonoff@arizona.edu
 # 2022-10-11
 
-require(raster)
 require(terra)
 require(dplyr)
 

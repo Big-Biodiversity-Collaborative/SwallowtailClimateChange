@@ -3,7 +3,6 @@
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-09-23
 
-require(raster)
 require(terra)
 require(dplyr)
 
