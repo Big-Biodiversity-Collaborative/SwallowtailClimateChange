@@ -17,8 +17,8 @@ climate_models <- read.csv(file = "data/climate-models.csv")
 climate_names_short <- climate_models$name %>%
   str_remove(pattern = "ensemble_")
 
-# Logical indicating whether summarize overlap rasters for all species or just a 
-# subset of insects
+# Logical indicating whether to summarize overlap rasters for all species or 
+# just a subset of insects
 all_insects <- FALSE
 
 # Extract species names
@@ -68,25 +68,29 @@ for (i in 1:length(insects)) {
                               pattern = nice_name, 
                               full.names = TRUE)
   
-  # Create list of rasters with all areas predicted suitable for insect
+  # Create list of rasters with all areas predicted suitable for insect under
+  # all climate scenarios (current + 4 future)
   allinsect_list <- list()
   # Create list of rasters with areas predicted suitable for insect and at 
-  # least one host plant
+  # least one host plant under all climate scenarios (current + 4 future)
   insecthost_list <- list()
   
   for (j in 1:length(overlap_files)) {
     allinsect_list[[j]] <- readRDS(overlap_files[j])
     insecthost_list[[j]] <- readRDS(overlap_files[j])
-    # Reclassify all cells in overlap rasters that were equal to 1 or 3 as 1 
-    # (NA everywhere else)
+    
+    # For all areas predicted suitable for the insect: reclassify cells in 
+    # overlap rasters that were equal to 1 or 3 as 1 (NA everywhere else)
     allinsect_list[[j]] <- terra::classify(x = allinsect_list[[j]],
                                            rcl = rbind(c(1, 1), c(3, 1)),
                                            others = NA)
-    # Reclassify all cells in overlap rasters that were equal to 3 as 1 
+    
+    # For all areas predicted suitable for the insect and one or more host
+    # plants: reclassify cells in overlap rasters that were equal to 3 as 1 
     # (NA everywhere else)
     insecthost_list[[j]] <- terra::classify(x = insecthost_list[[j]],
-                                           rcl = matrix(c(3, 1), nrow = 1),
-                                           others = NA)
+                                            rcl = matrix(c(3, 1), nrow = 1),
+                                            others = NA)
   }
 
   # Loop through distribution types
@@ -104,10 +108,10 @@ for (i in 1:length(insects)) {
                              summaries$climate == "current")
       current <- raster_list[[1]]
       
-      # Calculate land area and add to summaries
+      # Calculate land area (in sq km) and add to summaries
       summaries$area[row_index_c] <- round(terra::expanse(current, unit = "km"))
       
-      # Get dataframe with lat/long for all non-NA cells
+      # Create a data frame with lat/long for all non-NA cells
       current_df <- terra::as.data.frame(current, xy = TRUE, na.rm = TRUE)
       
       # Calculate maximum latitude for each longitudinal band
@@ -128,7 +132,7 @@ for (i in 1:length(insects)) {
                            summaries$climate == clim_model)
       future <- raster_list[[j]]
 
-      # Calculate land area and add to summaries
+      # Calculate land area (in sq km) and add to summaries
       summaries$area[row_index] <- round(terra::expanse(future, unit = "km"))      
 
       # Calculate maximum latitude for each longitudinal band
@@ -147,8 +151,8 @@ for (i in 1:length(insects)) {
       perc_current <- overlay/summaries$area[row_index_c] * 100
       summaries$percent_current[row_index] <- round(perc_current, 2)
       
-      # Join future and current latitudinal data
-      # (ignoring latitudinal bands that lack suitable cells in either time period)
+      # Join future and current latitudinal data (only including longitudinal 
+      # bands that have suitable areas in both time periods)
       future_lats <- inner_join(current_lats, future_lats, by = "x")
       # Calculating shift in each longitudinal band
       future_lats$shift <- future_lats$max - future_lats$max_current
@@ -166,7 +170,7 @@ for (i in 1:length(insects)) {
 
 # Write summary table to file
 # TODO: figure out where and how we want to save this information. Leaving 
-# commented out for now.
+# this commented out for now.
 
 # write.csv(x = summaries,
 #           file = "output/overlap_summaries.csv",
