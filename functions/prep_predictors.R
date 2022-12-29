@@ -5,7 +5,7 @@
 #' @param object an object of class save_means_sds (created with the 
 #' save_means_sds function) that contains means and SDs for predictor variables 
 #' in a training dataset
-#' @param newdata a raster or data.frame containing the predictor variables 
+#' @param newdata a SpatRaster or data.frame containing the predictor variables 
 #' listed in object
 #' @param quad a logical indicating whether or not to create quadratics for each
 #' of the predictors
@@ -21,21 +21,21 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     stop("The newdata does not have the same names as the object.")
   ncl <- object$names
   
-  if (methods::is(newdata, "Raster")){
+  if (methods::is(newdata, "SpatRaster")){
     newdata <- newdata[[ncl]]
     for (i in ncl) {
       x1 <- (newdata[[i]] - object$xbars[i]) / object$sds[i]
-      if(raster::nlayers(newdata) > 1){
+      if(terra::nlyr(newdata) > 1){
         newdata <- newdata[[-which(names(newdata) == i)]]
-        newdata <- raster::stack(newdata, x1)
+        newdata <- c(newdata, x1)
       } else {
         newdata <- x1
       }
-      names(newdata)[raster::nlayers(newdata)] <- paste0(i, "_1")
+      names(newdata)[terra::nlyr(newdata)] <- paste0(i, "_1")
       if (quad) {
         x2 <- x1 ^ 2
-        newdata <- raster::stack(newdata, x2)
-        names(newdata)[raster::nlayers(newdata)] <- paste0(i, "_2")
+        newdata <- c(newdata, x2)
+        names(newdata)[terra::nlyr(newdata)] <- paste0(i, "_2")
       }
     }
     
@@ -52,6 +52,6 @@ prep_predictors <- function(object, newdata, quad = TRUE){
         names(newdata)[ncol(newdata)] <- paste0(i, "_2")
       }
     }
-  } else stop("Newdata should be a raster or a data.frame.")
+  } else stop("Newdata should be a SpatRaster or a data.frame.")
   return(newdata)
 }
