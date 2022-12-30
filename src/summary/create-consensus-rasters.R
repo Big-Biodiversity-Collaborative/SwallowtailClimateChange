@@ -5,11 +5,7 @@
 # 2022-12-20
 
 require(stringr)
-require(raster)
 require(terra)
-# Note: Using terra to do all the work here, but since the distribution rasters
-# were saved with the raster package (as RasterLayers and not SpatRasters), need
-# the raster package to read in the file.
 
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
@@ -68,7 +64,6 @@ for (i in 1:length(species)) {
         
         for (j in 1:length(dist_files)) {
           dist_list[[j]] <- readRDS(dist_files[j])
-          dist_list[[j]] <- terra::rast(dist_list[[j]])
         }
         consensus <- rast(dist_list)
         
