@@ -29,6 +29,7 @@ The project uses the following additional R packages:
 + ggplot2
 + kernlab
 + maptools
++ Matrix (for lasso models)
 + parallel (usually part of R distribution, but needs explicit loading)
 + randomForest
 + raster
