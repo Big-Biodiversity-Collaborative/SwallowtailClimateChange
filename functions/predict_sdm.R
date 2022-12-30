@@ -111,8 +111,9 @@ predict_sdm <- function(nice_name,
   # Extract only those layers associated with climate variables in the model
   predictors <- terra::subset(predictors, climate_vars)
   
-  # Crop and mask as appropriate (takes a few moments)
-  pred_mask <- terra::crop(predictors, buffered_mcp, mask = TRUE)
+  # Crop and mask as appropriate
+  pred_mask <- terra::crop(predictors, buffered_mcp)
+  pred_mask <- terra::mask(pred_mask, buffered_mcp)
   
   # If using a lasso or gam model, need to standardize predictors using means 
   # and SDs from training dataset
@@ -123,7 +124,8 @@ predict_sdm <- function(nice_name,
   # Create list of arguments for predict function
   params <- list(object = pred_mask, 
                  model = model,
-                 type = "response")
+                 type = "response", 
+                 na.rm = TRUE)
   
   # If using a BRT model, specify the number of trees and add to list of args
   if (sdm_method == "brt") {
