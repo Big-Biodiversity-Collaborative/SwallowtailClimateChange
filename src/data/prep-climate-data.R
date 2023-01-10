@@ -8,6 +8,12 @@ require(raster) # you know, raster stuff
 require(dismo)  # calculating bioclimate variables
 require(terra)  # raster manipulation
 
+# TODO: Migrate away from use of raster package; most functionality provided by 
+# the terra package. On hold for now, as the dismo::biovars function still 
+# requires RasterBrick/Stack objects as input.
+
+# TODO: Add check for existence of bioclim averages before extraction
+
 # Calculates average values for the 19 bioclimatic variables for 2000-2018, 
 # based on monthly values for the 19 year span (yeah, two 19s, I'm sure this 
 # won't cause any confusion). Monthly climate data (tmin, tmax, and prec) 
@@ -16,8 +22,6 @@ require(terra)  # raster manipulation
 # Much of the approach adapted from Keaton Wilson's work on Giant Swallowtails 
 # at https://github.com/keatonwilson/swallowtail_ms, especially the code in the 
 # appropriately named scripts/terraclim_nonsense.R
-
-# TODO: Add check for existence of bioclim averages before extraction 
 
 # WorldClim variables
 wc_vars <- c("tmin", "tmax", "prec")
@@ -46,11 +50,11 @@ remove_monthly <- TRUE
 # Whether or not to remove annual bioclim data after the average has been 
 # calculated for the time span of interest
 remove_annual <- FALSE
-# Whether or not to remove the historic bioclim data after doing QA
-remove_historic <- TRUE
 # Whether or not to remove climate data (i.e. set to NA) from cells in the 
 # Great Lakes and other large bodies of water
 remove_lakes <- TRUE
+# Whether or not to remove the historic bioclim data after doing QA
+remove_historic <- TRUE
 
 # Check for data files for tmin, tmax, and prec; download from 
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
@@ -73,11 +77,11 @@ for (one_var in wc_vars) {
     }
     
     # if data files haven't been extracted yet, do that now
-    # Extraction can take a minute
     final_year <- substr(x = time_per, start = 6, stop = 9)
     one_data_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, "_", 
                             final_year, "-11.tif")
     if (!file.exists(one_data_file)) {
+      # Extraction can take a minute, so notify user
       message(paste0("Extracting ", zip_file))
       unzip(zipfile = zip_file,
             exdir = "data/wc2-1/monthly")
