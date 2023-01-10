@@ -17,7 +17,7 @@ insect_species <- c("Papilio rumiko")
 #                     "Papilio eurymedon", "Papilio multicaudata",
 #                     "Papilio troilus", "Papilio machaon",
 #                     "Papilio palamedes")
-model_names <- c("svm", "glm")
+sdm_methods <- c("svm", "glm")
 
 ########################################
 # find hosts
@@ -25,7 +25,7 @@ model_names <- c("svm", "glm")
 insects_hosts <- read.csv(file = "data/insect-host.csv")
 
 # identify all host plants used for each insect
-host_species <- insects_hosts$accepted_host[insects_hosts$insect %in% insect_species]
+host_species <- insects_hosts$host_accepted[insects_hosts$insect %in% insect_species]
 rm(insects_hosts)
 
 # drop duplicates, as some insects may share host plant species
@@ -54,7 +54,7 @@ message(paste0("Checking data files for ", nrow(all_species), " species."))
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
-  data_filename <- paste0("data/gbif/", nice_name, "-gbif.csv")
+  data_filename <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv")
   if (!file.exists(data_filename)) {
     # If this is a host species, remove it from the list of hosts to include 
     # in subsequent steps
@@ -88,17 +88,17 @@ if (length(rows_to_exclude) > 0) {
 ########################################
 # build sdm models for all remaining species (insects and plants)
 message(paste0("\n*** Estimating SDMs for ", nrow(all_species), " species and ",
-               length(model_names), " models."))
+               length(sdm_methods), " models."))
 
 # TODO: At least some of this should be parallelized. Over species, probably
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
-  for (model_name in model_names) {
-    model_filename <- paste0("src/indiv/", nice_name, "-model-", model_name, ".R")
+  for (sdm_method in sdm_methods) {
+    model_filename <- paste0("src/indiv/", nice_name, "-SDM-", sdm_method, ".R")
     if (!file.exists(model_filename)) {
       warning(paste0("Model file ", model_filename,
-                     " is missing. Has build-scripts-model-", model_name, 
+                     " is missing. Has build-scripts-model-", sdm_method, 
                      ".sh been run locally?"))
     } else {
       message(paste0("Running model script ", model_filename))
@@ -107,7 +107,7 @@ for (i in 1:nrow(all_species)) {
   }
 }
 message(paste0("Fininshed estimating SDMs for ", nrow(all_species), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_methods), " models."))
 
 ########################################
 # do current distributions for bug (all bugs)
@@ -123,17 +123,17 @@ message(paste0("Fininshed estimating SDMs for ", nrow(all_species),
 # scripts run *all* the forecast climate models
 
 message(paste0("\n*** Predicting distributions for ", nrow(all_species), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_methods), " models."))
 missing_predictions <- integer(0)
 for (i in 1:nrow(all_species)) {
   species_name <- all_species$species_name[i]
   nice_name <- all_species$nice_name[i]
-  for (model_name in model_names) {
+  for (sdm_method in sdm_methods) {
     prediction_filename <- paste0("src/indiv/", nice_name, "-prediction-",
-                                  model_name, ".R")
+                                  sdm_method, ".R")
     if (!file.exists(prediction_filename)) {
       warning(paste0("Prediction file ", prediction_filename,
-                     " is missing. Has build-prediction-", model_name, 
+                     " is missing. Has build-prediction-", sdm_method, 
                      "-files.sh been run locally?"))
       missing_predictions <- c(missing_predictions, i)
     } else {
@@ -144,7 +144,7 @@ for (i in 1:nrow(all_species)) {
 }
 message(paste0("Finished predicting distributions for ", 
                nrow(all_species) - length(missing_predictions), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_methods), " models."))
 if (length(missing_predictions > 0)) {
   warning(paste0("Predictions for ", length(missing_predictions), 
                  " species not made, due to missing prediction scripts."))
@@ -164,17 +164,17 @@ if (length(missing_predictions > 0)) {
 insect_species <- all_species[all_species$category == "insect",]
 
 message(paste0("\n*** Estimating overlaps for ", nrow(insect_species), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_methods), " models."))
 missing_overlaps <- integer(0)
 for (i in 1:nrow(insect_species)) {
   species_name <- insect_species$species_name[i]
   nice_name <- insect_species$nice_name[i]
-  for (model_name in model_names) {
+  for (sdm_method in sdm_methods) {
     overlap_filename <- paste0("src/indiv/", nice_name, "-overlap-raster-",
-                               model_name, ".R")
+                               sdm_method, ".R")
     if (!file.exists(overlap_filename)) {
       warning(paste0("Overlap raster file ", overlap_filename,
-                     " is missing. Has build-overlap-raster-", model_name, 
+                     " is missing. Has build-overlap-raster-", sdm_method, 
                      "-files.sh been run locally?"))
       missing_overlaps <- c(missing_overlaps, i)
     } else {
@@ -185,7 +185,7 @@ for (i in 1:nrow(insect_species)) {
 }
 message(paste0("Finished creating overlap rasters for ", 
                nrow(insect_species) - length(missing_overlaps), 
-               " species and ", length(model_names), " models."))
+               " species and ", length(sdm_methods), " models."))
 if (length(missing_overlaps > 0)) {
   warning(paste0("Overlap rasters for ", length(missing_overlaps), 
                  " species not made, due to missing overlap raster scripts."))
@@ -203,8 +203,8 @@ if (length(missing_overlaps > 0)) {
 
 # As it is written, it does this for *all* insect species, not just the ones 
 # that are the focus of this script.
-for (model_name in model_names) {
-  area_script <- paste0("summary/calcuate-range-sizes-", model_name, ".R")
+for (sdm_method in sdm_methods) {
+  area_script <- paste0("summary/calcuate-range-sizes-", sdm_method, ".R")
   message(paste0("Running area calculation script ", area_script))
   # source(file = area_script)
 }

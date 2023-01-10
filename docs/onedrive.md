@@ -2,7 +2,8 @@
 
 Summary: Goal is to have a place to store the various output files so all 
 parties on the project do not need to run all models and predictions. We 
-ultimately chose OneDrive for easy of synchronizing.
+ultimately chose OneDrive for easy of synchronizing. Instructions below are 
+currently only written for Linux.
 
 ## Other options
 

@@ -39,14 +39,6 @@ ssps <- c("ssp245", "ssp370")
 final_raster_format <- ".tif"
 # Names of the variables, to be used in filenames et al
 biovar_names <- paste0("bio", 1:19)
-# Whether or not to re-calculate averages for the 19 bioclim variables
-# overwrite_averages <- TRUE
-# Whether or not to remove monthly tmin, tmax, prec after annual bioclim 
-# variables have been calculated for that year
-# remove_monthly <- TRUE
-# Whether or not to remove annual bioclim data after the average has been 
-# calculated for the time span of interest
-# remove_annual <- FALSE
 # Whether or not to remove the historic bioclim data after doing QA
 remove_historic <- TRUE
 
@@ -126,6 +118,13 @@ for (ssp in ssps) {
       raster_list[[one_var_name]] <- raster::projectRaster(from = raster_list[[one_var_name]],
                                                              to = template_raster)
       message(paste0(Sys.time(), " | ", one_var_name, " reprojection complete"))
+      # Now mask the raster by the template raster; primary goal is to ensure 
+      # we are masking out any cells that are missing data in contemporary 
+      # climate raster (i.e. the Great Lakes, which we mask out in preparing 
+      # the contemporary bioclim variables; see src/data/prep-climate-data.R)
+      raster_list[[one_var_name]] <- raster::mask(x = raster_list[[one_var_name]],
+                                                  mask = template_raster)
+      message(paste0(Sys.time(), " | ", one_var_name, " masking complete"))
     }
     # Do biovar calculation for this SSP + time period; can take several (> 10) 
     # minutes
@@ -135,12 +134,18 @@ for (ssp in ssps) {
                               tmin = raster_list[["tmin"]],
                               tmax = raster_list[["tmax"]])
     message(paste0(Sys.time(), " | Finished calculating ", ssp, ", ", time_per))
+    # Iterate over the three biovars (prec, tmin, tmax) and write to file
     for (biovar_name in names(biovars)) {
       biovar_filename <- paste0("data/ensemble/", ssp, "/", time_per, "/",
                                 biovar_name, final_raster_format)
       raster::writeRaster(x = biovars[[biovar_name]],
                           filename = biovar_filename,
                           overwrite = TRUE)
+      # Remove associated metadata files
+      metadata_filename <- paste0(biovar_filename, ".aux.xml")
+      if (file.exists(metadata_filename)) {
+        invisible(file.remove(metadata_filename))
+      }
     }
   }
 }
