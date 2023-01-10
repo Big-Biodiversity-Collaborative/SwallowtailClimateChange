@@ -1,0 +1,17 @@
+"insect","num_filtered","included","total_hosts","included_hosts","host_prop"
+"Papilio appalachiensis",98,TRUE,1,1,1
+"Papilio aristodemus",3,FALSE,2,2,1
+"Papilio brevicauda",158,TRUE,8,8,1
+"Papilio canadensis",5325,TRUE,20,19,0.95
+"Papilio cresphontes",5308,TRUE,4,4,1
+"Papilio eurymedon",2144,TRUE,5,5,1
+"Papilio glaucus",14990,TRUE,26,26,1
+"Papilio indra",205,TRUE,21,13,0.619047619047619
+"Papilio machaon",448,TRUE,39,13,0.333333333333333
+"Papilio multicaudata",2244,TRUE,15,15,1
+"Papilio palamedes",1642,TRUE,2,2,1
+"Papilio polyxenes",12013,TRUE,37,32,0.864864864864865
+"Papilio rumiko",1811,TRUE,5,4,0.8
+"Papilio rutulus",3487,TRUE,28,28,1
+"Papilio troilus",7316,TRUE,6,6,1
+"Papilio zelicaon",2171,TRUE,44,38,0.863636363636364

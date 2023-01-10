@@ -6,6 +6,8 @@
 require(dplyr)
 require(stringr)
 
+# DEPRECATED
+
 # This script is no longer needed as we now include the accepted name of the
 # hostplant (or insects) in each gbif file.
 
