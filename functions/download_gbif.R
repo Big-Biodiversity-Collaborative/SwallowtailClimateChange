@@ -9,10 +9,6 @@
 #' @param countries character vector of country codes to restrict search 
 #' @param query_limit integer number of results to return per query
 #' @param max_attempts integer maximum number of times to try querying gbif
-#' @param restrict_n_amer logical indicating whether or not to omit records 
-#' fall (roughly) outside the latitudinal and longitudinal bounds of North 
-#' America; primarily useful for removing observations with incorrect 
-#' geographical coordinates
 #' 
 #' @details Downloaded data are downloaded to the 'data' directory with the 
 #' following file naming convention: <genus name>_<specific epithet>-gbif.csv.
@@ -20,8 +16,7 @@
 #' @return NULL
 download_gbif <- function(species_name, gbif_name, replace = FALSE, 
                           verbose = FALSE, countries = c("CA", "MX", "US"),
-                          query_limit = 100, max_attempts = 5, 
-                          restrict_n_amer = TRUE) {
+                          query_limit = 100, max_attempts = 5) {
   if (!require(dplyr)) {
     stop("download_gbif requires dplyr package, but it could not be loaded")
   }
@@ -166,8 +161,6 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       }
       
       # Select only those columns we want to write to file
-      # TODO: Could add column with state information here if we want to be 
-      # able to filter out Hawaii observations
       obs <- obs %>%
         dplyr::select(gbifID, species, longitude, latitude, 
                       year, month, day, countryCode)
@@ -175,19 +168,8 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       # Before writing to file, add a column with accepted name (which
       # may be different than what GBIF puts in species column)
       obs$accepted_name <- species_name
-      
-      # Before writing to file, if required, remove observations falling 
-      # outside North America
-      if (restrict_n_amer) {
-        lat_lim <- c(14, 80)
-        lon_lim <- c(-170, -52)
-        out_of_bounds <- obs %>%
-          filter(longitude < lon_lim[1] | longitude > lon_lim[2] |
-                   latitude < lat_lim[1] | latitude > lat_lim[2])
-        obs <- obs %>%
-          filter(!(gbifID %in% out_of_bounds$gbifID))
-      }
-      
+
+      # Write to file and report back (if appropriate)
       write.csv(x = obs,
                 file = filename,
                 row.names = FALSE)
