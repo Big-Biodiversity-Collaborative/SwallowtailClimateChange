@@ -9,6 +9,7 @@
 #' @param countries character vector of country codes to restrict search 
 #' @param query_limit integer number of results to return per query
 #' @param max_attempts integer maximum number of times to try querying gbif
+#' @param logfile character name of file to write details on failed queries
 #' 
 #' @details Downloaded data are downloaded to the 'data' directory with the 
 #' following file naming convention: <genus name>_<specific epithet>-gbif.csv.
@@ -16,7 +17,7 @@
 #' @return NULL
 download_gbif <- function(species_name, gbif_name, replace = FALSE, 
                           verbose = FALSE, countries = c("CA", "MX", "US"),
-                          query_limit = 100, max_attempts = 5) {
+                          query_limit = 100, max_attempts = 5, logfile = NULL) {
   if (!require(dplyr)) {
     stop("download_gbif requires dplyr package, but it could not be loaded")
   }
@@ -128,6 +129,18 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
                 }
               }
             } else { # never had a successful query
+              # Want to make a note of this in the logfile (if one exists)
+              if (!is.null(logfile)) {
+                if (file.exists(logfile)) {
+                  sink(file = logfile, append = TRUE)
+                  cat("Failed query for ", species_name, " (as ", 
+                      gbif_name, ") from ", country, ", records ", 
+                      (start + 1), "-", end, 
+                      "; dataset may be incomplete.", sep = "")
+                  sink()
+                }
+              }
+              
               if (verbose) {
                 message(paste0("\tquery failed after ", attempts, " attempts"))
               }

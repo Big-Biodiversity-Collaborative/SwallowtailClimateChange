@@ -9,7 +9,14 @@
 source(file = "load_functions.R")
 
 gbif_data <- read.csv(file = "data/gbif-reconcile.csv")
-replace <- TRUE
+replace <- FALSE
+
+# File to write messages for failed queries; passed to download_gbif
+logfile <- "data/gbif/download-log.txt"
+
+sink(file = logfile)
+cat(Sys.Date(), " download log/n", sep = "")
+sink()
 
 # For testing with subset
 # gbif_data <- gbif_data %>%
@@ -22,7 +29,8 @@ for (i in 1:nrow(gbif_data)) {
   download_gbif(species_name = species_name,
                 gbif_name = gbif_name,
                 replace = replace,
-                verbose = TRUE)
+                verbose = TRUE,
+                logfile = logfile)
   # Adding a 2 second sleep to slow things down.
   Sys.sleep(time = 2)
 }
