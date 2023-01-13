@@ -1,6 +1,6 @@
 # Download and prepare bioclimatic variables for 2000-2018
-# Jeff Oliver
-# jcoliver@arizona.edu
+# Jeff Oliver & Erin Zylstra
+# jcoliver@arizona.edu & ezylstra@arizona.edu
 # 2022-04-15
 
 require(sp)     # raster needs this
@@ -9,8 +9,10 @@ require(dismo)  # calculating bioclimate variables
 require(terra)  # raster manipulation
 
 # TODO: Migrate away from use of raster package; most functionality provided by 
-# the terra package. On hold for now, as the dismo::biovars function still 
-# requires RasterBrick/Stack objects as input.
+# the terra package. Completed where possible, but the dismo::biovars function 
+# still requires RasterBrick/Stack objects as input. Eventually the 
+# dismo::biovars function should be replaced by a corresponding function in the 
+# predicts package: https://github.com/rspatial/dismo/issues/29
 
 # TODO: Add check for existence of bioclim averages before extraction
 
@@ -38,7 +40,7 @@ coord_bounds <- c("xmin" = -169,
 geo_extent <- raster::extent(x = coord_bounds)
 # For writing raster files to disk
 temp_raster_format <- ".tif"
-annual_raster_format <- ".bil"
+annual_raster_format <- ".tif"
 final_raster_format <- ".tif"
 # Names of the variables, to be used in filenames et al
 biovar_names <- paste0("bio", 1:19)
@@ -75,41 +77,19 @@ for (one_var in wc_vars) {
     } else {
       message(paste0("Zip already present for ", one_var, ", ", time_per))
     }
-    
-    # if data files haven't been extracted yet, do that now
-    final_year <- substr(x = time_per, start = 6, stop = 9)
-    one_data_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, "_", 
-                            final_year, "-11.tif")
-    if (!file.exists(one_data_file)) {
-      # Extraction can take a minute, so notify user
-      message(paste0("Extracting ", zip_file))
-      unzip(zipfile = zip_file,
-            exdir = "data/wc2-1/monthly")
-      # Some December 2018 files are named wrong ("2019" instead of "2018"), 
-      # fix this; only necessary for second archive (2010-2018)
-      if (final_year == 2018) {
-        dec_19_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, 
-                              "_2019-12.tif")
-        if (file.exists(dec_19_file)) {
-          dec_18_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", one_var, 
-                                "_2018-12.tif")
-          invisible(file.rename(from = dec_19_file,
-                                to = dec_18_file))
-        }
-      }
-    }
+    # Extraction once took place here. Moved to iteration of annual 
+    # calculations to avoid excessive file space load (extracting *all* the 
+    # monthly files takes a lot of disk space)
   }
 }
 options(timeout = timeout_default) # Reset to default
-
-# Now have monthly data 2000-2018, one for each month / year for each of three 
-# variables
 
 # Need to create single RasterBrick/Stack for each of the three variables for 
 # a single year (so 12 layers each), then feed them to dismo::biovars()
 
 # We calculate the average for the entire span, 2000-2018, so we start by 
 # calculating biovar for each year
+
 # Files have two-digit month, so creating a character vector for that
 month_vec <- as.character(1:12)
 month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1])
@@ -124,15 +104,46 @@ for (year_i in 1:length(year_span)) {
   one_year <- year_span[year_i]
   # Check to see if biovars have yet been calculated for this year; if not, do 
   # calculations and store in stack (and save to file); if so, read in values 
-  # as RasterStack 
+  # as SpatRaster
   annual_filenames <- paste0("data/wc2-1/annual/biovars-", 
                              one_year, "-",
                              biovar_names, 
                              annual_raster_format)
   if (any(!file.exists(annual_filenames))) {
-    # A list of three elements, one corresponding to each of the variables (tmin, 
-    # tmax, and prec). Each element will be a RasterStack of the 12 monthly 
-    # layers for that variable
+    # Annual files for this year do not exist, so start by extracting the 
+    # monthly files from the corresponding zip archive
+    # Decide which of the two archives this year belongs in
+    if (one_year < 2010) {
+      zip_years <- "2000-2009"
+    } else {
+      zip_years <- "2010-2018"
+    }
+    # Iterate over the three worldclim variables, extracting monthly data for 
+    # each, but only for this year
+    message("Extracting monthly data for ", one_year)
+    for (one_var in wc_vars) {
+      # Archive path
+      zip_file <- paste0("data/wc2-1/monthly/wc2.1_2.5m_", 
+                          one_var, "_",
+                          zip_years, ".zip")
+      # Names of files to extract
+      # Example file names in the archive:
+      # wc2.1_2.5m_prec_2000-01.tif
+      # wc2.1_2.5m_tmin_2000-01.tif
+      # wc2.1_2.5m_tmax_2000-01.tif
+      var_files <- paste0("wc2.1_2.5m_", 
+                          one_var, "_", 
+                          one_year, "-", 
+                          month_vec, ".tif")
+      # Extract just those files
+      unzip(zipfile = zip_file,
+            files = var_files,
+            exdir = "data/wc2-1/monthly")
+    }
+
+    # A list of three elements, one corresponding to each of the variables 
+    # (tmin, tmax, and prec). Each element will be a SpatRaster of the 12 
+    # monthly layers for that variable
     raster_list <- vector("list", length(wc_vars))
     names(raster_list) <- wc_vars
     # Create a RasterStack for each of the variables for this year
@@ -141,16 +152,24 @@ for (year_i in 1:length(year_span)) {
                                   one_var, "_", 
                                   one_year, "-", 
                                   month_vec, ".tif")) 
-      # raster_list[[one_var]] <- terra::rast(x = var_files)
-      raster_list[[one_var]] <- raster::stack(x = var_files)
-      # Restrict to geographical area of this study (CA, MX, US); cropping will 
-      # take a few seconds
-      # raster_list[[one_var]] <- terra::crop(x = raster_list[[one_var]],
-      #                                       y = geo_extent)
-      raster_list[[one_var]] <- raster::crop(x = raster_list[[one_var]],
-                                             y = geo_extent)
+      # Read in files as raster and stack them
+      raster_list[[one_var]] <- c(lapply(X = var_files,
+                                         FUN = terra::rast))
+      # Restrict to geographical area of this study (roughly CA, MX, US)
+      raster_list[[one_var]] <- lapply(X = raster_list[[one_var]],
+                                       FUN = terra::crop,
+                                       y = geo_extent)
+      # Because dismo::biovars needs a RasterStack, convert to that type
+      # This makes a 12-layer SpatRaster for each worldclim variable
+      raster_list[[one_var]] <- terra::rast(raster_list[[one_var]])
+      # And this converts that SpatRaster to a RasterStack
+      raster_list[[one_var]] <- raster::stack(raster_list[[one_var]])
     }
-    # Do biovar calculation for this year; can take several (> 10) minutes
+    # Do biovars calculation for this year; can take several (> 10) minutes
+    # This is sooooo slow. Might be faster to do the arithmetic for each of 
+    # 19 biovariables using terra functions...
+    # For variable calculations, see https://pubs.usgs.gov/ds/691/ds691.pdf
+    # And terra arithmatic https://rspatial.org/pkg/4-algebra.html
     message(paste0(Sys.time(), " | Calculating biovars for ", one_year))
     # dismo::biovars spits out a RasterBrick
     biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
@@ -164,12 +183,9 @@ for (year_i in 1:length(year_span)) {
                                 one_year, "-",
                                 biovar_name, 
                                 annual_raster_format)
-      # terra::writeRaster(x = biovars_annual[[year_i]][[biovar_name]],
-      #                    filename = biovar_filename,
-      #                    overwrite = TRUE)
-      raster::writeRaster(x = biovars_annual[[year_i]][[biovar_name]],
-                          filename = biovar_filename,
-                          overwrite = TRUE)
+      terra::writeRaster(x = biovars_annual[[year_i]][[biovar_name]],
+                         filename = biovar_filename,
+                         overwrite = TRUE)
       # Remove associated metadata files
       metadata_filename <- paste0(biovar_filename, ".aux.xml")
       if (file.exists(metadata_filename)) {
@@ -178,8 +194,7 @@ for (year_i in 1:length(year_span)) {
     }
   } else { # biovars already calculated for this year, just read them in
     message(paste0("biovars already calculated for ", one_year, "; loading."))
-    # biovars_annual[[year_i]] <- terra::rast(x = annual_filenames)
-    biovars_annual[[year_i]] <- raster::stack(x = annual_filenames)
+    biovars_annual[[year_i]] <- terra::rast(x = annual_filenames)
     # Blech. Have to re-assign layer names.
     names(biovars_annual[[year_i]]) <- biovar_names
   }
@@ -203,10 +218,10 @@ for (year_i in 1:length(year_span)) {
 }
 
 # Now do calculation of means for each variable; before writing to disk, mask 
-# out Great Lakes and other large bodies of water
+# out Great Lakes and other large bodies of water as appropriate
 if (remove_lakes) { # Only load shapefile if necessary
-  # lakes_shp <- terra::vect(x = "data/lakes/ne_10m_lakes.shp")
-  lakes_shp <- raster::shapefile(x = "data/lakes/ne_10m_lakes.shp")
+  lakes_shp <- terra::vect(x = "data/lakes/ne_10m_lakes.shp")
+  lakes_raster <- NULL
 }
 for (biovar_name in biovar_names) {
   mean_filename <- paste0("data/wc2-1/", 
@@ -214,40 +229,44 @@ for (biovar_name in biovar_names) {
                           final_raster_format)
   if (!file.exists(mean_filename) | overwrite_averages) {
     message("Averaging ", biovar_name)
+    # Subset the layer in the SpatRaster corresponding to this biovar
+    biovar_rasters <- lapply(X = biovars_annual,
+                             FUN = terra::subset,
+                             subset = biovar_name)
     # Pull corresponding RasterLayer out for this variable
-    biovar_rasters <- lapply(X = biovars_annual, FUN = "[[", biovar_name)
-    # Making a stack, but why?
-    # biovar_stack <- terra::rast(biovar_rasters)
-    biovar_stack <- raster::stack(biovar_rasters)
+    # Making a multi-layer SpatRaster on which to calculate averages
+    biovar_stack <- terra::rast(biovar_rasters)
     # Calculate mean of all layers (each layer is a year in this case)
-    # biovar_mean <- terra::app(x = biovar_stack, fun = mean, na.rm = TRUE)
-    biovar_mean <- raster::calc(x = biovar_stack, fun = mean, na.rm = TRUE)
-    # Set the CRS to WGS84
-    terra::crs(biovar_mean) <- "EPSG:4326"
-    
+    biovar_mean <- terra::app(x = biovar_stack, fun = mean, na.rm = TRUE)
+
     # Here we can mask out the Great Lakes (and other large bodies of water we 
     # want to exclude from predictions) as appropriate
     if (remove_lakes) {
-      # biovar_mean <- terra::mask(x = biovar_mean,
-      #                            mask = lakes_shp,
-      #                            inverse = TRUE)
-      biovar_mean <- raster::mask(x = biovar_mean,
-                                  mask = lakes_shp,
-                                  inverse = TRUE)
+      # Using mask based on the shapefile alone results in a fairly aggressive 
+      # mask - any cells in our climate data that overlap with water bodies *at 
+      # all* are masked out (even if the cell is 98% land).
+
+      # Generate values for each cell that represent the proportional area of 
+      # that cell that falls in a water body (ie, cell values range from 0-1)
+      # (note: this takes a minute, but only needs to be done once)
+      if (is.null(lakes_raster)) {
+        lakes_raster <- terra::rasterize(x = lakes_shp,
+                                         y = biovar_mean,
+                                         cover = TRUE)
+        # Set cells that are >99% lake == 1, all other cells NA
+        lakes_raster <- terra::ifel(test = round(x = lakes_raster, 2) != 1, 
+                                    yes = NA, 
+                                    no = 1)
+      }
+
+      # Mask the averaged biovar raster by the new rasterized lake layer
+      biovar_mean <- terra::mask(x = biovar_mean,
+                                 mask = lakes_raster,
+                                 inverse = TRUE)
     }
-    # terra::writeRaster(x = biovar_mean,
-    #                    filename = mean_filename,
-    #                    overwrite = TRUE)
-    raster::writeRaster(x = biovar_mean,
-                        filename = mean_filename,
-                        overwrite = TRUE)
-    # When using raster::writeRaster, a small XML file of metadata is written,
-    # we do not need these files
-    metadata_filename <- paste0(mean_filename, ".aux.xml")
-    if (file.exists(metadata_filename)) {
-      invisible(file.remove(metadata_filename))
-    }
-    
+    terra::writeRaster(x = biovar_mean,
+                       filename = mean_filename,
+                       overwrite = TRUE)
   } else {
     message("Averages already on disk for ", biovar_name)
   }
