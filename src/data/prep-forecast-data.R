@@ -5,6 +5,7 @@
 
 require(sp)     # raster needs this
 require(raster) # you know, raster stuff
+require(terra)  # raster manipulation
 require(dismo)  # calculating bioclimate variables
 require(dplyr)  # QA/QC
 require(ggplot2)# QA/QC
@@ -35,7 +36,6 @@ per_start <- c("2041", "2071")
 # Two different ssps of interest (2 = 4.5, 3 = 7.0)
 ssps <- c("ssp245", "ssp370")
 # For writing raster files to disk
-# temp_raster_format <- ".tif"
 final_raster_format <- ".tif"
 # Names of the variables, to be used in filenames et al
 biovar_names <- paste0("bio", 1:19)
@@ -95,7 +95,7 @@ month_vec[nchar(month_vec) == 1] <- paste0("0", month_vec[nchar(month_vec) == 1]
 # The data coming in are much higher resolution that we need. Use the 
 # calculated bioclim variables to get and update the resolution of the monthly
 # temperature and precip data before calling dismo::biovars
-template_raster <- raster(x = "data/wc2-1/bio1.tif")
+template_raster <- terra::rast(x = "data/wc2-1/bio1.tif")
 
 for (ssp in ssps) {
   for (time_per in per_start) {
@@ -103,33 +103,40 @@ for (ssp in ssps) {
     names(raster_list) <- names(monthly_vars)
     # Create a RasterStack for each of the variables
     for (var_i in 1:length(monthly_vars)) {
-      # doing this way 'cause iterator loses names
+      # doing this way because iterator loses names
       one_var <- monthly_vars[var_i]
       one_var_name <- names(one_var)
       var_files <- as.list(paste0("data/ensemble/monthly/ensemble_",
                                   ssp, "_",
                                   time_per, "_",
                                   one_var, month_vec, ".tif"))
-      raster_list[[one_var_name]] <- raster::stack(x = var_files)
+      # Each list element is a 12-element list (one for each month)
+      raster_list[[one_var_name]] <- c(lapply(X = var_files,
+                                              FUN = terra::rast))
+      # Call terra::rast (again?) to make each top-level element a single 
+      # SpatRaster with 12 layers
+      raster_list[[one_var_name]] <- terra::rast(raster_list[[one_var_name]])
       # Reproject the raster to the resolution & CRS of the contemporary data
       # This changes the resolution from 30s to 2.5 minutes
-      # Can take a a couple of minutes, so let user know progress
-      message(paste0(Sys.time(), " | Reprojecting ", one_var_name, ", ", ssp, ", ", time_per))
-      raster_list[[one_var_name]] <- raster::projectRaster(from = raster_list[[one_var_name]],
-                                                             to = template_raster)
+      # Can take a minute or so - let user know progress
+      message(paste0(Sys.time(), " | Reprojecting ", one_var_name, ", ", ssp, 
+                     ", ", time_per))
+      raster_list[[one_var_name]] <- terra::project(x = raster_list[[one_var_name]],
+                                                    y = template_raster)
       message(paste0(Sys.time(), " | ", one_var_name, " reprojection complete"))
       # Now mask the raster by the template raster; primary goal is to ensure 
       # we are masking out any cells that are missing data in contemporary 
       # climate raster (i.e. the Great Lakes, which we mask out in preparing 
       # the contemporary bioclim variables; see src/data/prep-climate-data.R)
-      raster_list[[one_var_name]] <- raster::mask(x = raster_list[[one_var_name]],
-                                                  mask = template_raster)
+      raster_list[[one_var_name]] <- terra::mask(x = raster_list[[one_var_name]],
+                                                 mask = template_raster)
       message(paste0(Sys.time(), " | ", one_var_name, " masking complete"))
+      # dismo::biovars needs a RasterStack, so do that conversion here
+      raster_list[[one_var_name]] <- raster::stack(raster_list[[one_var_name]])
     }
     # Do biovar calculation for this SSP + time period; can take several (> 10) 
     # minutes
     message(paste0(Sys.time(), " | Calculating biovars for ", ssp, ", ", time_per))
-    # dismo::biovars spits out a RasterBrick
     biovars <- dismo::biovars(prec = raster_list[["prec"]],
                               tmin = raster_list[["tmin"]],
                               tmax = raster_list[["tmax"]])
@@ -138,9 +145,9 @@ for (ssp in ssps) {
     for (biovar_name in names(biovars)) {
       biovar_filename <- paste0("data/ensemble/", ssp, "/", time_per, "/",
                                 biovar_name, final_raster_format)
-      raster::writeRaster(x = biovars[[biovar_name]],
-                          filename = biovar_filename,
-                          overwrite = TRUE)
+      terra::writeRaster(x = biovars[[biovar_name]],
+                         filename = biovar_filename,
+                         overwrite = TRUE)
       # Remove associated metadata files
       metadata_filename <- paste0(biovar_filename, ".aux.xml")
       if (file.exists(metadata_filename)) {
@@ -150,7 +157,8 @@ for (ssp in ssps) {
   }
 }
 
-# Do some QA/QC for each of the forecast data sets
+# Do some QA/QC for each of the forecast data sets; still relies on raster
+# package
 
 # Check with some of the biovars that are included at 
 # https://adaptwest.databasin.org/pages/adaptwest-climatena/
