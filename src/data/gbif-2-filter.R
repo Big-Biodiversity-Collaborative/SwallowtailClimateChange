@@ -5,7 +5,6 @@
 
 require(MASS)    # kernel density estimation
 require(terra)   # extracting observations with climate data
-require(raster)  # you know, raster stuff
 require(dplyr)   # data wrangling
 
 # TODO: Resolution of envelope is based on 0.5 degrees, but climate data are in 
@@ -13,7 +12,7 @@ require(dplyr)   # data wrangling
 #       resolution envelope?
 
 # Filter observations for each species, so observations:
-#     occur between 2000-2022
+#     occur between 2000-2023
 #     are in locations where climate data are available
 #     are thinned to a max of X observations per grid cell (of climate raster)
 #     are inside the 95% contour of observations
@@ -43,7 +42,7 @@ envelope_min <- 100
 # Logical indicating whether or not to remove observations that are outside the 
 # range of desired years
 remove_old <- TRUE
-year_range <- 2000:2022
+year_range <- 2000:2023
 
 ########################################
 # Thinning settings
@@ -177,19 +176,20 @@ for (i in 1:length(gbif_files)) {
     wgs_crs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
     # Transform this to a raster; not quite sure why, but need to do 90 degree 
     # counter-clockwise rotation of the z matrix...
-    kde_raster <-raster::raster(x = apply(X = t(obs_kde$z),
-                                          MARGIN = 2,
-                                          FUN = rev),
-                                xmn = min(obs_kde$x), 
-                                xmx = max(obs_kde$x),
-                                ymn = min(obs_kde$y), 
-                                ymx = max(obs_kde$y), 
-                                crs = wgs_crs)
+    kde_raster <- terra::rast(x = apply(X = t(obs_kde$z),
+                                        MARGIN = 2,
+                                        FUN = rev),
+                              extent = terra::ext(x = c(xmin = min(obs_kde$x), 
+                                                        xmax = max(obs_kde$x),
+                                                        ymin = min(obs_kde$y), 
+                                                        ymax = max(obs_kde$y))),
+                              crs = wgs_crs)
+    
     # From https://mhallwor.github.io/_pages/activities_GenerateTerritories
     # Set zeros to NA
     kde_raster[kde_raster == 0] <- NA
     # Get the values as a vector
-    kde_values <- raster::getValues(kde_raster)
+    kde_values <- terra::values(kde_raster)
     # Sort all the not missing values
     sorted_values <- sort(kde_values[!is.na(kde_values)], 
                           decreasing = TRUE)
@@ -198,14 +198,15 @@ for (i in 1:length(gbif_files)) {
     # Find index of those sorted values for the cutoff
     cutoff_index <- sum(summed_values <= envelope_cutoff * summed_values[length(summed_values)])
     # Set the values of the raster to 0 or 1 based on that cutoff
-    kde_envelope <- raster::setValues(kde_raster, 
-                                      kde_values >= sorted_values[cutoff_index])
-    
+    kde_envelope <- terra::setValues(kde_raster,
+                                     kde_values >= sorted_values[cutoff_index])
+
     # Pull out values from the kde_envelope raster and add them to data; 
     # 0 = outside envelope, 1 = inside envelope
-    data$envelope <- raster::extract(x = kde_envelope, 
-                                     y = data[,c('longitude','latitude')])
-    
+    data$envelope <- terra::extract(x = kde_envelope,
+                                    y = data[,c('longitude','latitude')])[, 2]
+    data$envelope <- as.numeric(data$envelope)
+
     # Sometimes values for envelope are NA if point is on edge of the defined 
     # envelope; count those as outliers, too
     data <- data %>%
@@ -243,7 +244,7 @@ for (i in 1:length(gbif_files)) {
   # Drop those columns needed for filtering
   data <- data %>%
     dplyr::select(-c(outside_dates, missing_climate, thin, outside_envelope,
-                     climate, bio1, cell, obs_no))
+                     climate, cell, obs_no))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
