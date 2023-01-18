@@ -24,12 +24,13 @@ The project uses the following additional R packages:
 + dismo
 + dplyr
 + ENMeval
-+ gam
 + gbm (for BRT models)
 + ggplot2
 + kernlab
 + maptools
++ MASS (part of base R, but needs loading)
 + Matrix (for lasso models)
++ mgcv
 + parallel (usually part of R distribution, but needs explicit loading)
 + randomForest
 + raster
@@ -40,9 +41,11 @@ The project uses the following additional R packages:
 + sf
 + sp
 + spocc
++ stats (included in base R)
 + stringr
 + terra
 + tidyr
++ TNRS
 
 To run models implementing the MaxEnt approach, you will also need the MaxEnt 
 program, which can be downloaded from 
