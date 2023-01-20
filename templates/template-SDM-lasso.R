@@ -54,6 +54,10 @@ full_data <- full_data %>%
   cbind(., predictors) %>%
   dplyr::select(c("pa", "fold", all_of(paste0("bio", 1:19))))
 
+# TODO: We shouldn't have to run this line below, but some models fail if there 
+# are any NA passed to them
+full_data <- na.omit(full_data)
+
 # Run lasso regression model 
 # Note: quad = TRUE will include quadratic terms for all predictors
 model_result <- run_lasso(full_data = full_data,
