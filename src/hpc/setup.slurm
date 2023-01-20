@@ -19,4 +19,4 @@ module load geos
 module load R/4.2.2
 unzip data/gbif-pa.zip
 unzip data/gbif-shapefiles.zip
-Rscript check-libraries.R
+Rscript src/hpc/check-libraries.R
