@@ -100,6 +100,9 @@ run_sdm_script <- function(script_name,
         # Run the actual script
         source(file = sdm_script)
         message_out <- paste0("Finished running script: ", sdm_script)
+        write(x = paste0("Finished ", sdm_script),
+              file = log_file,
+              append = TRUE)
       } else {
         message_out <- paste0("Could not find script: ", sdm_script)
       }

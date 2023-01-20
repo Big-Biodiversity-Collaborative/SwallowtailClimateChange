@@ -6,7 +6,7 @@
 
 #SBATCH --job-name=R-library-test
 #SBATCH --ntasks=1
-#SBATCH --nodes=1
+#SBATCH --nodes=8
 ### Asking for 2 hours
 #SBATCH --time=02:00:00
 #SBATCH --partition=standard
