@@ -16,9 +16,13 @@ libs <- libs[, 1]
 installed <- rownames(installed.packages())
 for (one_lib in libs) {
   if (!(one_lib %in% installed)) {
+    deps <- NA
+    if (one_lib == "ENMeval") {
+      deps <- TRUE # So "Suggests" get installed, too
+    }
     install.packages(one_lib, 
                      repos = "https://cran.microsoft.com/",
-                     dependencies = TRUE) # So "Suggests" get installed, too
+                     dependencies = deps)
   } else {
     message(one_lib, " already installed.")
   }

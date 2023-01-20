@@ -118,7 +118,7 @@ run_sdm_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
+# For parallel processing, do two fewer cores or max (whichever is lower)
 num_cores <- parallel::detectCores() - 2
 if (!is.null(max_cores)) {
   if (num_cores > max_cores) {
