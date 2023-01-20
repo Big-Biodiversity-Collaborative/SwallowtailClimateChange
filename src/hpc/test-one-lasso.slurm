@@ -1,14 +1,14 @@
 #!/bin/bash
-### Test for running lasso SDMs on two insects and hosts
+### Test for running one lasso SDM (P. rumiko)
 ### Jeff Oliver
 ### jcoliver@arizona.edu
-### 2023-01-19
+### 2023-01-20
 
 #SBATCH --job-name=R-library-test
-#SBATCH --ntasks=8
+#SBATCH --ntasks=1
 #SBATCH --nodes=1
-### Asking for 2 hours
-#SBATCH --time=02:00:00
+### Asking for 10 minutes
+#SBATCH --time=00:10:00
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
@@ -18,4 +18,4 @@ module load proj
 module load geos
 module load R/4.2.2
 src/bash/build-scripts-SDM.sh
-Rscript src/run-indiv/run-all-SDM-lasso-scripts.R
+Rscript src/indiv/papilio_rumiko-SDM-lasso.R
