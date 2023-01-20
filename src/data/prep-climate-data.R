@@ -4,7 +4,7 @@
 # 2022-04-15
 
 require(sp)     # raster needs this
-require(raster) # you know, raster stuff
+require(raster) # only necessary for biovar calculation via dismo
 require(dismo)  # calculating bioclimate variables
 require(terra)  # raster manipulation
 
@@ -13,8 +13,6 @@ require(terra)  # raster manipulation
 # still requires RasterBrick/Stack objects as input. Eventually the 
 # dismo::biovars function should be replaced by a corresponding function in the 
 # predicts package: https://github.com/rspatial/dismo/issues/29
-
-# TODO: Add check for existence of bioclim averages before extraction
 
 # Calculates average values for the 19 bioclimatic variables for 2000-2018, 
 # based on monthly values for the 19 year span (yeah, two 19s, I'm sure this 
@@ -238,6 +236,9 @@ for (biovar_name in biovar_names) {
     biovar_stack <- terra::rast(biovar_rasters)
     # Calculate mean of all layers (each layer is a year in this case)
     biovar_mean <- terra::app(x = biovar_stack, fun = mean, na.rm = TRUE)
+    # Renames layers with the function name (in this case, "mean"), which is 
+    # lame. Update layer name to the biovar we are working with (e.g. "bio1")
+    names(biovar_mean) <- biovar_name
 
     # Here we can mask out the Great Lakes (and other large bodies of water we 
     # want to exclude from predictions) as appropriate
