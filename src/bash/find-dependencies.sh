@@ -1,4 +1,4 @@
-# Identify dependencies through search for "require"
+# Identify dependencies through pattern matching ("require", ::)
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2023-01-18
@@ -16,13 +16,14 @@ ALL=$TEMPLATES$DATA$WRAPPERS$SUMMARY$FUNREQUIRE
 LEFT=$(sed 's/.*(//g' <<< "$ALL")
 BOTH=$(sed 's/).*//g' <<< "$LEFT")
 
-# Things in functions are different (only sometimes pass raw names to require)
+# Things in the functions directory are different (only sometimes pass raw 
+# names to require)
 # Pull out double colon references, e.g. dplyr::select
 FUNCTIONS=$(grep -roP '[[:alpha:]\d]*(?=::)' functions/)
 FUNLEFT=$(sed 's/.*://g' <<< "$FUNCTION")
 
-# Sometimes explicit libraries are mentioned in conditionals
-FUNREQ=$(grep -r "require(" functions/) # won't pick up all, see below
+# Sometimes explicit libraries *are* loaded in functions via require
+FUNREQ=$(grep -r "require(" functions/)
 FUNREQLEFT=$(sed 's/.*(//g' <<< "$FUNREQ")
 FUNREQBOTH=$(sed 's/).*/\n/g' <<< "$FUNREQLEFT")
 
