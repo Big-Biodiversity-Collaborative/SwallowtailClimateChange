@@ -17,6 +17,6 @@ module load gdal
 module load proj
 module load geos
 module load R/4.2.2
-unzip data/gbif-pa.zip
-unzip data/gbif-shapefiles.zip
+unzip -u data/gbif-pa.zip
+unzip -u data/gbif-shapefiles.zip
 Rscript src/hpc/check-libraries.R

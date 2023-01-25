@@ -12,6 +12,9 @@
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
+### TODO: Try ntasks=1, nodes=1, cpus-per-task=1
+### and incrementally increase cpus-per-task...
+
 ### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
 module load gdal
 module load proj
@@ -19,3 +22,14 @@ module load geos
 module load R/4.2.2
 src/bash/build-scripts-distribution.sh
 Rscript src/run-indiv/run-all-distribution-lasso-scripts.R
+
+### To avoid OOM errors, may need to do array jobs
+### Find all the lasso distribution scripts
+### allfiles=$(ls src/indiv/*distribution-lasso.R)
+### Change to an array
+### lassos=($allfiles)
+### Reality check
+### for i in ${lassos[@]}; do echo $i; done
+### See 
+### https://help.rc.ufl.edu/doc/SLURM_Job_Arrays#Using_the_array_ID_Index
+### https://blog.ronin.cloud/slurm-job-arrays/
