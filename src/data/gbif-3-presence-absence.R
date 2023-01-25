@@ -98,7 +98,7 @@ for (i in 1:nrow(species_list)) {
 
       # Convert to a SpatialPoints object using WGS84 CRS
       presence_sp <- SpatialPoints(coords = presence,
-                                    proj4string = CRS("+init=epsg:4326"))
+                                   proj4string = CRS("+init=epsg:4326"))
 
       # Calculate the GreatCircle distance (in km) between points (can take
       # minutes for larger data sets)
