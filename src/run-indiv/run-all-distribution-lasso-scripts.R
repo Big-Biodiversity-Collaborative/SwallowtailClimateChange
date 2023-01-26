@@ -95,6 +95,7 @@ run_prediction_script <- function(script_name,
               file = log_file,
               append = TRUE)
         source(file = script_name)
+        gc()
         message_out <- paste0("Finished running script: ", script_name)
       } else {
         message_out <- paste0("Could not find script: ", script_name)
