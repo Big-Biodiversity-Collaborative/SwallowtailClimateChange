@@ -120,7 +120,7 @@ if (!is.null(max_cores)) {
     num_cores <- max_cores
   }
 }
-clust <- parallel::makeCluster(num_cores)
+clust <- parallel::makeCluster(num_cores, type = "FORK")
 
 # Run each script in parallel
 r <- parallel::parLapply(cl = clust,
