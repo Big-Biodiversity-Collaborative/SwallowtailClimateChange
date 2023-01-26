@@ -5,15 +5,13 @@
 ### 2023-01-19
 
 #SBATCH --job-name=R-lasso-prediction-test
-#SBATCH --ntasks=8
+#SBATCH --ntasks=1
 #SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
 ### Asking for 2 hours
 #SBATCH --time=02:00:00
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
-
-### TODO: Try ntasks=1, nodes=1, cpus-per-task=1
-### and incrementally increase cpus-per-task...
 
 ### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
 module load gdal
