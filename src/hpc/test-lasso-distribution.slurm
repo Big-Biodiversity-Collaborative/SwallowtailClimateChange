@@ -5,9 +5,8 @@
 ### 2023-01-19
 
 #SBATCH --job-name=R-lasso-prediction-test
-#SBATCH --ntasks=1
+#SBATCH --ntasks=2
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=4
 ### Asking for 2 hours
 #SBATCH --time=02:00:00
 #SBATCH --partition=standard
