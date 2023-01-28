@@ -115,13 +115,12 @@ predict_sdm <- function(nice_name,
   pred_mask <- terra::crop(predictors, buffered_mcp)
   pred_mask <- terra::mask(pred_mask, buffered_mcp)
   
-  # Attempt at memory conservation
-  rm(buffered_mcp, predictors)
-  
   # If using a lasso or gam model, need to standardize predictors using means 
   # and SDs from training dataset
   if (sdm_method == "lasso" | sdm_method == "gam" | sdm_method == "glm") {
-    pred_mask <- prep_predictors(stand_obj, pred_mask, quad = quad)
+    pred_mask <- prep_predictors(object = stand_obj, 
+                                 newdata = pred_mask, 
+                                 quad = quad)
   }
   
   # Create list of arguments for predict function
@@ -155,14 +154,7 @@ predict_sdm <- function(nice_name,
                                     s = model$lambda.1se))
     pred_points$pred <- pred_vect
     preds <- terra::rasterize(pred_points, pred_mask, field = "pred")
-    
-    # Attempt at memory conservation
-    rm(pred_points, data_sparse, pred_vect)
   }
-  
-  # Attempt at memory conservation
-  rm(pred_mask, params)
-  gc()
   
   # Send back this raster with the predicted values
   return(preds)

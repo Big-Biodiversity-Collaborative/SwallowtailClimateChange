@@ -17,7 +17,7 @@ rerun <- TRUE
 all_insects <- FALSE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- NULL # 8
+max_cores <- 2 # NULL # 8
 
 logfile <- paste0("logs/distribution-", sdm_method, "-out.log")
 
