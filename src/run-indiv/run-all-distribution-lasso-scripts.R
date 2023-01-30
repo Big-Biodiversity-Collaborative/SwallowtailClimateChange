@@ -14,7 +14,7 @@ remove_log <- FALSE
 rerun <- TRUE
 # Logical indicating whether to run prediction scripts for all species or only a 
 # subset of insects and their host plants
-all_insects <- FALSE
+all_insects <- TRUE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
 max_cores <- 2 # lasso are pretty memory-intensive, so we're being cautious
