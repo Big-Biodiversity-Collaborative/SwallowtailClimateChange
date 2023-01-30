@@ -121,6 +121,7 @@ predict_sdm <- function(nice_name,
     pred_mask <- prep_predictors(object = stand_obj, 
                                  newdata = pred_mask, 
                                  quad = quad)
+    invisible(gc())
   }
   
   # Create list of arguments for predict function
@@ -153,9 +154,12 @@ predict_sdm <- function(nice_name,
                                     type = "response", 
                                     s = model$lambda.1se))
     pred_points$pred <- pred_vect
+    rm(data_sparse, pred_vect)
     preds <- terra::rasterize(pred_points, pred_mask, field = "pred")
+    rm(pred_points, pred_mask)
   }
-  
+
+  invisible(gc())
   # Send back this raster with the predicted values
   return(preds)
 }

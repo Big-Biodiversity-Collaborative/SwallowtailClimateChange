@@ -37,6 +37,7 @@ prep_predictors <- function(object, newdata, quad = TRUE){
                           },
                           xbars = object$xbars,
                           sds = object$sds)
+    invisible(gc()) # Give back some memory
     
     # Will need to rename layers, so keep track of how many there are
     num_layers <- terra::nlyr(newdata)
@@ -46,6 +47,7 @@ prep_predictors <- function(object, newdata, quad = TRUE){
       newdata <- c(newdata, newdata^2)
       # Update names for those new layers
       names(newdata)[(num_layers + 1):terra::nlyr(newdata)] <- paste0(names(newdata)[1:num_layers], "_2")
+      invisible(gc())
     }
     # Append a "_1" to (original) layer names
     names(newdata)[1:num_layers] <- paste0(names(newdata)[1:num_layers], "_1")
@@ -79,7 +81,7 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     
   } else if (is.data.frame(newdata)) {
     newdata <- dplyr::select(newdata, all_of(lyr_names))
-    # TODO: Replace with vectorized approach, either with lapply or tidyverse
+    # TODO: Replace with vectorized approach, either with apply or tidyverse
     for (i in lyr_names) {
       x1 <- (newdata[,i] - object$xbars[i]) / object$sds[i]
       newdata <- newdata[,-which(names(newdata) == i)]
@@ -91,6 +93,8 @@ prep_predictors <- function(object, newdata, quad = TRUE){
         names(newdata)[ncol(newdata)] <- paste0(i, "_2")
       }
     }
-  } else stop("newdata should be a SpatRaster or a data.frame.")
+  } else {
+    stop("newdata should be a SpatRaster or a data.frame.")
+  }
   return(newdata)
 }
