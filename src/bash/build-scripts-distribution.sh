@@ -3,13 +3,21 @@
 # jcoliver@arizona.edu
 # 2021-06-02
 
+SCRIPTTYPE="distribution"
+MODELS=("brt" "gam" "lasso" "maxent-notune" "maxent-tune" "rf")
+PRODUCT="predicted probabilities and distributions"
+
+# If script is called with -v flag, will print messages after writing each file
+while getopts v flag
+do
+    case "${flag}" in
+        v) verbose=true;;
+    esac
+done
+
 # Read the file with organism names in as an array, skipping the header row 
 # (hence -n +2 in call to tail)
 readarray -t NAMES < <(tail -n +2 data/gbif-reconcile.csv)
-
-SCRIPTTYPE="distribution"
-MODELS=("brt" "gam" "glm" "lasso" "maxent-notune" "maxent-tune" "rf")
-PRODUCT="predicted probabilities and distributions"
 
 # Iterate over all the types of models (e.g. glm, svm)
 for MODEL in "${MODELS[@]}"
@@ -46,6 +54,11 @@ do
     echo "${MODELFILE}" | \
       sed "s/GENUS/${GENUS}/g" | \
       sed "s/SPECIES/${SPECIES}/g" > "$FILENAME"
-    echo "Wrote to ${FILENAME}"
+      
+    # If verbose, print out message
+    if [ "$verbose" = true ] ; then
+        echo "Wrote to ${FILENAME}"
+    fi
+    
   done; # end iterating over all species names
 done; # end iterating over all models

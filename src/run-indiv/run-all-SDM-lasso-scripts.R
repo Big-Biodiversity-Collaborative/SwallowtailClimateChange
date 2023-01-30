@@ -31,6 +31,9 @@ sdm_files <- list.files(path = "./src/indiv",
                         pattern = paste0("*-SDM-", sdm_method, ".R"),
                         full.names = TRUE)
 
+# Extract the presence/absence data
+unzip(zipfile = "data/gbif-pa.zip")
+
 # If not running SDMs for all species, identify which species to include and
 # update the sdm_files to *only* include those insect species and their 
 # respective host plants

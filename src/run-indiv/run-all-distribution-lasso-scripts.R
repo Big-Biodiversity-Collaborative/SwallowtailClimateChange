@@ -17,14 +17,25 @@ rerun <- TRUE
 all_insects <- FALSE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- 2 # NULL # 8
+max_cores <- 2 # lasso are pretty memory-intensive, so we're being cautious
 
+# For parallel processing, do two fewer cores or max (whichever is lower)
+num_cores <- parallel::detectCores() - 2
+if (!is.null(max_cores)) {
+  if (num_cores > max_cores) {
+    num_cores <- max_cores
+  }
+}
+
+# Setup log file and write first line to file
 logfile <- paste0("logs/distribution-", sdm_method, "-out.log")
+write(x = paste0("Start: ", Sys.time(), " on ", num_cores, " processors"),
+      file = logfile,
+      append = FALSE)
 
-# Create log file before running prediction scripts
-f <- file.create(logfile)
-# Create hold message for log file
+# Start of message for log file
 message_out <- ""
+
 
 # Identify prediction scripts
 pred_scripts <- list.files(path = "./src/indiv",
@@ -78,6 +89,8 @@ run_prediction_script <- function(script_name,
   # File name that would be used for SDM model output
   sdm_out <- paste0("output/SDMs/", nice_name, "-", sdm_method, ".rds")
   
+  message_out <- ""
+  
   if (file.exists(sdm_out)) {
   
     # See whether predictions have already been made
@@ -114,13 +127,6 @@ run_prediction_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or max (whichever is lower)
-num_cores <- parallel::detectCores() - 2
-if (!is.null(max_cores)) {
-  if (num_cores > max_cores) {
-    num_cores <- max_cores
-  }
-}
 clust <- parallel::makeCluster(num_cores, type = "FORK")
 
 # Run each script in parallel

@@ -29,37 +29,35 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     # Pull out just the biovar layers from the SpatRaster
     newdata <- newdata[[lyr_names]]
     
-    # New implementation, not ready yet, doesn't behave quite the same...
-    newdata_n <- newdata
+    # New implementation
     # Standardize biovar values (subtract mean, divide by sd)
-    newdata_n <- terra::app(x = newdata_n,
-                            fun = function(l, xbars, sds) {
-                              return((l - xbars)/sds)
-                            },
-                            xbars = object$xbars,
-                            sds = object$sds)
-
+    newdata <- terra::app(x = newdata,
+                          fun = function(l, xbars, sds) {
+                            return((l - xbars)/sds)
+                          },
+                          xbars = object$xbars,
+                          sds = object$sds)
+    
     # Will need to rename layers, so keep track of how many there are
-    num_layers <- terra::nlyr(newdata_n)
+    num_layers <- terra::nlyr(newdata)
     # If requested, also calculate quadratic values and add them as layers
     # to the SpatRaster object
     if (quad) {
-      newdata_n <- c(newdata_n, newdata_n^2)
+      newdata <- c(newdata, newdata^2)
       # Update names for those new layers
-      names(newdata_n)[(num_layers + 1):terra::nlyr(newdata_n)] <- paste0(names(newdata_n)[1:num_layers], "_2")
+      names(newdata)[(num_layers + 1):terra::nlyr(newdata)] <- paste0(names(newdata)[1:num_layers], "_2")
     }
     # Append a "_1" to (original) layer names
-    names(newdata_n)[1:num_layers] <- paste0(names(newdata_n)[1:num_layers], "_1")
+    names(newdata)[1:num_layers] <- paste0(names(newdata)[1:num_layers], "_1")
     # A cludge to get layers into same order as prior implementation; this is 
-    # REQUIRED as subsequent processing happens via layer order, not layer
+    # required as subsequent processing happens via layer order, not layer
     # names
     name_order <- character(2 * length(lyr_names))
     for (i in 1:length(lyr_names)) {
       name_order[(2 * i) - 1] <- paste0(lyr_names[i], "_1")
       name_order[(2 * i)] <- paste0(lyr_names[i], "_2")
     }
-    newdata_n <- newdata_n[[name_order]]
-    newdata <- newdata_n
+    newdata <- newdata[[name_order]]
 
     # Original implementation
     # for (i in lyr_names) {
@@ -81,6 +79,7 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     
   } else if (is.data.frame(newdata)) {
     newdata <- dplyr::select(newdata, all_of(lyr_names))
+    # TODO: Replace with vectorized approach, either with lapply or tidyverse
     for (i in lyr_names) {
       x1 <- (newdata[,i] - object$xbars[i]) / object$sds[i]
       newdata <- newdata[,-which(names(newdata) == i)]

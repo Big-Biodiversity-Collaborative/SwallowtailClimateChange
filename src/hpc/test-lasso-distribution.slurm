@@ -5,7 +5,7 @@
 ### 2023-01-19
 
 #SBATCH --job-name=R-lasso-prediction-test
-#SBATCH --ntasks=2
+#SBATCH --ntasks=16
 #SBATCH --nodes=1
 ### Asking for 2 hours
 #SBATCH --time=02:00:00
