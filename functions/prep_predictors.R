@@ -81,18 +81,31 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     
   } else if (is.data.frame(newdata)) {
     newdata <- dplyr::select(newdata, all_of(lyr_names))
-    # TODO: Replace with vectorized approach, either with apply or tidyverse
-    for (i in lyr_names) {
-      x1 <- (newdata[,i] - object$xbars[i]) / object$sds[i]
-      newdata <- newdata[,-which(names(newdata) == i)]
-      newdata[,ncol(newdata) + 1] <- x1
-      names(newdata)[ncol(newdata)] <- paste0(i, "_1")
-      if (quad) {
-        x2 <- x1 ^ 2
-        newdata[,ncol(newdata) + 1] <- x2
-        names(newdata)[ncol(newdata)] <- paste0(i, "_2")
-      }
+    # Original implementation
+    # for (i in lyr_names) {
+    #   x1 <- (newdata[,i] - object$xbars[i]) / object$sds[i]
+    #   newdata <- newdata[,-which(names(newdata) == i)]
+    #   newdata[,ncol(newdata) + 1] <- x1
+    #   names(newdata)[ncol(newdata)] <- paste0(i, "_1")
+    #   if (quad) {
+    #     x2 <- x1 ^ 2
+    #     newdata[,ncol(newdata) + 1] <- x2
+    #     names(newdata)[ncol(newdata)] <- paste0(i, "_2")
+    #   }
+    # }
+    newdata <- sweep(newdata, 2, stand_obj$xbars, "-")
+    newdata <- sweep(newdata, 2, stand_obj$sds, "/")
+    names(newdata) <- paste0(names(newdata), "_1")
+    
+    if (quad) {
+      quadratics <- newdata * newdata
+      names(quadratics) <- gsub("_1", "_2", names(newdata))
+      newdata <- cbind(newdata, quadratics)
+      quadnames <- paste0(rep(lyr_names, each = 2), rep(c("_1", "_2")))
+      newdata <- newdata[,quadnames]
     }
+    
+    
   } else {
     stop("newdata should be a SpatRaster or a data.frame.")
   }
