@@ -6,6 +6,9 @@
 #' @param verbose logical indicating whether or not to print processing messages
 #' @param criteria character indicating the criteria that will be used to 
 #' evaluate the performance of models with different tuning parameters 
+#' @param num_cores integer indicating number of cores to use for parallel 
+#' processing; if NULL (default), will use two less than the number of 
+#' available cores
 #' 
 #' @details Uses \code{ENMeval::ENMevaluate()} for both tuning and running the 
 #' Maxent models. Note that the algorithm we're using requires a 
@@ -27,7 +30,8 @@
 #'   in the model}
 #' }
 run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
-                            criteria = c("AICc", "AUC", "CBI")) {
+                            criteria = c("AICc", "AUC", "CBI"), 
+                            num_cores = NULL) {
   # Extract the name of this function for reporting
   function_name <- as.character(match.call())[1]
   
@@ -109,8 +113,15 @@ run_maxent_tune <- function(pa_data, predictors, verbose = TRUE,
     partition.settings <- list(kfolds = 5)
   }
   
-  # For parallel processing, use two fewer cores than are available
-  num_cores <- parallel::detectCores() - 2
+  # For parallel processing, use two fewer cores than are available if user 
+  # did not supply value for num_cores
+  if (is.null(num_cores)) {
+    num_cores <- parallel::detectCores() - 2
+  }
+  # Just make sure we are not asking for more than exist
+  if (num_cores > parallel::detectCores()) {
+    num_cores <- parallel::detectCores()
+  }
 
   if(verbose) {
     message("Running ", method_name, ".")

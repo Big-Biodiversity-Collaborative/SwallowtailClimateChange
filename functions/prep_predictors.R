@@ -93,8 +93,8 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     #     names(newdata)[ncol(newdata)] <- paste0(i, "_2")
     #   }
     # }
-    newdata <- sweep(newdata, 2, stand_obj$xbars, "-")
-    newdata <- sweep(newdata, 2, stand_obj$sds, "/")
+    newdata <- sweep(newdata, 2, object$xbars, "-")
+    newdata <- sweep(newdata, 2, object$sds, "/")
     names(newdata) <- paste0(names(newdata), "_1")
     
     if (quad) {
@@ -104,8 +104,7 @@ prep_predictors <- function(object, newdata, quad = TRUE){
       quadnames <- paste0(rep(lyr_names, each = 2), rep(c("_1", "_2")))
       newdata <- newdata[,quadnames]
     }
-    
-    
+
   } else {
     stop("newdata should be a SpatRaster or a data.frame.")
   }

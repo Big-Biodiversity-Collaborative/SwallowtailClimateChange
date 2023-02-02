@@ -15,6 +15,11 @@ species <- "SPECIES"
 set.seed(20220916)
 sdm_method <- "maxent-tune"
 
+# Restricting the number of cores for individual-level analyses for now to 2
+# Primarily for dealing with HPC out of memory issues, change to NULL if 
+# running locally to allow parallelization on > 2 cores
+num_cores <- 2 # NULL
+
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
@@ -47,7 +52,8 @@ message("\n**** Running ", sdm_method, " SDM on ",
 model_result <- run_maxent_tune(pa_data = pa_data,
                                 predictors = predictors, 
                                 criteria = "AICc",
-                                verbose = FALSE)
+                                verbose = FALSE,
+                                num_cores = num_cores)
 
 # Save the model to file in output/models/
 model_file <- paste0("output/SDMs/", nice_name,
