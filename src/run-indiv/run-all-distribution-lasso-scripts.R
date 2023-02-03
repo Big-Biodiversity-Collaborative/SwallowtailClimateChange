@@ -14,10 +14,10 @@ remove_log <- FALSE
 rerun <- TRUE
 # Logical indicating whether to run prediction scripts for all species or only a 
 # subset of insects and their host plants
-all_insects <- TRUE
+all_insects <- FALSE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- 2 # lasso are pretty memory-intensive, so we're being cautious
+max_cores <- 2 # predictions are pretty memory-intensive, so we're being cautious
 
 # For parallel processing, do two fewer cores or max (whichever is lower)
 num_cores <- parallel::detectCores() - 2
@@ -35,7 +35,6 @@ write(x = paste0("Start: ", Sys.time(), " on ", num_cores, " processors"),
 
 # Start of message for log file
 message_out <- ""
-
 
 # Identify prediction scripts
 pred_scripts <- list.files(path = "./src/indiv",
@@ -127,9 +126,8 @@ run_prediction_script <- function(script_name,
         append = TRUE)
 }
 
-clust <- parallel::makeCluster(num_cores, type = "FORK")
-
 # Run each script in parallel
+clust <- parallel::makeCluster(num_cores, type = "FORK")
 r <- parallel::parLapply(cl = clust,
                          X = pred_script_list,
                          fun = run_prediction_script,

@@ -7,21 +7,34 @@ require(parallel)
 
 sdm_method <- "brt"
 
-logfile <- paste0("logs/distribution-", sdm_method, "-out.log")
+# Whether or not to remove log file after running
 remove_log <- FALSE
-
-# Create log file before running prediction scripts
-f <- file.create(logfile)
-# Create hold message for log file
-message_out <- ""
-
 # Logical indicating whether or not to re-run script if predictions already
 # exist
 rerun <- TRUE
-
 # Logical indicating whether to run prediction scripts for all species or only a 
 # subset of insects and their host plants
 all_insects <- FALSE
+# Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
+# where n is the number of cores available
+max_cores <- 2 # predictions are pretty memory-intensive, so we're being cautious
+
+# For parallel processing, do two fewer cores or max (whichever is lower)
+num_cores <- parallel::detectCores() - 2
+if (!is.null(max_cores)) {
+  if (num_cores > max_cores) {
+    num_cores <- max_cores
+  }
+}
+
+# Setup log file and write first line to file
+logfile <- paste0("logs/distribution-", sdm_method, "-out.log")
+write(x = paste0("Start: ", Sys.time(), " on ", num_cores, " processors"),
+      file = logfile,
+      append = FALSE)
+
+# Create hold message for log file
+message_out <- ""
 
 # Identify prediction scripts
 pred_scripts <- list.files(path = "./src/indiv",
@@ -110,14 +123,8 @@ run_prediction_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
-num_cores <- parallel::detectCores() - 2
-if (num_cores > 8) {
-  num_cores <- 8
-}
-clust <- parallel::makeCluster(num_cores)
-
 # Run each script in parallel
+clust <- parallel::makeCluster(num_cores)
 r <- parallel::parLapply(cl = clust,
                          X = pred_script_list,
                          fun = run_prediction_script,
