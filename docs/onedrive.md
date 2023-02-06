@@ -12,7 +12,7 @@ currently only written for Linux.
 difficult
 + Google Drive: (not investigated)
 
-## Setup
+## rclone Setup
 
 For Linux, working through the program rclone. Alternative is to install the 
 [open source OneDrive client](https://abraunegg.github.io/).
@@ -87,3 +87,30 @@ Tokens expire after 90 days if not used. To refresh tokens, run
 
 1. [https://itsfoss.com/use-onedrive-linux-rclone/](https://itsfoss.com/use-onedrive-linux-rclone/)
 2. [https://rclone.org/onedrive/](https://rclone.org/onedrive/)
+
+## OneDrive Windows client setup
+
+Some gymnastics were required, but ultimately, we 
+
+1. Shared the SwallowtailClimateChange on OneDrive to the other collaborator's 
+institutional Microsoft account (@arizona.edu).
+2. Set up the institutional OneDrive account on a Windows laptop; this was running parallel to another OneDrive account on the same laptop.
+3. Synced the laptop to the (cloud) OneDrive, which pulled down the 
+SwallowtailClimateChange/output folder to the laptop.
+4. **Deleted** the local OneDrive output folder, but left the
+SwallowtailClimateChange folder in place.
+5. Made a symbolic link from the "real" local output folder (the output folder 
+that lives with all the other assets under Git version control) to a "new" 
+output folder in the OneDrive SwallowtailClimateChange folder:
+```
+mklink \d "C:\Users\username\OneDrive - University of Arizona\SwallowtailClimateChange\output" \
+"C:\Users\username\Documents\SwallowtailClimateChange\output"
+```
+  + If there are errors about a file existing, make sure the output folder on 
+  OneDrive (the place where the link is created, i.e. the first path), make 
+  sure there is no "output" folder already there.
+  + If there are errors about permissions, make sure the command terminal is 
+  being run as Administrator
+6. If it does not happen automatically, sync the OneDrive files. Check by 
+logging into web interface for OneDrive to see that files are updated (note 
+containing folder date/owner information may not change).
