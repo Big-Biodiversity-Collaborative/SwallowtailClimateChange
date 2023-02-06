@@ -114,3 +114,8 @@ mklink \d "C:\Users\username\OneDrive - University of Arizona\SwallowtailClimate
 6. If it does not happen automatically, sync the OneDrive files. Check by 
 logging into web interface for OneDrive to see that files are updated (note 
 containing folder date/owner information may not change).
+
+### References for OneDrive
+
+1. [https://answers.microsoft.com/en-us/windows/forum/all/onedrive-on-windows-10-and-symbolichard-links/9003d014-bb3f-4069-a3e9-fe387aeb748d](https://answers.microsoft.com/en-us/windows/forum/all/onedrive-on-windows-10-and-symbolichard-links/9003d014-bb3f-4069-a3e9-fe387aeb748d)
+2. [https://support.microsoft.com/en-us/office/can-t-synchronize-onedrive-files-and-folders-from-a-local-file-location-other-than-the-default-onedrive-path-b7eef9d4-4203-431d-8345-fe49254f9da0](https://support.microsoft.com/en-us/office/can-t-synchronize-onedrive-files-and-folders-from-a-local-file-location-other-than-the-default-onedrive-path-b7eef9d4-4203-431d-8345-fe49254f9da0)
