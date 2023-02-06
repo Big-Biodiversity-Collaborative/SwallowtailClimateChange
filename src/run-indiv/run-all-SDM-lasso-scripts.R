@@ -7,24 +7,25 @@ require(parallel)
 
 sdm_method <- "lasso"
 
-# Whether or not to remove log file after running
-remove_log <- FALSE
-# Logical indicating whether or not to re-run script if the model output already 
-# exists
-rerun <- TRUE
-# Logical indicating whether to run SDMs for all species or only a subset of 
-# insects and their host plants
-all_insects <- TRUE
-# Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
-# where n is the number of cores available
-max_cores <- NULL # 8
-
 logfile <- paste0("logs/SDM-", sdm_method, "-out.log")
+remove_log <- FALSE
 
 # Create log file before running SDMs
 f <- file.create(logfile)
 # Create hold message for log file
 message_out <- ""
+
+# Logical indicating whether or not to re-run script if the model output already 
+# exists
+rerun <- TRUE
+
+# Logical indicating whether to run SDMs for all species or only a subset of 
+# insects and their host plants
+all_insects <- TRUE
+
+# Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
+# where n is the number of cores available
+max_cores <- NULL # 8
 
 # Identify scripts to run SDMs
 sdm_files <- list.files(path = "./src/indiv",

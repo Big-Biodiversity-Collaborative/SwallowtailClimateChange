@@ -23,6 +23,10 @@ rerun <- TRUE
 # insects and their host plants
 all_insects <- FALSE
 
+# Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
+# where n is the number of cores available
+max_cores <- NULL # 8
+
 # Identify scripts to run SDMs
 sdm_files <- list.files(path = "./src/indiv",
                         pattern = paste0("*-SDM-", sdm_method, ".R"),
@@ -113,10 +117,12 @@ run_sdm_script <- function(script_name,
         append = TRUE)
 }
 
-# For parallel processing, do two fewer cores or eight (whichever is lower)
+# For parallel processing, do two fewer cores or max (whichever is lower)
 num_cores <- parallel::detectCores() - 2
-if (num_cores > 8) {
-  num_cores <- 8
+if (!is.null(max_cores)) {
+  if (num_cores > max_cores) {
+    num_cores <- max_cores
+  }
 }
 clust <- parallel::makeCluster(num_cores)
 
