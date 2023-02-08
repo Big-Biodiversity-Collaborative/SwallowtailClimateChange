@@ -5,7 +5,8 @@
 ### 2023-01-19
 
 #SBATCH --job-name=test-SDM-maxent-tune-many
-#SBATCH --ntasks=8
+### Allowing 8 nodes for maxent gets a OOM error
+#SBATCH --ntasks=4
 #SBATCH --nodes=1
 ### Asking for 2 hours
 #SBATCH --time=02:00:00

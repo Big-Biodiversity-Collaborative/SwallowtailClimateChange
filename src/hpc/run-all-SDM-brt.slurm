@@ -18,4 +18,4 @@ module load proj
 module load geos
 module load R/4.2.2
 src/bash/build-scripts-SDM.sh
-Rscript src/run-indiv/run-all-SDM-brt-scripts.R
+Rscript src/run-indiv/run-all-SDM-brt-scripts.R -a
