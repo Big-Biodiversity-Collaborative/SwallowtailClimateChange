@@ -15,6 +15,15 @@ rerun <- TRUE
 # Logical indicating whether to run prediction scripts for all species or only a 
 # subset of insects and their host plants
 all_insects <- FALSE
+# If this script is called from bash (e.g. Rscript run-all-...), see if the -a
+# flag was set to run all insects; if so, update all_insects to TRUE
+# e.g. from command line:
+# $ Rscript run-all-SDM-<method>-scripts.R -a
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) > 0) {
+  all_insects <- args[1] == "-a"
+}
+
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
 max_cores <- 2 # predictions are pretty memory-intensive, so we're being cautious

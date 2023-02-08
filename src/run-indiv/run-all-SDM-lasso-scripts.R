@@ -28,7 +28,7 @@ all_insects <- FALSE
 # $ Rscript run-all-SDM-<method>-scripts.R -a
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) > 0) {
-  run_all <- args[1] == "-a"
+  all_insects <- args[1] == "-a"
 }
 
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
