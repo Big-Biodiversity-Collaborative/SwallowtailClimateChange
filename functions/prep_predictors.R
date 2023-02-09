@@ -54,12 +54,14 @@ prep_predictors <- function(object, newdata, quad = TRUE){
     # A cludge to get layers into same order as prior implementation; this is 
     # required as subsequent processing happens via layer order, not layer
     # names
-    name_order <- character(2 * length(lyr_names))
-    for (i in 1:length(lyr_names)) {
-      name_order[(2 * i) - 1] <- paste0(lyr_names[i], "_1")
-      name_order[(2 * i)] <- paste0(lyr_names[i], "_2")
+    if (quad) {
+      name_order <- character(2 * length(lyr_names))
+      for (i in 1:length(lyr_names)) {
+        name_order[(2 * i) - 1] <- paste0(lyr_names[i], "_1")
+        name_order[(2 * i)] <- paste0(lyr_names[i], "_2")
+      }
+      newdata <- newdata[[name_order]]
     }
-    newdata <- newdata[[name_order]]
 
     # Original implementation
     # for (i in lyr_names) {

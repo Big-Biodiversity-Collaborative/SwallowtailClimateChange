@@ -26,7 +26,7 @@ if (length(args) > 0) {
 
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- 2 # predictions are pretty memory-intensive, so we're being cautious
+max_cores <- 1 # predictions are pretty memory-intensive, so we're being cautious
 
 # For parallel processing, do two fewer cores or max (whichever is lower)
 num_cores <- parallel::detectCores() - 2

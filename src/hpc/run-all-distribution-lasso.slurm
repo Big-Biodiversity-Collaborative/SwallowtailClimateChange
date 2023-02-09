@@ -5,7 +5,7 @@
 ### 2023-01-19
 
 #SBATCH --job-name=run-all-distribution-lasso
-#SBATCH --ntasks=8
+#SBATCH --ntasks=16
 #SBATCH --nodes=1
 ### Asking for 10 hours
 #SBATCH --time=10:00:00
