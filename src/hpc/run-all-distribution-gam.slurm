@@ -7,8 +7,8 @@
 #SBATCH --job-name=run-all-distribution-gam
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
-### Asking for 10 hours
-#SBATCH --time=10:00:00
+### Asking for 20 hours
+#SBATCH --time=20:00:00
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 

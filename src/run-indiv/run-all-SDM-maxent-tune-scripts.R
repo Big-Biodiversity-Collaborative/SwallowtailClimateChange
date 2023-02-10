@@ -33,7 +33,7 @@ if (length(args) > 0) {
 
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- NULL # 8
+max_cores <- 8 # NULL
 
 # Identify scripts to run SDMs
 sdm_files <- list.files(path = "./src/indiv",
