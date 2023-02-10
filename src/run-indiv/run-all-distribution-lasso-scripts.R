@@ -38,7 +38,7 @@ if (!is.null(max_cores)) {
 
 # Setup log file and write first line to file
 logfile <- paste0("logs/distribution-", sdm_method, "-out.log")
-write(x = paste0("Start: ", Sys.time(), " on ", num_cores, " processors"),
+write(x = paste0("Start time ", Sys.time(), " on ", num_cores, " processors"),
       file = logfile,
       append = FALSE)
 
@@ -69,7 +69,7 @@ if (!all_insects) {
   for (i in 1:length(species)) {
     spp_index <- grep(nice_names[i], pred_scripts)
     if (length(spp_index) == 0) {
-      message_out <- paste0("No prediction script for ", species[i], " (",
+      message_out <- paste0("No prediction script for: ", species[i], " (",
                             nice_names[i], "-distribution-", sdm_method, ".R)")
       message(message_out)
       # Write message to log file if species prediction script doesn't exist
@@ -112,7 +112,7 @@ run_prediction_script <- function(script_name,
         # Note: sometimes these messages overwrite each other, so adding a small
         # system delay to see if we can avoid the problem.
         Sys.sleep(time = runif(1, 0, 3))
-        write(x = paste0("About to run ", script_name),
+        write(x = paste0("About to run: ", script_name),
               file = log_file,
               append = TRUE)
         source(file = script_name)

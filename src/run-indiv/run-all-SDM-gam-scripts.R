@@ -58,7 +58,7 @@ if (!all_insects) {
   for (i in 1:length(species)) {
     spp_index <- grep(nice_names[i], sdm_files)
     if (length(spp_index) == 0) {
-      message_out <- paste0("No SDM script for ", species[i], " (.src/indiv/",
+      message_out <- paste0("No SDM script for: ", species[i], " (.src/indiv/",
                             nice_names[i], "-SDM-", sdm_method, ".R)")
       message(message_out)
       # Write message to log file if species SDM script doesn't exist
@@ -101,7 +101,7 @@ run_sdm_script <- function(script_name,
         # Note: sometimes these messages overwrite each other, so adding a small
         # system delay to see if we can avoid the problem.
         Sys.sleep(time = runif(1, 0 ,3))
-        write(x = paste0("About to run ", sdm_script), 
+        write(x = paste0("About to run: ", sdm_script), 
               file = log_file,
               append = TRUE)
         # Run the actual script
@@ -111,11 +111,11 @@ run_sdm_script <- function(script_name,
         message_out <- paste0("Could not find script: ", sdm_script)
       }
     } else {
-      message_out <- paste0("SDM for ", nice_name, 
+      message_out <- paste0("SDM for: ", nice_name, 
                             " already exists and rerun set to FALSE.")
     }
   } else {
-    message_out <- paste0("No data file found for ", nice_name, " (", 
+    message_out <- paste0("No data file found for: ", nice_name, " (", 
                           pa_file, ").")
   }
 
