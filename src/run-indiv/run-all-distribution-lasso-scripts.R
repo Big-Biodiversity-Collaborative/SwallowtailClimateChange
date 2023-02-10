@@ -4,7 +4,6 @@
 # 2022-08-05
 
 require(parallel)
-source(file = "load_functions.R")
 
 sdm_method <- "lasso"
 
@@ -93,6 +92,7 @@ run_prediction_script <- function(script_name,
                                   log_file,
                                   rerun,
                                   sdm_method) {
+  source(file = "load_functions.R")
   
   # Need to extract nice name
   nice_name <- strsplit(x = basename(script_name),

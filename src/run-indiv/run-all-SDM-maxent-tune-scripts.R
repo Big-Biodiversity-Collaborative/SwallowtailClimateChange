@@ -4,7 +4,6 @@
 # 2022-08-05
 
 require(parallel)
-source(file = "load_functions.R")
 
 sdm_method <- "maxent-tune"
 
@@ -84,7 +83,8 @@ run_sdm_script <- function(script_name,
                            rerun,
                            sdm_method) {
   sdm_script <- script_name
-
+  source(file = "load_functions.R")
+  
   # Need to extract species name from file to see if model has already been run
   nice_name <- strsplit(x = basename(sdm_script),
                         split = "-SDM-")[[1]][1]
