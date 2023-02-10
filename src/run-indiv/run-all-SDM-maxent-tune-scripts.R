@@ -4,6 +4,7 @@
 # 2022-08-05
 
 require(parallel)
+source(file = "load_functions.R")
 
 sdm_method <- "maxent-tune"
 
@@ -108,7 +109,9 @@ run_sdm_script <- function(script_name,
               file = log_file,
               append = TRUE)
         # Run the actual script
-        source(file = sdm_script)
+        # source(file = script_name)
+        script_run <- exec_script(script_name = script_name,
+                                  log_file = log_file)
         message_out <- paste0("Finished running script: ", sdm_script)
       } else {
         message_out <- paste0("Could not find script: ", sdm_script)
