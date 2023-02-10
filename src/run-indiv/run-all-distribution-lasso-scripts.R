@@ -19,7 +19,7 @@ all_insects <- FALSE
 # If this script is called from bash (e.g. Rscript run-all-...), see if any 
 # arguments were passed and update variables accordingly. e.g. Example below
 # Updates all_insects
-# $ Rscript run-all-SDM-<method>-scripts.R -a -f
+# $ Rscript run-all-distribution-<method>-scripts.R -a -f
 #    -a: sets all_insects to TRUE
 #    -f: sets rerun to FALSE
 args <- commandArgs(trailingOnly = TRUE)
