@@ -19,7 +19,6 @@
 #' 
 #' @return SpatRaster with predicted probabilities of occurrence based on given 
 #' species distribution model and global climate model data
-
 predict_sdm <- function(nice_name, 
                         model, 
                         sdm_method = c("brt", "glm", "gam", "lasso",

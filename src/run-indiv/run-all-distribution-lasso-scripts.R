@@ -4,6 +4,7 @@
 # 2022-08-05
 
 require(parallel)
+source(file = "load_functions.R")
 
 sdm_method <- "lasso"
 
@@ -15,13 +16,16 @@ rerun <- TRUE
 # Logical indicating whether to run prediction scripts for all species or only a 
 # subset of insects and their host plants
 all_insects <- FALSE
-# If this script is called from bash (e.g. Rscript run-all-...), see if the -a
-# flag was set to run all insects; if so, update all_insects to TRUE
-# e.g. from command line:
-# $ Rscript run-all-SDM-<method>-scripts.R -a
+# If this script is called from bash (e.g. Rscript run-all-...), see if any 
+# arguments were passed and update variables accordingly. e.g. Example below
+# Updates all_insects
+# $ Rscript run-all-SDM-<method>-scripts.R -a -f
+#    -a: sets all_insects to TRUE
+#    -f: sets rerun to FALSE
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) > 0) {
-  all_insects <- args[1] == "-a"
+  all_insects <- "-a" %in% args
+  rerun <- !("-f" %in% args)
 }
 
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
@@ -115,7 +119,9 @@ run_prediction_script <- function(script_name,
         write(x = paste0("About to run: ", script_name),
               file = log_file,
               append = TRUE)
-        source(file = script_name)
+        # source(file = script_name)
+        script_run <- exec_script(script_name = script_name,
+                                  log_file = log_file)
         gc()
         message_out <- paste0("Finished running script: ", script_name)
       } else {
