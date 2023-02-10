@@ -18,4 +18,4 @@ module load proj
 module load geos
 module load R/4.2.2
 src/bash/build-scripts-SDM.sh
-Rscript src/run-indiv/run-all-distribution-lasso-scripts.R -a
+Rscript src/run-indiv/run-all-distribution-lasso-scripts.R -a -f
