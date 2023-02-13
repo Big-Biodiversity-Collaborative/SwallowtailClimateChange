@@ -35,9 +35,9 @@ if (file.exists(gbif_pa_file)) {
   gbif_pa <- read.csv(gbif_pa_file)
   gbif_pa <- gbif_pa[order(match(gbif_pa$species, species_list$accepted_name)),]
 } else {
-gbif_pa <- as.data.frame(matrix(NA, nrow = nrow(species_list), ncol = 6))
-colnames(gbif_pa) <- c("species", "n_filtered", "n_background",
-                       "filtered_csv", "pa_csv", "mcp_shapefile")
+  gbif_pa <- as.data.frame(matrix(NA, nrow = nrow(species_list), ncol = 6))
+  colnames(gbif_pa) <- c("species", "n_filtered", "n_background",
+                         "filtered_csv", "pa_csv", "mcp_shapefile")
 }
 
 set.seed(20221109)
@@ -112,40 +112,60 @@ for (i in 1:nrow(species_list)) {
       rm(gc_dist)
 
       # Garbage can pile up at this point. Clean it up.
-      gc(verbose = FALSE)
-            
-      # Create a minimum convex polygon (MCP) for observations
-      ch <- chull(presence)
-      ch_coords <- presence[c(ch, ch[1]), ]
-      ch_polygon <- SpatialPolygons(list(Polygons(list(Polygon(ch_coords)), ID = 1)),
-                                    proj4string = CRS("+init=epsg:4326"))
-      
-      # Convert MCP to sf object and project to NA Albers Equal Area Conic 
-      ch_poly_proj <- st_as_sf(ch_polygon) %>%
-        st_transform(crs = "ESRI:102008")
-      
-      # Create a polygon = MCP + buffer
-      ch_buffer <- st_buffer(ch_poly_proj,
-                             dist = buffer * 1000)
-      
-      # Transform the buffered MCP back to lat/long 
-      ch_buffer_latlong <- st_transform(ch_buffer, 4326)
+      invisible(gc())
+
+      # Use terra functions to define the minimum convex polygon (MCP)
+      ch <- terra::convHull(x = terra::vect(x = presence,
+                                            geom = c("x", "y"),
+                                            crs = "EPSG:4326"))
+      # Create the buffer, adding a buffer; width takes argument in meters
+      ch_buffer <- terra::buffer(x = ch,
+                                 width = buffer * 1000)
+      # Maybe not necessary, but paranoia
+      terra::crs(ch_buffer) <- "EPSG:4326"
+
+      # Prior implementation relied on sp and reprojections      
+      # # Create a minimum convex polygon (MCP) for observations
+      # ch <- chull(presence)
+      # ch_coords <- presence[c(ch, ch[1]), ]
+      # ch_polygon <- SpatialPolygons(list(Polygons(list(Polygon(ch_coords)), ID = 1)),
+      #                               proj4string = CRS("+init=epsg:4326"))
+      # 
+      # # Convert MCP to sf object and project to NA Albers Equal Area Conic 
+      # ch_poly_proj <- st_as_sf(ch_polygon) %>%
+      #   st_transform(crs = "ESRI:102008")
+      # 
+      # # Create a polygon = MCP + buffer
+      # ch_buffer <- st_buffer(ch_poly_proj,
+      #                        dist = buffer * 1000)
+      # 
+      # # Transform the buffered MCP back to lat/long 
+      # ch_buffer_latlong <- st_transform(ch_buffer, 4326)
       
       # Save buffered MCP as shapefile
       shapefile_name <- paste0("data/gbif/shapefiles/", 
                                nice_name, "-buffered-mcp.shp") 
-      st_write(obj = ch_buffer_latlong, 
-               dsn = shapefile_name, 
-               append = FALSE,
-               quiet = TRUE)
-      
+      # st_write(obj = ch_buffer_latlong, 
+      #          dsn = shapefile_name, 
+      #          append = FALSE,
+      #          quiet = TRUE)
+
+      # GDAL/terra will not let us overwrite existing file (as of 2023-02-13),
+      # even when passing overwrite = TRUE
+      # So we have to manually remove the file first, then write
+      if (file.exists(shapefile_name)) {
+        invisible(file.remove(shapefile_name))
+      }
+      terra::writeVector(x = ch_buffer,
+                         filename = shapefile_name)
+
       # Convert the buffered MCP to a SpatVector
-      ch_buffer_sv <- terra::vect(ch_buffer_latlong)
+      # ch_buffer_sv <- terra::vect(ch_buffer_latlong)
       
       # Crop and mask climate data to the buffered MCP polygon
       pred_mask <- predictor %>%
-        terra::crop(ch_buffer_sv) %>%
-        terra::mask(ch_buffer_sv)
+        terra::crop(ch_buffer) %>%
+        terra::mask(ch_buffer)
 
       # Generate pseudo-absence points
       absence <- suppressWarnings(terra::spatSample(x = pred_mask,  
@@ -161,8 +181,8 @@ for (i in 1:nrow(species_list)) {
       # in suppressWarnings()
       
       # Reality check:
-      # plot(ch_buffer_sv)
-      # plot(ch_polygon, add = TRUE)
+      # plot(ch_buffer)
+      # plot(ch, add = TRUE)
       # points(y ~ x, data = absence, cex = 0.5, col = "gray")
       # points(y ~ x, data = presence, cex = 0.5, col = "blue")
       

@@ -173,7 +173,8 @@ for (i in 1:length(gbif_files)) {
                            n = n_points)
     
     # The projection string for raster conversion
-    wgs_crs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+    # wgs_crs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+    wgs_crs <- "EPSG:4326"
     # Transform this to a raster; not quite sure why, but need to do 90 degree 
     # counter-clockwise rotation of the z matrix...
     kde_raster <- terra::rast(x = apply(X = t(obs_kde$z),

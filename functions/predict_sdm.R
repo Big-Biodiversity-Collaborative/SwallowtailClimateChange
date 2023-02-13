@@ -95,6 +95,7 @@ predict_sdm <- function(nice_name,
 
     # Reliance on terra alone makes reprojection unneccessary    
     buffered_mcp <- terra::buffer(buffered_mcp, width = dist_mult * 1000)
+    terra::crs(buffered_mcp) <- "EPSG:4326"
   }
   
   # Get list of climate variables that were considered for the SDM
