@@ -81,17 +81,20 @@ predict_sdm <- function(nice_name,
   # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
   # for more distant time periods
   if (yr %in% c("2041", "2071")) {
-    # Project buffered MCP to NA Albers Equal Area Conic 
-    buffered_mcp_proj <- terra::project(buffered_mcp, "ESRI:102008")
     dist_mult <- dplyr::if_else(yr == "2041",
                                 true = 350,  # 350 km for 2041
                                 false = 900) # 900 km for 2071
     
+    # Prior approach (raster package-based) required reprojection
+    # Project buffered MCP to North America Albers Equal Area Conic 
+    # buffered_mcp_proj <- terra::project(buffered_mcp, "ESRI:102008")
     # Add to the buffer, based on appropriate distance multiplier
-    buffered_mcp <- terra::buffer(buffered_mcp_proj, width = dist_mult * 1000)
-    
+    # buffered_mcp <- terra::buffer(buffered_mcp_proj, width = dist_mult * 1000)
     # Transform back to lat/long
-    buffered_mcp <- terra::project(buffered_mcp, "EPSG:4326") 
+    # buffered_mcp <- terra::project(buffered_mcp, "EPSG:4326") 
+
+    # Reliance on terra alone makes reprojection unneccessary    
+    buffered_mcp <- terra::buffer(buffered_mcp, width = dist_mult * 1000)
   }
   
   # Get list of climate variables that were considered for the SDM
