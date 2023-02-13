@@ -89,6 +89,7 @@ run_prediction_script <- function(script_name,
                                   log_file,
                                   rerun,
                                   sdm_method) {
+  source(file = "load_functions.R")
   
   # Need to extract nice name
   nice_name <- strsplit(x = basename(script_name),
@@ -113,7 +114,10 @@ run_prediction_script <- function(script_name,
         write(x = paste0("About to run: ", script_name),
               file = log_file,
               append = TRUE)
-        source(file = script_name)
+        # source(file = script_name)
+        script_run <- exec_script(script_name = script_name,
+                                  log_file = log_file)
+        gc()
         message_out <- paste0("Finished running script: ", script_name)
       } else {
         message_out <- paste0("Could not find script: ", script_name)
