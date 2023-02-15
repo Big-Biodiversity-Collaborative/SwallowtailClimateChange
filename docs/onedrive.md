@@ -17,7 +17,7 @@ difficult
 For Linux, working through the program rclone. Alternative is to install the 
 [open source OneDrive client](https://abraunegg.github.io/).
 
-### Installing & configuring rclone
+### Installing and configuring rclone
 
 `sudo apt-get install rclone`
 `rclone config`
@@ -77,6 +77,46 @@ To test (no files changed, report of what would happen is printed):
 To actually run:
 
 `rclone copy -v output onedrive:SwallowtailClimateChange/output`
+
+### Sending from HPC to remote
+
+Set up rclone on the HPC, likely as above (see #Installing-and-configuring-rclone 
+and [https://public.confluence.arizona.edu/display/UAHPC/Transferring+Data#TransferringData-rclone](https://public.confluence.arizona.edu/display/UAHPC/Transferring+Data#TransferringData-rclone)). 
+Start the configuration process by starting an interactive session, then 
+running the configuration process:
+
+`interactive -a <username>`
+`rclone config`
+
+A couple of deviations from local setup:
+
++ When choosing the type of storage, Microsoft OneDrive is number 28.
++ There is a prompt to choose a national cloud region for OneDrive, select 1 
+(Microsoft Cloud Global)
++ Select 'n' when prompted to use autoconfig, this will require a call to 
+rclone on a _local_ machine with a web browser that can be used for 
+authentication. This will return a very long key that should be pasted into the 
+HPC shell session.
++ It will ask if the Drive is OK (it'll be a URL to the OneDrive that was set 
+up above)
++ The long key will print again and ask if the remote is OK (enter 'y')
+
+To test transfer of distribution files from HPC to remote OneDrive (do this 
+from _within_ the SwallowtailClimateChange folder on the HPC):
+
+`rclone copy -v --dry-run output/distributions onedrive:SwallowtailClimateChange/output/distributions`
+
+To actually run:
+
+`rclone copy -v output/distributions onedrive:SwallowtailClimateChange/output/distributions`
+
+Some files may fail to transfer (idiosyncratic error?); if this happens, try 
+calling `rclone copy` again.
+
+**Note** The initial transfer did not complete (ended around the "T"s 
+somewhere) because the interactive session timed out. Restarting the 
+interactive sessions and running `rclone copy` finished the job _and_ 
+transferred (most of) the files that had errored out before.
 
 ### Troubleshooting
 
