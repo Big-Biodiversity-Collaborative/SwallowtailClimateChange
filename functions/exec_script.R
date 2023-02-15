@@ -4,8 +4,9 @@
 #' @param log_file Path to file to write output to; if NULL, will print messages
 #' to screen
 #' 
-#' @return If script runs with no errors or warnings, returns value produced 
-#' from script (which is often \code{NULL})
+#' @return If script runs with no errors or warnings, returns \code{NULL}. In 
+#' cases of errors or warnings, will return the error or warning message as 
+#' character vector of length 1.
 #' 
 #' @examples 
 #' \dontrun{
