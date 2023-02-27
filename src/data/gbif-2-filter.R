@@ -8,6 +8,7 @@ require(terra)   # extracting observations with climate data
 require(dplyr)   # data wrangling
 
 # Filter observations for each species, so observations:
+#     are not on the basis of barcodes only
 #     occur between 2000-2023
 #     are in locations where climate data are available
 #     are thinned to a max of X observations per grid cell (of climate raster)
@@ -19,6 +20,27 @@ unzip(zipfile = "data/gbif-downloaded.zip")
 
 ################################################################################
 # FILTER SETTINGS
+
+########################################
+# Date of observation settings
+# Logical indicating whether or not to remove observations that are outside the 
+# range of desired years
+remove_old <- TRUE
+year_range <- 2000:2023
+
+########################################
+# Climate data filter settings
+# Logical indicating whether or not to remove any observations that are out of 
+# bounds as defined by those in locations with no (terrestrial) climate data
+remove_oob <- TRUE
+
+########################################
+# Thinning settings
+# Logical indicating whether or not to remove excess observations of species 
+# in the same grid cell (i.e., so we're left with a maximum of X observations 
+# per grid cell)
+thin <- TRUE
+max_obs_per_cell <- 1
 
 ########################################
 # Kernel density estimate envelope settings
@@ -34,25 +56,11 @@ envelope_cutoff <- 0.98
 envelope_min <- 100
 
 ########################################
-# Date of observation settings
-# Logical indicating whether or not to remove observations that are outside the 
-# range of desired years
-remove_old <- TRUE
-year_range <- 2000:2023
-
-########################################
-# Thinning settings
-# Logical indicating whether or not to remove excess observations of species 
-# in the same grid cell (i.e., so we're left with a maximum of X observations 
-# per grid cell)
-thin <- TRUE
-max_obs_per_cell <- 1
-
-########################################
-# Climate data filter settings
-# Logical indicating whether or not to remove any observations that are out of 
-# bounds as defined by those in locations with no (terrestrial) climate data
-remove_oob <- TRUE
+# Basis of observation setting
+# Logical indicating whether or not to exclude GBIF samples that have a 
+# basisOfRecord = "MATERIAL_SAMPLE" (i.e. often soil samples with species 
+# identity based on DNA barcodes)
+remove_material <- TRUE
 
 ################################################################################
 # FILE PROCESSING
@@ -77,7 +85,7 @@ clim_data <- terra::rast(tif_file)
 # Create a table that will summarize the number of excluded records per species
 gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 7))
 colnames(gbif_obs) <- c("species", "n_orig", "n_excluded",
-                        "n_old", "n_oob", "n_thin", "n_outlier")
+                        "n_old", "n_oob", "n_thin", "n_outlier", "n_material")
 
 set.seed(20221109)
 
@@ -95,6 +103,20 @@ for (i in 1:length(gbif_files)) {
   
   # Count the number of unfiltered observations
   gbif_obs$n_orig[i] <- nrow(data)
+
+  ########################################
+  # Determine if observation a material sample (i.e. soil sample)
+  data <- data %>%
+    dplyr::mutate(material_sample = (basisOfRecord == "MATERIAL_SAMPLE"))
+  
+  # Record the number of material sample observations
+  gbif_obs$n_material[i] <- sum(data$material_sample)
+  
+  # Remove material sample records
+  if (remove_material) {
+    data <- data %>%
+      dplyr::filter(!material_sample)
+  }
 
   ########################################
   # Determine if observation is recent enough
@@ -203,10 +225,10 @@ for (i in 1:length(gbif_files)) {
   }
 
   ########################################
-  # Drop those columns needed for filtering
+  # Drop those columns we used for filtering
   data <- data %>%
     dplyr::select(-c(outside_dates, missing_climate, thin, outside_envelope,
-                     climate, bio1, cell, obs_no))
+                     climate, bio1, cell, obs_no, material_sample))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)

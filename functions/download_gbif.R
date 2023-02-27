@@ -176,7 +176,7 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
       # Select only those columns we want to write to file
       obs <- obs %>%
         dplyr::select(gbifID, species, longitude, latitude, 
-                      year, month, day, countryCode)
+                      year, month, day, countryCode, basisOfRecord)
       
       # Before writing to file, add a column with accepted name (which
       # may be different than what GBIF puts in species column)
