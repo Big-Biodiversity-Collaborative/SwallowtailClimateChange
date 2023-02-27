@@ -41,7 +41,7 @@ exec_script <- function(script_name, log_file = NULL) {
       }
       return(error_message)
     }, # end of error function
-    warning = function(w) {
+    warning_f = function(w) {
       warning_message <- paste0("Warning while running: ", script_name, ": ", w)
       
       # Only try writing to a log if a filename was passed
