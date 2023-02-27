@@ -185,7 +185,7 @@ for (i in 1:length(gbif_files)) {
     # Create a column indicating if observation is outside envelope
     data <- data %>% 
       dplyr::mutate(outside_envelope = !as.logical(envelope)) %>%
-      dplyr::select(-envelope)
+      dplyr::select(-c(envelope, kde_pred))
   } else { 
     # For subsequent processing, need to add the outside_envelope column to any 
     # dataset that had too few observations for envelope calculations
@@ -206,7 +206,7 @@ for (i in 1:length(gbif_files)) {
   # Drop those columns needed for filtering
   data <- data %>%
     dplyr::select(-c(outside_dates, missing_climate, thin, outside_envelope,
-                     climate, cell, obs_no))
+                     climate, bio1, cell, obs_no))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
