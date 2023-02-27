@@ -27,8 +27,8 @@ The project uses the following additional R packages:
 + gbm (for BRT models)
 + ggplot2
 + kernlab
++ ks
 + maptools
-+ MASS (part of base R, but needs loading)
 + Matrix (for lasso models)
 + mgcv
 + parallel (usually part of R distribution, but needs explicit loading)

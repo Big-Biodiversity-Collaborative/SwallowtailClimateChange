@@ -3,19 +3,15 @@
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-06-21
 
-require(MASS)    # kernel density estimation
+require(ks)      # kernel density estimation
 require(terra)   # extracting observations with climate data
 require(dplyr)   # data wrangling
-
-# TODO: Resolution of envelope is based on 0.5 degrees, but climate data are in 
-#       ~ 0.04 degree resolution (2.5 min, ~ 4.5km). Should we make higher
-#       resolution envelope?
 
 # Filter observations for each species, so observations:
 #     occur between 2000-2023
 #     are in locations where climate data are available
 #     are thinned to a max of X observations per grid cell (of climate raster)
-#     are inside the 95% contour of observations
+#     are inside the 98% contour of observations
 # Filters are applied in the order above.
 
 # First extract the zip file that has downloaded data
@@ -30,9 +26,9 @@ unzip(zipfile = "data/gbif-downloaded.zip")
 # to filter by kernel density estimate envelope.
 envelope_filter <- TRUE
 # The cutoff for envelope; proportion of observations that defines envelope; 
-# i.e. value of 0.95 will remove observations falling outside the 95% density 
+# i.e. value of 0.98 will remove observations falling outside the 98% density 
 # contour
-envelope_cutoff <- 0.95
+envelope_cutoff <- 0.98
 # Problems with kernel density envelope when few observations are present; skip
 # the envelope filtering if number of observations is below this
 envelope_min <- 100
@@ -164,69 +160,34 @@ for (i in 1:length(gbif_files)) {
   ########################################
   # Determine if observation is in envelope
   if (nrow(data) >= envelope_min) {
-
-    # Calculate density envelope; using a 0.5 degree resolution
-    n_points <- c(abs(max(data$longitude) - min(data$longitude)) * 2,
-                  abs(max(data$latitude) - min(data$latitude)) * 2)
-    obs_kde <- MASS::kde2d(x = data$longitude,
-                           y = data$latitude, 
-                           n = n_points)
     
-    # The projection string for raster conversion
-    # wgs_crs <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-    wgs_crs <- "EPSG:4326"
-    # Transform this to a raster; not quite sure why, but need to do 90 degree 
-    # counter-clockwise rotation of the z matrix...
-    kde_raster <- terra::rast(x = apply(X = t(obs_kde$z),
-                                        MARGIN = 2,
-                                        FUN = rev),
-                              extent = terra::ext(x = c(xmin = min(obs_kde$x), 
-                                                        xmax = max(obs_kde$x),
-                                                        ymin = min(obs_kde$y), 
-                                                        ymax = max(obs_kde$y))),
-                              crs = wgs_crs)
+    # Create matrix of observations
+    obs_mat <- as.matrix(data[, c("longitude", "latitude")])
     
-    # From https://mhallwor.github.io/_pages/activities_GenerateTerritories
-    # Set zeros to NA
-    kde_raster[kde_raster == 0] <- NA
-    # Get the values as a vector
-    kde_values <- terra::values(kde_raster)
-    # Sort all the not missing values
-    sorted_values <- sort(kde_values[!is.na(kde_values)], 
-                          decreasing = TRUE)
-    # Create cumulative sum of those sorted values
-    summed_values <- cumsum(x = sorted_values)
-    # Find index of those sorted values for the cutoff
-    cutoff_index <- sum(summed_values <= envelope_cutoff * summed_values[length(summed_values)])
-    # Set the values of the raster to 0 or 1 based on that cutoff
-    kde_envelope <- terra::setValues(kde_raster,
-                                     kde_values >= sorted_values[cutoff_index])
-
-    # Pull out values from the kde_envelope raster and add them to data; 
-    # 0 = outside envelope, 1 = inside envelope
-    data$envelope <- terra::extract(x = kde_envelope,
-                                    y = data[,c('longitude','latitude')])[, 2]
-    data$envelope <- as.numeric(data$envelope)
-
-    # Sometimes values for envelope are NA if point is on edge of the defined 
-    # envelope; count those as outliers, too
-    data <- data %>%
-      dplyr::mutate(envelope = if_else(is.na(envelope), 0, envelope))
+    # Create density envelope using normal scale smoothing parameters (as these 
+    # seemed to be reasonable without "overfitting")
+    hns <- ks::Hns(obs_mat)
+    f_hns <- ks::kde(obs_mat, H = hns)
+    data$kde_pred <- predict(object = f_hns, x = obs_mat)
+    env_threshold <- (1 - envelope_cutoff) * 100
     
+    # Identify those observations that fall within the envelope
+    data$envelope <- ifelse(data$kde_pred >= f_hns$cont[paste0(env_threshold, "%")], 
+                            1, 0)
+
     # Reality check
-    # plot(kde_envelope, col = c("white", "grey75"))
-    # points(x = data$longitude, y = data$latitude, pch = 16,
-    #        cex = 0.75, col = "blue")
-    # points(x = data$longitude[data$envelope == 0],
-    #        y = data$latitude[data$envelope == 0],
-    #        cex = 1, col = "red", pch = 16)
+    # plot(latitude ~ longitude, data = data, col = "gray30", pch = 19, cex = 0.5,
+    #      las = 1, xlab = "", ylab = "")
+    # plot(f_hns, cont = 98, drawlabels = FALSE, col = "blue", add = TRUE)
+    # points(latitude ~ longitude, data = data[data$envelope == 1, ], 
+    #        col = "gray70", pch = 19, cex = 0.5)  
 
-    # Create the column indicating if observation is outside envelope
+    # Create a column indicating if observation is outside envelope
     data <- data %>% 
       dplyr::mutate(outside_envelope = !as.logical(envelope)) %>%
-      dplyr::select(-envelope)
+      dplyr::select(-c(envelope, kde_pred))
   } else { 
-    # for subsequent processing, need to add the outside_envelope column to any 
+    # For subsequent processing, need to add the outside_envelope column to any 
     # dataset that had too few observations for envelope calculations
     data <- data %>%
       dplyr::mutate(outside_envelope = FALSE)
@@ -245,7 +206,7 @@ for (i in 1:length(gbif_files)) {
   # Drop those columns needed for filtering
   data <- data %>%
     dplyr::select(-c(outside_dates, missing_climate, thin, outside_envelope,
-                     climate, cell, obs_no))
+                     climate, bio1, cell, obs_no))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
