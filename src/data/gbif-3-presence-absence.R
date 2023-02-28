@@ -63,9 +63,8 @@ for (i in 1:nrow(species_list)) {
   obs_file <- paste0("data/gbif/filtered/",
                      nice_name,
                      "-gbif.csv")
-  if (!file.exists(obs_file)) {
-    unzip(zipfile = "data/gbif-filtered.zip")
-  }
+  # Unzip to make sure we're using data from the most recent download
+  unzip(zipfile = "data/gbif-filtered.zip", overwrite = TRUE) 
 
   # There's a chance that a file might not be present, even after unzipping; 
   # note this and move on.
