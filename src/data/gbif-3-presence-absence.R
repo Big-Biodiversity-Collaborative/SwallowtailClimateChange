@@ -63,8 +63,11 @@ for (i in 1:nrow(species_list)) {
   obs_file <- paste0("data/gbif/filtered/",
                      nice_name,
                      "-gbif.csv")
-  # Unzip to make sure we're using data from the most recent download
-  unzip(zipfile = "data/gbif-filtered.zip", overwrite = TRUE) 
+  # Unzip the first time around to make sure we're using data from the most 
+  # recent download
+  if (i == 1) {
+    unzip(zipfile = "data/gbif-filtered.zip", overwrite = TRUE) 
+  }
 
   # There's a chance that a file might not be present, even after unzipping; 
   # note this and move on.
@@ -151,9 +154,12 @@ for (i in 1:nrow(species_list)) {
 
       # GDAL/terra will not let us overwrite existing file (as of 2023-02-13),
       # even when passing overwrite = TRUE
-      # So we have to manually remove the file first, then write
+      # So we have to manually remove related files first, then write
       if (file.exists(shapefile_name)) {
-        invisible(file.remove(shapefile_name))
+        to_delete <- list.files(path = "data/gbif/shapefiles/", 
+                                pattern = paste0(nice_name, "-buffered-mcp"),
+                                full.names = TRUE)
+        invisible(file.remove(to_delete))
       }
       terra::writeVector(x = ch_buffer,
                          filename = shapefile_name)
