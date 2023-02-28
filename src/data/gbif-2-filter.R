@@ -22,6 +22,13 @@ unzip(zipfile = "data/gbif-downloaded.zip")
 # FILTER SETTINGS
 
 ########################################
+# Basis of observation setting
+# Logical indicating whether or not to exclude GBIF samples that have a 
+# basisOfRecord = "MATERIAL_SAMPLE" (i.e. often soil samples with species 
+# identity based on DNA barcodes)
+remove_material <- TRUE
+
+########################################
 # Date of observation settings
 # Logical indicating whether or not to remove observations that are outside the 
 # range of desired years
@@ -55,13 +62,6 @@ envelope_cutoff <- 0.98
 # the envelope filtering if number of observations is below this
 envelope_min <- 100
 
-########################################
-# Basis of observation setting
-# Logical indicating whether or not to exclude GBIF samples that have a 
-# basisOfRecord = "MATERIAL_SAMPLE" (i.e. often soil samples with species 
-# identity based on DNA barcodes)
-remove_material <- TRUE
-
 ################################################################################
 # FILE PROCESSING
 
@@ -83,9 +83,12 @@ tif_file <- list.files(path = "data/wc2-1",
 clim_data <- terra::rast(tif_file)
 
 # Create a table that will summarize the number of excluded records per species
-gbif_obs <- as.data.frame(matrix(NA, nrow = length(gbif_files), ncol = 7))
-colnames(gbif_obs) <- c("species", "n_orig", "n_excluded",
-                        "n_old", "n_oob", "n_thin", "n_outlier", "n_material")
+summary_cols <- c("species", "n_orig", "n_excluded",
+                  "n_old", "n_oob", "n_thin", "n_outlier", "n_material")
+gbif_obs <- as.data.frame(matrix(NA, 
+                                 nrow = length(gbif_files), 
+                                 ncol = length(summary_cols)))
+colnames(gbif_obs) <- summary_cols
 
 set.seed(20221109)
 
@@ -106,6 +109,11 @@ for (i in 1:length(gbif_files)) {
 
   ########################################
   # Determine if observation a material sample (i.e. soil sample)
+  # In some cases, the column did not come through, in this case, add it
+  if (!("basisOfRecord" %in% colnames(data))) {
+    data <- data %>%
+      mutate(basisOfRecord = NA_character_)
+  }
   data <- data %>%
     dplyr::mutate(material_sample = (basisOfRecord == "MATERIAL_SAMPLE"))
   
@@ -117,7 +125,6 @@ for (i in 1:length(gbif_files)) {
     data <- data %>%
       dplyr::filter(!material_sample)
   }
-
   ########################################
   # Determine if observation is recent enough
   data <- data %>%
