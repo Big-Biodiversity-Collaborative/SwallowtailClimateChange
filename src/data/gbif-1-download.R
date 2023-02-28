@@ -9,13 +9,13 @@
 source(file = "load_functions.R")
 
 gbif_data <- read.csv(file = "data/gbif-reconcile.csv")
-replace <- FALSE
+replace <- TRUE
 
 # File to write messages for failed queries; passed to download_gbif
-logfile <- "data/gbif/download-log.txt"
+logfile <- "logs/download-log.txt"
 
 sink(file = logfile)
-cat(Sys.Date(), " download log/n", sep = "")
+cat(Sys.time(), " download log/n", sep = "")
 sink()
 
 # For testing with subset
