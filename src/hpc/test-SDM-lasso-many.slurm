@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2023-01-19
 
-#SBATCH --job-name=test-SDM-lasso-many
+#SBATCH --job-name=SDM-lasso-many
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 2 hours

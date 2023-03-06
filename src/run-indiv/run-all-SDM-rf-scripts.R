@@ -18,17 +18,19 @@ message_out <- ""
 # Logical indicating whether or not to re-run script if the model output already 
 # exists
 rerun <- TRUE
-
 # Logical indicating whether to run SDMs for all species or only a subset of 
 # insects and their host plants
 all_insects <- FALSE
-# If this script is called from bash (e.g. Rscript run-all-...), see if the -a
-# flag was set to run all insects; if so, update all_insects to TRUE
-# e.g. from command line:
-# $ Rscript run-all-SDM-<method>-scripts.R -a
+# If this script is called from bash (e.g. Rscript run-all-...), see if any 
+# arguments were passed and update variables accordingly. e.g. Example below
+# Updates all_insects
+# $ Rscript run-all-SDM-<method>-scripts.R -a -f
+#    -a: sets all_insects to TRUE
+#    -f: sets rerun to FALSE
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) > 0) {
-  all_insects <- args[1] == "-a"
+  all_insects <- "-a" %in% args
+  rerun <- !("-f" %in% args)
 }
 
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 

@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2023-01-19
 
-#SBATCH --job-name=run-all-distribution-maxent-tune
+#SBATCH --job-name=dist-maxent-tune-all
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 10 hours

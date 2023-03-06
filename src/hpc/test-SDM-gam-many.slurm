@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2023-01-19
 
-#SBATCH --job-name=test-SDM-gam-many
+#SBATCH --job-name=SDM-gam-many
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 2 hours

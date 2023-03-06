@@ -18,7 +18,6 @@ message_out <- ""
 # Logical indicating whether or not to re-run script if the model output already 
 # exists
 rerun <- TRUE
-
 # Logical indicating whether to run SDMs for all species or only a subset of 
 # insects and their host plants
 all_insects <- FALSE

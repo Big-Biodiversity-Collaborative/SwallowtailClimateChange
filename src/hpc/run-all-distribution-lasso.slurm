@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2023-01-19
 
-#SBATCH --job-name=run-all-distribution-lasso
+#SBATCH --job-name=dist-lasso-all
 #SBATCH --ntasks=16
 #SBATCH --nodes=1
 ### Asking for 10 hours
