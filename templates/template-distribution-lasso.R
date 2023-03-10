@@ -4,6 +4,7 @@
 # ezylstra@arizona.edu
 # 2022-10-12
 
+require(raster)
 require(Matrix)
 require(terra)
 
