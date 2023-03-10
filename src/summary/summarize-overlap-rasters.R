@@ -40,20 +40,23 @@ summaries <- as.data.frame(expand_grid(insect = insects,
                                        climate = climate_names_short)) %>%
   mutate(area = NA,
          percent_current = NA,
-         median_lat = NA,  
-         mean_shift = NA,
-         median_shift = NA,
-         pvalue_shift = NA)
+         max_Nlat = NA,
+         median_Nlat = NA,  
+         mean_Nshift = NA,
+         median_Nshift = NA,
+         pvalue_Nshift = NA)
 
 # area = total land area (sq km) predicted to be suitable
 # percent_current = percent of area predicted suitable in current time period 
   # that's predicted to be suitable in the future
-# median_lat = median latitude of the northernmost cell in each longitudinal band
-# mean_shift = mean northward shift (degrees) in each longitudinal band (only 
+# max_Nlat = Northern extent of predicted range
+# median_Nlat = median latitude among the northernmost cells in each 
+  # longitudinal band
+# mean_Nshift = mean northward shift (degrees) in each longitudinal band (only 
   # for bands that have >=1 cell considered suitable in both time periods)
-# median_shift  = median northward shift (degrees) in each longitudinal band 
+# median_Nshift  = median northward shift (degrees) in each longitudinal band 
   # (only for bands that have >=1 cell considered suitable in both time periods)
-# pvalue_shift = p-value from one-sided t-test evaluating evidence of a northern 
+# pvalue_Nshift = p-value from one-sided t-test evaluating evidence of a northern 
   # shift
 
 # Loop through insect species
@@ -113,15 +116,19 @@ for (i in 1:length(insects)) {
       
       # Create a data frame with lat/long for all non-NA cells
       current_df <- terra::as.data.frame(current, xy = TRUE, na.rm = TRUE)
-      
+
       # Calculate maximum latitude for each longitudinal band
       current_lats <- current_df %>%
         group_by(x) %>%
         summarize(max_current = max(y)) %>%
         data.frame()
       
+      # Calculate maximum latitude (across entire predicted range) and add to 
+      # summaries
+      summaries$max_Nlat[row_index_c] <- max(current_lats$max_current)
+      
       # Calculate median latitude along northern boundary and add to summaries
-      summaries$median_lat[row_index_c] <- median(current_lats$max_current)
+      summaries$median_Nlat[row_index_c] <- median(current_lats$max_current)
       
     # Loop through future climate scenarios
     for (j in 2:nrow(climate_models)) {
@@ -142,8 +149,11 @@ for (i in 1:length(insects)) {
         summarize(max = max(y)) %>%
         data.frame()
       
+      # Calculate maximum latitude and add to summaries
+      summaries$max_Nlat[row_index] <- max(future_lats$max)
+      
       # Calculate median latitude along northern boundary and add to summaries
-      summaries$median_lat[row_index] <- median(future_lats$max)
+      summaries$median_Nlat[row_index] <- median(future_lats$max)
       
       # Calculate percent of current distribution that's suitable in future
       future <- terra::crop(future, current)
@@ -153,17 +163,27 @@ for (i in 1:length(insects)) {
       
       # Join future and current latitudinal data (only including longitudinal 
       # bands that have suitable areas in both time periods)
-      future_lats <- inner_join(current_lats, future_lats, by = "x")
-      # Calculating shift in each longitudinal band
-      future_lats$shift <- future_lats$max - future_lats$max_current
-      summaries$mean_shift[row_index] <- round(mean(future_lats$shift), 2)
-      summaries$median_shift[row_index] <- round(median(future_lats$shift), 2)
-      # Paired t-test to see if edge has shifted north
-      ttest_p <- t.test(x = future_lats$max,
-                        y = future_lats$max_current,
-                        paired = TRUE,
-                        alternative = "greater")$p.value
-      summaries$pvalue_shift[row_index] <- round(ttest_p, 3)
+        # Rounding longitudes first to ensure there are matching values
+        current_lats$x <- round(current_lats$x, 4)
+        future_lats$x <- round(future_lats$x, 4)
+        future_lats <- inner_join(current_lats, future_lats, by = "x")
+        
+      if (nrow(future_lats) == 0) {
+        message("None of the same longitudinal bands are in the current and future distributions for ",
+                insects[i], ", ", clim_model, ".")
+      } else {
+        
+        # Calculating shift in each longitudinal band
+        future_lats$shift <- future_lats$max - future_lats$max_current
+        summaries$mean_Nshift[row_index] <- round(mean(future_lats$shift), 2)
+        summaries$median_Nshift[row_index] <- round(median(future_lats$shift), 2)
+        # Paired t-test to see if edge has shifted north
+        ttest_p <- t.test(x = future_lats$max,
+                          y = future_lats$max_current,
+                          paired = TRUE,
+                          alternative = "greater")$p.value
+        summaries$pvalue_Nshift[row_index] <- round(ttest_p, 3)
+      }
     }
   }
 }  
