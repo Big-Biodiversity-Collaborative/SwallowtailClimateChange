@@ -48,10 +48,10 @@ for (i in 1:nrow(species_list)) {
   nice_name <- tolower(x = gsub(pattern = " ",
                                 replacement = "_",
                                 x = species))
-  filename <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv")
+  pa_file <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv")
   
   # Only proceed if file doesn't exist or we want to replace existing files
-  if (file.exists(filename) & replace == FALSE) next
+  if (file.exists(pa_file) & replace == FALSE) next
   
   if (verbose) {
     message(paste0("\n****  Beginning process for ", species, "  ****"))
@@ -82,15 +82,23 @@ for (i in 1:nrow(species_list)) {
     obs <- read.csv(file = obs_file)
 
     # Skip species that have fewer than the minimum number of filtered records 
-    # indicated above
+    # indicated above; if a P/A file exists, remove it
     if (nrow(obs) < min_records) {
       gbif_pa$n_filtered[i] <- nrow(obs)
       gbif_pa$n_background[i] <- 0
       gbif_pa$filtered_csv[i] <- "yes"
       gbif_pa$pa_csv[i] <- "no"
       gbif_pa$mcp_shapefile[i] <- "no"
-      message(paste0("Less than ", min_records, " filtered records for ", 
-                     species, ". No background points created."))
+      # If a presence absence file for this species exists, we need to remove 
+      # it so SDMs won't be attempted
+      if (file.exists(pa_file)) {
+        file.remove(pa_file)
+        message(paste0("Less than ", min_records, " filtered records for ", 
+                       species, ". No background points created and previous file on disk removed."))
+      } else {
+        message(paste0("Less than ", min_records, " filtered records for ", 
+                       species, ". No background points created."))
+      }
     } else {
       # Retain just the geographic coordinates
       presence <- obs %>%
@@ -206,7 +214,7 @@ for (i in 1:nrow(species_list)) {
                                     fold = fold,
                                     rbind(presence, absence)))
       write.csv(x = full_data,
-                file = filename,
+                file = pa_file,
                 row.names = FALSE)
       
       gbif_pa$n_filtered[i] <- nrow(presence)
@@ -218,7 +226,7 @@ for (i in 1:nrow(species_list)) {
       if (verbose) {
         message(paste0("****  ",nrow(presence), " gbif records and ", 
                        nrow(absence), " pseudo-absence records written to ",
-                       filename, "  ****"))
+                       pa_file, "  ****"))
       }
     }
   }
