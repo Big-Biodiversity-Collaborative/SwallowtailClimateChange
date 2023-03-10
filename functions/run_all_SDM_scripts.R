@@ -19,7 +19,7 @@ run_all_SDM_scripts <- function(sdm_method = c("brt", "gam", "lasso", "maxent-tu
   # Extract the name of this function for reporting
   function_name <- as.character(match.call())[1]
   
-  if (require(parallel)) {
+  if (!require(parallel)) {
     stop(function_name, "requires parallel package, but it could not be loaded")
   }
   
