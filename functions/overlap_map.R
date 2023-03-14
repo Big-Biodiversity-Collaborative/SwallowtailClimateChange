@@ -2,12 +2,10 @@
 #' 
 #' @param species_name character vector with name of insect species, e.g. 
 #' "Papilio multicaudata"
-#' @param predictor character vector indicating which climate variables on 
-#' which predictions are based
-#' @param sdm_method character vector of the method used to generate species 
-#' distribution model
-#' @param crop_to_insect logical indicating whether plot should be cropped to 
-#' range of the insect
+#' @param overlap_raster raster with overlap between predicted ranges of insect
+#' and its hostplants (raster values = 0:3)
+#' @param clim_model character vector indicating climate variables on which  
+#' predictions are based
 #' @param include_legend logical indicating whether legend should be included
 #' or not
 #' @param horizontal_legend logical indicating whether legend should be 
@@ -20,87 +18,24 @@
 #' maps only) should include the scenario and year (title_scenarioyear = TRUE)
 #' or just say "future" (title_scenarioyear = FALSE)
 overlap_map <- function(species_name, 
-                        predictor,
-                        sdm_method = c("glm", "svm", "maxent-notune", "brt"),
-                        crop_to_insect = FALSE,
+                        overlap_raster,
+                        clim_model = clim_model,
                         include_legend = TRUE,
                         horizontal_legend = FALSE,
                         generic_legend = FALSE,
                         title_scenarioyear = TRUE) {
-  if (!require(raster)) {
-    stop("overlap_map requires raster package, but it could not be loaded")
+  if (!require(terra)) {
+    stop("overlap_map requires terra package, but it could not be loaded")
   }
+  if (!require(tidyterra)) {
+    stop("overlap_map requires tidyterra package, but it could not be loaded")
+  }  
   if (!require(dplyr)) {
     stop("overlap_map requires dplyr package, but it could not be loaded")
   }
   if (!require(ggplot2)) {
     stop("overlap_map requires ggplot2 package, but it could not be loaded")
   }
-
-  # predictor <- match.arg(predictor)
-  sdm_method <- match.arg(sdm_method)
-  
-  nice_name <- tolower(x = gsub(pattern = " ",
-                                replacement = "_",
-                                x = species_name))
-  
-  overlap_file <- paste0("output/overlaps/",
-                         nice_name, 
-                         "-overlap-",
-                         sdm_method, 
-                         "-",
-                         predictor, 
-                         ".rds")
-  
-  if (!file.exists(overlap_file)) {
-    message(paste0("Could not find overlap file for ", species_name, 
-                   "; no map produced"))
-    return(NULL)
-  }
-  
-  overlap <- readRDS(file = overlap_file)
-  
-  # If requested, crop the raster to extent of insect
-  if (crop_to_insect) {
-    # We need to determine geographic extent of insect (values of 1 and 3) in
-    # order to do crop
-    insect <- overlap
-    # First classify pixels that are not 1 or 3 as NA
-    insect <- raster::reclassify(x = insect, 
-                                 rcl = matrix(data = c(0, NA, 2, NA), 
-                                              ncol = 2, byrow = TRUE))
-    
-    # Make sure there are at least some non-NA pixels
-    if (nrow(raster::freq(x = insect, useNA = "no")) > 0) {
-      # Trim the raster to only include extent of non-NA pixels
-      insect <- raster::trim(x = insect)
-      # Get the extent of the insect
-      insect_extent <- extent(insect)
-      # Crop the overlap raster and go from there
-      overlap <- raster::crop(x = overlap, y = insect_extent)
-    } else {
-      # No cells were found with insect, so cannot use crop to insect
-      warning(paste0("No pixels indicated presence of ", species_name, 
-                     " in overlap raster file ", overlap_file, 
-                     ". Map will not be cropped."))
-    }
-  }
-  
-  # Use ggplot to plot these rasters, but we need to extract raster information 
-  # into a data frame
-  
-  # Convert to data frame (two steps to do so)
-  # First, to a SpatialPointsDataFrame
-  overlap_points <- raster::rasterToPoints(x = overlap, 
-                                           spatial = TRUE)
-  # Then to a dataframe
-  overlap_df <- data.frame(overlap_points)
-  rm(overlap_points)
-  
-  # Rename columns so they plot without extra ggplot commands
-  overlap_df <- overlap_df %>%
-    dplyr::rename(Longitude = x,
-                  Latitude = y)
   
   # Want an abbreviated version of species name for title & legend
   name_split <- unlist(strsplit(x = species_name, split = " "))
@@ -108,58 +43,53 @@ overlap_map <- function(species_name,
                       ". ", name_split[2])
   and_hosts <- paste0(abbr_name, " & hosts")
   
-  # Create column indicating what each layer means
+  # Plotting details
+  # Important note: values in raster are 0:3 with 1 = insect only, 2 = host only 
+  # But for plotting, it's nicer to have the levels in this order:
+  # 1 = Both absent, 2 = hosts only, 3 = insect only, 4 = both present
+  
+  # Labels for legend
   if (generic_legend) {
-    status_levels <- c("Absent", 
-                       "Hosts only",
-                       "Butterfly only", 
-                       "Butterfly and hosts")    
+    labels <- c("Absent", 
+                "Hosts only", 
+                "Butterfly only",
+                "Butterfly and hosts")    
   } else {
-    status_levels <- c("Absent", 
-                       "Hosts only",
-                       abbr_name, 
-                       and_hosts)     
+    labels <- c("Absent", 
+                "Hosts only",
+                paste0(abbr_name, " only"),
+                and_hosts)     
   }
-
-  # TODO: Better way of doing this?
-  # NOTE NOTE NOTE!!! level indexes differ from layer values
-  overlap_df <- overlap_df %>%
-    dplyr::mutate(Status = dplyr::case_when(layer == 0 ~ status_levels[1],
-                                            layer == 1 ~ status_levels[3],
-                                            layer == 2 ~ status_levels[2],
-                                            layer == 3 ~ status_levels[4])) %>%
-    dplyr::mutate(Status = factor(x = Status,
-                                  levels = status_levels))
+  
+  # Set levels in categorical raster (note that we're switching 1 and 2
+  # to list "hosts only" before "insect only" in legend)
+  overlap2 <- as.factor(overlap)
+  levels(overlap2) <- data.frame(value = c(0, 2, 1, 3), desc = labels)
   
   color_vec <- c("#e5e5e5",   # Absent
-                 "#b2df8a",   # Hosts only
-                 "#a6cee3",   # Insect only
-                 "#1f78b4")   # Hosts and insect
-  
-  names(color_vec) <- status_levels
-
+                          "#b2df8a",   # Hosts only
+                          "#a6cee3",   # Insect only
+                          "#1f78b4")   # Hosts and insect  
+                          
+  # Plot title
   if (title_scenarioyear) {
-    title_text <- labs(title = paste0(abbr_name, " and hosts ", predictor))
+    title_text <- labs(title = paste0(abbr_name, " and hosts, ", clim_model))
   } else {
-    future_text <- ifelse(predictor == "current", "current", "future")
-    title_text <- labs(title = paste0(abbr_name, " and hosts ",future_text)) 
+    future_text <- ifelse(clim_model == "current", "current", "future")
+    title_text <- labs(title = paste0(abbr_name, " and hosts, ",future_text)) 
   }
   
-  overlap_plot_base <- ggplot(data = overlap_df, 
-                              mapping = aes(x = Longitude, 
-                                            y = Latitude, 
-                                            fill = Status)) +
-    geom_raster() +
-    scale_fill_manual(values = color_vec) +
+  overlap_plot_base <- ggplot() +
+    geom_spatraster(data = overlap2, maxcell = Inf) +
+    scale_fill_manual(values = color_vec, na.translate = FALSE) +
     title_text +
-    coord_equal() + 
     theme_bw()
   
   if (include_legend == TRUE & horizontal_legend == TRUE) {
     overlap_plot <- overlap_plot_base +
-        theme(axis.title = element_blank(),
-              legend.title = element_blank(),
-              legend.position = "bottom")
+      theme(axis.title = element_blank(),
+            legend.title = element_blank(),
+            legend.position = "bottom")
   } else if (include_legend == TRUE & horizontal_legend == FALSE) {
     overlap_plot <- overlap_plot_base +
       theme(axis.title = element_blank(),
@@ -169,6 +99,6 @@ overlap_map <- function(species_name,
       theme(axis.title = element_blank(),
             legend.position = "None")    
   }
-
+  
   return(overlap_plot)  
 }

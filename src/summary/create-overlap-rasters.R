@@ -14,8 +14,14 @@ require(stringr)
 # 2 = At least one host plant predicted present, but insect predicted absent
 # 3 = Insect and at least one host plant predicted present
 
-# TODO: save overlap maps (eg, pngs) to file?
-# TODO: Output messages/warnings to a log file for record keeping?
+# Logical indicating whether to replace an overlap raster if one already exists
+replace <- TRUE
+
+# Logical indicating whether to save overlap maps (i.e., images) to file
+save_maps <- TRUE
+file_ext <- "png"
+# Load up the functions (really just needed to load the overlap_map function)
+source(file = "load_functions.R")
 
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
@@ -57,9 +63,7 @@ for (i in 1:length(insects)) {
     message("*** Missing one or more consensus rasters for ", insect, 
             ". Did not create overlap rasters.")
   } else {
-    
-    cat(paste0("Creating overlap rasters for ", insect, ".\n"))
-  
+
     # Identify host plants and extract consensus raster files
     plants <- ih$host_accepted[ih$insect == insect]
     plant_nice_names <- plants %>%
@@ -79,7 +83,7 @@ for (i in 1:length(insects)) {
         plant_files <- c(plant_files, plant_files_new)
       }
     }
-
+    
     for (clim_model in climate_models$name) {
       
       dist_files <- str_subset(c(insect_files, plant_files), clim_model)
@@ -89,13 +93,26 @@ for (i in 1:length(insects)) {
         message("*** Missing consensus rasters for all hosts associated with ",
                 insect, ", ", clim_model, ". Did not create overlap raster.")
       } else {
-
+        
+        overlap_file <- paste0("output/overlaps/",
+                               insect_nice_name, 
+                               "-overlap-",
+                               clim_model,
+                               ".rds")
+        
+        # Skip rest of loop if file exists and we don't want to replace it
+        if (file.exists(overlap_file) & replace == FALSE) next
+        
+        # Update on progress
+        cat(paste0("Creating overlap raster for ", insect, 
+                   ", ", clim_model, ".\n"))
+        
         # Load consensus raster for insect and create a raster with the species'
         # predicted distribution (ie, convert consensus raster to binary values 
         # based on the number of SDMs that predict presence)
         insect_dist <- readRDS(dist_files[1])
         insect_dist <- as.numeric(insect_dist >= min_sdms)
-
+        
         # Load consensus rasters for host plants, crop rasters to match extent 
         # of the insect, and convert to binary values. 
         plant_list <- list()
@@ -114,16 +131,16 @@ for (i in 1:length(insects)) {
           plant_list[[j]] <- terra::extend(plant_list[[j]], all_plants_ext)
         }
         host_dist <- terra::rast(plant_list)
-
+        
         # Calculate the number of host plants present in each cell
         host_dist <- sum(host_dist, na.rm = TRUE)
         
         # Make cell values = 2 where at least one host plant is present, zero 
         # otherwise
-          # First create 3-column matrix, with values in columns 1-2 
-          # representing a range of cell values you want to reclassify, and a 
-          # value in the 3rd column containing the new value for those cells.
-          rcl <- rbind(c(0, 0, 0), c(1, 100, 2))
+        # First create 3-column matrix, with values in columns 1-2 
+        # representing a range of cell values you want to reclassify, and a 
+        # value in the 3rd column containing the new value for those cells.
+        rcl <- rbind(c(0, 0, 0), c(1, 100, 2))
         host_dist <- terra::classify(x = host_dist, 
                                      rcl = rcl,
                                      right = NA)
@@ -145,14 +162,35 @@ for (i in 1:length(insects)) {
         overlap <- sum(overlap)
         
         # Save overlap raster to file
-        overlap_file <- paste0("output/overlaps/",
-                               insect_nice_name, 
-                               "-overlap-",
-                               clim_model,
-                               ".rds")
         saveRDS(object = overlap, 
                 file = overlap_file)
         
+        # Save map to file
+        if (save_maps) {
+          
+          cat(paste0("Saving overlap map for ", insect, 
+                     ", ", clim_model, ".\n"))
+          
+          map_object <- overlap_map(species_name = insects[i],
+                                    overlap_raster = overlap,
+                                    clim_model = clim_model,
+                                    include_legend = TRUE,
+                                    horizontal_legend = FALSE,
+                                    generic_legend = FALSE,
+                                    title_scenarioyear = TRUE)
+          
+          map_file <- paste0("output/maps/",
+                             insect_nice_name, 
+                             "-overlap-",
+                             clim_model,
+                             ".", file_ext)
+          
+          ggsave(filename = map_file,
+                 plot = map_object, 
+                 width = 6, 
+                 height = 6,
+                 units = "in")
+        }
       }
     } 
   }
