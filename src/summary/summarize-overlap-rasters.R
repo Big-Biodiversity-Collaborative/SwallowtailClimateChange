@@ -189,9 +189,18 @@ for (i in 1:length(insects)) {
 }  
 
 # Write summary table to file
-# TODO: figure out where and how we want to save this information. Leaving 
-# this commented out for now.
+datestamp <- Sys.Date()
+datestamp <- str_remove_all(datestamp, "-")
 
-# write.csv(x = summaries,
-#           file = "output/overlap_summaries.csv",
-#           row.names = FALSE)
+if (all_insects) {
+  spp <- "allspp"
+} else {
+  spp <- paste0(length(insects), "spp")
+}
+
+filename <- paste0("output/summary-stats/overlap-summaries-", 
+                   spp, "-", datestamp, ".csv")
+
+write.csv(x = summaries,
+          file = filename, 
+          row.names = FALSE)

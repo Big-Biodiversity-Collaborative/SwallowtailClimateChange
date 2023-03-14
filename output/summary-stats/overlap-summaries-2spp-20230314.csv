@@ -1,0 +1,21 @@
+"insect","distribution","climate","area","percent_current","max_Nlat","median_Nlat","mean_Nshift","median_Nshift","pvalue_Nshift"
+"Papilio rumiko","total insect","current",383621,NA,36.9375,30.1666666666667,NA,NA,NA
+"Papilio rumiko","total insect","ssp245_2041",163190,18.92,39.9375,26.1458333333333,-2.31,-0.58,1
+"Papilio rumiko","total insect","ssp245_2071",187248,18.18,40.6041666666666,27.7708333333333,-1.62,-0.08,1
+"Papilio rumiko","total insect","ssp370_2041",171969,18.8,39.9375,25.7708333333333,-2.4,-0.6,1
+"Papilio rumiko","total insect","ssp370_2071",246222,17.65,40.6875,28.6041666666667,-0.61,0.04,0.995
+"Papilio rumiko","insect + host","current",275539,NA,36.9375,31.2083333333333,NA,NA,NA
+"Papilio rumiko","insect + host","ssp245_2041",114190,15.09,39.9375,24.6875,-1.9,0,1
+"Papilio rumiko","insect + host","ssp245_2071",144610,16.34,40.6041666666666,26.0208333333333,-1.4,0.08,1
+"Papilio rumiko","insect + host","ssp370_2041",125434,15.38,39.9375,24.7291666666667,-2.29,0.02,1
+"Papilio rumiko","insect + host","ssp370_2071",181332,15.16,40.6875,26.1458333333333,-1.55,0.1,1
+"Papilio cresphontes","total insect","current",842930,NA,46.8541666666667,44.3541666666667,NA,NA,NA
+"Papilio cresphontes","total insect","ssp245_2041",722184,33.52,48.8958333333333,46.2708333333333,1.78,1.96,0
+"Papilio cresphontes","total insect","ssp245_2071",962967,36.27,50.5208333333333,46.7291666666667,2.33,2.62,0
+"Papilio cresphontes","total insect","ssp370_2041",827116,34.12,49.0625,46.5208333333333,1.76,2.08,0
+"Papilio cresphontes","total insect","ssp370_2071",1736314,54.3,51.8125,49.6458333333333,4.64,4.92,0
+"Papilio cresphontes","insect + host","current",645576,NA,46.5208333333334,44.0208333333334,NA,NA,NA
+"Papilio cresphontes","insect + host","ssp245_2041",675174,39.22,48.8958333333333,46.1875,1.84,2.17,0
+"Papilio cresphontes","insect + host","ssp245_2071",897466,43.43,50.5208333333333,46.6875,2.43,2.71,0
+"Papilio cresphontes","insect + host","ssp370_2041",766455,39.8,49.0625,46.2708333333333,1.8,2.21,0
+"Papilio cresphontes","insect + host","ssp370_2071",1535064,64.16,51.8125,49.2708333333333,4.63,4.92,0
