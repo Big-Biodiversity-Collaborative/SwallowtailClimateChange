@@ -12,7 +12,7 @@ rerun <- TRUE
 all_insects <- FALSE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- NULL # 8
+max_cores <- 4 # 8
 
 # If this script is called from bash (e.g. Rscript run-all-...), parse
 # arguments and update variables accordingly. e.g. 
