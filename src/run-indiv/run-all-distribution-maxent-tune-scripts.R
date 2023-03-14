@@ -16,7 +16,7 @@ max_cores <- 1 # NULL
 
 # If this script is called from bash (e.g. Rscript run-all-...), parse
 # arguments and update variables accordingly. e.g. 
-# $ Rscript run-all-SDM-<method>-scripts.R -a -f
+# $ Rscript run-all-distribution-<method>-scripts.R -a -f
 #    -a: sets all_insects to TRUE
 #    -f: sets rerun to FALSE
 args <- commandArgs(trailingOnly = TRUE)
@@ -26,7 +26,7 @@ if (length(args) > 0) {
 }
 
 # Call function to do the heavy lifting
-run_all_SDM_scripts(sdm_method = sdm_method,
-                    rerun = rerun,
-                    all_insects = all_insects,
-                    max_cores = max_cores)
+run_all_distribution_scripts(sdm_method = sdm_method,
+                             rerun = rerun,
+                             all_insects = all_insects,
+                             max_cores = max_cores)
