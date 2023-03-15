@@ -80,6 +80,8 @@ To actually run:
 
 ### Sending from HPC to remote
 
+#### Setup
+
 Set up rclone on the HPC, likely as above (see #Installing-and-configuring-rclone 
 and [https://public.confluence.arizona.edu/display/UAHPC/Transferring+Data#TransferringData-rclone](https://public.confluence.arizona.edu/display/UAHPC/Transferring+Data#TransferringData-rclone)). 
 Start the configuration process by starting an interactive session, then 
@@ -101,9 +103,12 @@ HPC shell session.
 up above)
 + The long key will print again and ask if the remote is OK (enter 'y')
 
+#### Transfer
+
 To test transfer of distribution files from HPC to remote OneDrive (do this 
 from _within_ the SwallowtailClimateChange folder on the HPC):
 
+`interactive -a <username>`
 `rclone copy -v --dry-run output/distributions onedrive:SwallowtailClimateChange/output/distributions`
 
 To actually run:
