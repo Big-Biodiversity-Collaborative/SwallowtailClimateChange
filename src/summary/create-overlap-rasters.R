@@ -26,6 +26,9 @@ source(file = "load_functions.R")
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
 
+# Load information about data availability for each species
+species_info <- read.csv("data/gbif-pa-summary.csv")
+
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
 
@@ -42,8 +45,16 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko", "Papilio cresphontes")
+  # insects <- c("Papilio rumiko", "Papilio cresphontes")
+  insects <- "Papilio troilus"
 }
+
+# Remove insects from list that have an insufficient number of filtered 
+# occurrence records and therefore should not be included in analyses. 
+# (Technically, they shouldn't have consensus rasters, but some obsolete 
+# files may still remain in the output/consensus-rasters folder)
+exclude <- species_info$species[species_info$pa_csv == "no"]
+insects <- insects[!insects %in% exclude]
 
 # Loop through insect species to create an overlap raster for each climate model
 for (i in 1:length(insects)) {
@@ -69,6 +80,12 @@ for (i in 1:length(insects)) {
     plant_nice_names <- plants %>%
       str_replace(pattern = " ", replacement = "_") %>%
       tolower()
+    
+    # Remove plants from list that have an insufficient number of filtered 
+    # occurrence records and therefore should not be included in analyses. 
+    # (Technically, they shouldn't have consensus rasters, but some obsolete 
+    # files may still remain in the output/consensus-rasters folder)
+    plants <- plants[!plants %in% exclude]
     
     plant_files <- NULL
     for (j in 1:length(plants)) {
