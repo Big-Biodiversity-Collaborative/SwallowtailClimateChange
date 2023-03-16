@@ -76,15 +76,16 @@ for (i in 1:length(insects)) {
 
     # Identify host plants and extract consensus raster files
     plants <- ih$host_accepted[ih$insect == insect]
-    plant_nice_names <- plants %>%
-      str_replace(pattern = " ", replacement = "_") %>%
-      tolower()
     
     # Remove plants from list that have an insufficient number of filtered 
     # occurrence records and therefore should not be included in analyses. 
     # (Technically, they shouldn't have consensus rasters, but some obsolete 
     # files may still remain in the output/consensus-rasters folder)
     plants <- plants[!plants %in% exclude]
+    
+    plant_nice_names <- plants %>%
+      str_replace(pattern = " ", replacement = "_") %>%
+      tolower()
     
     plant_files <- NULL
     for (j in 1:length(plants)) {
