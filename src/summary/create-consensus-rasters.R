@@ -10,6 +10,9 @@ require(terra)
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
 
+# Load information about data availability for each species
+species_info <- read.csv("data/gbif-pa-summary.csv")
+
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
 
@@ -30,6 +33,14 @@ if (all_insects) {
   plants <- ih$host_accepted[ih$insect %in% insects]
   species <- unique(c(insects, plants))
 }
+
+# Remove species from list that have an insufficient number of filtered 
+# occurrence records and therefore should not be included in analyses. 
+# (Technically, they shouldn't have distribution rasters, but some obsolete 
+# files may still remain in the output/distributions folder)
+exclude <- species_info$species[species_info$pa_csv == "no"]
+species <- species[!species %in% exclude]
+
 nice_names <- species %>%
   str_replace(pattern = " ", replacement = "_") %>%
   tolower()
@@ -41,7 +52,7 @@ all_dist_files <- list.files("output/distributions/",
 all_dist_files <- str_subset(all_dist_files, paste(sdms, collapse = "|"))
 
 for (i in 1:length(species)) {
-  
+
   spp_dist_files <- str_subset(all_dist_files, nice_names[i])
   
   if (length(spp_dist_files) == 0) {
