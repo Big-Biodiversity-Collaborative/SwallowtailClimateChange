@@ -38,15 +38,14 @@ min_sdms <- 4
 
 # Logical indicating whether to create overlap rasters for all species or just a 
 # subset of insects
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  # insects <- c("Papilio rumiko", "Papilio cresphontes")
-  insects <- "Papilio troilus"
+  insects <- c("Papilio rumiko", "Papilio cresphontes")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -153,11 +152,11 @@ for (i in 1:length(insects)) {
         host_dist <- sum(host_dist, na.rm = TRUE)
         
         # Make cell values = 2 where at least one host plant is present, zero 
-        # otherwise
+        # otherwise.
         # First create 3-column matrix, with values in columns 1-2 
         # representing a range of cell values you want to reclassify, and a 
         # value in the 3rd column containing the new value for those cells.
-        rcl <- rbind(c(0, 0, 0), c(1, 100, 2))
+        rcl <- rbind(c(0, 0, 0), c(1, Inf, 2))
         host_dist <- terra::classify(x = host_dist, 
                                      rcl = rcl,
                                      right = NA)
