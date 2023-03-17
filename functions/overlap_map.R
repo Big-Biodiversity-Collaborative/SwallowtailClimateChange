@@ -67,9 +67,12 @@ overlap_map <- function(species_name,
   levels(overlap2) <- data.frame(value = c(0, 2, 1, 3), desc = labels)
   
   color_vec <- c("#e5e5e5",   # Absent
-                          "#b2df8a",   # Hosts only
-                          "#a6cee3",   # Insect only
-                          "#1f78b4")   # Hosts and insect  
+                 "#b2df8a",   # Hosts only
+                 "#a6cee3",   # Insect only
+                 "#1f78b4")   # Hosts and insect  
+  # Assign colors to each level so colors are consistent across maps (in case
+  # not all levels are present in all maps)
+  names(color_vec) <- levels(overlap2)[[1]][,"desc"]
                           
   # Plot title
   if (title_scenarioyear) {
@@ -81,7 +84,7 @@ overlap_map <- function(species_name,
   
   overlap_plot_base <- ggplot() +
     geom_spatraster(data = overlap2, maxcell = Inf) +
-    scale_fill_manual(values = color_vec, na.translate = FALSE) +
+    scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
     title_text +
     theme_bw()
   
