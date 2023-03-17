@@ -1,0 +1,151 @@
+"insect","distribution","climate","area_sqkm","percent_current","lat_max","Nlat_med","Nshift_mn_deg","Nshift_md_deg","Nshift_mn_km","Nshift_md_km"
+"Papilio appalachiensis","total insect","current",66356,NA,41.1,37.94,NA,NA,NA,NA
+"Papilio appalachiensis","total insect","ssp245_2041",35,0.05,35.65,35.65,-0.21,-0.21,-23,-23
+"Papilio appalachiensis","total insect","ssp245_2071",25431,0,49.27,49.19,3.08,8.54,343,949
+"Papilio appalachiensis","total insect","ssp370_2041",0,NA,NA,NA,NA,NA,NA,NA
+"Papilio appalachiensis","total insect","ssp370_2071",4499,0,45.81,27.52,-9.49,-9.46,-1052,-1049
+"Papilio appalachiensis","insect + host","current",41137,NA,40.94,37.81,NA,NA,NA,NA
+"Papilio appalachiensis","insect + host","ssp245_2041",0,NA,NA,NA,NA,NA,NA,NA
+"Papilio appalachiensis","insect + host","ssp245_2071",647,0,45.98,45.88,10.58,10.58,1175,1175
+"Papilio appalachiensis","insect + host","ssp370_2041",0,NA,NA,NA,NA,NA,NA,NA
+"Papilio appalachiensis","insect + host","ssp370_2071",15,0,45.4,45.4,NA,NA,NA,NA
+"Papilio brevicauda","total insect","current",54621,NA,52.44,49.56,NA,NA,NA,NA
+"Papilio brevicauda","total insect","ssp245_2041",781765,73.47,55.31,51.02,2.75,2.33,306,260
+"Papilio brevicauda","total insect","ssp245_2071",1834046,73.47,59.73,56.85,6.13,8.21,682,914
+"Papilio brevicauda","total insect","ssp370_2041",792843,73.47,55.31,51.06,2.81,2.42,313,269
+"Papilio brevicauda","total insect","ssp370_2071",2165607,72.87,59.73,56.85,6.12,8.21,682,914
+"Papilio brevicauda","insect + host","current",54536,NA,52.44,49.54,NA,NA,NA,NA
+"Papilio brevicauda","insect + host","ssp245_2041",746635,73.43,55.31,51.02,2.74,2.33,305,260
+"Papilio brevicauda","insect + host","ssp245_2071",1495962,73.43,58.94,55.35,4.5,5.04,501,561
+"Papilio brevicauda","insect + host","ssp370_2041",755784,73.43,55.31,51.06,2.78,2.42,309,269
+"Papilio brevicauda","insect + host","ssp370_2071",1911913,72.83,58.81,55.6,5,6,556,668
+"Papilio canadensis","total insect","current",1270165,NA,62.48,50.23,NA,NA,NA,NA
+"Papilio canadensis","total insect","ssp245_2041",368571,19.33,63.06,50.44,-0.9,-0.04,-101,-5
+"Papilio canadensis","total insect","ssp245_2071",417525,13.92,64.94,52.88,0.06,0.1,7,12
+"Papilio canadensis","total insect","ssp370_2041",403312,18.36,64.4,50.73,-0.47,0,-53,0
+"Papilio canadensis","total insect","ssp370_2071",541833,8.42,68.06,55.75,1.43,1.25,159,139
+"Papilio canadensis","insect + host","current",1234849,NA,62.44,50.1,NA,NA,NA,NA
+"Papilio canadensis","insect + host","ssp245_2041",365042,19.03,63.02,50.4,-0.84,-0.04,-93,-5
+"Papilio canadensis","insect + host","ssp245_2071",415819,13.53,64.94,52.85,0.13,0.21,15,23
+"Papilio canadensis","insect + host","ssp370_2041",398717,18.02,64.06,50.69,-0.43,0.04,-48,5
+"Papilio canadensis","insect + host","ssp370_2071",536423,7.93,67.81,55.1,1.51,1.29,168,144
+"Papilio cresphontes","total insect","current",842930,NA,46.85,44.35,NA,NA,NA,NA
+"Papilio cresphontes","total insect","ssp245_2041",722184,33.52,48.9,46.27,1.78,1.96,198,218
+"Papilio cresphontes","total insect","ssp245_2071",962967,36.27,50.52,46.73,2.33,2.62,259,292
+"Papilio cresphontes","total insect","ssp370_2041",827116,34.12,49.06,46.52,1.76,2.08,196,232
+"Papilio cresphontes","total insect","ssp370_2071",1736314,54.3,51.81,49.65,4.64,4.92,516,547
+"Papilio cresphontes","insect + host","current",642357,NA,46.52,44.02,NA,NA,NA,NA
+"Papilio cresphontes","insect + host","ssp245_2041",659475,37.96,48.9,46.19,1.86,2.12,207,236
+"Papilio cresphontes","insect + host","ssp245_2071",872248,42.18,50.52,46.69,2.43,2.69,270,298
+"Papilio cresphontes","insect + host","ssp370_2041",743350,38.18,49.06,46.27,1.81,2.23,201,247
+"Papilio cresphontes","insect + host","ssp370_2071",1504909,63.05,51.81,49.27,4.61,4.98,513,553
+"Papilio eurymedon","total insect","current",503662,NA,52.35,50.35,NA,NA,NA,NA
+"Papilio eurymedon","total insect","ssp245_2041",615191,57.99,54.52,49.23,-0.32,-0.38,-36,-42
+"Papilio eurymedon","total insect","ssp245_2071",586297,57.28,55.02,49.56,0,-0.25,0,-28
+"Papilio eurymedon","total insect","ssp370_2041",609828,59.79,54.9,49.52,-0.09,-0.38,-10,-42
+"Papilio eurymedon","total insect","ssp370_2071",490464,51.89,59.06,49.81,0.6,0.33,67,37
+"Papilio eurymedon","insect + host","current",449096,NA,52.35,50.15,NA,NA,NA,NA
+"Papilio eurymedon","insect + host","ssp245_2041",331561,49.2,52.44,49.04,-1.68,-0.96,-186,-107
+"Papilio eurymedon","insect + host","ssp245_2071",288700,45.23,51.06,49.15,-1.68,-1.17,-187,-130
+"Papilio eurymedon","insect + host","ssp370_2041",308945,48.82,50.94,49.15,-1.57,-0.9,-174,-100
+"Papilio eurymedon","insect + host","ssp370_2071",259134,41,54.65,49.69,-0.96,-0.33,-106,-37
+"Papilio glaucus","total insect","current",780130,NA,45.19,42.31,NA,NA,NA,NA
+"Papilio glaucus","total insect","ssp245_2041",34732,2.74,47.1,37.65,-2.84,-1.96,-316,-218
+"Papilio glaucus","total insect","ssp245_2071",37880,2.04,47.48,39.85,-1.76,-1.92,-195,-213
+"Papilio glaucus","total insect","ssp370_2041",34731,2.52,47.48,38.98,-2.55,-2.08,-283,-231
+"Papilio glaucus","total insect","ssp370_2071",183977,5.28,50.56,46.02,2.26,3.42,251,380
+"Papilio glaucus","insect + host","current",779830,NA,45.19,42.31,NA,NA,NA,NA
+"Papilio glaucus","insect + host","ssp245_2041",33470,2.66,47.1,37.65,-2.82,-1.96,-313,-218
+"Papilio glaucus","insect + host","ssp245_2071",37138,1.96,47.48,39.9,-1.62,-1.83,-179,-204
+"Papilio glaucus","insect + host","ssp370_2041",33780,2.46,47.48,39.02,-2.42,-1.85,-268,-206
+"Papilio glaucus","insect + host","ssp370_2071",183977,5.28,50.56,46.02,2.26,3.42,251,380
+"Papilio indra","total insect","current",353707,NA,50.44,44.85,NA,NA,NA,NA
+"Papilio indra","total insect","ssp245_2041",1238540,35.72,53.1,48.65,3.81,4.17,424,463
+"Papilio indra","total insect","ssp245_2071",1288520,33.92,54.48,48.35,3.36,4.12,373,458
+"Papilio indra","total insect","ssp370_2041",1258410,37.33,52.98,47.98,3.5,4.12,389,459
+"Papilio indra","total insect","ssp370_2071",1207805,34.52,56.52,48.31,2.93,2.5,326,278
+"Papilio indra","insect + host","current",243332,NA,50.44,43.83,NA,NA,NA,NA
+"Papilio indra","insect + host","ssp245_2041",620762,34.36,52.02,47.98,2.47,1.29,275,144
+"Papilio indra","insect + host","ssp245_2071",626076,32.44,51.81,48.04,2.64,1.94,294,215
+"Papilio indra","insect + host","ssp370_2041",631603,35.93,52.1,47.65,2.23,1.04,248,116
+"Papilio indra","insect + host","ssp370_2071",604970,32.52,53.65,47.77,2.74,2.29,305,255
+"Papilio machaon","total insect","current",1556296,NA,71.1,64.9,NA,NA,NA,NA
+"Papilio machaon","total insect","ssp245_2041",1141525,36.05,71.31,60.98,-1.47,-1.58,-163,-176
+"Papilio machaon","total insect","ssp245_2071",1177892,33.39,71.31,62.31,-1.35,-1.42,-150,-158
+"Papilio machaon","total insect","ssp370_2041",1155010,35.47,71.31,60.56,-1.59,-1.67,-178,-185
+"Papilio machaon","total insect","ssp370_2071",1339772,32.29,71.9,65.31,1.3,2,146,223
+"Papilio machaon","insect + host","current",645332,NA,69.1,58.9,NA,NA,NA,NA
+"Papilio machaon","insect + host","ssp245_2041",563323,26.65,61.27,51.19,-3.92,-4.04,-436,-450
+"Papilio machaon","insect + host","ssp245_2071",575136,25.95,69.48,51.02,-3.74,-3.96,-416,-441
+"Papilio machaon","insect + host","ssp370_2041",561409,25.72,61.31,50.83,-4.25,-4.25,-473,-474
+"Papilio machaon","insect + host","ssp370_2071",683222,25.56,70.6,59.15,-0.67,-2.08,-75,-232
+"Papilio multicaudata","total insect","current",720477,NA,52.6,42.9,NA,NA,NA,NA
+"Papilio multicaudata","total insect","ssp245_2041",1306088,61.77,51.9,43.65,-1.32,-0.25,-146,-28
+"Papilio multicaudata","total insect","ssp245_2071",1208653,51.9,51.94,43.6,-2.12,-0.83,-235,-93
+"Papilio multicaudata","total insect","ssp370_2041",1228867,57.06,51.85,43.35,-2.25,-0.83,-250,-93
+"Papilio multicaudata","total insect","ssp370_2071",970382,43.15,57.94,44.12,-1.86,-0.42,-206,-46
+"Papilio multicaudata","insect + host","current",539103,NA,52.6,42.9,NA,NA,NA,NA
+"Papilio multicaudata","insect + host","ssp245_2041",1075123,56.96,51.9,43.73,-1.08,-0.08,-120,-9
+"Papilio multicaudata","insect + host","ssp245_2071",1022357,48.08,51.94,43.9,-1.54,-0.54,-171,-60
+"Papilio multicaudata","insect + host","ssp370_2041",1012536,51.64,51.85,43.6,-1.94,-0.71,-215,-79
+"Papilio multicaudata","insect + host","ssp370_2071",825778,41.47,57.94,44.52,-1.44,-0.23,-159,-25
+"Papilio palamedes","total insect","current",277537,NA,37.31,31.15,NA,NA,NA,NA
+"Papilio palamedes","total insect","ssp245_2041",2591,0.42,26.69,25.88,-7.28,-7.29,-807,-808
+"Papilio palamedes","total insect","ssp245_2071",20973,0,28.15,21,-9.39,-9.04,-1040,-1001
+"Papilio palamedes","total insect","ssp370_2041",292,0,25.98,24.19,-7.43,-7.46,-824,-827
+"Papilio palamedes","total insect","ssp370_2071",17770,0,39.27,23.69,2.93,7.92,326,878
+"Papilio palamedes","insect + host","current",119208,NA,37.31,30.6,NA,NA,NA,NA
+"Papilio palamedes","insect + host","ssp245_2041",1345,0.23,26.69,26.1,-5.12,-5,-568,-554
+"Papilio palamedes","insect + host","ssp245_2071",900,0,21.65,20.79,-10.54,-10.54,-1167,-1167
+"Papilio palamedes","insect + host","ssp370_2041",96,0,25.98,25.94,-5.18,-5.17,-574,-573
+"Papilio palamedes","insect + host","ssp370_2071",280,0,21.52,20.6,NA,NA,NA,NA
+"Papilio polyxenes","total insect","current",1752900,NA,49.94,44.81,NA,NA,NA,NA
+"Papilio polyxenes","total insect","ssp245_2041",387243,13,50.27,46.23,-0.04,0.56,-4,63
+"Papilio polyxenes","total insect","ssp245_2071",577293,14.2,54.81,47.88,3.89,2.38,432,264
+"Papilio polyxenes","total insect","ssp370_2041",473266,14.26,53.19,46.73,0.91,1.17,101,130
+"Papilio polyxenes","total insect","ssp370_2071",1086552,19.54,55.81,49.73,7,4.52,778,503
+"Papilio polyxenes","insect + host","current",1735814,NA,49.94,44.81,NA,NA,NA,NA
+"Papilio polyxenes","insect + host","ssp245_2041",386990,13.07,50.27,46.23,-0.01,0.56,-1,63
+"Papilio polyxenes","insect + host","ssp245_2071",577274,14.32,54.81,47.88,3.93,2.38,437,264
+"Papilio polyxenes","insect + host","ssp370_2041",473266,14.37,53.19,46.73,0.95,1.17,106,130
+"Papilio polyxenes","insect + host","ssp370_2071",1086449,19.68,55.81,49.73,7.02,4.5,780,500
+"Papilio rumiko","total insect","current",383621,NA,36.94,30.17,NA,NA,NA,NA
+"Papilio rumiko","total insect","ssp245_2041",163190,18.92,39.94,26.15,-2.31,-0.58,-256,-65
+"Papilio rumiko","total insect","ssp245_2071",187248,18.18,40.6,27.77,-1.62,-0.08,-179,-9
+"Papilio rumiko","total insect","ssp370_2041",171969,18.8,39.94,25.77,-2.4,-0.6,-266,-67
+"Papilio rumiko","total insect","ssp370_2071",246222,17.65,40.69,28.6,-0.61,0.04,-67,5
+"Papilio rumiko","insect + host","current",271376,NA,36.94,30.9,NA,NA,NA,NA
+"Papilio rumiko","insect + host","ssp245_2041",111044,15.09,39.94,24.71,-1.78,0.04,-198,5
+"Papilio rumiko","insect + host","ssp245_2071",142113,16.36,40.6,26.06,-1.31,0.12,-145,14
+"Papilio rumiko","insect + host","ssp370_2041",122209,15.39,39.94,24.48,-2.23,0.08,-247,9
+"Papilio rumiko","insect + host","ssp370_2071",179357,15.21,40.69,26.23,-1.43,0.13,-159,14
+"Papilio rutulus","total insect","current",520556,NA,52.35,49.54,NA,NA,NA,NA
+"Papilio rutulus","total insect","ssp245_2041",656357,64.94,52.31,48.31,-0.84,-1.15,-93,-127
+"Papilio rutulus","total insect","ssp245_2071",668455,67.08,50.65,48.56,-1.98,-1.29,-220,-144
+"Papilio rutulus","total insect","ssp370_2041",662607,66.82,50.69,48.54,-1.36,-1.25,-151,-139
+"Papilio rutulus","total insect","ssp370_2071",681525,69.84,58.98,50.1,0.06,-0.08,7,-9
+"Papilio rutulus","insect + host","current",520380,NA,52.35,49.54,NA,NA,NA,NA
+"Papilio rutulus","insect + host","ssp245_2041",652948,64.63,52.31,48.31,-0.84,-1.15,-93,-127
+"Papilio rutulus","insect + host","ssp245_2071",666770,66.93,50.65,48.56,-1.98,-1.29,-220,-144
+"Papilio rutulus","insect + host","ssp370_2041",660708,66.68,50.69,48.54,-1.36,-1.25,-151,-139
+"Papilio rutulus","insect + host","ssp370_2071",680150,69.72,58.98,50.1,0.06,-0.08,7,-9
+"Papilio troilus","total insect","current",560104,NA,44.27,42.19,NA,NA,NA,NA
+"Papilio troilus","total insect","ssp245_2041",241969,19.38,47.15,43.73,1.32,0.87,146,97
+"Papilio troilus","total insect","ssp245_2071",305831,17.83,47.98,45.9,2.96,2.37,329,264
+"Papilio troilus","total insect","ssp370_2041",223203,17.38,47.15,44.35,1.75,1.1,195,123
+"Papilio troilus","total insect","ssp370_2071",258212,9.71,49.23,46.44,3.82,3.37,424,375
+"Papilio troilus","insect + host","current",540842,NA,44.27,42.19,NA,NA,NA,NA
+"Papilio troilus","insect + host","ssp245_2041",227585,19.09,47.02,43.54,1.61,0.87,178,97
+"Papilio troilus","insect + host","ssp245_2071",279408,16.47,47.81,45.77,2.97,1.75,330,194
+"Papilio troilus","insect + host","ssp370_2041",208337,17.07,47.02,44.27,1.92,1.08,213,120
+"Papilio troilus","insect + host","ssp370_2071",231730,9.42,49.23,46.35,3.77,3.33,419,370
+"Papilio zelicaon","total insect","current",683346,NA,52.4,50.42,NA,NA,NA,NA
+"Papilio zelicaon","total insect","ssp245_2041",541150,44.23,52.31,48.58,-0.81,-1.17,-90,-130
+"Papilio zelicaon","total insect","ssp245_2071",539249,45.71,50.65,48.73,-1.03,-1.25,-114,-139
+"Papilio zelicaon","total insect","ssp370_2041",542827,46.14,50.69,48.67,-1.11,-1.33,-124,-148
+"Papilio zelicaon","total insect","ssp370_2071",533066,47.71,58.98,49.23,-0.97,-1,-107,-111
+"Papilio zelicaon","insect + host","current",639203,NA,52.35,50.02,NA,NA,NA,NA
+"Papilio zelicaon","insect + host","ssp245_2041",512270,45.93,50.69,48.69,-1,-1.17,-112,-130
+"Papilio zelicaon","insect + host","ssp245_2071",535382,48.21,50.65,48.77,-1.14,-1.21,-127,-134
+"Papilio zelicaon","insect + host","ssp370_2041",514861,47.42,50.69,48.73,-1.27,-1.25,-141,-139
+"Papilio zelicaon","insect + host","ssp370_2071",531340,49.72,58.98,49.27,-0.83,-0.79,-92,-88
