@@ -45,6 +45,7 @@ The project uses the following additional R packages:
 + stringr
 + terra
 + tidyr
++ tidyterra
 + TNRS
 
 To run models implementing the MaxEnt approach, you will also need the MaxEnt 
