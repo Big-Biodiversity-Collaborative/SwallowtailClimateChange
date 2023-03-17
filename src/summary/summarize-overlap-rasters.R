@@ -12,6 +12,9 @@ require(stringr)
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
 
+# Load information about data availability for each species
+species_info <- read.csv("data/gbif-pa-summary.csv")
+
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
 climate_names_short <- climate_models$name %>%
@@ -19,7 +22,7 @@ climate_names_short <- climate_models$name %>%
 
 # Logical indicating whether to summarize overlap rasters for all species or 
 # just a subset of insects
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
@@ -28,6 +31,13 @@ if (all_insects) {
   # If not all insects, identify which insects to include
   insects <- c("Papilio rumiko", "Papilio cresphontes")
 }
+
+# Remove insects from list that have an insufficient number of filtered 
+# occurrence records and therefore should not be included in analyses. 
+# (Technically, they shouldn't have overlap rasters, but some obsolete 
+# files may still remain in the output/overlaps folder)
+exclude <- species_info$species[species_info$pa_csv == "no"]
+insects <- insects[!insects %in% exclude]
 
 # Interested in summarizing values for (1) all areas predicted to be suitable 
 # for the insect (overlap raster values 1 and 3), and (2) areas predicted to be 
