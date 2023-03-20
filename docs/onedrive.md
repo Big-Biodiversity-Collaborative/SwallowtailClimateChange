@@ -108,8 +108,10 @@ up above)
 To test transfer of distribution files from HPC to remote OneDrive (do this 
 from _within_ the SwallowtailClimateChange folder on the HPC):
 
-`interactive -a <username>`
-`rclone copy -v --dry-run output/distributions onedrive:SwallowtailClimateChange/output/distributions`
+```
+interactive -a <username>
+rclone copy -v --dry-run output/distributions onedrive:SwallowtailClimateChange/output/distributions
+```
 
 To actually run:
 
