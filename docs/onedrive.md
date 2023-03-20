@@ -125,6 +125,17 @@ somewhere) because the interactive session timed out. Restarting the
 interactive sessions and running `rclone copy` finished the job _and_ 
 transferred (most of) the files that had errored out before.
 
+##### Transfer specific files
+
+rclone does not support wildcard expansion, but we can transfer multiple files
+using an `include` flag. To test:
+
+`rclone copy -v --dry-run output/SDMs/ --include "papilio_appalachiensis*" onedrive:SwallowtailClimateChange/output/SDMs/`
+
+and to actually copy:
+
+`rclone copy -v output/SDMs/ --include "papilio_appalachiensis*" onedrive:SwallowtailClimateChange/output/SDMs/`
+
 ### Troubleshooting
 
 Tokens expire after 90 days if not used. To refresh tokens, run 
