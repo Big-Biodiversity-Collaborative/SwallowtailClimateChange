@@ -2,7 +2,7 @@
 # distributions of each insect species and its host plants
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2022-12-28
+# 2023-03-22
 
 require(terra)
 require(tidyr)
@@ -29,7 +29,7 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko", "Papilio cresphontes")
+  insects <- c("Papilio appalachiensis", "Papilio brevicauda")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -44,42 +44,66 @@ insects <- insects[!insects %in% exclude]
 # suitable for the insect and at least one of its host plants (overlap = 3).
 distributions <- c("total insect", "insect + host")
 
-# Logical indicating whether to use a t-test evaluating evidence of a northern 
-# shift in an insect's distribution 
-t_test <- FALSE
+## Current set of summary stats ################################################
+# Summary stats that are calculated for each time period (and distribution type)
+  # area: total area (sqkm)
+  # lat_max: median latitude of 10 northernmost cells
+  # lat_min: median latitude of 10 southernmost cells
+  # lon_max: median longitude of 10 easternmost cells
+  # lon_min: median longitude of 10 westernmost cells
+  # lat_max_bands: median lat among the northernmost cells in each long band
+  # lat_min_bands: median lat among the southernmost cells in each long band
+  # lon_max_bands: median long among the easternmost cells in each lat band
+  # lon_min_bands: median long among the westernmost cells in each lat band
+
+# Summary stats that are calculated for each time period (across distribution types)
+  # pinsect_withhost: % of insect range that overlaps with >= 1 host plant
+  # pinsecthost_1host: % of insect + host range where only 1 host plant occurs 
+
+# Summary stats that are calculated between future and current time periods (for 
+# each distribution type)
+  # area_gained: area (sqkm) predicted suitable in future that wasn't in current range
+  # area_lost: area (sqkm) predicted unsuitable in future that was in current range
+  # area_retained: area (sqkm) predicted suitable in future that was in current range
+  # lat_max_shift: median value of shifts (km) along northern edge in each 
+    # longitudinal band (positive values = northward shift; negative values = 
+    # southward shift)
+  # lat_min_shift: median value of shifts (km) along southern edge in each 
+    #  longitudinal band (pos values = northward; neg values = southward)
+  # lon_max_shift: median value of shifts (km) along eastern edge in each 
+    # latitudinal band (positive values = eastward shift; negative values = 
+    # westward shift)
+  # lon_min_shift: median value of shifts (km) along western edge in each 
+    # latitudinal band (pos values = eastward; neg values = westward)
+
+# Note: Can calculate % of current range that's still suitable in future as 
+  # area_retained/(area retained + area lost)
+# Note: For last 4 metrics, only considered bands with >= 1 cell considered 
+  # suitable in both time periods
+################################################################################
 
 # Create table to hold summary statistics
-summary <- as.data.frame(expand_grid(insect = insects, 
-                                       distribution = distributions,
-                                       climate = climate_names_short)) %>%
-  mutate(area_sqkm = NA,
-         percent_current = NA,
+stats <- as.data.frame(expand_grid(insect = insects, 
+                                   distribution = distributions,
+                                   climate = climate_names_short)) %>%
+  mutate(area = NA,
          lat_max = NA,
-         Nlat_med = NA,  
-         Nshift_mn_deg = NA,
-         Nshift_md_deg = NA,
-         Nshift_mn_km = NA,
-         Nshift_md_km = NA)
-if (t_test) {
-  summary$pvalue_Nshift = NA
-}
-
-# area = total land area (sq km) predicted to be suitable
-# percent_current = percent of area predicted suitable in current time period 
-  # that's predicted to be suitable in the future
-# lat_max = Northern extent of predicted range
-# Nlat_med = median latitude among the northernmost cells in each 
-  # longitudinal band
-# Nshift_mn_deg = mean northward shift (degrees) in each longitudinal band 
-  # (only for bands that have >=1 cell considered suitable in both time periods)
-# Nshift_md_deg  = median northward shift (degrees) in each longitudinal band 
-  # (only for bands that have >=1 cell considered suitable in both time periods)
-# Nshift_mn_km = mean northward shift (km) in each longitudinal band 
-  # (only for bands that have >=1 cell considered suitable in both time periods)
-# Nshift_md_km  = median northward shift (km) in each longitudinal band 
-  # (only for bands that have >=1 cell considered suitable in both time periods)
-# pvalue_Nshift = p-value from one-sided t-test evaluating evidence of a northern 
-  # shift
+         lat_min = NA,
+         lon_max = NA,
+         lon_min = NA,
+         lat_max_bands = NA,
+         lat_min_bands = NA,
+         lon_max_bands = NA,
+         lon_min_bands = NA,
+         area_gained = NA,
+         area_lost = NA,
+         area_retained = NA,
+         lat_max_shift = NA,
+         lat_min_shift = NA,
+         lon_max_shift = NA,
+         lon_min_shift = NA,
+         pinsect_withhost = NA,
+         pinsecthost_1host = NA)
 
 # Loop through insect species
 for (i in 1:length(insects)) {
@@ -107,23 +131,62 @@ for (i in 1:length(insects)) {
     allinsect_list[[j]] <- readRDS(overlap_files[j])
     insecthost_list[[j]] <- readRDS(overlap_files[j])
     
+    # First, use the original overlap raster to calculate the percent of insect 
+    # range that overlaps with one or more host plants
+    row_index1 <- which(stats$insect == insects[i] & 
+                          stats$distribution == "total insect" &
+                          stats$climate == climate_names_short[j])
+    ih_areas <- round(terra::expanse(allinsect_list[[j]], 
+                                     unit = "km",
+                                     byValue = TRUE))
+    if (max(ih_areas[, "value"]) > 3) {
+      insect_area <- sum(ih_areas[ih_areas[, "value"] > 2, "area"])
+      ih_area <- sum(ih_areas[ih_areas[, "value"] > 3, "area"])
+      stats$pinsect_withhost[row_index1] <- round(ih_area / insect_area * 100, 2)
+    } else {
+      stats$pinsect_withhost[row_index1] <- 0
+    }
+    
+    # Second, use the original overlap raster to calculate the percent of insect 
+    # + host range where only 1 host occurs
+    row_index2 <- which(stats$insect == insects[i] & 
+                          stats$distribution == "insect + host" &
+                          stats$climate == climate_names_short[j])
+    cats <- ih_areas[, "value"]
+    if (all(4:5 %in% cats)) {
+      ih_area <- sum(ih_areas[ih_areas[, "value"] > 3, "area"])
+      ih1_area <- sum(ih_areas[ih_areas[, "value"] == 4, "area"])
+      stats$pinsecthost_1host[row_index2] <- round(ih1_area / ih_area * 100, 2)
+    } else {
+      if (4 %in% cats & !5 %in% cats) {
+        stats$pinsecthost_1host[row_index2] <- 1
+      } else {
+        if (5 %in% cats & !4 %in% cats) {
+          stats$pinsecthost_1host[row_index2] <- 0
+        } else {
+          stats$pinsecthost_1host[row_index2] <- NA 
+        }
+      }
+    }
+    
     # For all areas predicted suitable for the insect: reclassify cells in 
-    # overlap rasters that were equal to 1 or 3 as 1 (NA everywhere else)
+    # overlap rasters that are >= 3 as 1 (NA everywhere else)
     allinsect_list[[j]] <- terra::classify(x = allinsect_list[[j]],
-                                           rcl = rbind(c(1, 1), c(3, 1)),
+                                           rcl = matrix(c(3, Inf, 1), nrow = 1),
+                                           right = FALSE,
                                            others = NA)
     
     # For all areas predicted suitable for the insect and one or more host
-    # plants: reclassify cells in overlap rasters that were equal to 3 as 1 
+    # plants: reclassify cells in overlap rasters that are >=4 as 1 
     # (NA everywhere else)
     insecthost_list[[j]] <- terra::classify(x = insecthost_list[[j]],
-                                            rcl = matrix(c(3, 1), nrow = 1),
+                                            rcl = matrix(c(4, Inf, 1), nrow = 1),
+                                            right = FALSE,
                                             others = NA)
   }
-
+  
   # Loop through distribution types
   for (distribution in distributions) {
-    
     if (distribution == "total insect") {
       raster_list <- allinsect_list
       message_spp <- short_name
@@ -131,113 +194,194 @@ for (i in 1:length(insects)) {
       raster_list <- insecthost_list
       message_spp <- paste0(short_name, " + hostplants")
     }
-
+    
     # Do calculations for current time period
-      row_index_c <- which(summary$insect == insects[i] & 
-                             summary$distribution == distribution &
-                             summary$climate == "current")
-      current <- raster_list[[1]]
-      
-      # Calculate land area (in sq km) and add to summary
-      summary$area_sqkm[row_index_c] <- round(terra::expanse(current, 
-                                                             unit = "km"))
-      
-      # Create a data frame with lat/long for all non-NA cells
-      current_df <- terra::as.data.frame(current, xy = TRUE, na.rm = TRUE)
+    row_index_c <- which(stats$insect == insects[i] & 
+                           stats$distribution == distribution &
+                           stats$climate == "current")
+    current <- raster_list[[1]]
+    
+    # Calculate land area (in sq km) and add to summary
+    stats$area[row_index_c] <- round(terra::expanse(current, unit = "km"))
+    
+    # Create a data frame with lat/long for all non-NA cells
+    current_df <- terra::as.data.frame(current, xy = TRUE, na.rm = TRUE)
+    
+    # Calculate min/max values (median of 10 most extreme cells)
+    stats$lat_max[row_index_c] <- round(median(tail(sort(current_df$y), 10)), 2)
+    stats$lat_min[row_index_c] <- round(median(head(sort(current_df$y), 10)), 2)
+    stats$lon_max[row_index_c] <- round(median(tail(sort(current_df$x), 10)), 2)
+    stats$lon_min[row_index_c] <- round(median(head(sort(current_df$x), 10)), 2)
+    
+    # Calculate max/min latitude for each longitudinal band
+    current_lats <- current_df %>%
+      group_by(x) %>%
+      summarize(max_current = max(y),
+                min_current = min(y)) %>%
+      data.frame()
 
-      # Calculate maximum latitude for each longitudinal band
-      current_lats <- current_df %>%
-        group_by(x) %>%
-        summarize(max_current = max(y)) %>%
-        data.frame()
-      
-      # Calculate maximum latitude (across entire predicted range) and add to 
-      # summary
-      summary$lat_max[row_index_c] <- round(max(current_lats$max_current), 2)
-      
-      # Calculate median latitude along northern boundary and add to summary
-      summary$Nlat_med[row_index_c] <- round(median(current_lats$max_current), 2)
-      
+    # Calculate median latitude along northern boundary
+    stats$lat_max_bands[row_index_c] <- round(median(current_lats$max_current), 2)
+    # Calculate median latitude along southern boundary
+    stats$lat_min_bands[row_index_c] <- round(median(current_lats$min_current), 2)
+    
+    # Calculate max/min longitude for each latitudinal band
+    current_lons <- current_df %>%
+      group_by(y) %>%
+      summarize(max_current = max(x),
+                min_current = min(x)) %>%
+      data.frame()
+    
+    # Calculate median longitude along eastern boundary
+    stats$lon_max_bands[row_index_c] <- round(median(current_lons$max_current), 2)
+    # Calculate median latitude along southern boundary
+    stats$lon_min_bands[row_index_c] <- round(median(current_lons$min_current), 2)
+    
     # Loop through future climate scenarios
     for (j in 2:nrow(climate_models)) {
-      
       clim_model <- climate_names_short[j]
-      row_index <- which(summary$insect == insects[i] & 
-                           summary$distribution == distribution &
-                           summary$climate == clim_model)
+      row_index <- which(stats$insect == insects[i] & 
+                           stats$distribution == distribution &
+                           stats$climate == clim_model)
       future <- raster_list[[j]]
-
+      
       # Calculate land area (in sq km) and add to summary
-      summary$area_sqkm[row_index] <- round(terra::expanse(future, unit = "km"))      
-
-      if (summary$area[row_index] == 0) {
-        message("No areas predicted suitable for ", message_spp, ", ", 
+      stats$area[row_index] <- round(terra::expanse(future, unit = "km"))      
+      
+      if (stats$area[row_index] == 0) {
+        message("No areas predicted suitable for ", message_spp, ", ",
                 clim_model,".")
       } else {
-        # Calculate maximum latitude for each longitudinal band
+        # Create a data frame with lat/long for all non-NA cells
         future_df <- terra::as.data.frame(future, xy = TRUE, na.rm = TRUE)
+        
+        # Calculate min/max values (median of 10 most extreme cells). Similar to
+        # Grewe et al. 2013.
+        stats$lat_max[row_index] <- round(median(tail(sort(future_df$y), 10)), 2)
+        stats$lat_min[row_index] <- round(median(head(sort(future_df$y), 10)), 2)
+        stats$lon_max[row_index] <- round(median(tail(sort(future_df$x), 10)), 2)
+        stats$lon_min[row_index] <- round(median(head(sort(future_df$x), 10)), 2)
+        
+        # Calculate max/min latitude for each longitudinal band
         future_lats <- future_df %>%
           group_by(x) %>%
-          summarize(max = max(y)) %>%
+          summarize(max_future = max(y),
+                    min_future = min(y)) %>%
           data.frame()
         
-        # Calculate maximum latitude and add to summary
-        summary$lat_max[row_index] <- round(max(future_lats$max), 2)
+        # Calculate median latitude along northern boundary
+        stats$lat_max_bands[row_index] <- round(median(future_lats$max_future), 2)
+        # Calculate median latitude along southern boundary
+        stats$lat_min_bands[row_index] <- round(median(future_lats$min_future), 2)
         
-        # Calculate median latitude along northern boundary and add to summary
-        summary$Nlat_med[row_index] <- round(median(future_lats$max), 2)
+        # Calculate max/min longitude for each latitudinal band
+        future_lons <- future_df %>%
+          group_by(y) %>%
+          summarize(max_future = max(x),
+                    min_future = min(x)) %>%
+          data.frame()
         
-        # Calculate percent of current distribution that's suitable in future
-        future <- terra::crop(future, current)
-        overlay <- terra::expanse(current + future, unit = "km")
-        perc_current <- overlay/summary$area[row_index_c] * 100
-        summary$percent_current[row_index] <- round(perc_current, 2)
+        # Calculate median longitude along eastern boundary
+        stats$lon_max_bands[row_index] <- round(median(future_lons$max_future), 2)
+        # Calculate median latitude along southern boundary
+        stats$lon_min_bands[row_index] <- round(median(future_lons$min_future), 2)
         
         # Join future and current latitudinal data (only including longitudinal 
         # bands that have suitable areas in both time periods)
-          # Rounding longitudes first to ensure there are matching values
-          current_lats$x <- round(current_lats$x, 4)
-          future_lats$x <- round(future_lats$x, 4)
-          future_lats <- inner_join(current_lats, future_lats, by = "x")
-          
+        # Rounding longitudes first to ensure there are matching values
+        current_lats$x <- round(current_lats$x, 4)
+        future_lats$x <- round(future_lats$x, 4)
+        future_lats <- inner_join(current_lats, future_lats, by = "x")
+        
         if (nrow(future_lats) == 0) {
           message("None of the same longitudinal bands are in the current and ",
                   clim_model, " distributions of ", message_spp, ".")
         } else {
-          # Calculating northward shift, in degrees, in each longitudinal band
-          future_lats$shift <- future_lats$max - future_lats$max_current
-          summary$Nshift_mn_deg[row_index] <- round(mean(future_lats$shift), 2)
-          summary$Nshift_md_deg[row_index] <- round(median(future_lats$shift), 2)
-          
-          # Calculating northward shift, in km, in each longitudinal band
-          x <- as.matrix(future_lats[, c("x", "max")])
-          y <- as.matrix(future_lats[, c("x", "max_current")])
+          # Calculating shift along northern edge, in km, in each longitudinal band
+          future_n <- as.matrix(future_lats[, c("x", "max_future")])
+          current_n <- as.matrix(future_lats[, c("x", "max_current")])
           # Distances in meters
-          dists <- terra::distance(x, y, lonlat = TRUE, pairwise = TRUE)
-          # Calculate northward shift and convert to km
-          shift_km <- ifelse(x[, "max"] > y[, "max_current"], 
-                             1 * dists, -1 * dists) / 1000
-          summary$Nshift_mn_km[row_index] <- round(mean(shift_km))
-          summary$Nshift_md_km[row_index] <- round(median(shift_km))
+          dists_n <- terra::distance(future_n, current_n, 
+                                     lonlat = TRUE, pairwise = TRUE)
+          # Calculate shift (positive values = north) and convert to km
+          shift_n_km <- ifelse(future_n[, "max_future"] > current_n[, "max_current"], 
+                             1 * dists_n, -1 * dists_n) / 1000
+          stats$lat_max_shift[row_index] <- round(median(shift_n_km))
+
+          # Calculating shift along southern edge, in km, in each longitudinal band
+          future_s <- as.matrix(future_lats[, c("x", "min_future")])
+          current_s <- as.matrix(future_lats[, c("x", "min_current")])
+          # Distances in meters
+          dists_s <- terra::distance(future_s, current_s, 
+                                     lonlat = TRUE, pairwise = TRUE)
+          # Calculate shift (positive values = north) and convert to km
+          shift_s_km <- ifelse(future_s[, "min_future"] > current_s[, "min_current"], 
+                               1 * dists_s, -1 * dists_s) / 1000
+          stats$lat_min_shift[row_index] <- round(median(shift_s_km))
+        }  
           
-          # Paired t-test to see if edge has shifted north
-          if (t_test) {
-            if (nrow(future_lats) == 1) {
-              message("Cannot perform t-test for ", message_spp, ", ", 
-                      clim_model, ". Only one longitudinal band.")
-            } else {
-              ttest_p <- t.test(x = future_lats$max,
-                                y = future_lats$max_current,
-                                paired = TRUE,
-                                alternative = "greater")$p.value
-              summary$pvalue_Nshift[row_index] <- round(ttest_p, 3)
-            }
-          }
+        # Join future and current latitudinal data (only including longitudinal 
+        # bands that have suitable areas in both time periods)
+        # Rounding longitudes first to ensure there are matching values
+        current_lons$y <- round(current_lons$y, 4)
+        future_lons$y <- round(future_lons$y, 4)
+        future_lons <- inner_join(current_lons, future_lons, by = "y")    
+        
+        if (nrow(future_lons) == 0) {
+          message("None of the same latitudinal bands are in the current and ",
+                  clim_model, " distributions of ", message_spp, ".")
+        } else {
+          # Calculating shift along eastern edge, in km, in each latitudinal band
+          future_e <- as.matrix(future_lons[, c("max_future", "y")])
+          current_e <- as.matrix(future_lons[, c("max_current", "y")])
+          # Distances in meters
+          dists_e <- terra::distance(future_e, current_e, 
+                                     lonlat = TRUE, pairwise = TRUE)
+          # Calculate shift (positive values = east) and convert to km
+          shift_e_km <- ifelse(future_e[, "max_future"] > current_e[, "max_current"], 
+                               1 * dists_e, -1 * dists_e) / 1000
+          stats$lon_max_shift[row_index] <- round(median(shift_e_km))
+          
+          # Calculating shift along western edge, in km, in each latitudinal band
+          future_w <- as.matrix(future_lons[, c("min_future", "y")])
+          current_w <- as.matrix(future_lons[, c("min_current", "y")])
+          # Distances in meters
+          dists_w <- terra::distance(future_w, current_w, 
+                                     lonlat = TRUE, pairwise = TRUE)
+          # Calculate shift (positive values = east) and convert to km
+          shift_w_km <- ifelse(future_w[, "min_future"] > current_w[, "min_current"], 
+                               1 * dists_w, -1 * dists_w) / 1000
+          stats$lon_min_shift[row_index] <- round(median(shift_w_km))
         }
+      }
+      
+      # Combine current and future rasters to identify areas lost/gained
+      # (1 = lost; 2 = gained; 3 = retained)
+      current_lg <- terra::extend(current, ext(future))
+      future_lg <- terra::classify(x = future, 
+                                   rcl = matrix(c(1, 2), nrow = 1),
+                                   other = NA)
+      lg <- rast(list(current_lg, future_lg))
+      lg <- sum(lg, na.rm = TRUE)
+      areas <- round(terra::expanse(lg, unit = "km", byValue = TRUE))
+      if (1 %in% areas[, "value"]) {
+        stats$area_lost[row_index] <- areas[areas[, "value"] == 1, "area"]
+      } else {
+        stats$area_lost[row_index] <- 0
+      }
+      if (2 %in% areas[, "value"]) {
+        stats$area_gained[row_index] <- areas[areas[, "value"] == 2, "area"]
+      } else {
+        stats$area_gained[row_index] <- 0
+      }
+      if (3 %in% areas[, "value"]) {
+        stats$area_retained[row_index] <- areas[areas[, "value"] == 3, "area"]
+      } else {
+        stats$area_retained[row_index] <- 0
       }
     }
   }
-}  
+}
 
 # Write summary table to file
 datestamp <- Sys.Date()
@@ -252,6 +396,7 @@ if (all_insects) {
 filename <- paste0("output/summary-stats/overlap-summary-", 
                    spp, "-", datestamp, ".csv")
 
-write.csv(x = summary,
+write.csv(x = stats,
           file = filename, 
           row.names = FALSE)
+
