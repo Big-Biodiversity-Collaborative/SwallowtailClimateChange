@@ -3,7 +3,7 @@
 #' @param species_name character vector with name of insect species, e.g. 
 #' "Papilio multicaudata"
 #' @param overlap_raster raster with overlap between predicted ranges of insect
-#' and its hostplants (raster values = 0:3)
+#' and its hostplants (raster values = 0:5)
 #' @param clim_model character vector indicating climate variables on which  
 #' predictions are based
 #' @param include_legend logical indicating whether legend should be included
@@ -43,10 +43,18 @@ overlap_map <- function(species_name,
                       ". ", name_split[2])
   and_hosts <- paste0(abbr_name, " & hosts")
   
-  # Plotting details
-  # Important note: values in raster are 0:3 with 1 = insect only, 2 = host only 
-  # But for plotting, it's nicer to have the levels in this order:
-  # 1 = Both absent, 2 = hosts only, 3 = insect only, 4 = both present
+  # Important note: values in raster are 0:5, with 
+    # 0 = no insect, no hosts
+    # 1 = no insect, one host
+    # 2 = no insect, 2 or more hosts
+    # 3 = insect, no hosts
+    # 4 = insect, 1 host
+    # 5 = insect, 2 or more hosts  
+  # For plotting, we'll want to combine the host information and have:
+    # 0 = Both absent 
+    # 1:2 = Hosts only
+    # 3 = Insect only
+    # 4:5 = Both present
   
   # Labels for legend
   if (generic_legend) {
@@ -61,10 +69,13 @@ overlap_map <- function(species_name,
                 and_hosts)     
   }
   
-  # Set levels in categorical raster (note that we're switching 1 and 2
-  # to list "hosts only" before "insect only" in legend)
-  overlap2 <- as.factor(overlap)
-  levels(overlap2) <- data.frame(value = c(0, 2, 1, 3), desc = labels)
+  # Create new overlap raster with specified levels
+  overlap2 <- overlap
+  overlap2[overlap2 %in% 1:2] <- 1
+  overlap2[overlap2 == 3] <- 2
+  overlap2[overlap2 %in% 4:5] <- 3
+  overlap2 <- as.factor(overlap2)
+  levels(overlap2) <- data.frame(value = c(0, 1, 2, 3), desc = labels)
   
   color_vec <- c("#e5e5e5",   # Absent
                  "#b2df8a",   # Hosts only

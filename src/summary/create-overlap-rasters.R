@@ -8,11 +8,13 @@ require(terra)
 require(dplyr)
 require(stringr)
 
-# Want to create a raster for each insect, with the following classification:
-# 0 = Insect and all host plants predicted absent
-# 1 = Insect predicted present, but all host plants predicted absent
-# 2 = At least one host plant predicted present, but insect predicted absent
-# 3 = Insect and at least one host plant predicted present
+# Create a raster for each insect, with the following classification:
+# 0 = (Insect and hosts absent) Insect and all host plants predicted absent
+# 1 = (1 host only) Insect predicted absent, only 1 host predicted present
+# 2 = (2 or more hosts) Insect predicted absent, >= 2 hosts predicted present
+# 3 = (Insect, no hosts) Insect predicted present, all hosts predicted absent
+# 4 = (Insect, only 1 host) Insect and only 1 host predicted present
+# 5 = (Insect, 2 or more hosts) Insect and >= 2 hosts predicted present
 
 # Logical indicating whether to replace an overlap raster if one already exists
 replace <- TRUE
@@ -45,7 +47,7 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko", "Papilio cresphontes")
+  insects <- c("Papilio appalachiensis", "Papilio brevicauda")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -73,7 +75,7 @@ for (i in 1:length(insects)) {
     message("*** Missing one or more consensus rasters for ", insect, 
             ". Did not create overlap rasters.")
   } else {
-
+    
     # Identify host plants and extract consensus raster files
     plants <- ih$host_accepted[ih$insect == insect]
     
@@ -151,16 +153,13 @@ for (i in 1:length(insects)) {
         
         # Calculate the number of host plants present in each cell
         host_dist <- sum(host_dist, na.rm = TRUE)
+
+        # For insect, make cell values = 3 where present, zero otherwise.
+        insect_dist[insect_dist == 1] <- 3
         
-        # Make cell values = 2 where at least one host plant is present, zero 
-        # otherwise.
-        # First create 3-column matrix, with values in columns 1-2 
-        # representing a range of cell values you want to reclassify, and a 
-        # value in the 3rd column containing the new value for those cells.
-        rcl <- rbind(c(0, 0, 0), c(1, Inf, 2))
-        host_dist <- terra::classify(x = host_dist, 
-                                     rcl = rcl,
-                                     right = NA)
+        # For hosts, make cell values = 1 where 1 one host plant is present, 2 
+        # where 2 or more hosts present, zero otherwise.
+        host_dist[host_dist > 1] <- 2
         
         # Combine insect and host distributions 
         
@@ -174,10 +173,10 @@ for (i in 1:length(insects)) {
         # distribution is NA
         host_dist <- terra::mask(host_dist, insect_dist)
         
-        # Calculate overlap values (0, 1, 2, or 3)
+        # Calculate overlap values (0 to 5)
         overlap <- rast(list(insect_dist, host_dist))
         overlap <- sum(overlap)
-        
+
         # Save overlap raster to file
         saveRDS(object = overlap, 
                 file = overlap_file)
