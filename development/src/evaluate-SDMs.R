@@ -53,7 +53,7 @@ metrics <- data.frame(expand.grid(SDM = sdms, species = insects)) %>%
          TSS = NA,
          AUC = NA,
          IMAE = NA,
-         Boyce = NA,
+         Boyce_flexsdm = NA,
          Boyce_modEvA = NA,
 )
 
