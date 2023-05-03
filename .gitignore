@@ -44,6 +44,10 @@ output/areas/*.csv
 output/aridity/*.csv
 !output/aridity/.gitkeep
 
+# Comparisons between current and forecast distributions
+output/deltas/*.rds
+!output/deltas/.gitkeep
+
 # Predicted distributions
 output/distributions/*.rds
 !output/distributions/.gitkeep
