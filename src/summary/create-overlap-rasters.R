@@ -66,7 +66,7 @@ for (i in 1:length(insects)) {
     str_replace(pattern = " ", replacement = "_") %>%
     tolower()
   
-  insect_files <- list.files("output/consensus-rasters/", 
+  insect_files <- list.files("output/consensus-rasters", 
                              pattern = insect_nice_name,
                              full.names = TRUE)
   
@@ -91,7 +91,7 @@ for (i in 1:length(insects)) {
     
     plant_files <- NULL
     for (j in 1:length(plants)) {
-      plant_files_new <- list.files("output/consensus-rasters/", 
+      plant_files_new <- list.files("output/consensus-rasters", 
                                     pattern = plant_nice_names[j],
                                     full.names = TRUE) 
       # Print message if consensus rasters are missing for a host plant

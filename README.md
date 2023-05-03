@@ -73,9 +73,12 @@ method (e.g. maximum entropy, boosted regression trees, random forest)
     distribution model under a variety of global climate models, including 
     contemporary climate ("current") and ensemble forecast climate models (this
     is referred to in scripts as the "distribution" step)
-    3. Combine predicted distributions of each _insect_ species with the 
-    predictions for all of its respective host plants to create a single raster
-    with distributional information (see documentation in 
+    3. Combine predicted distributions for each species into a consensus 
+    distribution for each global climate model (this is referred to as the 
+    "consensus" step)
+    3. Combine predicted consensus distributions of each _insect_ species with 
+    the consensus predictions for all of its respective host plants to create a 
+    single raster with distributional information (see documentation in 
     functions/overlap_raster.R for interpretations of values in those rasters) 
     (referred to as the "overlap" step)
 4. Synthesizing results of single-species analyses
@@ -192,6 +195,7 @@ above).
 + src: 
     + bash: bash scripts to generate individual species R scripts
     + data: R scripts for data download and assessment
+    + hpc: scripts (primarily slurm) for running analyses on HPC
     + indiv: R scripts for individual species modeling and forecasting; 
     automatically created by shell scripts in src/bash
     + run-indiv: R scripts to run individual species scripts in src/indiv in 
