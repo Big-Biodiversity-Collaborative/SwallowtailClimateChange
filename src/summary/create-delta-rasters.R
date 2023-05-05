@@ -99,11 +99,11 @@ for (i in 1:length(insects)) {
         # Pull out the name of the forecast, will need for output file
         file_basename <- tools::file_path_sans_ext(basename(forecast_file))
         # Remove prefix with species name and "overlap"
-        model_name <- gsub(x = file_basename,
+        clim_model <- gsub(x = file_basename,
                            pattern = paste0(insect_nice_name, "-overlap-"),
                            replacement = "")
         delta_filename <- paste0("output/deltas/", insect_nice_name,
-                                 "-delta-", model_name, ".rds")
+                                 "-delta-", clim_model, ".rds")
         forecast_overlap <- readRDS(forecast_file)
         # Update forecast overlap raster values as suitable / unsuitable as 
         # was done for current overlap raster, above BUT here we score suitable
@@ -113,9 +113,35 @@ for (i in 1:length(insects)) {
         
         # Now stack the rasters, current first, forecast second to ensure the 
         # math lines up
-        #TODO: Works to here; need to update stack_rasters so it uses terra 
-        # functions instead of raster functions.
-        delta_raster <- stack_rasters(r = list(current_overlap, forecast_overlap))
+        delta_raster <- stack_rasters(r = list(current_overlap, 
+                                               forecast_overlap))
+        
+        # Save delta raster to file
+        saveRDS(object = delta_raster, 
+                file = delta_filename)
+        
+        # Save map to file
+        if (save_maps) {
+          message("Saving delta map for ", insect, ", ", clim_model, ".")
+
+          map_object <- delta_map(species_name = insect,
+                                  delta_raster = delta_raster,
+                                  clim_model = clim_model,
+                                  include_legend = TRUE,
+                                  horizontal_legend = FALSE)
+                    
+          map_file <- paste0("output/maps/",
+                             insect_nice_name, 
+                             "-delta-",
+                             clim_model,
+                             ".", file_ext)
+          
+          ggsave(filename = map_file,
+                 plot = map_object, 
+                 width = 6, 
+                 height = 6,
+                 units = "in")
+        }
       }
     }
   }

@@ -1,28 +1,34 @@
 #' Stack rasters of predicted presence / absence
 #' 
-#' @param r \code{list} of \code{Raster*} objects
+#' @param r \code{list} of \code{SpatRaster} objects
 #' @param out character indicating output format; "binary" returns raster where 
 #' cells with summed values >= 1 are reported as 1, while "total" will return 
 #' the total summed value of the cell
 #' 
-#' @details Because the desired output may be based on individual \code{Raster*}
-#' objects of differing geographic extent, \code{stack_rasters} will attempt to 
-#' extend every raster to the maximum extent covered by the union of all 
-#' elements of \code{r}. Due to the treatment of missing values by 
-#' \code{raster::mosaic()} and binary raster addition (i.e. `+`), this function 
-#' uses some creative workarounds to ensure that cells that are missing data 
+#' @details Because the desired output may be based on individual 
+#' \code{SpatRaster} objects of differing geographic extent, 
+#' \code{stack_rasters} will attempt to extend every raster to the maximum 
+#' extent covered by the union of all elements of \code{r}. This function 
+#' uses some creative solutions to ensure that cells that are missing data 
 #' from a subset of the elements of \code{r} but have data from at least one 
-#' element of \code{r} have a non-\code{NA} value returned for that cell. 
-#' Direct use of \code{raster::mosaic(fun = sum)} would result in NA values 
-#' being converted to zeros in the output raster, while the binary operation 
-#' (`+`) returns a raster where the only cells that are not \code{NA} are those 
-#' cells which did not have any missing data across all elements of \code{r}.
+#' element of \code{r} have a non-\code{NA} value returned for that cell. This 
+#' behavior was developed for use with \code{raster::mosaic()}, but with the 
+#' switch to \code{terra::mosaic()}, may not be necessary. The treatment of 
+#' missing values by \code{raster::mosaic()} and binary raster addition (i.e. 
+#' `+`). Direct use of \code{raster::mosaic(fun = sum)} would result in 
+#' \code{NA} values being converted to zeros in the output raster, while the 
+#' binary operation (`+`) returns a raster where the only cells that are not 
+#' \code{NA} are those cells which did not have any missing data across all 
+#' elements of \code{r}.
 #' 
-#' @param A \code{RasterLayer} with cell values reflecting the sum of values 
+#' @param A \code{SpatRaster} with cell values reflecting the sum of values 
 #' across rasters in \code{r}
 stack_rasters <- function(r, out = c("total", "binary")) {
   if (!require(raster)) {
     stop("stack_rasters requires raster package, but it could not be loaded")
+  }
+  if (!require(terra)) {
+    stop("stack_rasters requires terra package, but it could not be loaded")
   }
   out <- match.arg(out)
 
@@ -37,12 +43,13 @@ stack_rasters <- function(r, out = c("total", "binary")) {
     x <- r
     # Remove names from x because they cause issues?
     names(x) <- NULL
-    x$fun = sum
-    x$na.rm = TRUE
+    x$fun = sum # named argument for do.call()
+    # x$na.rm = TRUE
     
     # Make a RasterLayer that is the sum of all values; missing and values of 
     # zero all become zero
-    mosaic_raster <- do.call(raster::mosaic, x)
+    # mosaic_raster <- do.call(raster::mosaic, x)
+    mosaic_raster <- do.call(terra::mosaic, x)
     
     # We use this to keep track of the sum of cell values  
     sum_r <- NULL
@@ -53,19 +60,26 @@ stack_rasters <- function(r, out = c("total", "binary")) {
       if (is.null(sum_r)) {
         # First one, so just extend the raster to the appropriate extent, 
         # leaving missing values as missing, and assign to sum_r
-        sum_r <- raster::extend(x = one_raster,
-                                y = mosaic_raster)
+        # sum_r <- raster::extend(x = one_raster,
+        #                         y = mosaic_raster)
+        sum_r <- terra::extend(x = one_raster,
+                               y = mosaic_raster)
       } else {
         # for each additional raster, need to have two extensions: One with 
         # missing values as missing, one with missing values as zero
         
         # We use the 0 raster for actual addition, but the NA raster to then 
         # turn any 0 that should be an NA *back* to NA
-        one_raster_NA <- raster::extend(x = one_raster,
-                                        y = mosaic_raster)
-        one_raster_0 <- raster::extend(x = one_raster,
-                                       y = mosaic_raster,
-                                       value = 0)
+        # one_raster_NA <- raster::extend(x = one_raster,
+        #                                 y = mosaic_raster)
+        # one_raster_0 <- raster::extend(x = one_raster,
+        #                                y = mosaic_raster,
+        #                                value = 0)
+        one_raster_NA <- terra::extend(x = one_raster,
+                                       y = mosaic_raster)
+        one_raster_0 <- terra::extend(x = one_raster,
+                                      y = mosaic_raster,
+                                      fill = 0)
         # Because one_raster_0 only has 0s in the *extended* area, we need to 
         # manually set any remaining NAs to 0
         one_raster_0[is.na(one_raster_0)] <- 0
