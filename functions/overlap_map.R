@@ -70,7 +70,7 @@ overlap_map <- function(species_name,
   }
   
   # Create new overlap raster with specified levels
-  overlap2 <- overlap
+  overlap2 <- overlap_raster
   overlap2[overlap2 %in% 1:2] <- 1
   overlap2[overlap2 == 3] <- 2
   overlap2[overlap2 %in% 4:5] <- 3
