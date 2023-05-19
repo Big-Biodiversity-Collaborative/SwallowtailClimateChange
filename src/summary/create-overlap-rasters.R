@@ -40,14 +40,15 @@ min_sdms <- 4
 
 # Logical indicating whether to create overlap rasters for all species or just a 
 # subset of insects
-all_insects <- TRUE
+all_insects <- FALSE
 
 # Extract species names
 if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio appalachiensis", "Papilio brevicauda")
+  insects <- c("Papilio cresphontes", "Papilio glaucus", "Papilio rumiko",
+               "Papilio rutulus")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -193,6 +194,7 @@ for (i in 1:length(insects)) {
                                     include_legend = TRUE,
                                     horizontal_legend = FALSE,
                                     generic_legend = FALSE,
+                                    boundaries = TRUE,
                                     title_scenarioyear = TRUE)
           
           map_file <- paste0("output/maps/",

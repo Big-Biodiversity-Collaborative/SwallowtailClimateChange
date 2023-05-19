@@ -13,7 +13,9 @@
 #' if include_legend = FALSE.
 #' @param generic_legend logical indicating whether the legend should refer to
 #' butterflies (generic_legend = TRUE) or a particular butterfly species  
-#' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE. 
+#' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE.
+#' @param boundaries logical indicating whether or not to include political 
+#' boundaries 
 #' @param title_scenarioyear logical indicating whether the title (for future
 #' maps only) should include the scenario and year (title_scenarioyear = TRUE)
 #' or just say "future" (title_scenarioyear = FALSE)
@@ -23,6 +25,7 @@ overlap_map <- function(species_name,
                         include_legend = TRUE,
                         horizontal_legend = FALSE,
                         generic_legend = FALSE,
+                        boundaries = TRUE,
                         title_scenarioyear = TRUE) {
   if (!require(terra)) {
     stop("overlap_map requires terra package, but it could not be loaded")
@@ -35,6 +38,12 @@ overlap_map <- function(species_name,
   }
   if (!require(ggplot2)) {
     stop("overlap_map requires ggplot2 package, but it could not be loaded")
+  }
+  if (!require(rnaturalearth)) {
+    stop("overlap_map requires rnaturalearth package, but it could not be loaded")
+  }
+  if (!require(rnaturalearthdata)) {
+    stop("overlap_map requires rnaturalearthdata package, but it could not be loaded")
   }
   
   # Want an abbreviated version of species name for title & legend
@@ -77,7 +86,7 @@ overlap_map <- function(species_name,
   overlap2 <- as.factor(overlap2)
   levels(overlap2) <- data.frame(value = c(0, 1, 2, 3), desc = labels)
   
-  color_vec <- c("#e5e5e5",   # Absent
+  color_vec <- c("#e8e8e8",   # Absent
                  "#b2df8a",   # Hosts only
                  "#a6cee3",   # Insect only
                  "#1f78b4")   # Hosts and insect  
@@ -93,11 +102,34 @@ overlap_map <- function(species_name,
     title_text <- labs(title = paste0(abbr_name, " and hosts, ",future_text)) 
   }
   
-  overlap_plot_base <- ggplot() +
-    geom_spatraster(data = overlap2, maxcell = Inf) +
-    scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-    title_text +
-    theme_bw()
+  # Get limits for plot
+  plot_ext <- ext(overlap2) * 1.04
+  xlim = c(plot_ext[1], plot_ext[2])
+  ylim = c(plot_ext[3], plot_ext[4])
+  
+  if (boundaries) {
+    boundaries <- rnaturalearth::ne_countries(continent = "north america",
+                                              scale = "medium",
+                                              returnclass = "sf") %>% 
+      dplyr::select(1) %>%
+      terra::vect() %>%
+      terra::project(y = overlap2)
+
+    overlap_plot_base <- ggplot() +
+      geom_spatraster(data = overlap2, maxcell = Inf) +
+      scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
+      geom_spatvector(data = boundaries, color = "black", fill = NA) +
+      coord_sf(xlim = xlim, ylim = ylim) +
+      title_text +
+      theme_bw()
+  } else {
+    overlap_plot_base <- ggplot() +
+      geom_spatraster(data = overlap2, maxcell = Inf) +
+      scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
+      coord_sf(xlim = xlim, ylim = ylim) +
+      title_text +
+      theme_bw()
+  }
   
   if (include_legend == TRUE & horizontal_legend == TRUE) {
     overlap_plot <- overlap_plot_base +
