@@ -37,6 +37,8 @@ The project uses the following additional R packages:
 + RColorBrewer
 + rgdal
 + rJava (for MaxEnt models)
++ rnaturalearth
++ rnaturalearthdata
 + Rtools (needed to use the zip() function on Windows machines)
 + sf
 + sp

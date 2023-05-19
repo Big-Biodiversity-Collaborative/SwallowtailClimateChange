@@ -35,7 +35,7 @@ climate_models <- read.csv(file = "data/climate-models.csv")
 
 # Logical indicating whether to create delta rasters for all species or just a 
 # subset of insects
-all_insects <- TRUE
+all_insects <- FALSE
 
 # Extract species names
 if (all_insects) {
@@ -128,7 +128,9 @@ for (i in 1:length(insects)) {
                                   delta_raster = delta_raster,
                                   clim_model = clim_model,
                                   include_legend = TRUE,
-                                  horizontal_legend = FALSE)
+                                  horizontal_legend = TRUE,
+                                  boundaries = TRUE,
+                                  full_title = TRUE)
                     
           map_file <- paste0("output/maps/",
                              insect_nice_name, 
