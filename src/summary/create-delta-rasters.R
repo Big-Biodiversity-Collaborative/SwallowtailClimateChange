@@ -130,6 +130,7 @@ for (i in 1:length(insects)) {
                                   include_legend = TRUE,
                                   horizontal_legend = TRUE,
                                   boundaries = TRUE,
+                                  obs_points = FALSE,
                                   full_title = TRUE)
                     
           map_file <- paste0("output/maps/",

@@ -16,6 +16,8 @@
 #' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE.
 #' @param boundaries logical indicating whether or not to include political 
 #' boundaries 
+#' @param obs_points logical indicating whether or not to include observation 
+#' points to map; will only observations that have passed filtering process
 #' @param title_scenarioyear logical indicating whether the title (for future
 #' maps only) should include the scenario and year (title_scenarioyear = TRUE)
 #' or just say "future" (title_scenarioyear = FALSE)
@@ -26,6 +28,7 @@ overlap_map <- function(species_name,
                         horizontal_legend = FALSE,
                         generic_legend = FALSE,
                         boundaries = TRUE,
+                        obs_points = FALSE,
                         title_scenarioyear = TRUE) {
   if (!require(terra)) {
     stop("overlap_map requires terra package, but it could not be loaded")
@@ -145,6 +148,25 @@ overlap_map <- function(species_name,
       theme(axis.title = element_blank(),
             legend.position = "None")    
   }
-  
+
+  if (obs_points) {
+    nice_name <- gsub(pattern = " ",
+                      replacement = "_",
+                      x = tolower(species_name))
+    obs_file <- paste0("data/gbif/presence-absence/",
+                       nice_name, "-pa.csv")
+    if (file.exists(obs_file)) {
+      observations <- read.csv(file = obs_file)
+      observations <- observations %>%
+        dplyr::filter(pa == 1) %>%
+        dplyr::rename(Longitude = x, Latitude = y)
+      overlap_plot <- overlap_plot +
+        geom_point(data = observations, 
+                   mapping = aes(x = Longitude, y = Latitude),
+                   size = 0.05,
+                   shape = 3,
+                   alpha = 0.25)
+    }
+  }
   return(overlap_plot)  
 }

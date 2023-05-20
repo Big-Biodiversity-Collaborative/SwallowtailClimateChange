@@ -113,7 +113,6 @@ for (i in 1:length(insects)) {
         message("*** Missing consensus rasters for all hosts associated with ",
                 insect, ", ", clim_model, ". Did not create overlap raster.")
       } else {
-        
         overlap_file <- paste0("output/overlaps/",
                                insect_nice_name, 
                                "-overlap-",
@@ -184,7 +183,6 @@ for (i in 1:length(insects)) {
         
         # Save map to file
         if (save_maps) {
-          
           cat(paste0("Saving overlap map for ", insect, 
                      ", ", clim_model, ".\n"))
           
@@ -195,6 +193,7 @@ for (i in 1:length(insects)) {
                                     horizontal_legend = FALSE,
                                     generic_legend = FALSE,
                                     boundaries = TRUE,
+                                    obs_points = FALSE,
                                     title_scenarioyear = TRUE)
           
           map_file <- paste0("output/maps/",

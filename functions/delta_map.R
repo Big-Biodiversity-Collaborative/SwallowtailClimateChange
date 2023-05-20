@@ -17,6 +17,8 @@
 #' anything other than "current".
 #' @param boundaries logical indicating whether or not to include political 
 #' boundaries
+#' @param obs_points logical indicating whether or not to include observation 
+#' points to map; will only observations that have passed filtering process
 #' @param full_title logical indicating whether the plot title should include
 #' the reference and future climate models (TRUE) or whether the plot title
 #' should only include the species name (FALSE).
@@ -27,6 +29,7 @@ delta_map <- function(species_name,
                       horizontal_legend = FALSE,
                       reference_model = "current",
                       boundaries = TRUE,
+                      obs_points = FALSE,
                       full_title = TRUE) {
   if (!require(terra)) {
     stop("overlap_map requires terra package, but it could not be loaded")
@@ -130,5 +133,28 @@ delta_map <- function(species_name,
       theme(axis.title = element_blank(),
             legend.position = "None")    
   }
+  
+  # Add observation points, if appropriate
+  if (obs_points) {
+    nice_name <- gsub(pattern = " ",
+                      replacement = "_",
+                      x = tolower(species_name))
+    obs_file <- paste0("data/gbif/presence-absence/",
+                       nice_name, "-pa.csv")
+    if (file.exists(obs_file)) {
+      observations <- read.csv(file = obs_file)
+      observations <- observations %>%
+        dplyr::filter(pa == 1) %>%
+        dplyr::rename(Longitude = x, Latitude = y)
+      delta_plot <- delta_plot +
+        geom_point(data = observations, 
+                   mapping = aes(x = Longitude, y = Latitude),
+                   size = 0.05,
+                   shape = 3,
+                   alpha = 0.25)
+    }
+  }
+  
+  
   return(delta_plot)  
 }
