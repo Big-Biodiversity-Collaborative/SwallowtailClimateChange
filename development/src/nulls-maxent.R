@@ -134,7 +134,7 @@ nice_name <- nice_names[1]
   # mod_mj
   # mod_mj@results
   
-  # Use maxent:
+  # Use maxnet:
   mod_mn <- ENMevaluate(occs = occs, 
                         bg = bg, 
                         envs = pred_rs,
