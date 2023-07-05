@@ -153,9 +153,11 @@ nice_name <- nice_names[1]
   best_index <- which(mod_mn@results$or.10p.avg == min(mod_mn@results$or.10p.avg))
   best_settings <- list(fc = as.character(mod_mn@results$fc[best_index]),
                         rm = as.numeric(mod_mn@results$rm[best_index]))
-  mod_null <- ENMnulls(e = mod_mn, 
-                       mod.settings = best_settings,
-                       no.iter = 100)
+  suppressMessages(
+    mod_null <- ENMnulls(e = mod_mn, 
+                         mod.settings = best_settings,
+                         no.iter = 100)
+  )
 
   # Summary table
   null.emp.results(mod_null) %>%
