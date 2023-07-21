@@ -28,18 +28,88 @@
 
 library(dplyr)
 library(terra)
-
+source(file = "load_functions.R")
+set.seed(20230721)
 # Starting with our local rumiko
 rumiko_obs <- read.csv(file = "data/gbif/presence-absence/papilio_rumiko-pa.csv")
 
+# Question 1: Proportion overlap
 # Counting cells
 # Get one climate raster
 bio1 <- terra::rast(x = "data/wc2-1/bio1.tif")
+# Just want lat & long for rumiko, along with pa
+rumiko_xyz <- rumiko_obs[, c("x", "y", "pa")]
+
 # Gets the cell id for each point in rumiko_xyz
 rumiko_cells <- terra::cellFromXY(bio1, as.matrix(rumiko_xyz[, c("x", "y")]))
+
 # Calculate how many cells have two points
 two_points <- length(rumiko_cells) - length(unique(rumiko_cells))
 # 115 for rumiko
+
 # Calculate proportion of absences that share a cell
 prop_shared <- two_points/sum(rumiko_obs$pa)
 # Only 5% for rumiko
+
+# Question 2: Affect on AUC
+# Want to create two datasets: one with overlap and one with no overlap. Both 
+# should have the same number of observations, even the one with overlaps.
+
+# Need to add in climate data for SDMs
+predictors <- terra::rast(list.files(path = "data/wc2-1",
+                                     pattern = ".tif$",
+                                     full.names = TRUE))
+
+# Extract bioclim data for presence/absence data; can take a moment
+predictors <- terra::extract(x = predictors, 
+                             y = rumiko_obs[, c("x", "y")], 
+                             xy = FALSE) %>%
+  dplyr::select(-ID)
+
+# Join bioclim data with original full_data (which has pa and fold info),
+# dropping x, y columns at the same time
+rumiko_obs <- rumiko_obs %>%
+  cbind(., predictors) %>%
+  dplyr::select(c("pa", "fold", all_of(paste0("bio", 1:19))))
+
+# Identify cells that have both presence and pseudo-absence points; add a 
+# column in the observation data frame indicating thus
+rumiko_obs$cell_id <- rumiko_cells
+rumiko_obs <- rumiko_obs %>%
+  arrange(desc(pa))  # order so presence points have lower indexes
+rumiko_obs$shared <- duplicated(rumiko_obs$cell_id)
+# sum(rumiko_obs$shared)
+
+# Create the "no overlap" dataset by removing all background points that share 
+# a cell with a presence point
+rumiko_no_overlap <- rumiko_obs %>%
+  filter(!shared)
+
+# Create the "overlap" dataset by removing random background points, but 
+# **not** any of those background points that are in a cell with presence point
+# Start by identifying those background points that are in a cell without a 
+# presence point
+solo_background <- which(rumiko_obs$pa == 0 & !rumiko_obs$shared)
+to_skip <- sample(x = solo_background, 
+                  size = sum(rumiko_obs$shared))
+rumiko_overlap <- rumiko_obs[-to_skip, ]
+
+# Run SDM on both datasets
+# Drop columns not used by SDM
+rumiko_no_overlap <- rumiko_no_overlap %>%
+  dplyr::select(pa, fold, all_of(paste0("bio", 1:19)))
+rumiko_overlap <- rumiko_overlap %>%
+  dplyr::select(pa, fold, all_of(paste0("bio", 1:19)))
+
+no_overlap_lasso <- run_lasso(full_data = rumiko_no_overlap,
+                              quad = TRUE,
+                              verbose = TRUE)
+
+overlap_lasso <- run_lasso(full_data = rumiko_overlap,
+                           quad = TRUE,
+                           verbose = TRUE)
+
+# Extract evaluation metric and compare
+no_overlap_lasso$evaluation@auc - overlap_lasso$evaluation@auc
+# [1] 0.00535957
+# Not really any different
