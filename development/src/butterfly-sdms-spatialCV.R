@@ -1,7 +1,7 @@
 # Running new maxent models for butterfly species
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-08-21
+# 2023-08-22
 
 require(stringr)
 require(ENMeval)
@@ -37,7 +37,7 @@ predictors <- terra::rast(list.files(path = "data/wc2-1",
                                      full.names = TRUE))
 
 # For now, will use only 9 of the worldclim variables (this includes the 6 vars
-# that Low et al. 2020 used, plus a few varaibles that assess seasonal or daily
+# that Low et al. 2020 used, plus a few variables that assess seasonal or daily
 # variation in temp/precip)
 climate_vars <- paste0("bio", c(1, 2, 4:6, 12:15))
 
@@ -51,11 +51,11 @@ folds <- 1:4
 evals <- expand.grid(insect = insects, sdm = sdms, fold = folds,
                      stringsAsFactors = FALSE) %>%
   mutate(tune.args = NA,
-         AUC = NA,
-         CBI = NA,
+         AUC = NA, 
+         CBI = NA, # Continuous Boyce index
          IMAE = NA, # Inverse mean absolute error
          thr.mss = NA, # Max(sens + spec) threshold value
-         OR.mss = NA, # OR, w/ thr = max(sens + spec)
+         OR.mss = NA, # Omission rate, w/ thr = max(sens + spec)
          TSS.mss = NA # True skill statistic, w/ thr = max(sens + spec)
          ) %>%
   relocate(tune.args, .after = sdm) %>%
@@ -120,6 +120,15 @@ for (i in 1:nrow(insect_data)) {
     # points(y ~ x, data = filter(pa_data, block == 3 & pa == 1),
     #        pch = 19, col = "green")
     # points(y ~ x, data = filter(pa_data, block == 4 & pa == 1),
+    #        pch = 19, col = "purple")
+    # plot(pred_rs[[1]])
+    # points(y ~ x, data = filter(pa_data, block == 1 & pa == 0),
+    #        pch = 19, col = "red")
+    # points(y ~ x, data = filter(pa_data, block == 2 & pa == 0),
+    #        pch = 19, col = "blue")
+    # points(y ~ x, data = filter(pa_data, block == 3 & pa == 0),
+    #        pch = 19, col = "green")
+    # points(y ~ x, data = filter(pa_data, block == 4 & pa == 0),
     #        pch = 19, col = "purple")
 
   # Maxent --------------------------------------------------------------------#
@@ -295,7 +304,14 @@ for (i in 1:nrow(insect_data)) {
       # Create model formula
       model_formula <- paste(climate_vars, collapse = " + ")
       model_formula <- as.formula(paste0("pa ~ ", model_formula))
-      smpsize <- c("0" = prNum, "1" = prNum)
+      # Generate equal sample sizes for presence, pseudo-absence data. Note that 
+      # if we have more presences than absences in a fold (happens rarely), need 
+      # to then sample the presences.
+      if (prNum < bgNum) {
+        smpsize <- c("0" = prNum, "1" = prNum)
+      } else {
+        smpsize <- c("0" = bgNum, "1" = bgNum)
+      } 
       sdmtrain_f <- sdmtrain
       sdmtrain_f$pa <- as.factor(sdmtrain_f$pa)
 
