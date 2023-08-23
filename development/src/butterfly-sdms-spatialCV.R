@@ -206,7 +206,10 @@ for (i in 1:nrow(insect_data)) {
                                   y = pa_data[, c("x", "y")],
                                   xy = FALSE) %>%
     dplyr::select(-ID)
-  pa_data <- cbind(pa_data, predictors_df) 
+  pa_data <- cbind(pa_data, predictors_df)
+  # Remove any rows with NAs
+  anyNAs <- apply(pa_data[, climate_vars], 1, function(x) sum(is.na(x)))
+  pa_data <- pa_data[-which(anyNAs > 0),]
   
   # Other SDMs ----------------------------------------------------------------#
   # Loop through each training dataset
