@@ -13,6 +13,7 @@ require(ecospat)
 require(glmnet)
 require(mgcv)
 require(randomForest)
+require(gbm)
 
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
@@ -198,6 +199,7 @@ for (i in 1:nrow(insect_data)) {
   sdm_file <- paste0("development/output/SDMs/",
                      nice_name, "-sdm-maxent-9var-CV.rds")
   saveRDS(mod_max, sdm_file)
+  # Note: I'm not saving the other SDM types for now...
   
   # Prep data for all other SDMs ----------------------------------------------#  
   predictors_df <- terra::extract(x = pred_mask,
@@ -235,6 +237,105 @@ for (i in 1:nrow(insect_data)) {
     bgNum <- as.numeric(table(sdmtrain$pa)["0"])
     wt <- ifelse(sdmtrain$pa == 1, 1, prNum / bgNum)
     
+    # Run BRT and save evaluation metrics
+      # Set tree complexity (number of nodes in tree; only 1 if few records)
+      tc <- ifelse(prNum < 40, 1, 5)
+      # Learning rate (weights applied to individual trees; start at 0.01)
+      poss_lr_values <- c(0.001, 0.01, 0.05, 0.10)
+      lr_index <- 2
+      lr <- poss_lr_values[lr_index] 
+      # Number of initial trees (50 is default)
+      n_trees <- 100
+      # Number of trees to add at each step (50 is default)
+      step_size <- 100
+      # Maximum number of trees to fit before stopping (default is 10000)
+      max_trees <- 10000
+      # Number of folds for cross-validation (to find optimal number of trees)
+      n_folds <- 5
+      
+      # Note: using try() function so if model fails to fit the loop will continue
+      brt_fit <- NULL  
+      opt_trees <- 0 
+      no_model <-  FALSE
+      while (is.null(brt_fit) | opt_trees < 1000 | opt_trees == max_trees)  {
+        # Run gbm.step
+        # Note: set plot arguments below to FALSE to avoid creating an extraneous 
+        # file when running BRT models in parallel
+        try(
+          brt_fit <- dismo::gbm.step(data = sdmtrain,
+                                     gbm.x = 6:ncol(sdmtrain), # Columns with predictor data
+                                     gbm.y = 1,                # Column with pa data
+                                     family = "bernoulli",
+                                     tree.complexity = tc,
+                                     learning.rate = lr,
+                                     n.trees = n_trees,
+                                     step.size = step_size,
+                                     max.trees = max_trees,
+                                     n.folds = n_folds,
+                                     verbose = FALSE, 
+                                     silent = TRUE,
+                                     plot.main = FALSE,  
+                                     plot.folds = FALSE)
+        )
+        
+        # Extract the optimal number of trees
+        opt_trees <- ifelse(is.null(brt_fit), 0, brt_fit$gbm.call$best.trees)
+        
+        # If the algorithm is unable to find an optimum number with the fastest 
+        # learning rate (0.10) within 10,000 trees, then exit. 
+        if (lr_index == 4 & opt_trees == max_trees) {
+          no_model <- TRUE
+          message("Unable to find optimal number of trees with learning rate = 0.1 and max trees = 10,000.")
+          break
+        }
+        
+        # If the optimal number of trees is < 1000 with a learning rate of 0.001, 
+        # save this model and exit.
+        if (lr_index == 1 & opt_trees < 1000) {
+          message("Optimal number of trees < 1000 with learning rate = 0.001. ",
+                  "Saving model with < 1000 trees.")
+          break      
+        }
+        
+        # Adjust the learning rate if the optimal number of trees is < 1000 or 
+        # optimal number couldn't be identified (ie, equal to max_trees) 
+        lr_index <- ifelse(opt_trees < 1000, 
+                           max(lr_index - 1, 1), 
+                           ifelse(opt_trees == max_trees, 
+                                  min(lr_index + 1, 4),
+                                  lr_index))
+        lr <- poss_lr_values[lr_index]
+      }
+      
+      if (!is.null(brt_fit)) {
+        ntree <- brt_fit$gbm.call$best.trees
+        tree.complex <- brt_fit$gbm.call$tree.complexity
+        learning <- brt_fit$gbm.call$learning.rate
+        tune.args <- paste0("tree.", ntree, "_node.", tree.complex, "_lr.", learning)
+      
+        brt_eval <- dismo::evaluate(p = sdmtest[sdmtest$pa == 1, climate_vars],
+                                    a = sdmtest[sdmtest$pa == 0, climate_vars],
+                                    model = brt_fit,
+                                    type = "response")
+        brt_em <- flexsdm::sdm_eval(p = brt_eval@presence,
+                                    a = brt_eval@absence,
+                                    thr = "max_sens_spec") 
+        brt_boyce <- ecospat::ecospat.boyce(fit = c(brt_eval@presence, 
+                                                    brt_eval@absence),
+                                            obs = brt_eval@presence,
+                                            nclass = 0,
+                                            PEplot = FALSE)      
+        # Save evaluation metrics
+        row_index <- which(evals$insect == insect & evals$sdm == "BRT" & evals$fold == j)
+        evals$tune.args[row_index] <- tune.args
+        evals$AUC[row_index] <- brt_em$AUC
+        evals$CBI[row_index] <- brt_boyce$cor
+        evals$IMAE[row_index] <- brt_em$IMAE  
+        evals$thr.mss[row_index] <- brt_em$thr_value
+        evals$OR.mss[row_index] <- brt_em$OR
+        evals$TSS.mss[row_index] <- brt_em$TSS   
+      }
+        
     # Run GAM and save evaluation metrics
       # Create model formula
       smooth <- "s"
@@ -344,10 +445,8 @@ for (i in 1:nrow(insect_data)) {
       evals$thr.mss[row_index] <- rf_em$thr_value
       evals$OR.mss[row_index] <- rf_em$OR
       evals$TSS.mss[row_index] <- rf_em$TSS
-      
-      # Not saving each of the models for now
   }
 }  
-  
+
 write.table(evals, "clipboard", sep = "\t", row.names = FALSE)
 
