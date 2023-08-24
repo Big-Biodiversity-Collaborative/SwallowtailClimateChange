@@ -122,6 +122,7 @@ for (i in 1:nrow(insect_data)) {
     #        pch = 19, col = "green")
     # points(y ~ x, data = filter(pa_data, block == 4 & pa == 1),
     #        pch = 19, col = "purple")
+  
     # plot(pred_rs[[1]])
     # points(y ~ x, data = filter(pa_data, block == 1 & pa == 0),
     #        pch = 19, col = "red")
@@ -209,7 +210,9 @@ for (i in 1:nrow(insect_data)) {
   pa_data <- cbind(pa_data, predictors_df)
   # Remove any rows with NAs
   anyNAs <- apply(pa_data[, climate_vars], 1, function(x) sum(is.na(x)))
-  pa_data <- pa_data[-which(anyNAs > 0),]
+  if (max(anyNAs) > 0) {
+    pa_data <- pa_data[-which(anyNAs > 0),]
+  }
   
   # Other SDMs ----------------------------------------------------------------#
   # Loop through each training dataset
@@ -450,6 +453,4 @@ for (i in 1:nrow(insect_data)) {
       evals$TSS.mss[row_index] <- rf_em$TSS
   }
 }  
-
-write.table(evals, "clipboard", sep = "\t", row.names = FALSE)
 
