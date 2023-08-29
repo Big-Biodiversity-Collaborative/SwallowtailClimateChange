@@ -1037,6 +1037,12 @@ for (i in 1:nrow(insect_data)) {
   evals <- read.csv("development/output/evals-CV-insect-SDMs-meanBRT.csv", 
                     header = TRUE)
   
+  evals2 <- evals %>%
+    mutate(across(AUC:TSS.mss, function(x) round(x, 3))) %>%
+    rename(threshold.mss = thr.mss) %>%
+    relocate(threshold.mss, .after = TSS.mss)
+  head(evals2, 50)
+  
   # Identify problematic evaluation metrics:
   evals <- evals %>%
     mutate(prob.AUC = ifelse(AUC < 0.5, 1, 0),
@@ -1084,7 +1090,7 @@ for (i in 1:nrow(insect_data)) {
               .groups = "keep") %>%
     mutate(across(auc.avg:or.max, function(x) round(x, 3))) %>%
     data.frame()
-  
+
   # Look at distributions of evaluation metrics (across species and models)
   par(mfrow = c(2, 1))
   hist(evals_avg$auc.avg, breaks = 20)
@@ -1104,11 +1110,34 @@ for (i in 1:nrow(insect_data)) {
   
   hist(evals_avg$imae.avg, breaks = 20)
   hist(evals_avg$imae.min, breaks = 20)
+  
+  # Look at patterns across SDMs and species
+  evals_avg %>%
+    group_by(sdm) %>%
+    summarize(auc.avg = mean(auc.avg),
+              auc.min = min(auc.min),
+              cbi.avg = mean(cbi.avg),
+              cbi.min = min(cbi.min),
+              or.avg = mean(or.avg),
+              or.max = max(or.max),
+              imae.avg = mean(imae.avg),
+              imae.min = min(imae.min))
+  
+  evals_avg %>%
+    group_by(insect) %>%
+    summarize(auc.avg = mean(auc.avg),
+              auc.min = min(auc.min),
+              cbi.avg = mean(cbi.avg),
+              cbi.min = min(cbi.min),
+              or.avg = mean(or.avg),
+              or.max = max(or.max),
+              imae.avg = mean(imae.avg),
+              imae.min = min(imae.min))
 
 # -----------------------------------------------------------------------------#  
-# Look at predictions for one species
+# Look at predictions for one species at a time
 
-i = 7
+i = 13
 nice_name <- nice_names[i]
 insect <- insect_data$species[i]
 short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
@@ -1148,6 +1177,16 @@ short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
     bad.models <- cbi$sdm[which(cbi$insect == insect)] 
     good.models <- setdiff(sdms, bad.models)
     p_suits$MN.GOOD <- apply(p_suits[,good.models], 1, mean)
+    # Calculate weights (based on OR.avg) for "good" models
+      # ors <- data.frame(sdms = sdms,
+      #                   or = evals_avg$or.avg[evals_avg$insect == insect]) %>%
+      #   filter(sdms %in% good.models) %>%
+      #   mutate(ior = 1 - or,
+      #          wt = ior/sum(ior))
+      # p_suits$WTMN.GOOD <- apply(p_suits[,good.models], 1, 
+      #                            function(x) sum(x * ors$wt))
+      # This doesn't seem to make any meaningful difference, so skipping this
+      # for now
   
     a_suits <- data.frame(BRT = brt$evaluation@absence,
                           GAM = gam$evaluation@absence,
