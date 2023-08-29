@@ -1,7 +1,7 @@
 # Running new maxent models for butterfly species
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-08-25
+# 2023-08-28
 
 require(stringr)
 require(ENMeval)
@@ -709,10 +709,531 @@ abline(v = 0, col = "blue", lty = 2)
 hist(evals_avg$cbi.min, breaks = 20)
 abline(v = 0, col = "blue", lty = 2)
 
+hist(evals_avg$or.avg, breaks = 20)
+abline(v = 0.5, col = "blue", lty = 2)
+hist(evals_avg$or.max, breaks = 20)
+abline(v = 0.5, col = "blue", lty = 2)
+
 hist(evals_avg$imae.avg, breaks = 20)
 hist(evals_avg$imae.min, breaks = 20)
 
-hist(evals_avg$or.avg, breaks = 20)
-hist(evals_avg$or.max, breaks = 20)
+# -----------------------------------------------------------------------------#  
+# Re-run final SDMs using all the data and save objects to file (Note: don't 
+# need to re-run MAXENT models.  Just need to load ENMeval object, pick best 
+# model, and run dismo evaluation functions)
 
+for (i in 1:nrow(insect_data)) {
+  nice_name <- nice_names[i]
+  insect <- insect_data$species[i]
+  
+  # Load in presence/absence data
+  pa_file <- paste0("data/gbif/presence-absence/",
+                    nice_name,
+                    "-pa.csv")
+  # If dataset isn't in presence-absence folder, unzip gbif-pa
+  if (!file.exists(pa_file)) {
+    unzip(zipfile = "data/gbif-pa.zip")
+  }
+  pa_data <- read.csv(file = pa_file)
+  
+  # Dataframes with lat/long (in that order) for occurrence and background locs
+  occs <- pa_data %>%
+    filter(pa == 1) %>%
+    select(x, y)
+  bg <- pa_data %>%
+    filter(pa == 0) %>%
+    select(x, y)
+  
+  # Get shapefile for geographic extent (to crop predictor rasters)
+  shapefile_name <- paste0("data/gbif/shapefiles/",
+                           nice_name, 
+                           "-buffered-mcp.shp")
+  # If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
+  if (!file.exists(shapefile_name)) {
+    unzip(zipfile = "data/gbif-shapefiles.zip")
+  }
+  buffered_mcp <- vect(shapefile_name)
+  
+  # Crop and mask predictor rasters
+  pred_mask <- terra::crop(predictors, buffered_mcp)
+  pred_mask <- terra::mask(pred_mask, buffered_mcp) 
+  
+  predictors_df <- terra::extract(x = pred_mask,
+                                  y = pa_data[, c("x", "y")],
+                                  xy = FALSE) %>%
+    dplyr::select(-ID)
+  pa_data <- cbind(pa_data, predictors_df)
+  # Remove any rows with NAs
+  anyNAs <- apply(pa_data[, climate_vars], 1, function(x) sum(is.na(x)))
+  if (max(anyNAs) > 0) {
+    pa_data <- pa_data[-which(anyNAs > 0),]
+  }
 
+  # Calculate means, SDs for standardizing covariates
+  stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = TRUE)
+  
+  # Standardize values with quadratics
+  pa_data_zq <- prep_predictors(stand_obj, pa_data, quad = TRUE) 
+  pa_data_zq <- cbind(pa = pa_data[,1], pa_data_zq)
+
+  # Standardize values without quadratics
+  pa_data_z <- prep_predictors(stand_obj, pa_data, quad = FALSE) 
+  pa_data_z <- cbind(pa = pa_data[,1], pa_data_z)
+  
+  # Creating values to downweight background points (so total [summed] weight of 
+  # background points is equal to the total weight of presence points)
+  prNum <- as.numeric(table(pa_data$pa)["1"])
+  bgNum <- as.numeric(table(pa_data$pa)["0"])
+  wt <- ifelse(pa_data$pa == 1, 1, prNum / bgNum)
+  
+  # Run BRT
+    brt_settings <- evals %>%
+      filter(insect == insect_data$species[i], sdm == "BRT", fold == 1) %>%
+      select(tune.args)
+    tc <- as.numeric(str_sub(brt_settings, 16, 16))
+    n_trees <- as.numeric(str_sub(brt_settings, 6, 9))
+    lr <- as.numeric(str_sub(brt_settings, 21, nchar(brt_settings)))
+    brt_fit <- dismo::gbm.fixed(data = pa_data, 
+                                gbm.x = 5:ncol(pa_data),
+                                gbm.y = 1,
+                                family = "bernoulli",
+                                tree.complexity = tc,
+                                learning.rate = lr,
+                                n.trees = n_trees,
+                                bag.fraction = 0.75,
+                                verbose = TRUE)
+    # Use dismo::evaluate to get suitability values for presence/bg points 
+    brt_eval <- dismo::evaluate(p = pa_data[pa_data$pa == 1, climate_vars],
+                                a = pa_data[pa_data$pa == 0, climate_vars],
+                                model = brt_fit,
+                                n.trees = n_trees,
+                                type = "response")
+    # Use dismo::threshold to get threshold value based on presence/bg points
+    brt_thr <- dismo::threshold(x = brt_eval, stat = "spec_sens")
+    
+    # Bind everything together and return as list  
+    brt_results <- list(model = brt_fit,
+                        evaluation = brt_eval,
+                        thresh = brt_thr,
+                        trees = n_trees,
+                        climate_vars = climate_vars)
+    
+    # Save object to file
+    brt_file <- paste0("development/output/SDMs/", nice_name, "-sdm-brt-9var.rds")
+    saveRDS(brt_results, brt_file)
+  
+  # Run GAM
+    smooth <- "s"
+    model_formula <- paste0(smooth, "(", climate_vars, "_1)")
+    model_formula <- paste(model_formula, collapse = " + ")
+    model_formula <- as.formula(paste0("pa ~ ", model_formula))  
+    gam_fit <- mgcv::gam(model_formula,
+                         data = pa_data_z,
+                         family = binomial, 
+                         method = 'REML', 
+                         select = TRUE)
+    # Use dismo::evaluate to get suitability values for presence/bg points 
+    gam_eval <- dismo::evaluate(p = pa_data_z[pa_data_z$pa == 1, -1],
+                                a = pa_data_z[pa_data_z$pa == 0, -1],
+                                model = gam_fit,
+                                type = "response")
+    # Use dismo::threshold to get threshold value based on presence/bg points
+    gam_thr <- dismo::threshold(x = gam_eval, stat = "spec_sens")
+    
+    # Bind everything together and return as list  
+    gam_results <- list(model = gam_fit,
+                        evaluation = gam_eval,
+                        thresh = gam_thr,
+                        standardize_objects = stand_obj,
+                        quad = FALSE,
+                        climate_vars = climate_vars)
+    
+    # Save object to file
+    gam_file <- paste0("development/output/SDMs/", nice_name, "-sdm-gam-9var.rds")
+    saveRDS(gam_results, gam_file)    
+  
+  # Run LASSO 
+    lasso_fit <- glmnet::cv.glmnet(x = as.matrix(pa_data_zq[,2:ncol(pa_data_zq)]),
+                                   y = pa_data_zq$pa,
+                                   family = "binomial",
+                                   alpha = 1,
+                                   weights = wt,
+                                   standardize = FALSE)
+    # Use a modified version of dismo::evaluate to get suitability values for 
+    # presence/bg points 
+    lasso_eval <- evaluate_lasso(p = as.matrix(pa_data_zq[pa_data_zq$pa == 1, -1]),
+                                 a = as.matrix(pa_data_zq[pa_data_zq$pa == 0, -1]),
+                                 model = lasso_fit,
+                                 s = lasso_fit$lambda.1se,
+                                 type = "response")
+    # Use dismo::threshold to get threshold value based on presence/bg points
+    lasso_thr <- dismo::threshold(x = lasso_eval, stat = "spec_sens")
+    
+    # Bind everything together and return as list  
+    lasso_results <- list(model = lasso_fit,
+                          evaluation = lasso_eval,
+                          thresh = lasso_thr,
+                          standardize_objects = stand_obj,
+                          quad = TRUE,
+                          climate_vars = climate_vars)
+
+    # Save object to file
+    lasso_file <- paste0("development/output/SDMs/", nice_name, "-sdm-lasso-9var.rds")
+    saveRDS(lasso_results, lasso_file)  
+  
+  # Load MAXENT model
+    max_file <- paste0("development/output/SDMs/", nice_name, "-sdm-maxent-9var-CV.rds")
+    max_models <- readRDS(max_file)
+    other_summaries <- max_models@results.partitions %>%
+      group_by(tune.args) %>%
+      summarize(cbi.min = min(cbi.val),
+                auc.min = min(auc.val),
+                n.partitions = length(fold)) %>%
+      data.frame()
+    optimal <- max_models@results %>% 
+      left_join(., other_summaries, by = "tune.args") %>%
+      filter(n.partitions == 4)
+    if (max(optimal$cbi.min) <= 0) {
+      optimal <- optimal %>%
+        filter(cbi.min == max(cbi.min)) %>%
+        filter(or.10p.avg == min(or.10p.avg)) %>%
+        filter(auc.val.avg == max(auc.val.avg))
+    } else {
+      optimal <- optimal %>%
+        filter(cbi.min > 0) %>%
+        filter(or.10p.avg == min(or.10p.avg)) %>%
+        filter(auc.val.avg == max(auc.val.avg))
+    }
+    
+    max_best <- max_models@models[[optimal$tune.args]]
+    # Use dismo::evaluate to get suitability values for presence/bg points
+    max_eval <- dismo::evaluate(p = pa_data[pa_data$pa == 1, climate_vars],
+                                a = pa_data[pa_data$pa == 0, climate_vars],
+                                model = max_best,
+                                type = "cloglog")
+    # Use dismo::threshold to get threshold value based on presence/bg points
+    max_thr <- dismo::threshold(x = max_eval, stat = "spec_sens")
+    
+    # Bind everything together and return as list  
+    max_results <- list(model = max_best,
+                        evaluation = max_eval,
+                        thresh = max_thr,
+                        feature_class = as.character(optimal$fc),
+                        multiplier = as.numeric(optimal$rm),
+                        climate_vars = climate_vars)
+    
+    # Save object to file
+    max_file <- paste0("development/output/SDMs/", nice_name, "-sdm-maxent-9var.rds")
+    saveRDS(max_results, max_file)  
+  
+  # Run RF
+    model_formula <- paste(climate_vars, collapse = " + ")
+    model_formula <- as.formula(paste0("pa ~ ", model_formula))
+    # Generate equal sample sizes for presence, pseudo-absence data. Note that 
+    # if we have more presences than absences in a fold (happens rarely), need 
+    # to then sample the presences.
+    if (prNum < bgNum) {
+      smpsize <- c("0" = prNum, "1" = prNum)
+    } else {
+      smpsize <- c("0" = bgNum, "1" = bgNum)
+    } 
+    pa_data_f <- pa_data
+    pa_data_f$pa <- as.factor(pa_data_f$pa)  
+    rf_fit <- randomForest::randomForest(formula = model_formula,
+                                         data = pa_data_f,
+                                         ntree = 1000,
+                                         sampsize = smpsize,
+                                         replace = TRUE)
+    # For RF, which is a classification model, need to use predict with type 
+    # = "prob" before dismo::evaluate()
+    rf_preds <- predict(rf_fit, pa_data_f[, climate_vars], type = "prob")[, 2]
+    
+    # Use dismo::evaluate to get suitability values for presence/bg points
+    rf_eval <- dismo::evaluate(p = rf_preds[which(pa_data == 1)],
+                               a = rf_preds[which(pa_data == 0)])
+    # Use dismo::threshold to get threshold value based on presence/bg points
+    rf_thr <- dismo::threshold(x = rf_eval, stat = "spec_sens")
+  
+    # Bind everything together and return as list  
+    rf_results <- list(model = rf_fit,
+                       evaluation = rf_eval,
+                       thresh = rf_thr,
+                       climate_vars = climate_vars)
+    
+    # Save object to file
+    rf_file <- paste0("development/output/SDMs/", nice_name, "-sdm-rf-9var.rds")
+    saveRDS(rf_results, rf_file)  
+  
+}
+
+# -----------------------------------------------------------------------------#  
+# Predict suitability values for current and future time periods
+
+for (i in 1:nrow(insect_data)) {
+  nice_name <- nice_names[i]
+  insect <- insect_data$species[i]
+  
+  # Get shapefile for geographic extent (to crop predictor rasters)
+  shapefile_name <- paste0("data/gbif/shapefiles/",
+                           nice_name, 
+                           "-buffered-mcp.shp")
+  # If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
+  if (!file.exists(shapefile_name)) {
+    unzip(zipfile = "data/gbif-shapefiles.zip")
+  }
+  buffered_mcp <- vect(shapefile_name)
+  
+  # Crop and mask predictor rasters for current time period
+  pred_mask <- terra::crop(predictors, buffered_mcp)
+  pred_mask <- terra::mask(pred_mask, buffered_mcp) 
+  # Create raster stack for MAXENT and RF predictions
+  pred_rs <- raster::stack(pred_mask)
+  
+  # Load SDM models
+  file_base <- paste0("development/output/SDMs/", nice_name, "-sdm")
+  brt <- readRDS(paste0(file_base, "-brt-9var.rds"))
+  gam <- readRDS(paste0(file_base, "-gam-9var.rds"))
+  lasso <- readRDS(paste0(file_base, "-lasso-9var.rds"))
+  max <- readRDS(paste0(file_base, "-maxent-9var.rds"))
+  rf <- readRDS(paste0(file_base, "-rf-9var.rds"))
+
+  # Make and save predictions for each model, current time period
+    file_start <- "development/output/predicted-probabilities/"
+    
+    brt_current <- predict_sdm(nice_name = nice_name,
+                               model = brt$model,
+                               sdm_method = "brt",
+                               yr = "current")
+    saveRDS(brt_current, 
+            paste0(file_start, nice_name, "-pred-probs-brt-current.rds"))
+    
+    gam_current <- predict_sdm(nice_name = nice_name,
+                               model = gam$model,
+                               sdm_method = "gam",
+                               yr = "current",
+                               stand_obj = gam$standardize_objects,
+                               quad = FALSE)
+    saveRDS(gam_current, 
+            paste0(file_start, nice_name, "-pred-probs-gam-current.rds"))
+    
+    lasso_current <- predict_sdm(nice_name = nice_name,
+                                 model = lasso$model,
+                                 sdm_method = "lasso",
+                                 yr = "current",
+                                 stand_obj = lasso$standardize_objects,
+                                 quad = TRUE)
+    saveRDS(lasso_current, 
+            paste0(file_start, nice_name, "-pred-probs-lasso-current.rds"))
+    
+    # Can't use predict for maxnet models. See ?ENMevaluate or 
+    # https://github.com/jamiemkass/ENMeval/issues/112
+    max_current <- enm.maxnet@predict(max$model, pred_rs, 
+                                      list(pred.type ="cloglog", doClamp = FALSE))
+    max_current <- terra::rast(max_current)
+    saveRDS(max_current, 
+            paste0(file_start, nice_name, "-pred-probs-max-current.rds"))
+    
+    # Need to modify predict_sdm() to work with classification RF
+    rf_current <- raster::predict(object = pred_rs,
+                                  model = rf$model, 
+                                  type = "prob",
+                                  index = 2)
+    rf_current <- terra::rast(rf_current)
+    saveRDS(rf_current, 
+            paste0(file_start, nice_name, "-pred-probs-rf-current.rds"))
+
+  # Make and save predictions for each model, future time period (ssp245-2041)
+    brt_fut <- predict_sdm(nice_name = nice_name,
+                           model = brt$model,
+                           sdm_method = "brt",
+                           yr = "2041",
+                           ssp = "245")
+    saveRDS(brt_fut, 
+            paste0(file_start, nice_name, "-pred-probs-brt-ensemble_ssp245_2041.rds"))
+    
+    gam_fut <- predict_sdm(nice_name = nice_name,
+                           model = gam$model,
+                           sdm_method = "gam",
+                           yr = "2041",
+                           ssp = "245",
+                           stand_obj = gam$standardize_objects,
+                           quad = FALSE)
+    saveRDS(gam_fut, 
+            paste0(file_start, nice_name, "-pred-probs-gam-ensemble_ssp245_2041.rds"))
+    
+    lasso_fut <- predict_sdm(nice_name = nice_name,
+                             model = lasso$model,
+                             sdm_method = "lasso",
+                             yr = "2041",
+                             ssp = "245",
+                             stand_obj = lasso$standardize_objects,
+                             quad = TRUE)
+    saveRDS(lasso_fut, 
+            paste0(file_start, nice_name, "-pred-probs-lasso-ensemble_ssp245_2041.rds"))
+    
+    # Get future climate rasters
+    gcm_directory <- "data/ensemble/ssp245/2041"
+    predictors <- terra::rast(list.files(path = gcm_directory,
+                                         pattern = ".tif$",
+                                         full.names = TRUE))
+    # Extract only those layers associated with climate variables in the model
+    predictors <- terra::subset(predictors, climate_vars)
+    
+    # Extend buffer
+    dist_mult <- 350
+    buffered_mcp <- terra::buffer(buffered_mcp, width = dist_mult * 1000)
+    terra::crs(buffered_mcp) <- "EPSG:4326"
+    
+    # Crop and mask predictor rasters for future time period
+    pred_mask <- terra::crop(predictors, buffered_mcp)
+    pred_mask <- terra::mask(pred_mask, buffered_mcp) 
+    # Create raster stack for MAXENT and RF predictions
+    pred_rs <- raster::stack(pred_mask)
+  
+    max_fut <- enm.maxnet@predict(max$model, pred_rs, 
+                                  list(pred.type ="cloglog", doClamp = FALSE))
+    max_fut <- terra::rast(max_fut)
+    saveRDS(max_fut, 
+            paste0(file_start, nice_name, "-pred-probs-max-ensemble_ssp245_2041.rds"))
+  
+    rf_fut <- raster::predict(object = pred_rs,
+                              model = rf$model, 
+                              type = "prob",
+                              index = 2)
+    rf_fut <- terra::rast(rf_fut)
+    saveRDS(rf_fut, 
+            paste0(file_start, nice_name, "-pred-probs-rf-ensemble_ssp245_2041.rds"))
+
+}
+
+# TODO: move everything below to a separate script or loop
+# Look at predictions for one species
+
+i = 1
+nice_name <- nice_names[i]
+insect <- insect_data$species[i]
+
+  # Load rasters with predicted probabilities
+  file_start <- paste0("development/output/predicted-probabilities/",
+                       nice_name, "-pred-probs-")
+  brt_current <- readRDS(paste0(file_start, "brt-current.rds"))
+  gam_current <- readRDS(paste0(file_start, "gam-current.rds"))
+  lasso_current <- readRDS(paste0(file_start, "lasso-current.rds"))
+  max_current <- readRDS(paste0(file_start, "max-current.rds"))
+  rf_current <- readRDS(paste0(file_start, "rf-current.rds"))
+  brt_fut <- readRDS(paste0(file_start, "brt-ensemble_ssp245_2041.rds"))
+  gam_fut <- readRDS(paste0(file_start, "gam-ensemble_ssp245_2041.rds"))
+  lasso_fut <- readRDS(paste0(file_start, "lasso-ensemble_ssp245_2041.rds"))
+  max_fut <- readRDS(paste0(file_start, "max-ensemble_ssp245_2041.rds"))
+  rf_fut <- readRDS(paste0(file_start, "rf-ensemble_ssp245_2041.rds"))
+
+  # Load SDM models
+  file_base <- paste0("development/output/SDMs/", nice_name, "-sdm")
+  brt <- readRDS(paste0(file_base, "-brt-9var.rds"))
+  gam <- readRDS(paste0(file_base, "-gam-9var.rds"))
+  lasso <- readRDS(paste0(file_base, "-lasso-9var.rds"))
+  max <- readRDS(paste0(file_base, "-maxent-9var.rds"))
+  rf <- readRDS(paste0(file_base, "-rf-9var.rds"))
+  
+  # Get threshold value for ensemble model:
+  # TODO: add option to remove models with one or more CBI < 0
+  p_suits <- data.frame(brt = brt$evaluation@presence,
+                        gam = gam$evaluation@presence,
+                        lasso = lasso$evaluation@presence,
+                        max = max$evaluation@presence,
+                        rf = rf$evaluation@presence)
+  p_suits$mn <- apply(p_suits[,1:5], 1, mean)
+  a_suits <- data.frame(brt = brt$evaluation@absence,
+                        gam = gam$evaluation@absence,
+                        lasso = lasso$evaluation@absence,
+                        max = max$evaluation@absence,
+                        rf = rf$evaluation@absence)
+  a_suits$mn <- apply(a_suits[,1:5], 1, mean)
+  ensemble_eval <- dismo::evaluate(p = p_suits$mn, a = a_suits$mn)
+  ensemble_thr <- dismo::threshold(ensemble_eval, stat = "spec_sens")
+  
+  mn_current <- mean(c(brt_current, gam_current, lasso_current,
+                       max_current, rf_current))
+  
+  # Look at predicted suitabilities
+  par(mfrow = c(2,3))
+  plot(brt_current, main = "BRT")
+  plot(gam_current, main = "GAM")
+  plot(lasso_current, main = "LASSO")
+  plot(max_current, main = "MAXENT")
+  plot(rf_current, main = "RF")
+  plot(mn_current, main = "Ensemble (mean)")
+  # Look at predicted ranges
+  plot(brt_current > brt$thresh, main = "BRT")
+  plot(gam_current > gam$thresh, main = "GAM")
+  plot(lasso_current > lasso$thresh, main = "LASSO")
+  plot(max_current > max$thresh, main = "MAXENT")
+  plot(rf_current > rf$thresh, main = "RF")
+  plot(mn_current > ensemble_thr, main = "Ensemble (mean)")
+  
+  mn_fut <- mean(c(brt_fut, gam_fut, lasso_fut, max_fut, rf_fut))
+  
+  # Look at predicted suitabilities in the future
+  par(mfrow = c(2,3))
+  plot(brt_fut, main = "BRT")
+  plot(gam_fut, main = "GAM")
+  plot(lasso_fut, main = "LASSO")
+  plot(max_fut, main = "MAXENT")
+  plot(rf_fut, main = "RF")
+  plot(mn_fut, main = "Ensemble (mean)")
+  # Look at predicted ranges
+  plot(brt_fut > brt$thresh, main = "BRT")
+  plot(gam_fut > gam$thresh, main = "GAM")
+  plot(lasso_fut > lasso$thresh, main = "LASSO")
+  plot(max_fut > max$thresh, main = "MAXENT")
+  plot(rf_fut > rf$thresh, main = "RF")
+  plot(mn_fut > ensemble_thr, main = "Ensemble (mean)")
+  
+  
+  
+# -----------------------------------------------------------------------------#  
+# Look at predictions, excluding models with one or more CBI < 0
+  p_suits$mn.good <- apply(p_suits[,2:5], 1, mean)
+  a_suits$mn.good <- apply(a_suits[,2:5], 1, mean)
+  ensemble_eval_good <- dismo::evaluate(p = p_suits$mn.good, a = a_suits$mn.good)
+  ensemble_thr_good <- dismo::threshold(ensemble_eval_good, stat = "spec_sens")
+
+  mn_current_good <- mean(c(gam_current, lasso_current,
+                            max_current, rf_current))
+  mn_fut_good <- mean(c(gam_fut, lasso_fut, max_fut, rf_fut))
+  
+  # Look at predicted suitabilities
+  par(mfrow = c(2,3))
+  # plot(brt_current, main = "BRT")
+  plot(gam_current, main = "GAM")
+  plot(lasso_current, main = "LASSO")
+  plot(max_current, main = "MAXENT")
+  plot(rf_current, main = "RF")
+  plot(mn_current_good, main = "Ensemble (mean)")
+  # Look at predicted ranges
+  par(mfrow = c(2,3))
+  # plot(brt_current > brt$thresh, main = "BRT")
+  plot(gam_current > gam$thresh, main = "GAM")
+  plot(lasso_current > lasso$thresh, main = "LASSO")
+  plot(max_current > max$thresh, main = "MAXENT")
+  plot(rf_current > rf$thresh, main = "RF")
+  plot(mn_current_good > ensemble_thr_good, main = "Ensemble (mean)")
+
+  # Look at predicted suitabilities in the future
+  par(mfrow = c(2,3))
+  # plot(brt_fut, main = "BRT")
+  plot(gam_fut, main = "GAM")
+  plot(lasso_fut, main = "LASSO")
+  plot(max_fut, main = "MAXENT")
+  plot(rf_fut, main = "RF")
+  plot(mn_fut_good, main = "Ensemble (mean)")
+  # Look at predicted ranges
+  par(mfrow = c(2,3))
+  # plot(brt_fut > brt$thresh, main = "BRT")
+  plot(gam_fut > gam$thresh, main = "GAM")
+  plot(lasso_fut > lasso$thresh, main = "LASSO")
+  plot(max_fut > max$thresh, main = "MAXENT")
+  plot(rf_fut > rf$thresh, main = "RF")
+  plot(mn_fut_good > ensemble_thr_good, main = "Ensemble (mean)")
+  
+  
