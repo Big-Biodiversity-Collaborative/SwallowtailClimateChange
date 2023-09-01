@@ -1087,8 +1087,10 @@ for (i in 1:nrow(insect_data)) {
               thr.avg = mean(thr.mss),
               or.avg = mean(OR.mss),
               or.max = max(OR.mss),
+              tss.avg = mean(TSS.mss),
+              tss.min = min(TSS.mss),
               .groups = "keep") %>%
-    mutate(across(auc.avg:or.max, function(x) round(x, 3))) %>%
+    mutate(across(auc.avg:tss.min, function(x) round(x, 3))) %>%
     data.frame()
 
   # Look at distributions of evaluation metrics (across species and models)
@@ -1107,10 +1109,7 @@ for (i in 1:nrow(insect_data)) {
   abline(v = 0.5, col = "blue", lty = 2)
   hist(evals_avg$or.max, breaks = 20)
   abline(v = 0.5, col = "blue", lty = 2)
-  
-  hist(evals_avg$imae.avg, breaks = 20)
-  hist(evals_avg$imae.min, breaks = 20)
-  
+
   # Look at patterns across SDMs and species
   evals_avg %>%
     group_by(sdm) %>%
@@ -1121,7 +1120,9 @@ for (i in 1:nrow(insect_data)) {
               or.avg = mean(or.avg),
               or.max = max(or.max),
               imae.avg = mean(imae.avg),
-              imae.min = min(imae.min))
+              imae.min = min(imae.min),
+              tss.avg = mean(tss.avg),
+              tss.min = min(tss.min))
   
   evals_avg %>%
     group_by(insect) %>%
@@ -1132,12 +1133,14 @@ for (i in 1:nrow(insect_data)) {
               or.avg = mean(or.avg),
               or.max = max(or.max),
               imae.avg = mean(imae.avg),
-              imae.min = min(imae.min))
+              imae.min = min(imae.min),
+              tss.avg = mean(tss.avg),
+              tss.min = min(tss.min))
 
 # -----------------------------------------------------------------------------#  
 # Look at predictions for one species at a time
 
-i = 13
+i = 7
 nice_name <- nice_names[i]
 insect <- insect_data$species[i]
 short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
@@ -1163,30 +1166,69 @@ short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
   lasso <- readRDS(paste0(file_base, "-lasso-9var.rds"))
   maxent <- readRDS(paste0(file_base, "-maxent-9var.rds"))
   rf <- readRDS(paste0(file_base, "-rf-9var.rds"))
+
+  # Define "bad" models, which we may want to exclude from ensembles
+  sdms <- c("BRT", "GAM", "LASSO", "MAXENT", "RF")
+  bad.models <- cbi$sdm[which(cbi$insect == insect)] 
+  good.models <- setdiff(sdms, bad.models)
   
-  # Get threshold value for ensemble models (that include all models, or just
-  # those that meet CBI criteria):
+  # Extract mean evaluation metrics (across folds) for each SDM and calculate
+  # weights based on TSS (for all models or "good" models)  
+  evals_avg_spp <- evals_avg %>%
+    filter(insect == insect_data$species[i]) %>%
+    mutate(wt.tss = tss.avg / sum(tss.avg),
+           good = ifelse(sdm %in% good.models, 1, NA),
+           tss.good = tss.avg * good,
+           wt.good.tss = tss.good / sum(tss.good, na.rm = TRUE))  
+  
+  # Combine predicted suitabilities - current time period
+  mn_all_current <- app(rast(mget(paste0(tolower(sdms), "_current"))), mean)
+  md_all_current <- app(rast(mget(paste0(tolower(sdms), "_current"))), median)
+  wtmn_all_current <- app(rast(mget(paste0(tolower(sdms), "_current"))),
+                                 function(x) sum(x * evals_avg_spp$wt.tss))
+  mn_good_current <- app(rast(mget(paste0(tolower(good.models), "_current"))), 
+                         mean)
+  md_good_current <- app(rast(mget(paste0(tolower(good.models), "_current"))), 
+                         median)
+  wtmn_good_current <- app(rast(mget(paste0(tolower(good.models), "_current"))),
+                                  function(x) sum(x * evals_avg_spp$wt.good.tss[!is.na(evals_avg_spp$good)]))
+  
+  # Calculate correlations
+  cors <- layerCor(c(mn_all_current, md_all_current, wtmn_all_current,
+                     mn_good_current, md_good_current, wtmn_good_current), 
+                   "pearson", na.rm = TRUE)
+  round(cors[[1]], 2)
+  
+  # Visualize predicted suitabilities - current time period
+  if (length(bad.models > 0)) {
+    par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
+    plot(brt_current, main = paste0("BRT, ", short_name))
+    plot(gam_current, main = paste0("GAM, ", short_name))
+    plot(lasso_current, main = paste0("LASSO, ", short_name))
+    plot(maxent_current, main = paste0("MAX, ", short_name))
+    plot(rf_current, main = paste0("RF, ", short_name))
+    plot(mn_all_current, main = paste0("MN.ALL, ", short_name))
+    plot(mn_good_current, main = paste0("MN.GOOD, ", short_name))
+  } else {
+    par(mfrow = c(2, 3), mar = c(1, 1, 1, 1))
+    plot(brt_current, main = paste0("BRT, ", short_name))
+    plot(gam_current, main = paste0("GAM, ", short_name))
+    plot(lasso_current, main = paste0("LASSO, ", short_name))
+    plot(maxent_current, main = paste0("MAX, ", short_name))
+    plot(rf_current, main = paste0("RF, ", short_name))
+    plot(mn_all_current, main = paste0("MN.ALL, ", short_name))
+  }
+  
+  # Calculate threshold value for ensemble models based on all the pres-abs 
+  # (training) data:
     p_suits <- data.frame(BRT = brt$evaluation@presence,
                           GAM = gam$evaluation@presence,
                           LASSO = lasso$evaluation@presence,
                           MAXENT = maxent$evaluation@presence,
                           RF = rf$evaluation@presence)
     colnames(p_suits)[3] <- "LASSO"
-    sdms <- colnames(p_suits)
     p_suits$MN.ALL <- apply(p_suits, 1, mean)
-    bad.models <- cbi$sdm[which(cbi$insect == insect)] 
-    good.models <- setdiff(sdms, bad.models)
     p_suits$MN.GOOD <- apply(p_suits[,good.models], 1, mean)
-    # Calculate weights (based on OR.avg) for "good" models
-      # ors <- data.frame(sdms = sdms,
-      #                   or = evals_avg$or.avg[evals_avg$insect == insect]) %>%
-      #   filter(sdms %in% good.models) %>%
-      #   mutate(ior = 1 - or,
-      #          wt = ior/sum(ior))
-      # p_suits$WTMN.GOOD <- apply(p_suits[,good.models], 1, 
-      #                            function(x) sum(x * ors$wt))
-      # This doesn't seem to make any meaningful difference, so skipping this
-      # for now
   
     a_suits <- data.frame(BRT = brt$evaluation@absence,
                           GAM = gam$evaluation@absence,
@@ -1194,42 +1236,15 @@ short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
                           MAXENT = maxent$evaluation@absence,
                           RF = rf$evaluation@absence)
     colnames(a_suits)[3] <- "LASSO"
-    sdms <- colnames(a_suits)
     a_suits$MN.ALL <- apply(a_suits, 1, mean)
-    bad.models <- cbi$sdm[which(cbi$insect == insect)] 
-    good.models <- setdiff(sdms, bad.models)
     a_suits$MN.GOOD <- apply(a_suits[,good.models], 1, mean)
     
     ensemble_eval_all <- dismo::evaluate(p = p_suits$MN.ALL, a = a_suits$MN.ALL)
     ensemble_thr_all <- dismo::threshold(ensemble_eval_all, stat = "spec_sens")
     ensemble_eval_good <- dismo::evaluate(p = p_suits$MN.GOOD, a = a_suits$MN.GOOD)
     ensemble_thr_good <- dismo::threshold(ensemble_eval_good, stat = "spec_sens")  
-  
-  # Visualize predicted suitabilities - current time period
-    mn_all_current <- terra::app(rast(mget(paste0(tolower(sdms), "_current"))), 
-                                 mean)
-    if (length(bad.models > 0)) {
-      mn_good_current <- terra::app(rast(mget(paste0(tolower(good.models), "_current"))), 
-                                    mean)
-      par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
-      plot(brt_current, main = paste0("BRT, ", short_name))
-      plot(gam_current, main = paste0("GAM, ", short_name))
-      plot(lasso_current, main = paste0("LASSO, ", short_name))
-      plot(maxent_current, main = paste0("MAX, ", short_name))
-      plot(rf_current, main = paste0("RF, ", short_name))
-      plot(mn_all_current, main = paste0("MN.ALL, ", short_name))
-      plot(mn_good_current, main = paste0("MN.GOOD, ", short_name))
-    } else {
-      par(mfrow = c(2, 3), mar = c(1, 1, 1, 1))
-      plot(brt_current, main = paste0("BRT, ", short_name))
-      plot(gam_current, main = paste0("GAM, ", short_name))
-      plot(lasso_current, main = paste0("LASSO, ", short_name))
-      plot(maxent_current, main = paste0("MAX, ", short_name))
-      plot(rf_current, main = paste0("RF, ", short_name))
-      plot(mn_all_current, main = paste0("MN.ALL, ", short_name))
-    }
 
-  # Visualize predicted ranges - current time period
+  # Visualize predicted ranges (using thresholds from training data) - current
     if (length(bad.models > 0)) {
       par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
       plot(brt_current > brt$thresh, main = paste0("BRT, ", short_name))
@@ -1249,12 +1264,20 @@ short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
       plot(mn_all_current > ensemble_thr_all, main = paste0("MN.ALL, ", short_name))
     }
 
+  # Combine predicted suitabilities - future time period
+    mn_all_future <- app(rast(mget(paste0(tolower(sdms), "_future"))), mean)
+    md_all_future <- app(rast(mget(paste0(tolower(sdms), "_future"))), median)
+    wtmn_all_future <- app(rast(mget(paste0(tolower(sdms), "_future"))),
+                            function(x) sum(x * evals_avg_spp$wt.tss))
+    mn_good_future <- app(rast(mget(paste0(tolower(good.models), "_future"))), 
+                           mean)
+    md_good_future <- app(rast(mget(paste0(tolower(good.models), "_future"))), 
+                           median)
+    wtmn_good_future <- app(rast(mget(paste0(tolower(good.models), "_future"))),
+                             function(x) sum(x * evals_avg_spp$wt.good.tss[!is.na(evals_avg_spp$good)]))
+    
   # Visualize predicted suitabilities - future time period
-    mn_all_future <- terra::app(rast(mget(paste0(tolower(sdms), "_future"))), 
-                                 mean)
     if (length(bad.models > 0)) {
-      mn_good_future <- terra::app(rast(mget(paste0(tolower(good.models), "_future"))), 
-                                    mean)
       par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
       plot(brt_future, main = paste0("BRT, ", short_name))
       plot(gam_future, main = paste0("GAM, ", short_name))
@@ -1273,7 +1296,7 @@ short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
       plot(mn_all_future, main = paste0("MN.ALL, ", short_name))
     }
     
-  # Visualize predicted ranges - future time period
+  # Visualize predicted ranges (using thresholds from training data) - future
     if (length(bad.models > 0)) {
       par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
       plot(brt_future > brt$thresh, main = paste0("BRT, ", short_name))
