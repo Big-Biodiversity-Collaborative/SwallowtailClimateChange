@@ -196,11 +196,13 @@ for (i in 1:nrow(insect_data)) {
     cat(paste0("Saving MAXENT model for ", insect, ".\n"))
     max_file <- paste0("development/output/SDMs/", nice_name, "-sdm-maxent-9var.rds")
     max_model <- readRDS(max_file)
-    max_results <- list(model = max_model,
-                        climate_vars = climate_vars)
-    # Save object to file
-    saveRDS(max_results, max_file)  
-    
+    if (class(max_model)[1] != "list") {
+      max_results <- list(model = max_model,
+                          climate_vars = climate_vars)
+      # Save object to file
+      saveRDS(max_results, max_file)  
+    }
+      
   # Run (and save) RF with all the data
     cat(paste0("Running RF model for ", insect, ".\n"))
     model_formula <- paste(climate_vars, collapse = " + ")
