@@ -27,7 +27,7 @@ nice_names <- insect_data %>%
 evals <- read.csv("development/output/evals-CV-insect.csv", header = TRUE)
 
 # Pick a species
-i = 1
+i = 2
 nice_name <- nice_names[i]
 insect <- insect_data$species[i]
 short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
@@ -75,7 +75,8 @@ preds_all <- read.csv(preds_file, header = TRUE)
 mn_all <- apply(preds_all[,sdms], 1, mean) 
 wtmn_all <- as.matrix(preds_all[,sdms]) %*% as.vector(evals_ins$wt.tss)
 mn_good <-  apply(preds_all[,good.models], 1, mean)  
-wtmn_good <- as.matrix(preds_all[,good.models]) %*% as.vector(evals_ins$wt.good.tss)
+wtmn_good <- as.matrix(preds_all[,good.models]) %*% 
+  as.vector(evals_ins$wt.good.tss[!is.na(evals_ins$wt.good.tss)])
 preds_all <- cbind(preds_all, mn_all, wtmn_all, mn_good, wtmn_good)
 # head(preds_all)
 # cor(preds_all[,5:13])
