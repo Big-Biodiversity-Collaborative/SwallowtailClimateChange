@@ -27,7 +27,7 @@ nice_names <- insect_data %>%
 evals <- read.csv("development/output/evals-CV-insect.csv", header = TRUE)
 
 # Pick a species
-i = 2
+i = 15
 nice_name <- nice_names[i]
 insect <- insect_data$species[i]
 short_name <- paste0("P. ", str_split(insect, " ")[[1]][2])
@@ -124,9 +124,36 @@ if (length(bad.models) > 0) {
                            function(x) sum(x * evals_ins$wt.good.tss[!is.na(evals_ins$good)]))
 }
 
+# Extract predicted suitabilities for pres/bg points from rasters (from "full"
+# model) and use these to calculate thresholds
+preds_full <- preds_all[, 1:4]
+locs <- preds_full[, c("x", "y")]
+preds_full <- preds_full %>%
+  mutate(BRT = extract(brt_current, locs, ID = FALSE)[, 1],
+         GAM = extract(gam_current, locs, ID = FALSE)[, 1],
+         LASSO = extract(lasso_current, locs, ID = FALSE)[, 1],
+         MAXENT = extract(maxent_current, locs, ID = FALSE)[, 1],
+         RF = extract(rf_current, locs, ID = FALSE)[, 1],
+         mn_all = extract(mn_all_current, locs, ID = FALSE)[, 1],
+         wtmn_all = extract(wtmn_all_current, locs, ID = FALSE)[, 1])
+if (length(bad.models) > 0) {
+preds_full <- preds_full %>%
+  mutate(mn_good = extract(mn_good_current, locs, ID = FALSE)[, 1],
+         wtmn_good = extract(wtmn_good_current, locs, ID = FALSE)[, 1])
+}
+predtype <- colnames(preds_full)[5:ncol(preds_full)]
+thresholds_full <- data.frame(predtype = predtype, thr = NA)
+for (type in predtype) {
+  p <- preds_full %>% filter(pa == 1) %>% select(any_of(type)) %>% pull()
+  a <- preds_full %>% filter(pa == 0) %>% select(any_of(type)) %>% pull()
+  eval <- dismo::evaluate(p = p, a = a)
+  thr <- dismo::threshold(eval, stat = "spec_sens")
+  thresholds_full$thr[predtype == type] <- thr
+}
+
 # Visualize predicted suitabilities - current time period
 if (length(bad.models) > 0) {
-  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_current, main = paste0("BRT, ", short_name))
   plot(gam_current, main = paste0("GAM, ", short_name))
   plot(lasso_current, main = paste0("LASSO, ", short_name))
@@ -134,19 +161,21 @@ if (length(bad.models) > 0) {
   plot(rf_current, main = paste0("RF, ", short_name))
   plot(wtmn_all_current, main = paste0("WTMN.ALL, ", short_name))
   plot(wtmn_good_current, main = paste0("WTMN.GOOD, ", short_name))
+  mtext("Current", side = 3, line = 0, outer = TRUE)
 } else {
-  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_current, main = paste0("BRT, ", short_name))
   plot(gam_current, main = paste0("GAM, ", short_name))
   plot(lasso_current, main = paste0("LASSO, ", short_name))
   plot(maxent_current, main = paste0("MAX, ", short_name))
   plot(rf_current, main = paste0("RF, ", short_name))
   plot(wtmn_all_current, main = paste0("WTMN.ALL, ", short_name))
+  mtext("Current", side = 3, line = 0, outer = TRUE)
 }
 
 # Visualize predicted ranges - current time period
 if (length(bad.models) > 0) {
-  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_current > thresholds$thr[thresholds$predtype == "BRT"], 
        main = paste0("BRT, ", short_name))
   plot(gam_current > thresholds$thr[thresholds$predtype == "GAM"], 
@@ -161,8 +190,9 @@ if (length(bad.models) > 0) {
        main = paste0("WTMN.ALL, ", short_name))
   plot(wtmn_good_current > thresholds$thr[thresholds$predtype == "wtmn_good"], 
        main = paste0("WTMN.GOOD, ", short_name))
+  mtext("Current, CV thresholds", side = 3, line = 0, outer = TRUE)
 } else {
-  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_current > thresholds$thr[thresholds$predtype == "BRT"], 
        main = paste0("BRT, ", short_name))
   plot(gam_current > thresholds$thr[thresholds$predtype == "GAM"], 
@@ -175,11 +205,48 @@ if (length(bad.models) > 0) {
        main = paste0("RF, ", short_name))
   plot(wtmn_all_current > thresholds$thr[thresholds$predtype == "wtmn_all"], 
        main = paste0("WTMN.ALL, ", short_name))
+  mtext("Current, CV thresholds", side = 3, line = 0, outer = TRUE)
 }
+
+# Visualize predicted ranges (THRESHOLDS BASED ON FULL MODEL) - current time period
+if (length(bad.models) > 0) {
+  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
+  plot(brt_current > thresholds_full$thr[thresholds_full$predtype == "BRT"], 
+       main = paste0("BRT, ", short_name))
+  plot(gam_current > thresholds_full$thr[thresholds_full$predtype == "GAM"], 
+       main = paste0("GAM, ", short_name))
+  plot(lasso_current > thresholds_full$thr[thresholds_full$predtype == "LASSO"], 
+       main = paste0("LASSO, ", short_name))
+  plot(maxent_current > thresholds_full$thr[thresholds_full$predtype == "MAXENT"], 
+       main = paste0("MAX, ", short_name))
+  plot(rf_current > thresholds_full$thr[thresholds_full$predtype == "RF"], 
+       main = paste0("RF, ", short_name))
+  plot(wtmn_all_current > thresholds_full$thr[thresholds_full$predtype == "wtmn_all"], 
+       main = paste0("WTMN.ALL, ", short_name))
+  plot(wtmn_good_current > thresholds_full$thr[thresholds_full$predtype == "wtmn_good"], 
+       main = paste0("WTMN.GOOD, ", short_name))
+  mtext("Current, Full thresholds", side = 3, line = 0, outer = TRUE)
+} else {
+  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
+  plot(brt_current > thresholds_full$thr[thresholds_full$predtype == "BRT"], 
+       main = paste0("BRT, ", short_name))
+  plot(gam_current > thresholds_full$thr[thresholds_full$predtype == "GAM"], 
+       main = paste0("GAM, ", short_name))
+  plot(lasso_current > thresholds_full$thr[thresholds_full$predtype == "LASSO"], 
+       main = paste0("LASSO, ", short_name))
+  plot(maxent_current > thresholds_full$thr[thresholds_full$predtype == "MAXENT"], 
+       main = paste0("MAX, ", short_name))
+  plot(rf_current > thresholds_full$thr[thresholds_full$predtype == "RF"], 
+       main = paste0("RF, ", short_name))
+  plot(wtmn_all_current > thresholds_full$thr[thresholds_full$predtype == "wtmn_all"], 
+       main = paste0("WTMN.ALL, ", short_name))
+  mtext("Current, Full thresholds", side = 3, line = 0, outer = TRUE)
+}
+
 
 # Visualize predicted suitabilities - future time period
 if (length(bad.models) > 0) {
-  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_future, main = paste0("BRT, ", short_name))
   plot(gam_future, main = paste0("GAM, ", short_name))
   plot(lasso_future, main = paste0("LASSO, ", short_name))
@@ -187,6 +254,7 @@ if (length(bad.models) > 0) {
   plot(rf_future, main = paste0("RF, ", short_name))
   plot(wtmn_all_future, main = paste0("WTMN.ALL, ", short_name))
   plot(wtmn_good_future, main = paste0("WTMN.GOOD, ", short_name))
+  mtext("Future", side = 3, line = 0, outer = TRUE)
 } else {
   par(mfrow = c(2, 3), mar = c(1, 1, 1, 1))
   plot(brt_future, main = paste0("BRT, ", short_name))
@@ -195,11 +263,12 @@ if (length(bad.models) > 0) {
   plot(maxent_future, main = paste0("MAX, ", short_name))
   plot(rf_future, main = paste0("RF, ", short_name))
   plot(wtmn_all_future, main = paste0("WTMN.ALL, ", short_name))
+  mtext("Future", side = 3, line = 0, outer = TRUE)
 }
 
 # Visualize predicted ranges - future time period
 if (length(bad.models) > 0) {
-  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_future > thresholds$thr[thresholds$predtype == "BRT"], 
        main = paste0("BRT, ", short_name))
   plot(gam_future > thresholds$thr[thresholds$predtype == "GAM"], 
@@ -214,8 +283,9 @@ if (length(bad.models) > 0) {
        main = paste0("WTMN.ALL, ", short_name))
   plot(wtmn_good_future > thresholds$thr[thresholds$predtype == "wtmn_good"], 
        main = paste0("WTMN.GOOD, ", short_name))
+  mtext("Future, CV thresholds", side = 3, line = 0, outer = TRUE)
 } else {
-  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1))
+  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
   plot(brt_future > thresholds$thr[thresholds$predtype == "BRT"], 
        main = paste0("BRT, ", short_name))
   plot(gam_future > thresholds$thr[thresholds$predtype == "GAM"], 
@@ -228,4 +298,41 @@ if (length(bad.models) > 0) {
        main = paste0("RF, ", short_name))
   plot(wtmn_all_future > thresholds$thr[thresholds$predtype == "wtmn_all"], 
        main = paste0("WTMN.ALL, ", short_name))
+  mtext("Future, CV thresholds", side = 3, line = 0, outer = TRUE)
 }
+
+# Visualize predicted ranges (THRESHOLDS BASED ON FULL MODEL) - future time period
+if (length(bad.models) > 0) {
+  par(mfrow = c(3, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
+  plot(brt_future > thresholds_full$thr[thresholds_full$predtype == "BRT"], 
+       main = paste0("BRT, ", short_name))
+  plot(gam_future > thresholds_full$thr[thresholds_full$predtype == "GAM"], 
+       main = paste0("GAM, ", short_name))
+  plot(lasso_future > thresholds_full$thr[thresholds_full$predtype == "LASSO"], 
+       main = paste0("LASSO, ", short_name))
+  plot(maxent_future > thresholds_full$thr[thresholds_full$predtype == "MAXENT"], 
+       main = paste0("MAX, ", short_name))
+  plot(rf_future > thresholds_full$thr[thresholds_full$predtype == "RF"], 
+       main = paste0("RF, ", short_name))
+  plot(wtmn_all_future > thresholds_full$thr[thresholds_full$predtype == "wtmn_all"], 
+       main = paste0("WTMN.ALL, ", short_name))
+  plot(wtmn_good_future > thresholds_full$thr[thresholds_full$predtype == "wtmn_good"], 
+       main = paste0("WTMN.GOOD, ", short_name))
+  mtext("Future, Full thresholds", side = 3, line = 0, outer = TRUE)
+} else {
+  par(mfrow = c(2, 3), mar = c(1, 1, 1, 1), oma = c(0, 0, 1.5, 0))
+  plot(brt_future > thresholds_full$thr[thresholds_full$predtype == "BRT"], 
+       main = paste0("BRT, ", short_name))
+  plot(gam_future > thresholds_full$thr[thresholds_full$predtype == "GAM"], 
+       main = paste0("GAM, ", short_name))
+  plot(lasso_future > thresholds_full$thr[thresholds_full$predtype == "LASSO"], 
+       main = paste0("LASSO, ", short_name))
+  plot(maxent_future > thresholds_full$thr[thresholds_full$predtype == "MAXENT"], 
+       main = paste0("MAX, ", short_name))
+  plot(rf_future > thresholds_full$thr[thresholds_full$predtype == "RF"], 
+       main = paste0("RF, ", short_name))
+  plot(wtmn_all_future > thresholds_full$thr[thresholds_full$predtype == "wtmn_all"], 
+       main = paste0("WTMN.ALL, ", short_name))
+  mtext("Future, Full thresholds", side = 3, line = 0, outer = TRUE)
+}
+
