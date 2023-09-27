@@ -82,6 +82,10 @@ output/plots/*
 output/ranges/*
 !output/ranges/.gitkeep
 
+# CV evaluation metrics
+output/eval-metrics/*
+!output/eval-metrics/.gitkeep
+
 # Log files
 logs/*.log
 !/logs/.gitkeep
