@@ -1,12 +1,12 @@
 # Generate presence-absence dataset for each species, to be used in any SDM
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2022-06-13
+# 2023-09-27
 
 require(terra)
 require(sp)
-require(sf)
 require(dplyr)
+require(ENMeval)
 
 replace <- TRUE
 verbose <- TRUE
@@ -108,7 +108,7 @@ for (i in 1:nrow(species_list)) {
 
       # Convert to a SpatialPoints object using WGS84 CRS
       presence_sp <- SpatialPoints(coords = presence,
-                                   proj4string = CRS("+init=epsg:4326"))
+                                   proj4string = CRS("EPSG:4326"))
 
       # Calculate the GreatCircle distance (in km) between points (can take
       # minutes for larger data sets)
@@ -128,53 +128,26 @@ for (i in 1:nrow(species_list)) {
       ch <- terra::convHull(x = terra::vect(x = presence,
                                             geom = c("x", "y"),
                                             crs = "EPSG:4326"))
-      # Create the buffer, adding a buffer; width takes argument in meters
-      ch_buffer <- terra::buffer(x = ch,
-                                 width = buffer * 1000)
-      # Maybe not necessary, but paranoia
-      terra::crs(ch_buffer) <- "EPSG:4326"
+      # Adding a buffer; width takes argument in meters
+      ch_buffer <- terra::buffer(x = ch, width = buffer * 1000)
 
-      # Prior implementation relied on sp and reprojections      
-      # # Create a minimum convex polygon (MCP) for observations
-      # ch <- chull(presence)
-      # ch_coords <- presence[c(ch, ch[1]), ]
-      # ch_polygon <- SpatialPolygons(list(Polygons(list(Polygon(ch_coords)), ID = 1)),
-      #                               proj4string = CRS("+init=epsg:4326"))
-      # 
-      # # Convert MCP to sf object and project to NA Albers Equal Area Conic 
-      # ch_poly_proj <- st_as_sf(ch_polygon) %>%
-      #   st_transform(crs = "ESRI:102008")
-      # 
-      # # Create a polygon = MCP + buffer
-      # ch_buffer <- st_buffer(ch_poly_proj,
-      #                        dist = buffer * 1000)
-      # 
-      # # Transform the buffered MCP back to lat/long 
-      # ch_buffer_latlong <- st_transform(ch_buffer, 4326)
-      
       # Save buffered MCP as shapefile
       shapefile_name <- paste0("data/gbif/shapefiles/", 
                                nice_name, "-buffered-mcp.shp") 
-      # st_write(obj = ch_buffer_latlong, 
-      #          dsn = shapefile_name, 
-      #          append = FALSE,
-      #          quiet = TRUE)
+      # Below seems unnecessary, but leaving a commented out version in case.
+        # GDAL/terra will not let us overwrite existing file (as of 2023-02-13),
+        # even when passing overwrite = TRUE
+        # So we have to manually remove related files first, then write
+        # if (file.exists(shapefile_name)) {
+        #   to_delete <- list.files(path = "data/gbif/shapefiles/", 
+        #                           pattern = paste0(nice_name, "-buffered-mcp"),
+        #                           full.names = TRUE)
+        #   invisible(file.remove(to_delete))
+        # }
+      terra::writeVector(x = ch_buffer, 
+                         filename = shapefile_name,
+                         overwrite = TRUE)
 
-      # GDAL/terra will not let us overwrite existing file (as of 2023-02-13),
-      # even when passing overwrite = TRUE
-      # So we have to manually remove related files first, then write
-      if (file.exists(shapefile_name)) {
-        to_delete <- list.files(path = "data/gbif/shapefiles/", 
-                                pattern = paste0(nice_name, "-buffered-mcp"),
-                                full.names = TRUE)
-        invisible(file.remove(to_delete))
-      }
-      terra::writeVector(x = ch_buffer,
-                         filename = shapefile_name)
-
-      # Convert the buffered MCP to a SpatVector
-      # ch_buffer_sv <- terra::vect(ch_buffer_latlong)
-      
       # Crop and mask climate data to the buffered MCP polygon
       pred_mask <- predictor %>%
         terra::crop(ch_buffer) %>%
@@ -204,15 +177,21 @@ for (i in 1:nrow(species_list)) {
       pa_data <- c(rep(x = 1, times = nrow(presence)), 
                    rep(x = 0, times = nrow(absence)))  
       
-      # Create a vector of folds for easier splitting into testing/training
-      num_folds <- 5 # for 20/80 split
-      fold <- c(rep(x = 1:num_folds, length.out = nrow(presence)),
-                rep(x = 1:num_folds, length.out = nrow(absence)))
+      # Create spatial blocks/folds with ENM eval (creates 4 folds via lat/long
+      # with relatively even number of occurrences in each partition)
+      set.seed(1234)
+      fold <- ENMeval::get.block(presence, absence)
+      
+      # Check number of presences in each fold and view bg points by fold:
+      # table(fold$occs.grp)
+      # evalplot.grps(pts = absence, pts.grp = fold$bg.grp,
+      #               envs = raster::stack(pred_mask))
       
       # Combine presence / pseudo-absence data
       full_data <- data.frame(cbind(pa = pa_data,
-                                    fold = fold,
-                                    rbind(presence, absence)))
+                                    fold = c(fold$occs.grp, fold$bg.grp),
+                                    rbind(presence, absence)))      
+      
       write.csv(x = full_data,
                 file = pa_file,
                 row.names = FALSE)
@@ -259,4 +238,3 @@ zip(zipfile = zipfile,
 write.csv(x = gbif_pa,
           file = gbif_pa_file,
           row.names = FALSE)
-
