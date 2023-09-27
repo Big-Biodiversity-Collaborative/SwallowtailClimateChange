@@ -1,11 +1,11 @@
 variable,description,include
 bio1,annual mean temperature,TRUE
 bio2,mean diurnal range (mean of monthly (max temp - min temp)),TRUE
-bio3,isothermality (bio2 / bio7),TRUE
+bio3,isothermality (bio2 / bio7),FALSE
 bio4,temperature seasonality (SD * 100),TRUE
 bio5,max temperature of warmest month,TRUE
 bio6,min temperature of coldest month,TRUE
-bio7,temperature annual range (bio5 - bio6),TRUE
+bio7,temperature annual range (bio5 - bio6),FALSE
 bio8,mean temperature of wettest quarter,TRUE
 bio9,mean temperature of driest quarter,TRUE
 bio10,mean temperature of warmest quarter,FALSE
