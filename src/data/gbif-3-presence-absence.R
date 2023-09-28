@@ -1,10 +1,9 @@
 # Generate presence-absence dataset for each species, to be used in any SDM
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-09-27
+# 2023-09-28
 
 require(terra)
-require(sp)
 require(dplyr)
 require(ENMeval)
 
@@ -106,30 +105,27 @@ for (i in 1:nrow(species_list)) {
         dplyr::rename(x = longitude,
                       y =latitude)
 
-      # Convert to a SpatialPoints object using WGS84 CRS
-      presence_sp <- SpatialPoints(coords = presence,
-                                   proj4string = CRS("EPSG:4326"))
+      # Calculate the distance between each pair of points (in m)
+      dists <- terra::distance(x = as.matrix(presence),
+                               y = as.matrix(presence),
+                               lonlat = TRUE)
 
-      # Calculate the GreatCircle distance (in km) between points (can take
-      # minutes for larger data sets)
-      gc_dist <- sp::spDists(presence_sp, longlat = TRUE) 
-      
-      # Calculate the maximum of nearest neighbor distances (in km)
-      buffer <- gc_dist %>%
+      # Calculate the maximum of nearest neighbor distances
+      buffer <- dists %>%
         apply(., 1, function(x) min(x[x > 0])) %>%
         max %>%
         round
-      rm(gc_dist)
+      rm(dists)
 
       # Garbage can pile up at this point. Clean it up.
       invisible(gc())
 
-      # Use terra functions to define the minimum convex polygon (MCP)
+      # Define the minimum convex polygon (MCP)
       ch <- terra::convHull(x = terra::vect(x = presence,
                                             geom = c("x", "y"),
                                             crs = "EPSG:4326"))
-      # Adding a buffer; width takes argument in meters
-      ch_buffer <- terra::buffer(x = ch, width = buffer * 1000)
+      # Adding a buffer (width takes argument in meters)
+      ch_buffer <- terra::buffer(x = ch, width = buffer)
 
       # Save buffered MCP as shapefile
       shapefile_name <- paste0("data/gbif/shapefiles/", 
