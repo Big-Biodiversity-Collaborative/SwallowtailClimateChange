@@ -286,6 +286,8 @@ for (k in 1:nfolds) {
     evals$threshold[row_index] <- ev$threshold
     evals$OR[row_index] <- ev$or
     evals$TSS[row_index] <- ev$tss 
+    # TODO: see whether there's a more efficient way to dump in table (create
+    # a row and rbind it to existing?)
   }
   
   # Run GAM and evaluate with test data
