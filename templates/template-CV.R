@@ -71,24 +71,30 @@ pred_rs <- raster::stack(pred_mask)
 
 # Extract value of predictors at each presence/background location (needed for 
 # all SDMs except MAXENT). 
-  # For now, going through some extra steps to ensure that all presence and 
-  # background point have climate data and no two presence or background points 
-  # occur in the same raster cell. Once we've updated gbif-2-filter.R, we 
-  # shouldn't need these checks and fixes.
 predictors_df <- terra::extract(x = pred_mask,
                                 y = pa_data[, c("x", "y")],
-                                xy = FALSE,
-                                cells = TRUE) %>%
+                                xy = FALSE) %>%
   dplyr::select(-ID)
 pa_data <- cbind(pa_data, predictors_df)
-# Remove any rows with NAs
-anyNAs <- apply(pa_data[, climate_vars], 1, function(x) sum(is.na(x)))
-if (max(anyNAs) > 0) {
-  pa_data <- pa_data[-which(anyNAs > 0),]
-}
-pa_data <- pa_data %>%
-  distinct(pa, cell, .keep_all = TRUE) %>%
-  select(-cell)
+  
+  # Previously, we had to go through some extra steps to ensure that all 
+  # presence and background points had climate data and that no two presence 
+  # points occur in the same raster cell. Leaving the code here just in case we 
+  # need it again.
+  # predictors_df <- terra::extract(x = pred_mask,
+  #                                 y = pa_data[, c("x", "y")],
+  #                                 xy = FALSE,
+  #                                 cells = TRUE) %>%
+  #   dplyr::select(-ID)
+  # pa_data <- cbind(pa_data, predictors_df)
+  # # Remove any rows with NAs
+  # anyNAs <- apply(pa_data[, climate_vars], 1, function(x) sum(is.na(x)))
+  # if (max(anyNAs) > 0) {
+  #   pa_data <- pa_data[-which(anyNAs > 0),]
+  # }
+  # pa_data <- pa_data %>%
+  #   distinct(pa, cell, .keep_all = TRUE) %>%
+  #   select(-cell)
 
 # Create a table to store evaluation metrics for each SDM and fold
 sdms <- c("BRT", "GAM", "LASSO", "MAXENT", "RF")
@@ -132,8 +138,7 @@ os <- list(validation.bg = "partition",
 
 # Calculate a few other evaluation metrics, so we can compare model performance
 # with other SDMs. (Note that the CBI value ENMevaluate spits out is the same
-# as what's produced with the ecospat package, with fit = predictions from
-# occurrence and bg points in validation area, and nclass = 0.)
+# as what's produced with the ecospat package)
   # TSS = maxTSS
   # OR.mss = omission rate with the max(sens + spec) threshold
   # thr = max(sens + spec) threshold value
@@ -256,16 +261,8 @@ for (k in 1:nfolds) {
   sdmtest <- pa_data %>%
     filter(fold == k)  
   
-  # Calculate means, SDs for standardizing covariates
+  # Calculate means, SDs for standardizing covariates (for GAM, LASSO)
   stand_obj <- save_means_sds(sdmtrain, cols = climate_vars, verbose = TRUE)
-  
-  # TODO: Move stuff below to run_gam (_z) and run_lasso (_zq) functions
-    # Create training/testing datasets with standardized variables
-    sdmtrain_z <- prep_predictors(stand_obj, sdmtrain, quad = FALSE) 
-    sdmtrain_z <- cbind(pa = sdmtrain$pa, sdmtrain_z)
-    # Create training/testing datasets with linear and quadratic standardized variables
-    sdmtrain_zq <- prep_predictors(stand_obj, sdmtrain, quad = TRUE) 
-    sdmtrain_zq <- cbind(pa = sdmtrain$pa, sdmtrain_zq)
 
   # Run BRT and evaluate with test data
   brt_fit <- run_brt(full_data = sdmtrain, step = FALSE, ntrees = ntrees,
@@ -273,7 +270,6 @@ for (k in 1:nfolds) {
                      verbose = TRUE)
   
   if (!is.null(brt_fit)) {
-    
     ev <- evaluate_sdm(test_data = sdmtest, 
                        model = brt_fit, 
                        sdm_method = "brt") 
@@ -286,14 +282,12 @@ for (k in 1:nfolds) {
     evals$threshold[row_index] <- ev$threshold
     evals$OR[row_index] <- ev$or
     evals$TSS[row_index] <- ev$tss 
-    # TODO: see whether there's a more efficient way to dump in table (create
-    # a row and rbind it to existing?)
   }
   
   # Run GAM and evaluate with test data
   gam_fit <- run_gam(full_data = sdmtrain, 
                      stand_obj = stand_obj,
-                     quad = FALSE, ....)
+                     quad = FALSE)
   
   ev <- evaluate_sdm(test_data = sdmtest, 
                      model = gam_fit, 
@@ -309,20 +303,18 @@ for (k in 1:nfolds) {
   evals$TSS[row_index] <- ev$tss 
   
   # Run LASSO and evaluate with test data
-  traindata <- sdmtrain_zq
-  testdata <- sdmtest_zq
-  
   lasso_fit <- run_lasso(full_data = sdmtrain, 
                          stand_obj = stand_obj,
-                         quad = TRUE, ....)
+                         quad = TRUE)
   
-  ev <- evaluate_sdm(test_data = testdata, 
+  ev <- evaluate_sdm(test_data = sdmtest, 
                      model = lasso_fit, 
                      sdm_method = "lasso",
                      stand_obj = stand_obj,
-                     quad = TRUE, ....) 
+                     quad = TRUE) 
   
   row_index <- which(evals$sdm == "LASSO" & evals$fold == k)  
+  evals$tune.args[row_index] <- "lambda.1se"
   evals$AUC[row_index] <- ev$auc
   evals$CBI[row_index] <- ev$cbi
   evals$threshold[row_index] <- ev$threshold
@@ -330,19 +322,25 @@ for (k in 1:nfolds) {
   evals$TSS[row_index] <- ev$tss 
   
   # Run RF and evaluate with test data
-  rf_fit <- run_rf(full_data = sdmtrain..)
+  rf_fit <- run_rf(full_data = sdmtrain,
+                   ntree = 1000)
   
   ev <- evaluate_sdm(test_data = sdmtest, 
                      model = rf_fit, 
                      sdm_method = "rf") 
   
-  row_index <- which(evals$sdm == "RF" & evals$fold == k)  
+  row_index <- which(evals$sdm == "RF" & evals$fold == k) 
+  tune.args <- paste0("tree.", rf_fit$forest$ntree, "_mtry.3")
+  evals$tune.args[row_index] <- tune.args
   evals$AUC[row_index] <- ev$auc
   evals$CBI[row_index] <- ev$cbi
   evals$threshold[row_index] <- ev$threshold
   evals$OR[row_index] <- ev$or
   evals$TSS[row_index] <- ev$tss 
-  
 }
 
-
+# Write evals table to file
+eval_file <- paste0("output/eval-metrics/", nice_name, "-CVevals.csv")
+write.csv(evals, 
+          file = eval_file,
+          row.names = FALSE)
