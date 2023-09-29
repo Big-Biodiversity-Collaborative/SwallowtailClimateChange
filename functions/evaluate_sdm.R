@@ -92,11 +92,11 @@ evaluate_sdm <- function(test_data,
     eval <- dismo::evaluate(p = rf_preds[which(pa == 1)],
                             a = rf_preds[which(pa == 0)])
   } else if (sdm_method == "lasso") {
-    eval <- dismo::evaluate(p = as.matrix(p),
-                            a = as.matrix(a),
-                            model = model,
-                            s = model$lambda.1se,
-                            type = "response")
+    eval <- evaluate_lasso(p = as.matrix(p),
+                           a = as.matrix(a),
+                           model = model,
+                           s = model$lambda.1se,
+                           type = "response")
   } else {
     eval <- dismo::evaluate(p = p, 
                             a = a, 
