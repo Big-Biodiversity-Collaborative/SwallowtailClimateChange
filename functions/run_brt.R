@@ -1,35 +1,36 @@
 #' Run boosted regression tree (BRT) species distribution model
 #' 
-#' @param full_data dataframe with presence-absence data (1/0), fold (for 
-#' separating testing and training data), and 19 columns with climate data
+#' @param full_data dataframe with presence-absence data (1/0), columns with 
+#' climate data
+#' @param step logical indicating whether to use \code{dismo::gbm.step()} or 
+#' \code{dismo::gbm.fixed()}.
+#' @param bag.fraction random sample size for each new tree (default = 0.75)
+#' @param complexity number of nodes in tree (default = 5)
+#' @param ntrees number of trees (only needed if step = FALSE)
+#' @param learning.rate learning rate (weights applied to individual trees;
+#' only needed if step = FALSE)
 #' @param verbose logical indicating whether or not to print processing messages
 #' 
-#' @details Uses \code{dismo::gbm.step()} for a boosted regression tree model.
-#' This function assesses the optimal number of boosting trees (that
-#' minimizes deviance) using k-fold cross validation. Then it fits a model with 
-#' this number of trees and returns it as a gbm model (along with additional 
-#' information from the cross-validation selection process).
+#' @details If step = TRUE, uses \code{dismo::gbm.step()} for a boosted 
+#' regression tree model. This function assesses the optimal number of boosting 
+#' trees (that minimizes deviance) using k-fold cross validation. Then it fits a 
+#' model with this number of trees. If step = FALSE, uses 
+#' \code{dismo::gbm.fixed()} to run a boosted regression tree model with a 
+#' pre-specified number of trees.
 #' 
-#' @return a list with the following elements:
-#' \describe{
-#'   \item{model}{Boosted regression tree SDM; the output of 
-#'   \code{dismo::gbm.step()}
-#'   \item{evaluation}{Evaluation of model using testing data; the output of 
-#'   \code{dismo::evaluate()}}
-#'   \item{thresh}{Threshold value of probabilities for determining absence or 
-#'   presence; the output of \code{dismo::threshold} with 
-#'   \code{stat = "spec_sens"}}
-#'   \item{trees}{number of trees used in final model}
-#'   \item{climate_vars}{vector with names of all climate variables considered 
-#'   in the model}
-#' }
-run_brt <- function(full_data, verbose = TRUE) {
+#' @return An object of class gbm, with parameter estimates for a Boosted 
+#' Regression Tree (BRT) SDM. Output of \code{dismo::gbm.step()} or 
+#' \code{dismo::gbm::fixed()}
+
+run_brt <- function(full_data, step = TRUE, bag.fraction = 0.75, 
+                    complexity = 5, ntrees = NA, learning.rate = NA,
+                    verbose = TRUE) {
   # Extract the name of this function for reporting
   function_name <- as.character(match.call())[1]
   
   # Libraries required for this function to work
   method_name <- "boosted regression tree"
-  dependencies <- c("dplyr", "dismo", "gbm")
+  dependencies <- "gbm"
   if (!all(unlist(lapply(X = dependencies, FUN = require, character.only = TRUE)))) {
     stop("At least one package required by ", function_name, 
          " could not be loaded: ", paste(dependencies, collapse = ", "),
@@ -40,149 +41,114 @@ run_brt <- function(full_data, verbose = TRUE) {
   if (!("pa" %in% colnames(full_data))) {
     stop(function_name, " requires column named 'pa' in full_data")
   }
-  # Make sure fold indicators are there
-  if (!("fold" %in% colnames(full_data))) {
-    stop(function_name, " requires column named 'fold' in full_data")
+  # Make sure climate data are there
+  if (sum(grepl("bio", colnames(full_data))) < 2) {
+    stop(function_name, " requires multiple climate variables in full_data")
   }
-  # Make sure data for all 19 climate variables are there
-  if (length(setdiff(paste0("bio",1:19),colnames(full_data))) > 0) {
-    stop(function_name, " requires bio1:bio19 columns in full_data")
+  # Make sure parameter settings are appropriate
+  if (bag.fraction <= 0 | bag.fraction > 1) {
+    stop(function_name, " requires a bag.fraction between 0 and 1")
   }
-
-  # Get list of climate variables to consider for the SDM
-  all_climate_vars <- read.csv("data/climate-variables.csv")
-  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+  if (step == FALSE & complexity %%1 != 0) {
+    stop(function_name, " requires complexity to be an integer")
+  }		
+  if (step == FALSE & ntrees %% 1 != 0) {
+    stop(function_name, " requires ntrees to be an integer")
+  }	
+  if (step == FALSE & (learning.rate <= 0 | learning.rate > 1)) {
+    stop(function_name, " requires a learning.rate between 0 and 1")
+  }	
   
-  # Create separate data frames for testing and training presence data
-  presence_train <- full_data %>%
-    filter(pa == 1) %>%
-    filter(fold != 1) %>%
-    dplyr::select(pa, fold, all_of(climate_vars))
-  presence_test <- full_data %>%
-    filter(pa == 1) %>%
-    filter(fold == 1) %>%
-    dplyr::select(all_of(climate_vars))
-  # Create separate data frames for testing and training (pseudo)absence data
-  absence_train <- full_data %>%
-    filter(pa == 0) %>%
-    filter(fold != 1) %>%
-    dplyr::select(pa, fold, all_of(climate_vars))
-  absence_test <- full_data %>%
-    filter(pa == 0) %>%
-    filter(fold == 1) %>%
-    dplyr::select(all_of(climate_vars))
+  # Identify columns with presence-absence and climate data
+  pa_column <- which(colnames(full_data) == "pa")
+  clim_columns <- which(grepl("bio", colnames(full_data)))
   
-  # Add presence and pseudoabsence training data into single data frame
-  sdmtrain <- rbind(presence_train, absence_train)
-
-  # Creating values to downweight background points (so total [summed] weight of 
-  # background points is equal to the total weight of presence points)
-  prNum <- sum(sdmtrain$pa == 1)
-  bgNum <- sum(sdmtrain$pa == 0)
-  wt <- ifelse(sdmtrain$pa == 1, 1, prNum / bgNum)
-  
-  # Set model parameters
-    # Tree complexity (number of nodes in a tree)
-    tc <- ifelse(prNum < 50, 1, 5)
-    # Learning rate (weights applied to individual trees)
+  if (step) {
+    # Learning rate
     poss_lr_values <- c(0.001, 0.01, 0.05, 0.10)
-    lr_index <- 3
-    lr <- poss_lr_values[lr_index]
-    # Number of initial trees (and number to add at each step)
-    n_trees <- 50
+    lr_index <- 2
+    lr <- poss_lr_values[lr_index] 
+    # Number of initial trees
+    n_trees <- 100
+    # Number of trees to add at each step
+    step_size <- 100
     # Maximum number of trees to fit before stopping
     max_trees <- 10000
-    # Number of folds for cross-validation (to find optimal number of trees)
+    # Number of folds for internal cross validation
     n_folds <- 5
- 
-  if (verbose) {
-    message("Running ", method_name, ".")
-  }  
-  
-  # Run the model
-  # Note: using try() function so if model fails to fit the loop will continue
-  model_fit <- NULL  
-  opt_trees <- 0 
-  no_model <-  FALSE
-  while (is.null(model_fit) | opt_trees < 1000 | opt_trees == max_trees)  {
-    # Run gbm.step
-    # Note: set plot arguments below to FALSE to avoid creating an extraneous 
-    # file when running BRT models in parallel
+    
+    # Note: using try() function so if model fails to fit the loop will continue
+    brt_fit <- NULL  
+    opt_trees <- 0 
+    no_model <-  FALSE
+    
+    while (is.null(brt_fit) | opt_trees < 1000 | opt_trees == max_trees)  {
+      try(
+        brt_fit <- dismo::gbm.step(data = full_data,
+                                   gbm.x = clim_columns,
+                                   gbm.y = pa_column,
+                                   family = "bernoulli",
+                                   tree.complexity = complexity,
+                                   learning.rate = lr,
+                                   n.trees = n_trees,
+                                   step.size = step_size,
+                                   max.trees = max_trees,
+                                   n.folds = n_folds,
+                                   bag.fraction = bag.fraction,
+                                   verbose = verbose, 
+                                   silent = !verbose,
+                                   plot.main = FALSE,  
+                                   plot.folds = FALSE)
+      )
+      
+      # Extract the optimal number of trees
+      opt_trees <- ifelse(is.null(brt_fit), 0, brt_fit$gbm.call$best.trees)
+      
+      # If the algorithm is unable to find an optimum number with the fastest 
+      # learning rate (0.10) within 10,000 trees, then exit. 
+      if (lr_index == 4 & opt_trees == max_trees) {
+        no_model <- TRUE
+        message("Unable to find optimal number of trees with learning rate = 0.1 and max trees = 10,000.")
+        break
+      }
+      
+      # If the optimal number of trees is < 1000 with a learning rate of 0.001, 
+      # save this model and exit.
+      if (lr_index == 1 & opt_trees < 1000) {
+        message("Optimal number of trees < 1000 with learning rate = 0.001. ",
+                "Saving model with < 1000 trees.")
+        break      
+      }
+      
+      # Adjust the learning rate if the optimal number of trees is < 1000 or 
+      # optimal number couldn't be identified (ie, equal to max_trees) 
+      lr_index <- ifelse(opt_trees < 1000, 
+                         max(lr_index - 1, 1), 
+                         ifelse(opt_trees == max_trees, 
+                                min(lr_index + 1, 4),
+                                lr_index))
+      lr <- poss_lr_values[lr_index]
+    }
+  } else {
     try(
-      model_fit <- gbm.step(data = sdmtrain,
-                            gbm.x = 3:ncol(sdmtrain), # Columns with predictor data
-                            gbm.y = 1,                # Column with pa data
-                            family = "bernoulli",
-                            tree.complexity = tc,
-                            learning.rate = lr,
-                            n.trees = n_trees,
-                            max.trees = max_trees,
-                            n.folds = n_folds,
-                            verbose = FALSE, 
-                            silent = TRUE,
-                            plot.main = FALSE,  
-                            plot.folds = FALSE)
+      brt_fit <- dismo::gbm.fixed(data = full_data,
+                                  gbm.x = clim_columns,
+                                  gbm.y = pa_column, 
+                                  family = "bernoulli",
+                                  tree.complexity = complexity,
+                                  learning.rate = learning.rate,
+                                  n.trees = ntrees,
+                                  bag.fraction = bag.fraction,
+                                  verbose = verbose)
     )
-    
-    # Extract the optimal number of trees
-    opt_trees <- ifelse(is.null(model_fit), 0, model_fit$gbm.call$best.trees)
-    
-    # If the algorithm is unable to find an optimum number with the fastest 
-    # learning rate (0.10) within 10,000 trees, then exit. 
-    if (lr_index == 4 & opt_trees == max_trees) {
-      no_model <- TRUE
-      message("Unable to find optimal number of trees with learning rate = 0.1 and max trees = 10,000.")
-      break
-    }
-    
-    # If the optimal number of trees is < 1000 with a learning rate of 0.001, 
-    # save this model and exit.
-    if (lr_index == 1 & opt_trees < 1000) {
-      message("Optimal number of trees < 1000 with learning rate = 0.001. ",
-              "Saving model with < 1000 trees.")
-      break      
-    }
-    
-    # Adjust the learning rate if the optimal number of trees is < 1000 or 
-    # optimal number couldn't be identified (ie, equal to max_trees) 
-    lr_index <- ifelse(opt_trees < 1000, 
-                       max(lr_index - 1, 1), 
-                       ifelse(opt_trees == max_trees, 
-                              min(lr_index + 1, 4),
-                              lr_index))
-    lr <- poss_lr_values[lr_index]
   }
-    
-  if (no_model | is.null(model_fit)) {
+  
+  if (is.null(brt_fit)) {
     message("Unable to find optimal number of trees. Model not saved.")
     results <- NULL
   } else {
-    if (verbose) {
-      message("Model complete. Evaluating ", method_name, 
-              " with testing data.")
-    }
-    
-    # Evaluate model performance with testing data
-    # Need to specify the optimal number of trees and the type of predictions 
-    # (so they're on a [0, 1] scale)
-    model_eval <- dismo::evaluate(p = presence_test,
-                                  a = absence_test,
-                                  model = model_fit,
-                                  n.trees = opt_trees,
-                                  type = "response") 
-    
-    # Calculate threshold so we can make a P/A map later
-    pres_threshold <- dismo::threshold(x = model_eval, 
-                                       stat = "spec_sens")
-    
-    # Bind everything together and return as list  
-    # For BRT models, including the number of trees
-    results <- list(model = model_fit,
-                    evaluation = model_eval,
-                    thresh = pres_threshold,
-                    trees = opt_trees,
-                    climate_vars = climate_vars)
+    results <- brt_fit
   }
-
+  
   return(results)
 }
