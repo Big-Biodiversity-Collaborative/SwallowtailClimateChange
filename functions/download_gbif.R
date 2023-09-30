@@ -17,7 +17,7 @@
 #' @return NULL
 download_gbif <- function(species_name, gbif_name, replace = FALSE, 
                           verbose = FALSE, countries = c("CA", "MX", "US"),
-                          query_limit = 100, max_attempts = 5, logfile = NULL) {
+                          query_limit = 200, max_attempts = 5, logfile = NULL) {
   if (!require(dplyr)) {
     stop("download_gbif requires dplyr package, but it could not be loaded")
   }
@@ -90,26 +90,66 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
             success <- FALSE
             attempts <- 0
             while(!success && (attempts < max_attempts)) {
-              gbif_query <- spocc::occ(query = gbif_name,
-                                       from = "gbif",
-                                       limit = query_limit,
-                                       start = start,
-                                       has_coords = TRUE,
-                                       gbifopts = list(country = country))
               
-              query_data <- gbif_query$gbif$data[[list_name]]
-              attempts <- attempts + 1
+              ### Start new try/catch
+              tryCatch(expr = {
+                attempts <- attempts + 1
+                # If last attempt failed, sleep briefly
+                if (attempts > 1) {
+                  Sys.sleep(runif(n = 1, min = 1, max = 2))
+                }
+                
+                gbif_query <- spocc::occ(query = gbif_name,
+                                         from = "gbif",
+                                         limit = query_limit,
+                                         start = start,
+                                         has_coords = TRUE,
+                                         gbifopts = list(country = country))
+                
+                query_data <- gbif_query$gbif$data[[list_name]]
+                
+                # Failed queries (in these cases) are characterized by a set of 
+                # data that lacks the countryCode column. We use that as an 
+                # indicator of success
+                if ("countryCode" %in% colnames(query_data)) {
+                  success <- TRUE
+                } else {
+                  if (verbose & attempts < max_attempts) {
+                    message(paste0("\tquery failed on attempt ", attempts, ", retrying."))
+                  }
+                }
+              }, # End of expression to try
+              error = function(e) {
+                message("...unsuccessful query on attempt ", attempts, " of ", 
+                        max_attempts)
+                e
+              }, # End of error catching
+              finally = NULL) # end of tryCatch
+              #### End new
+
+              #### Start prior approach (no try/catch)
+              # gbif_query <- spocc::occ(query = gbif_name,
+              #                          from = "gbif",
+              #                          limit = query_limit,
+              #                          start = start,
+              #                          has_coords = TRUE,
+              #                          gbifopts = list(country = country))
+              # 
+              # query_data <- gbif_query$gbif$data[[list_name]]
+              # attempts <- attempts + 1
               
               # Failed queries (in these cases) are characterized by a set of 
               # data that lacks the countryCode column. We use that as an 
               # indicator of success
-              if ("countryCode" %in% colnames(query_data)) {
-                success <- TRUE
-              } else {
-                if (verbose & attempts < max_attempts) {
-                  message(paste0("\tquery failed on attempt ", attempts, ", retrying."))
-                }
-              }
+              # if ("countryCode" %in% colnames(query_data)) {
+              #   success <- TRUE
+              # } else {
+              #   if (verbose & attempts < max_attempts) {
+              #     message(paste0("\tquery failed on attempt ", attempts, ", retrying."))
+              #   }
+              # }
+              #### End prior
+
             } # end while loop
             if (success) {
               # Extract the data and clean it up before adding to results
@@ -133,7 +173,7 @@ download_gbif <- function(species_name, gbif_name, replace = FALSE,
               if (!is.null(logfile)) {
                 if (file.exists(logfile)) {
                   sink(file = logfile, append = TRUE)
-                  cat("Failed query for ", species_name, " (as ", 
+                  cat("\nFailed query for ", species_name, " (as ", 
                       gbif_name, ") from ", country, ", records ", 
                       (start + 1), "-", end, 
                       "; dataset may be incomplete.", sep = "")
