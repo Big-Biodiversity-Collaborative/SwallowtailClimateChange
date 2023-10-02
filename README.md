@@ -24,11 +24,12 @@ The project uses the following additional R packages:
 + dismo
 + dplyr
 + ENMeval
-+ gbm (for BRT models)
++ ecospat
++ flexsdm
++ gbm
 + ggplot2
-+ kernlab
++ glmnet
 + ks
-+ maptools
 + Matrix (for lasso models)
 + mgcv
 + parallel (usually part of R distribution, but needs explicit loading)
@@ -36,7 +37,6 @@ The project uses the following additional R packages:
 + raster
 + RColorBrewer
 + rgdal
-+ rJava (for MaxEnt models)
 + rnaturalearth
 + rnaturalearthdata
 + Rtools (needed to use the zip() function on Windows machines)
