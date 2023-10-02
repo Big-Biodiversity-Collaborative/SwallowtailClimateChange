@@ -1,7 +1,7 @@
 # A template for tuning Maxent and BRT models and using CV to evaluate SDMs
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2022-09-27
+# 2022-10-02
 
 require(stringr)
 require(ENMeval)
@@ -16,8 +16,6 @@ require(randomForest)
 require(dismo)
 require(gbm)
 
-rm(list = ls())
-
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
@@ -25,10 +23,8 @@ source(file = "load_functions.R")
 # all models (and not just the model with "optimal" tuning parameters)
 max_save <- FALSE
 
-# genus <- "GENUS"
-# species <- "SPECIES"
-genus <- "Papilio"
-species <- "machaon"
+genus <- "GENUS"
+species <- "SPECIES"
 
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
@@ -38,9 +34,9 @@ nice_name <- tolower(paste0(genus, "_", species))
 # Load in presence/pseudo-absence data
 pa_file <- paste0("data/gbif/presence-absence/", nice_name, "-pa.csv")
 # Check to see if file exists and what to do if not
-# if (!file.exists(pa_file)) {
-#   unzip(zipfile = "data/gbif-pa.zip")
-# }
+if (!file.exists(pa_file)) {
+  unzip(zipfile = "data/gbif-pa.zip")
+}
 pa_data <- read.csv(file = pa_file)
 
 # Get shapefile for geographic extent (to crop predictor rasters)
@@ -48,9 +44,9 @@ shapefile_name <- paste0("data/gbif/shapefiles/",
                          nice_name, 
                          "-buffered-mcp.shp")
 # If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
-# if (!file.exists(shapefile_name)) {
-#   unzip(zipfile = "data/gbif-shapefiles.zip")
-# }
+if (!file.exists(shapefile_name)) {
+  unzip(zipfile = "data/gbif-shapefiles.zip")
+}
 buffered_mcp <- vect(shapefile_name)
 
 # Grab worldclim data to use as predictors
@@ -114,10 +110,6 @@ set.seed(20230927)
 # Run MAXENT models -----------------------------------------------------------#
 
 cat(paste0("Running Maxent models for ", species_name, ".\n"))
-
-# TODO: move some of code below to the run_maxent function? The extent to which
-# this happens depends on how much of the code we created above (to ensure that
-# all SDMs are based on the exact same data) is needed.
 
 # Dataframes with lat/long (in that order) for presence and background locations
 occs <- pa_data %>%
