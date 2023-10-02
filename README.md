@@ -50,17 +50,6 @@ The project uses the following additional R packages:
 + tidyterra
 + TNRS
 
-To run models implementing the MaxEnt approach, you will also need the MaxEnt 
-program, which can be downloaded from 
-[https://biodiversityinformatics.amnh.org/open_source/maxent/](https://biodiversityinformatics.amnh.org/open_source/maxent/).
-The file maxent.jar then needs to be moved (or copied) to the java folder of 
-the dismo package. You can find where that folder exists on your machine by 
-typing, in an R console:
-
-```{r}
-system.file("java", package = "dismo")
-```
-
 ## Workflow
 
 The workflow has the general structure of:
