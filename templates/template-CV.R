@@ -21,10 +21,13 @@ source(file = "load_functions.R")
 
 # Logical to indicate whether to save ENMeval object that contains output from
 # all models (and not just the model with "optimal" tuning parameters)
+# TODO: Consider adding flag to toggle this to TRUE
 max_save <- FALSE
 
 genus <- "GENUS"
 species <- "SPECIES"
+
+set.seed(20230927)
 
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
@@ -105,11 +108,9 @@ evals <- data.frame(sdm = rep(sdms, each = max(folds)),
                     OR = NA,
                     TSS = NA)
 
-set.seed(20230927)
-
 # Run MAXENT models -----------------------------------------------------------#
 
-cat(paste0("Running Maxent models for ", species_name, ".\n"))
+message("Running Maxent models for ", species_name, ".\n")
 
 # Dataframes with lat/long (in that order) for presence and background locations
 occs <- pa_data %>%
@@ -213,7 +214,7 @@ evals$TSS[eval_rows] <- partitions$TSS
 # optimal learning rate and number of trees. We'll use the mean of these
 # values when running CV models. 
 
-cat(paste0("Tuning BRT models for ", species_name, ".\n"))
+message("Tuning BRT models for ", species_name, ".\n")
 
 # Create empty vectors to hold optimal tuning parameters for each fold
 learningrate_cv <-  rep(NA_real_, 4)
@@ -244,7 +245,7 @@ ntrees <- mean(ntrees_cv)
 
 # Run CV models for BRT, GAM, LASSO, RF ---------------------------------------#
 
-cat(paste0("Running CV models for ", species_name, ".\n"))
+message("Running CV models for ", species_name, ".\n")
 
 for (k in 1:nfolds) {
   # Create training and testing datasets for all SDMs
