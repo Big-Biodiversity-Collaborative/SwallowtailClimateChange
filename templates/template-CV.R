@@ -110,7 +110,7 @@ evals <- data.frame(sdm = rep(sdms, each = max(folds)),
 
 # Run MAXENT models -----------------------------------------------------------#
 
-message("Running Maxent models for ", species_name, ".\n")
+message("Running Maxent models for ", species_name)
 
 # Dataframes with lat/long (in that order) for presence and background locations
 occs <- pa_data %>%
@@ -214,7 +214,7 @@ evals$TSS[eval_rows] <- partitions$TSS
 # optimal learning rate and number of trees. We'll use the mean of these
 # values when running CV models. 
 
-message("Tuning BRT models for ", species_name, ".\n")
+message("Tuning BRT models for ", species_name)
 
 # Create empty vectors to hold optimal tuning parameters for each fold
 learningrate_cv <-  rep(NA_real_, 4)
@@ -245,7 +245,7 @@ ntrees <- mean(ntrees_cv)
 
 # Run CV models for BRT, GAM, LASSO, RF ---------------------------------------#
 
-message("Running CV models for ", species_name, ".\n")
+message("Running CV models for ", species_name)
 
 for (k in 1:nfolds) {
   # Create training and testing datasets for all SDMs

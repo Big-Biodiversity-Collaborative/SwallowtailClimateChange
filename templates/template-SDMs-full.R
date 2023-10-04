@@ -76,7 +76,7 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
 
 # Run BRT
   sdm <- "brt"
-  cat(paste0("Running ", toupper(sdm), " model for ", species_name, ".\n"))
+  message("Running ", toupper(sdm), " model for ", species_name)
 
   # Extract settings from CV models
   brt_settings <- evals %>%
@@ -104,7 +104,7 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
   
 # Run GAM
   sdm <- "gam"
-  cat(paste0("Running ", toupper(sdm), " model for ", species_name, ".\n"))
+  message("Running ", toupper(sdm), " model for ", species_name)
   quad <- FALSE
 
   # Run model
@@ -123,7 +123,7 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
   
 # Run LASSO
   sdm <- "lasso"
-  cat(paste0("Running ", toupper(sdm), " model for ", species_name, ".\n"))
+  message("Running ", toupper(sdm), " model for ", species_name)
   quad <- TRUE
   
   # Run model
@@ -142,7 +142,7 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
   
 # Run RF
   sdm <- "rf"
-  cat(paste0("Running ", toupper(sdm), " model for ", species_name, ".\n"))
+  message("Running ", toupper(sdm), " model for ", species_name)
 
   # Run model
   rf_fit <- run_rf(full_data = pa_data,
@@ -159,7 +159,7 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
   
 # Load Maxent model and save as list (if not done already)
   sdm <- "maxent"
-  cat(paste0("Saving ", toupper(sdm), " model for ", species_name, ".\n"))
+  message("Saving ", toupper(sdm), " model for ", species_name)
   
   # Load model
   max_file <- paste0("output/SDMs/", nice_name, "-", sdm, ".rds")
