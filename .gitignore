@@ -86,6 +86,10 @@ output/ranges/*
 output/eval-metrics/*
 !output/eval-metrics/.gitkeep
 
+# Predicted suitability values
+output/suitabilities/*
+!output/suitabilities/.gitkeep
+
 # Log files
 logs/*.log
 !/logs/.gitkeep
