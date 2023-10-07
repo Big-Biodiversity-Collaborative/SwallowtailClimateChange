@@ -2,7 +2,7 @@
 # climate scenario for a given species
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-10-04
+# 2023-10-06
 
 require(stringr)
 require(ENMeval)
@@ -20,7 +20,7 @@ require(gbm)
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
-# Logical indicating whether or not to save predicted suitabilities values from
+# Logical indicating whether or not to save predicted suitability values from
 # individual SDMs for the current time period
 sdm_raster_save <- TRUE
 
@@ -60,6 +60,7 @@ evals_avg <- evals %>%
   summarize(tss = mean(TSS),
             .groups = "keep") %>%
   data.frame()
+sdms <- tolower(evals_avg$sdm)
 
 # Load SDM objects (each SDM based on all available data)
 sdm_base <- paste0("output/SDMs/", nice_name)
@@ -111,16 +112,49 @@ for (i in 1:nrow(climate_models)) {
   # Crop and mask as appropriate
   pred_mask <- terra::crop(predictors, buffered_mcp, snap = "in")
   pred_mask <- terra::mask(pred_mask, buffered_mcp)
+
+  for (sdm in sdms) {
+    model_list <- get(paste0(sdm, "_mod"))
+    model <- model_list$model
+    stand_obj <- model_list$stand_obj
+    quad <- model_list$quad
+    # TODO: Update predict_sdm() function...
+    sdm_suit <- predict_sdm(nice_name = nice_name,
+                            sdm_method = sdm,
+                            model = model,
+                            stand_obj = stand_obj,
+                            quad = quad,
+                            predictors = pred_mask)
+    if (sdm_raster_save == TRUE & clim_yr == "current") {
+      rast_file <- paste0("output/suitabilities/", nice_name, "-", sdm, "-",
+                         clim_yr, ".rds")
+      saveRDS(sdm_suit, rast_file)
+    }
+    assign(paste0(sdm, "_", suit), sdm_suit)
+  }
   
-  # Predict suitability for each SDM using predict_sdm (in a loop?)
-  # Save rasters for current time period (if sdm_raster_save == TRUE)
+  # Create and save raster with weighted mean values (ie, mean of suitability 
+  # values across different SDMs, weighted by mean TSS values from CV models)
+  wtmn <- app(rast(mget(paste0(tolower(sdms), "_suit"))),
+              function(x) sum(x * evals_avg$tss))
+  wtmn_file <- paste0("output/suitabilities/", nice_name, "-ensemble-",
+                      clim_yr, ".rds")
+  saveRDS(wtmn, wtmn_file)
   
-  # Create raster with weighted average of suitability values
-  # Save raster
+  # Extract predicted suitability values for all occurrence and bg points
+  preds <- pa_data %>%
+    select(-fold) %>%
+    mutate(wtmn = terra::extract(wtmn, select(x, y), ID = FALSE)[,1 ])
+  p <- preds$wtmn[preds$pa == 1]
+  a <- preds$wtmn[preds$pa == 0]
   
-  # Calculate threshold value
+  # Calculate threshold value to convert suitability values to binary values
+  ev <- dismo::evaluate(p = p, a = a)
+  thr <- dismo::threshold(ev, stat = "spec_sens")
   
-  # Create raster with predicted distribution
-  # Save raster
-  
+  # Create and save raster with predicted distribution (suitability value > thr)
+  distrib <- wtmn > thr
+  dist_file <- paste0("output/distributions/", nice_name, "-distribution-",
+                      clim_yr, ".rds")
+  saveRDS(distrb, dist_file)
 }
