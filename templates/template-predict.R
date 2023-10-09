@@ -2,7 +2,7 @@
 # climate scenario for a given species
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-10-06
+# 2023-10-09
 
 require(stringr)
 require(ENMeval)
@@ -24,10 +24,8 @@ source(file = "load_functions.R")
 # individual SDMs for the current time period
 sdm_raster_save <- TRUE
 
-# genus <- "GENUS"
-# species <- "SPECIES"
-genus <- "Papilio"
-species <- "machaon"
+genus <- "GENUS"
+species <- "SPECIES"
 
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
@@ -42,16 +40,6 @@ if (!file.exists(pa_file)) {
 }
 pa_data <- read.csv(file = pa_file)
 
-# Get shapefile for geographic extent (to crop predictor rasters)
-shapefile_name <- paste0("data/gbif/shapefiles/",
-                         nice_name, 
-                         "-buffered-mcp.shp")
-# If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
-if (!file.exists(shapefile_name)) {
-  unzip(zipfile = "data/gbif-shapefiles.zip")
-}
-buffered_mcp <- vect(shapefile_name)
-
 # Load evaluation metrics from CV models
 eval_file <- paste0("output/eval-metrics/", nice_name, "-CVevals.csv")
 evals <- read.csv(eval_file, header = TRUE)
@@ -60,6 +48,8 @@ evals_avg <- evals %>%
   summarize(tss = mean(TSS),
             .groups = "keep") %>%
   data.frame()
+
+# Grab list of SDMs
 sdms <- tolower(evals_avg$sdm)
 
 # Load SDM objects (each SDM based on all available data)
@@ -95,6 +85,16 @@ for (i in 1:nrow(climate_models)) {
   # Extract only those layers associated with climate variables in the model
   predictors <- terra::subset(predictors, climate_vars)
   
+  # Get shapefile for geographic extent (to crop predictor rasters)
+  shapefile_name <- paste0("data/gbif/shapefiles/",
+                           nice_name, 
+                           "-buffered-mcp.shp")
+  # If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
+  if (!file.exists(shapefile_name)) {
+    unzip(zipfile = "data/gbif-shapefiles.zip")
+  }
+  buffered_mcp <- vect(shapefile_name)
+  
   # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
   # for more distant time periods
   if (clim_yr %in% c("2041", "2071")) {
@@ -118,7 +118,6 @@ for (i in 1:nrow(climate_models)) {
     model <- model_list$model
     stand_obj <- model_list$stand_obj
     quad <- model_list$quad
-    # TODO: Update predict_sdm() function...
     sdm_suit <- predict_sdm(nice_name = nice_name,
                             sdm_method = sdm,
                             model = model,
@@ -130,23 +129,21 @@ for (i in 1:nrow(climate_models)) {
                          clim_yr, ".rds")
       saveRDS(sdm_suit, rast_file)
     }
-    assign(paste0(sdm, "_", suit), sdm_suit)
+    assign(paste0(sdm, "_suit"), sdm_suit)
   }
   
   # Create and save raster with weighted mean values (ie, mean of suitability 
   # values across different SDMs, weighted by mean TSS values from CV models)
   wtmn <- app(rast(mget(paste0(tolower(sdms), "_suit"))),
               function(x) sum(x * evals_avg$tss))
-  wtmn_file <- paste0("output/suitabilities/", nice_name, "-ensemble-",
-                      clim_yr, ".rds")
+  wtmn_file <- paste0("output/suitabilities/", nice_name, "-",
+                      clim_name, ".rds")
   saveRDS(wtmn, wtmn_file)
   
   # Extract predicted suitability values for all occurrence and bg points
-  preds <- pa_data %>%
-    select(-fold) %>%
-    mutate(wtmn = terra::extract(wtmn, select(x, y), ID = FALSE)[,1 ])
-  p <- preds$wtmn[preds$pa == 1]
-  a <- preds$wtmn[preds$pa == 0]
+  preds_pa <- terra::extract(wtmn, pa_data[, c("x", "y")], ID = FALSE)
+  p <- preds_pa[pa_data$pa == 1, 1]
+  a <- preds_pa[pa_data$pa == 0, 1]
   
   # Calculate threshold value to convert suitability values to binary values
   ev <- dismo::evaluate(p = p, a = a)
@@ -155,6 +152,6 @@ for (i in 1:nrow(climate_models)) {
   # Create and save raster with predicted distribution (suitability value > thr)
   distrib <- wtmn > thr
   dist_file <- paste0("output/distributions/", nice_name, "-distribution-",
-                      clim_yr, ".rds")
-  saveRDS(distrb, dist_file)
+                      clim_name, ".rds")
+  saveRDS(distrib, dist_file)
 }

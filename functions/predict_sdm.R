@@ -3,44 +3,35 @@
 #' @param nice_name character name of species to use for predictions; should be
 #' all lowercase with spaces replaced by underscores (i.e. 
 #' "papilio_multicaudata" for Papilio multicaudata)
-#' @param model species distribution model object; generally output from model
-#' function such as maxent or glm
-#' @param sdm_method character indicating the type of SDM ("brt", "glm", "gam", 
-#' "lasso", "maxent-notune", "maxent-tune", "rf", "svm")
-#' @param yr character indicating year for which predictions are being made 
-#' ("current", "2041", "2071")
-#' @param ssp character indicating shared socioeconomic pathway of global 
-#' climate model; ignored if \code{yr == "current"}
+#' @param sdm_method character indicating the type of SDM ("brt", "gam",
+#' "lasso", "maxent", "rf")
+#' @param model species distribution model object
 #' @param stand_obj an object of class save_means_sds (created with the 
 #' save_means_sds function) that contains means and SDs for predictor variables 
 #' in a training dataset (Optional, except for lasso regression and gam models)
 #' @param quad a logical indicating whether or not quadratics were included 
 #' in model (Optional, except for lasso regression and gam models)
+#' @param predictors SpatRaster with global climate model data (a layer for each 
+#' climate variable in the model). Raster should already be cropped/masked to 
+#' area of interest
 #' 
-#' @return SpatRaster with predicted probabilities of occurrence based on given 
+#' @return SpatRaster with predicted suitability values based on given 
 #' species distribution model and global climate model data
+
 predict_sdm <- function(nice_name, 
+                        sdm_method = c("brt", "gam", "lasso", "maxent", "rf"),
                         model, 
-                        sdm_method = c("brt", "glm", "gam", "lasso",
-                                       "maxent-notune", "maxent-tune", "rf",
-                                       "svm"),
-                        yr = c("current", "2041", "2071"), 
-                        ssp = c(NA, "245", "370"),
                         stand_obj = NULL,
-                        quad = NULL) {
+                        quad = NULL,
+                        predictors) {
   
   sdm_method <- match.arg(arg = sdm_method)
-  yr <- match.arg(arg = yr)
-  ssp <- match.arg(arg = ssp)
-  
+
   if (!require(terra)) {
     stop("predict_sdm requires terra package, but it could not be loaded")
   }
   if (!require(dplyr)) {
     stop("predict_sdm requires dplyr package, but it could not be loaded")
-  }
-  if (!require(dismo)) {
-    stop("predict_sdm requires dismo package, but it could not be loaded")
   }
   if (sdm_method == "brt") {
     if (!require(gbm)) {
@@ -56,98 +47,82 @@ predict_sdm <- function(nice_name,
     if (!require(glmnet)) {
       stop("predict_sdm requires glmnet package, but it could not be loaded")       
     }
+    if (!require(Matrix)) {
+      stop("predict_sdm requires Matrix package, but it could not be loaded")
+    }
+  }
+  if (sdm_method == "maxent") {
+    if (!require(ENMeval)) {
+      stop("predict_sdm requires ENMeval package, but it could not be loaded")       
+    }
   }
   if (sdm_method == "rf") {
     if (!require(randomForest)) {
       stop("predict_sdm requires randomForest package, but it could not be loaded")       
     }
   }
-  if (sdm_method == "gam" | sdm_method == "lasso" | sdm_method == "glm") {
+  if (sdm_method == "gam" | sdm_method == "lasso") {
     if(is.null(stand_obj) | is.null(quad)) {
       stop("predict_sdm requires stand_obj and quad arguments")
     }
   }
-  
-  # Get MCP shapefile for geographic extent
-  shapefile_name <- paste0("data/gbif/shapefiles/",
-                           nice_name, 
-                           "-buffered-mcp.shp")
-  # If species' shapefile isn't in shapefiles folder, unzip gbif-shapefiles
-  if (!file.exists(shapefile_name)) {
-    unzip(zipfile = "data/gbif-shapefiles.zip")
+  if (sdm_method == "maxent" | sdm_method == "rf") {
+    if(!require(raster)) {
+      stop("predict_sdm requires raster package, but it could not be loaded")
+    }
   }
-  buffered_mcp <- terra::vect(shapefile_name)
   
-  # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
-  # for more distant time periods
-  if (yr %in% c("2041", "2071")) {
-    dist_mult <- dplyr::if_else(yr == "2041",
-                                true = 350,  # 350 km for 2041
-                                false = 900) # 900 km for 2071
-    
-    # Prior approach (raster package-based) required reprojection
-    # Project buffered MCP to North America Albers Equal Area Conic 
-    # buffered_mcp_proj <- terra::project(buffered_mcp, "ESRI:102008")
-    # Add to the buffer, based on appropriate distance multiplier
-    # buffered_mcp <- terra::buffer(buffered_mcp_proj, width = dist_mult * 1000)
-    # Transform back to lat/long
-    # buffered_mcp <- terra::project(buffered_mcp, "EPSG:4326") 
+  # Convert SpatRaster to a RasterStack (only needed for Maxent or RF models)
+  predictors_rs <- raster::stack(predictors)
 
-    # Reliance on terra alone makes reprojection unneccessary    
-    buffered_mcp <- terra::buffer(buffered_mcp, width = dist_mult * 1000)
-    terra::crs(buffered_mcp) <- "EPSG:4326"
+  # If using a Maxent model (with maxnet algorithm), need enm.maxnet@predict
+  # See ?ENMevaluate or https://github.com/jamiemkass/ENMeval/issues/112
+  if (sdm_method == "maxent") {
+    preds <- enm.maxnet@predict(model, predictors_rs,
+                                list(pred.type = "cloglog", doClamp = FALSE))
+    preds <- terra::rast(preds)
   }
   
-  # Get list of climate variables that were considered for the SDM
-  all_climate_vars <- read.csv("data/climate-variables.csv")
-  climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
-  
-  # Grab predictors
-  gcm_directory <- dplyr::if_else(yr == "current",
-                                  true = "data/wc2-1",
-                                  false = paste0("data/ensemble/ssp", ssp, "/", yr))
-  
-  predictors <- terra::rast(list.files(path = gcm_directory,
-                                       pattern = ".tif$",
-                                       full.names = TRUE))
-  
-  # Extract only those layers associated with climate variables in the model
-  predictors <- terra::subset(predictors, climate_vars)
-  
-  # Crop and mask as appropriate
-  pred_mask <- terra::crop(predictors, buffered_mcp)
-  pred_mask <- terra::mask(pred_mask, buffered_mcp)
-  
-  # If using a lasso or gam model, need to standardize predictors using means 
+  # If using a RF model, need raster package to work with classification model
+  if (sdm_method == "rf") {
+    preds <- raster::predict(object = predictors_rs,
+                             model = model, 
+                             type = "prob",
+                             index = 2)
+    preds <- terra::rast(preds)
+  }
+
+  # If using a GAM or LASSO model, need to standardize predictors using means 
   # and SDs from training dataset
-  if (sdm_method == "lasso" | sdm_method == "gam" | sdm_method == "glm") {
-    pred_mask <- prep_predictors(object = stand_obj, 
-                                 newdata = pred_mask, 
-                                 quad = quad)
+  if (sdm_method %in% c("lasso", "gam")) {
+    predictors <- prep_predictors(object = stand_obj, 
+                                  newdata = predictors, 
+                                  quad = quad)
     invisible(gc())
   }
   
-  # Create list of arguments for predict function
-  params <- list(object = pred_mask, 
+  # Create list of arguments for predict function for remaining model types
+  params <- list(object = predictors, 
                  model = model,
                  type = "response", 
                  na.rm = TRUE)
-  
+
   # If using a BRT model, specify the number of trees and add to list of args
   if (sdm_method == "brt") {
     n_trees <- model$n.trees
     params <- c(params, n.trees = n_trees)
   }  
   
-  # Make predictions
-  if (sdm_method != "lasso") {
+  # Make predictions for BRT, GAM, or LASSO
+  if (sdm_method %in% c("brt", "gam")) {
     preds <- do.call(predict, params)
-  } else {
+  } 
+  if (sdm_method == "lasso") {
     # For lasso regression models from cv.glmnet: 
     # predict.cv.glmnet doesn't allow for rasters as input, so we need to
-    # convert pred_mask to a sparse matrix. Referenced code from Roozbeh Valavi: 
+    # convert predictors to a sparse matrix. Referenced code from Roozbeh Valavi: 
     # https://github.com/rvalavi/myspatial/blob/master/R/prediction.R
-    pred_points <- terra::as.points(pred_mask, 
+    pred_points <- terra::as.points(predictors, 
                                     values=TRUE, 
                                     na.rm=TRUE, 
                                     na.all=FALSE)
@@ -158,11 +133,12 @@ predict_sdm <- function(nice_name,
                                     s = model$lambda.1se))
     pred_points$pred <- pred_vect
     rm(data_sparse, pred_vect)
-    preds <- terra::rasterize(pred_points, pred_mask, field = "pred")
-    rm(pred_points, pred_mask)
+    preds <- terra::rasterize(pred_points, predictors, field = "pred")
+    rm(pred_points, predictors)
   }
 
   invisible(gc())
+  
   # Send back this raster with the predicted values
   return(preds)
 }
