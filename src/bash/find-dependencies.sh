@@ -31,6 +31,6 @@ FUNREQBOTH=$(sed 's/).*/\n/g' <<< "$FUNREQLEFT")
 ALL=$BOTH$'\n'$FUNLEFT$'\n'$FUNREQBOTH
 
 # Sort and pull out uniques
-LIBS=$(echo $ALL | xargs -n1 | sort | uniq | xargs)
+LIBS=$(echo $ALL | xargs -n1 | sort | uniq)
 # Write to a file (a one-column csv sans header)
 echo "$LIBS" > src/dependencies.csv
