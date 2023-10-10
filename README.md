@@ -23,24 +23,22 @@ The project uses the following additional R packages:
 
 + dismo
 + dplyr
-+ ENMeval
 + ecospat
++ ENMeval
 + flexsdm
 + gbm
 + ggplot2
 + glmnet
++ kernlab
 + ks
 + Matrix (for lasso models)
 + mgcv
 + parallel (usually part of R distribution, but needs explicit loading)
 + randomForest
 + raster
-+ RColorBrewer
-+ rgdal
 + rnaturalearth
 + rnaturalearthdata
 + Rtools (needed to use the zip() function on Windows machines)
-+ sf
 + sp
 + spocc
 + stats (included in base R)
