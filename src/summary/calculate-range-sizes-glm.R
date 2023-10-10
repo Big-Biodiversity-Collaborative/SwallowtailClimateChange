@@ -3,6 +3,10 @@
 # jcoliver@arizona.edu
 # 2021-06-30
 
+# DEPRECATED
+# Will be replaced with new approach based on consensus predicted distributions
+# Leaving for now in case we need to copy code
+
 require(parallel)
 require(dplyr)
 

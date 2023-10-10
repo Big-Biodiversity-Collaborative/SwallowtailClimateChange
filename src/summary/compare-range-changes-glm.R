@@ -3,6 +3,10 @@
 # jcoliver@arizona.edu
 # 2021-06-18
 
+# DEPRECATED
+# Will be replaced with new approach based on consensus predicted distributions
+# Leaving for now in case we need to copy code
+
 require(dplyr)
 require(tidyr)
 require(ggplot2)

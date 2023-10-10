@@ -179,7 +179,6 @@ above).
     + maps: distribution maps (image files) for insect species and hosts
     + plots: miscellaneous data visualizations
     + overlaps: composite rasters of insect and host species
-    + ranges: estimates of range areas
     + SDMs: species distribution models
     + variable-contributions: summary of SDMs' relative contribution of each 
     bioclimatic variable in predicting presence / absence

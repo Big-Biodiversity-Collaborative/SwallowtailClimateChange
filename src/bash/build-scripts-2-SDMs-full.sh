@@ -1,12 +1,12 @@
-# Create a script for each species for making predictions for each climate 
-# model and each SDM method 
+# Create a script for each species for running (or for Maxent, just saving) 
+# SDMs using all available data
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2021-06-02
 
-SCRIPTNUM="03"
-SCRIPTTYPE="predict"
-PRODUCT="predicted probabilities and distributions"
+SCRIPTNUM="2"
+SCRIPTTYPE="SDMs-full"
+PRODUCT="SDM models using all available data"
 
 # If script is called with -v flag, will print messages after writing each file
 while getopts v flag
@@ -40,7 +40,7 @@ do
   # Read in the template file contents into the SCRIPTBODY variable, 
   # skipping first two lines
   TEMPLATE="templates/template-${SCRIPTNUM}-${SCRIPTTYPE}.R"
-  SCRIPTBODY=$(cat "$TEMPLATE" | tail -n +3)
+  SCRIPTBODY=$(cat "$TEMPLATE" | tail -n +2)
   
   # Add lines at top of file explaining script & message warning against 
   # editing

@@ -3,7 +3,7 @@
 # jcoliver@arizona.edu
 # 2021-06-02
 
-SCRIPTNUM="01"
+SCRIPTNUM="1"
 SCRIPTTYPE="CV"
 PRODUCT="MaxEnt models and model evaluation metrics for all models"
 
