@@ -84,12 +84,16 @@ linear model and "maxent-notune" for untuned MaxEnt model.
    script are _not_ under version control
    2. **src/data/gbif-2-filter.R**: Run quality assurance on downloaded data, 
    and retain only those records that:
-       1. are observations from 2000-2022,
-       2. are in locations with climate data (which effectively restricts 
+       1. are not observations based on barcodes only,
+       2. are observations from 2000-2023,
+       3. are in locations with climate data (which effectively restricts 
        observations to North America), and
-       3. are inside the 95% contour of observations
+       4. are thinned to a max of X observations per grid cell (of climate 
+       raster),
+       5. are inside the 98% contour of observations
    3. **src/data/gbif-3-presence-absence.R**: Generate a presence/absence 
-   dataset for each species, to be used in any species distribution model
+   dataset for each species, to be used in any species distribution model; 
+   also create a shapefile defining geographical limits of predictions
    4. **src/data/prep-climate-data.R**: Download monthly climate data for time 
    span of interest (2000-2018) and calculate the average values for the 19 
    standard bioclimatic variables (should not need to be run locally; data are 
@@ -104,15 +108,21 @@ linear model and "maxent-notune" for untuned MaxEnt model.
    calculate mean and median values for each insect species; data stored as a 
    csv in data/aridity-statistics.csv.
 2. Preparing R scripts for analyses of individual species
-   1. **src/bash/build-scripts-SDM.sh**: bash shell scripts to build species 
-   distribution models for individual species; one script is built for each 
-   row (species) in data/gbif-reconcile.csv
-   2. **src/bash/build-scripts-distribution.sh**: bash shell scripts to build R 
-   scripts that predict presence / absence of species based on species 
-   distribution models and predictor data (e.g. current bioclimatic data and
-   forecast data)
-   3. **src/bash/build-scripts-overlap.sh**: bash shell scripts to 
-   build R scripts that create overlap rasters for each species of insect with 
+   1. **src/bash/build-scripts-1-CV.sh**: bash shell script to build an R 
+   script for each species to estimate and evaluate each SDM method with 
+   spatial folds cross-validation; one script is built for each row (species) 
+   in data/gbif-reconcile.csv
+   2. **src/bash/build-scripts-2-SDMs-full.sh**: bash shell script to build an 
+   R script for each species to estimate model parameters based on _all_ 
+   observation data for four of five SDM methods (MaxEnt models based on all 
+   observation data are already estimated in CV step, above); one script is 
+   built for each row (species) in data/gbif-reconcile.csv
+   3. **src/bash/build-scripts-3-predict.sh**: bash shell script to build an R 
+   script for each species to calculate predicted probabilities for each 
+   climate model for each SDM method; one script is built for each row 
+   (species) in data/gbif-reconcile.csv
+   4. **src/bash/build-scripts-4-overlap.sh**: bash shell script to build an R 
+   scripts for each species of insect to create overlap rasters of insect with 
    its respective host plant(s)
 3. Bulk processing of single-species analyses (see below for example graphic)
    1. **src/run-indiv/run-all-SDM-\<method\>-scripts.R**: Run each species 
