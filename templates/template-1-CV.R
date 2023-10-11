@@ -63,7 +63,7 @@ climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
 predictors <- terra::subset(predictors, climate_vars)
 
 # Crop and mask predictor rasters
-pred_mask <- terra::crop(predictors, buffered_mcp, snap = "in")
+pred_mask <- terra::crop(predictors, buffered_mcp, snap = "out")
 pred_mask <- terra::mask(pred_mask, buffered_mcp)  
 # Create RasterStack (needed for MAXENT model)
 pred_rs <- raster::stack(pred_mask) 

@@ -110,7 +110,7 @@ for (i in 1:nrow(climate_models)) {
   buffered_mcp <- terra::crop(buffered_mcp, ext(predictors))  
   
   # Crop and mask as appropriate
-  pred_mask <- terra::crop(predictors, buffered_mcp, snap = "in")
+  pred_mask <- terra::crop(predictors, buffered_mcp, snap = "out")
   pred_mask <- terra::mask(pred_mask, buffered_mcp)
 
   for (sdm in sdms) {
