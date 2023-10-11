@@ -146,7 +146,7 @@ for (i in 1:nrow(species_list)) {
 
       # Crop and mask climate data to the buffered MCP polygon
       pred_mask <- predictor %>%
-        terra::crop(ch_buffer, snap = "in") %>%
+        terra::crop(ch_buffer, snap = "out") %>%
         terra::mask(ch_buffer)
 
       # Generate pseudo-absence points

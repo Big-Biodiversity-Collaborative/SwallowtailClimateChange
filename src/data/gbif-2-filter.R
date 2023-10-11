@@ -1,7 +1,7 @@
 # GBIF data QA/QC
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
-# 2022-06-21
+# 2023-10-11
 
 require(ks)      # kernel density estimation
 require(terra)   # extracting observations with climate data
@@ -141,14 +141,48 @@ for (i in 1:length(gbif_files)) {
 
   ########################################
   # Determine if observation has climate data
-  # Extract climate data associated with each gbif record location
-  # terra::extract will return a two-column data frame in this case, but we 
-  # only need the values from column 2 (the value of the bio1 variable)
-  data$climate <- terra::extract(x = clim_data, 
-                                 y = data[,c('longitude','latitude')])[,2]
+    # Before we do this, we need to deal with observations that fall on borders
+    # of cells in climate raster (because they may get assigned to different 
+    # cells when using terra::extract() with climate rasters that are 
+    # cropped/uncropped) 
+    
+    # Function to find cells on borders
+    on_border <- function(r, x, y, tolerance = sqrt(.Machine$double.eps)) {
+      v <- h <- (x >= xmin(r)) & (x <= xmax(r)) & (y >= ymin(r)) & (y <= ymax(r))
+      v[v] <- ((x[v] - xmin(r)) %% res(r)[1]) < tolerance
+      h[h] <- ((y[h] - ymin(r)) %% res(r)[2]) < tolerance
+      h | v
+    }
+    
+    data$on_border <- on_border(r = clim_data, 
+                                x = data$longitude, 
+                                y = data$latitude)
+    
+    # Add a tiny amount to the coordinates associated with observations on borders
+    data <- data %>%
+      mutate(longitude = ifelse(on_border == TRUE, longitude + 0.00001, longitude),
+             latitude = ifelse(on_border == TRUE, latitude + 0.00001, latitude))
+    
+    # Repeat this process in case a point gets moved to another border (which is
+    # highly unlikely)
+    if (sum(on_border(clim_data, data$longitude, data$latitude)) > 0) {
+      data$on_border <- on_border(r = clim_data, 
+                                  x = data$longitude, 
+                                  y = data$latitude)
+      data <- data %>%
+        mutate(longitude = ifelse(on_border == TRUE, longitude + 0.00001, longitude),
+               latitude = ifelse(on_border == TRUE, latitude + 0.00001, latitude))
+    }
+  
+  # Now, extract climate data associated with each location.
+  clim_extract <- terra::extract(x = clim_data,
+                                 y = data[, c("longitude", "latitude")], 
+                                 cells = TRUE) %>%
+    select(-ID)
+  data <- cbind(data, clim_extract)
 
   data <- data %>%
-    dplyr::mutate(missing_climate = is.na(climate))
+    dplyr::mutate(missing_climate = is.na(bio1))
 
   # Record the number of records that don't have climate data
   gbif_obs$n_oob[i] <- sum(data$missing_climate)
@@ -162,14 +196,9 @@ for (i in 1:length(gbif_files)) {
   ########################################
   # Thin observations so there's a maximum of X observations per grid cell
     # Could use duplicated() if we were only retaining one observation
-    # per grid cell, but I made this a little more general so that we can keep
+    # per grid cell, but made this a little more general so that we can keep
     # more than one observation per grid cell if desired.  
   data <- data %>%
-    # Extract the cell number associated with each observation
-    dplyr::mutate(terra::extract(x = clim_data,
-                                 y = data[ ,c("longitude", "latitude")],
-                                 cells = TRUE,
-                                 ID = FALSE)) %>%
     dplyr::arrange(cell) %>%
     # Assign each observation in a grid cell a unique number, from 1 to the 
     # total number of observations in that grid cell
@@ -235,7 +264,7 @@ for (i in 1:length(gbif_files)) {
   # Drop those columns we used for filtering
   data <- data %>%
     dplyr::select(-c(outside_dates, missing_climate, thin, outside_envelope,
-                     climate, bio1, cell, obs_no, material_sample))
+                     on_border, bio1, cell, obs_no, material_sample))
 
   # Update the excluded column
   gbif_obs$n_excluded[i] <- gbif_obs$n_orig[i] - nrow(data)
