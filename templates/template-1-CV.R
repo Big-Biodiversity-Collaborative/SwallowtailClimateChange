@@ -241,7 +241,7 @@ for (k in 1:nfolds) {
 # it's not, then average only over those folds with the smaller lr)
 lr_min <- min(learningrate_cv)
 ntrees_cv <- ntrees_cv[which(learningrate_cv == lr_min)]
-ntrees <- mean(ntrees_cv)
+ntrees <- round(mean(ntrees_cv))
 
 # Run CV models for BRT, GAM, LASSO, RF ---------------------------------------#
 
