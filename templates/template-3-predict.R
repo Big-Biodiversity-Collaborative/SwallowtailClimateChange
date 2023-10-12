@@ -2,7 +2,7 @@
 # climate scenario for a given species
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-10-09
+# 2023-10-12
 
 require(stringr)
 require(ENMeval)
@@ -69,17 +69,13 @@ climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
 
-# Loop through climate scenarios
-for (i in 1:nrow(climate_models)) {
-  clim_name <- climate_models$name[i]
-  clim_yr <- climate_models$yr[i]
-  clim_ssp <- climate_models$ssp[i]
-
-  # Grab predictors
-  gcm_directory <- dplyr::if_else(clim_yr == "current",
-                                  "data/wc2-1",
-                                  paste0("data/ensemble/ssp", clim_ssp, "/", clim_yr))
+# Make predictions for current time period
+  clim_name <- climate_models$name[1]
+  clim_yr <- climate_models$yr[1]
+  clim_ssp <- climate_models$ssp[1]
   
+  # Grab predictors
+  gcm_directory <- "data/wc2-1"
   predictors <- terra::rast(list.files(path = gcm_directory,
                                        pattern = ".tif$",
                                        full.names = TRUE))
@@ -95,26 +91,16 @@ for (i in 1:nrow(climate_models)) {
   if (!file.exists(shapefile_name)) {
     unzip(zipfile = "data/gbif-shapefiles.zip")
   }
-  buffered_mcp <- vect(shapefile_name)
-  
-  # If necessary, adjust buffered MCP as appropriate - allowing larger buffers
-  # for more distant time periods
-  if (clim_yr %in% c("2041", "2071")) {
-    dist_mult <- dplyr::if_else(clim_yr == "2041",
-                                true = 350,  # 350 km for 2041
-                                false = 900) # 900 km for 2071
-    
-    buffered_mcp <- terra::buffer(buffered_mcp, width = dist_mult * 1000)
-  }
-  
+  mcp <- vect(shapefile_name)
+
   # Cut off areas that fall outside the geographic extent of climate rasters
   # (could occur in any time period)
-  buffered_mcp <- terra::crop(buffered_mcp, ext(predictors))  
+  mcp <- terra::crop(mcp, ext(predictors))  
   
   # Crop and mask as appropriate
-  pred_mask <- terra::crop(predictors, buffered_mcp, snap = "out")
-  pred_mask <- terra::mask(pred_mask, buffered_mcp)
-
+  pred_mask <- terra::crop(predictors, mcp, snap = "out")
+  pred_mask <- terra::mask(pred_mask, mcp)
+  
   for (sdm in sdms) {
     model_list <- get(paste0(sdm, "_mod"))
     model <- model_list$model
@@ -126,9 +112,9 @@ for (i in 1:nrow(climate_models)) {
                             stand_obj = stand_obj,
                             quad = quad,
                             predictors = pred_mask)
-    if (sdm_raster_save == TRUE & clim_yr == "current") {
+    if (sdm_raster_save) {
       rast_file <- paste0("output/suitabilities/", nice_name, "-", sdm, "-",
-                         clim_yr, ".rds")
+                          clim_yr, ".rds")
       saveRDS(sdm_suit, rast_file)
     }
     assign(paste0(sdm, "_suit"), sdm_suit)
@@ -151,6 +137,64 @@ for (i in 1:nrow(climate_models)) {
   ev <- dismo::evaluate(p = p, a = a)
   thr <- dismo::threshold(ev, stat = "spec_sens")
   
+  # Create and save raster with predicted distribution (suitability value > thr)
+  distrib <- wtmn > thr
+  dist_file <- paste0("output/distributions/", nice_name, "-distribution-",
+                      clim_name, ".rds")
+  saveRDS(distrib, dist_file)
+
+# Loop through future climate scenarios
+for (i in 2:nrow(climate_models)) {
+  clim_name <- climate_models$name[i]
+  clim_yr <- climate_models$yr[i]
+  clim_ssp <- climate_models$ssp[i]
+
+  # Grab predictors
+  gcm_directory <- paste0("data/ensemble/ssp", clim_ssp, "/", clim_yr)
+  predictors <- terra::rast(list.files(path = gcm_directory,
+                                       pattern = ".tif$",
+                                       full.names = TRUE))
+  
+  # Extract only those layers associated with climate variables in the model
+  predictors <- terra::subset(predictors, climate_vars)
+
+  # Adjust buffered MCP as appropriate - allowing larger buffers
+  # for more distant time periods
+  dist_mult <- dplyr::if_else(clim_yr == "2041",
+                              true = 350,  # 350 km for 2041
+                              false = 900) # 900 km for 2071
+  buffered_mcp <- terra::buffer(mcp, width = dist_mult * 1000)
+
+  # Cut off areas that fall outside the geographic extent of climate rasters
+  # (could occur in any time period)
+  buffered_mcp <- terra::crop(buffered_mcp, ext(predictors))  
+  
+  # Crop and mask as appropriate
+  pred_mask <- terra::crop(predictors, buffered_mcp, snap = "out")
+  pred_mask <- terra::mask(pred_mask, buffered_mcp)
+
+  for (sdm in sdms) {
+    model_list <- get(paste0(sdm, "_mod"))
+    model <- model_list$model
+    stand_obj <- model_list$stand_obj
+    quad <- model_list$quad
+    sdm_suit <- predict_sdm(nice_name = nice_name,
+                            sdm_method = sdm,
+                            model = model,
+                            stand_obj = stand_obj,
+                            quad = quad,
+                            predictors = pred_mask)
+    assign(paste0(sdm, "_suit"), sdm_suit)
+  }
+  
+  # Create and save raster with weighted mean values (ie, mean of suitability 
+  # values across different SDMs, weighted by mean TSS values from CV models)
+  wtmn <- app(rast(mget(paste0(tolower(sdms), "_suit"))),
+              function(x) sum(x * evals_avg$tss_wt))
+  wtmn_file <- paste0("output/suitabilities/", nice_name, "-",
+                      clim_name, ".rds")
+  saveRDS(wtmn, wtmn_file)
+
   # Create and save raster with predicted distribution (suitability value > thr)
   distrib <- wtmn > thr
   dist_file <- paste0("output/distributions/", nice_name, "-distribution-",
