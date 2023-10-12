@@ -48,6 +48,8 @@ evals_avg <- evals %>%
   summarize(tss = mean(TSS),
             .groups = "keep") %>%
   data.frame()
+# Calculate SDM weights based on mean TSS
+evals_avg$tss_wt <- evals_avg$tss / sum(evals_avg$tss)
 
 # Grab list of SDMs
 sdms <- tolower(evals_avg$sdm)
@@ -135,7 +137,7 @@ for (i in 1:nrow(climate_models)) {
   # Create and save raster with weighted mean values (ie, mean of suitability 
   # values across different SDMs, weighted by mean TSS values from CV models)
   wtmn <- app(rast(mget(paste0(tolower(sdms), "_suit"))),
-              function(x) sum(x * evals_avg$tss))
+              function(x) sum(x * evals_avg$tss_wt))
   wtmn_file <- paste0("output/suitabilities/", nice_name, "-",
                       clim_name, ".rds")
   saveRDS(wtmn, wtmn_file)
