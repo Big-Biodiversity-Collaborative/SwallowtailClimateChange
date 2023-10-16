@@ -138,15 +138,27 @@ overlap_map <- function(species_name,
     overlap_plot <- overlap_plot_base +
       theme(axis.title = element_blank(),
             legend.title = element_blank(),
-            legend.position = "bottom")
+            legend.position = "bottom",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 8),
+            plot.title = element_text(size = 10))
   } else if (include_legend == TRUE & horizontal_legend == FALSE) {
     overlap_plot <- overlap_plot_base +
       theme(axis.title = element_blank(),
-            legend.title = element_blank())    
+            legend.title = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 8),
+            plot.title = element_text(size = 10))    
   } else {
     overlap_plot <- overlap_plot_base +
       theme(axis.title = element_blank(),
-            legend.position = "None")    
+            legend.position = "None",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 8),
+            plot.title = element_text(size = 10))    
   }
 
   if (obs_points) {
@@ -163,9 +175,10 @@ overlap_map <- function(species_name,
       overlap_plot <- overlap_plot +
         geom_point(data = observations, 
                    mapping = aes(x = Longitude, y = Latitude),
-                   size = 0.05,
-                   shape = 3,
-                   alpha = 0.25)
+                   color = "red",
+                   size = 0.15,
+                   shape = 16,
+                   alpha = 0.5)
     }
   }
   return(overlap_plot)  
