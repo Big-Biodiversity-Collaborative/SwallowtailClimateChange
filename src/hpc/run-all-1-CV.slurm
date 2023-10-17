@@ -1,5 +1,5 @@
 #!/bin/bash
-### Test for running CV evaluation on all insects and hosts
+### Run CV evaluation on all insects and hosts
 ### Jeff Oliver
 ### jcoliver@arizona.edu
 ### 2023-01-19
