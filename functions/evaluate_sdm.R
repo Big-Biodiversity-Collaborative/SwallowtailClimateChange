@@ -76,7 +76,7 @@ evaluate_sdm <- function(test_data,
   pa <- test_data$pa
   
   clim_data <- test_data %>%
-    select(contains("bio"))
+    dplyr::select(contains("bio"))
   
   if (sdm_method %in% c("gam", "lasso")) {
     clim_data <- prep_predictors(stand_obj, clim_data, quad = quad) 

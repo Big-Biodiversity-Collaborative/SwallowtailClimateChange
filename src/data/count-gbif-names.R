@@ -48,12 +48,12 @@ for (i in 1:nrow(species_df)) {
 
 # To see things of interest
 species_df %>%
-  select(accepted_name, gbif_name, gbif_count)
+  dplyr::select(accepted_name, gbif_name, gbif_count)
 
 # Which zero (or very few) records?
 species_df %>%
-  select(gbif_name, gbif_count, notes) %>%
-  filter(gbif_count < 40)
+  dplyr::select(gbif_name, gbif_count, notes) %>%
+  dplyr::filter(gbif_count < 40)
 
 # Update our data file with count information
 write.csv(x = species_df,

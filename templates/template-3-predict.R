@@ -70,6 +70,8 @@ climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
 climate_models <- read.csv(file = "data/climate-models.csv")
 
 # Make predictions for current time period
+message("Making predictions for current climate for ", species_name)
+
   clim_name <- climate_models$name[1]
   clim_yr <- climate_models$yr[1]
   clim_ssp <- climate_models$ssp[1]
@@ -149,6 +151,8 @@ for (i in 2:nrow(climate_models)) {
   clim_yr <- climate_models$yr[i]
   clim_ssp <- climate_models$ssp[i]
 
+  message("Making predictions for ", clim_name, " for ", species_name)
+  
   # Grab predictors
   gcm_directory <- paste0("data/ensemble/ssp", clim_ssp, "/", clim_yr)
   predictors <- terra::rast(list.files(path = gcm_directory,

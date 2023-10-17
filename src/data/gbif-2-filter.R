@@ -178,7 +178,7 @@ for (i in 1:length(gbif_files)) {
   clim_extract <- terra::extract(x = clim_data,
                                  y = data[, c("longitude", "latitude")], 
                                  cells = TRUE) %>%
-    select(-ID)
+    dplyr::select(-ID)
   data <- cbind(data, clim_extract)
 
   data <- data %>%

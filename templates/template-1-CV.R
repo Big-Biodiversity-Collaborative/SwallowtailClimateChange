@@ -93,7 +93,7 @@ pa_data <- cbind(pa_data, predictors_df)
   # }
   # pa_data <- pa_data %>%
   #   distinct(pa, cell, .keep_all = TRUE) %>%
-  #   select(-cell)
+  #   dplyr::select(-cell)
 
 # Create a table to store evaluation metrics for each SDM and fold
 sdms <- c("BRT", "GAM", "LASSO", "MAXENT", "RF")
@@ -114,11 +114,11 @@ message("Running Maxent models for ", species_name)
 
 # Dataframes with lat/long (in that order) for presence and background locations
 occs <- pa_data %>%
-  filter(pa == 1) %>%
-  select(x, y)
+  dplyr::filter(pa == 1) %>%
+  dplyr::select(x, y)
 bg <- pa_data %>%
-  filter(pa == 0) %>%
-  select(x, y)
+  dplyr::filter(pa == 0) %>%
+  dplyr::select(x, y)
 
 # ENMeval settings
 feature_classes <- c("L", "LQ", "H", "LQH")
@@ -170,27 +170,27 @@ if (max_save) {
 # Identify optimal tuning parameters
 other_summaries <- max_models@results.partitions %>%
   group_by(tune.args) %>%
-  summarize(n.partitions = length(fold)) %>%
+  dplyr::summarize(n.partitions = length(fold)) %>%
   data.frame()
 # Occasionally, there are no results for one fold (maybe the model didn't
 # run ok?). Should remove this model from consideration. 
 optimal <- max_models@results %>% 
   left_join(., other_summaries, by = "tune.args") %>%
-  filter(n.partitions == 4)
+  dplyr::filter(n.partitions == 4)
 # If all mean CBIs are negative (which is very rare), pick the model with the 
 # highest mean CBI. If at least one mean CBI is positive, eliminate models with 
 # negative mean CBIs. Of those remaining, use minimum average or.10p. Break any
 # ties by selecting model with the maximum average auc.val
 if (max(optimal$cbi.val.avg) <= 0) {
   optimal <- optimal %>%
-    filter(cbi.val.avg == max(cbi.min)) %>%
-    filter(or.10p.avg == min(or.10p.avg)) %>%
-    filter(auc.val.avg == max(auc.val.avg))
+    dplyr::filter(cbi.val.avg == max(cbi.min)) %>%
+    dplyr::filter(or.10p.avg == min(or.10p.avg)) %>%
+    dplyr::filter(auc.val.avg == max(auc.val.avg))
 } else {
   optimal <- optimal %>%
-    filter(cbi.val.avg > 0) %>%
-    filter(or.10p.avg == min(or.10p.avg)) %>%
-    filter(auc.val.avg == max(auc.val.avg))
+    dplyr::filter(cbi.val.avg > 0) %>%
+    dplyr::filter(or.10p.avg == min(or.10p.avg)) %>%
+    dplyr::filter(auc.val.avg == max(auc.val.avg))
 }
 
 # Save best model to file
@@ -200,7 +200,7 @@ saveRDS(max_best, max_file)
 
 # Extract evaluation metrics for the model with optimal tuning parameters
 partitions <- max_models@results.partitions %>%
-  filter(tune.args == optimal$tune.args)
+  dplyr::filter(tune.args == optimal$tune.args)
 eval_rows <- which(evals$sdm == "MAXENT")
 evals$tune.args[eval_rows] <- as.character(partitions$tune.args)
 evals$AUC[eval_rows] <- partitions$auc.val
@@ -225,7 +225,7 @@ complexity <- 5
 
 for (k in 1:nfolds) {
   sdmtrain <- pa_data %>%
-    filter(fold != k)
+    dplyr::filter(fold != k)
 
   brt_fit <- run_brt(full_data = sdmtrain, step = TRUE, 
                      complexity = complexity, verbose = FALSE)  
@@ -250,9 +250,9 @@ message("Running CV models for ", species_name)
 for (k in 1:nfolds) {
   # Create training and testing datasets for all SDMs
   sdmtrain <- pa_data %>%
-    filter(fold != k)
+    dplyr::filter(fold != k)
   sdmtest <- pa_data %>%
-    filter(fold == k)  
+    dplyr::filter(fold == k)  
   
   # Calculate means, SDs for standardizing covariates (for GAM, LASSO)
   stand_obj <- save_means_sds(sdmtrain, cols = climate_vars, verbose = TRUE)

@@ -80,8 +80,8 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
 
   # Extract settings from CV models
   brt_settings <- evals %>%
-    filter(sdm == "BRT" & fold == 1) %>%
-    select(tune.args) %>%
+    dplyr::filter(sdm == "BRT" & fold == 1) %>%
+    dplyr::select(tune.args) %>%
     str_split_fixed(pattern = "_", n = 3) %>%
     as.vector()
   ntrees <- as.numeric(str_remove(brt_settings[1], "tree."))
