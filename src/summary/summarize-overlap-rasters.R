@@ -2,7 +2,7 @@
 # distributions of each insect species and its host plants
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-03-22
+# 2023-10-17
 
 require(terra)
 require(tidyr)
@@ -22,14 +22,14 @@ climate_names_short <- climate_models$name %>%
 
 # Logical indicating whether to summarize overlap rasters for all species or 
 # just a subset of insects
-all_insects <- TRUE
+all_insects <- FALSE
 
 # Extract species names
 if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio appalachiensis", "Papilio brevicauda")
+  insects <- c("Papilio rumiko")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -40,8 +40,8 @@ exclude <- species_info$species[species_info$pa_csv == "no"]
 insects <- insects[!insects %in% exclude]
 
 # Interested in summarizing values for (1) all areas predicted to be suitable 
-# for the insect (overlap raster values 1 and 3), and (2) areas predicted to be 
-# suitable for the insect and at least one of its host plants (overlap = 3).
+# for the insect (overlap raster values 3, 4, and 5), and (2) areas predicted to 
+# be suitable for the insect and one or more of its host plants (overlap = 4-5).
 distributions <- c("total insect", "insect + host")
 
 ## Current set of summary stats ################################################
@@ -75,11 +75,11 @@ distributions <- c("total insect", "insect + host")
     # westward shift)
   # lon_min_shift: median value of shifts (km) along western edge in each 
     # latitudinal band (pos values = eastward; neg values = westward)
+  # Note for these shift calculations: only included bands with >= 1 cell 
+    # considered suitable in both time periods
 
 # Note: Can calculate % of current range that's still suitable in future as 
   # area_retained/(area retained + area lost)
-# Note: For last 4 metrics, only considered bands with >= 1 cell considered 
-  # suitable in both time periods
 ################################################################################
 
 # Create table to hold summary statistics
@@ -107,6 +107,7 @@ stats <- as.data.frame(expand_grid(insect = insects,
 
 # Loop through insect species
 for (i in 1:length(insects)) {
+
   nice_name <- insects[i] %>%
     str_replace(pattern = " ", replacement = "_") %>%
     tolower()
@@ -128,44 +129,46 @@ for (i in 1:length(insects)) {
   insecthost_list <- list()
   
   for (j in 1:length(overlap_files)) {
+
     allinsect_list[[j]] <- readRDS(overlap_files[j])
     insecthost_list[[j]] <- readRDS(overlap_files[j])
-    
-    # First, use the original overlap raster to calculate the percent of insect 
-    # range that overlaps with one or more host plants
-    row_index1 <- which(stats$insect == insects[i] & 
-                          stats$distribution == "total insect" &
-                          stats$climate == climate_names_short[j])
+
+    # Calculate areas in each overlap category
     ih_areas <- round(terra::expanse(allinsect_list[[j]], 
                                      unit = "km",
                                      byValue = TRUE))
-    if (max(ih_areas[, "value"]) > 3) {
-      insect_area <- sum(ih_areas[ih_areas[, "value"] > 2, "area"])
-      ih_area <- sum(ih_areas[ih_areas[, "value"] > 3, "area"])
+    cats <- ih_areas[, "value"]
+
+    # Calculate the percent of insect range that overlaps with one or more host
+    # plants (if possible)
+    row_index1 <- which(stats$insect == insects[i] & 
+                          stats$distribution == "total insect" &
+                          stats$climate == climate_names_short[j])
+    if (max(cats) > 3) {
+      insect_area <- sum(ih_areas[ih_areas[, "value"] %in% 3:5, "area"])
+      ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
       stats$pinsect_withhost[row_index1] <- round(ih_area / insect_area * 100, 2)
-    } else {
+    } else if (max(cats) == 3) {
       stats$pinsect_withhost[row_index1] <- 0
+    } else {
+      stats$pinsect_withhost[row_index1] <- NA
     }
     
-    # Second, use the original overlap raster to calculate the percent of insect 
-    # + host range where only 1 host occurs
+    # Calculate the percent of insect + host range where only 1 host occurs
     row_index2 <- which(stats$insect == insects[i] & 
                           stats$distribution == "insect + host" &
                           stats$climate == climate_names_short[j])
-    cats <- ih_areas[, "value"]
     if (all(4:5 %in% cats)) {
-      ih_area <- sum(ih_areas[ih_areas[, "value"] > 3, "area"])
+      ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
       ih1_area <- sum(ih_areas[ih_areas[, "value"] == 4, "area"])
       stats$pinsecthost_1host[row_index2] <- round(ih1_area / ih_area * 100, 2)
     } else {
       if (4 %in% cats & !5 %in% cats) {
-        stats$pinsecthost_1host[row_index2] <- 1
+        stats$pinsecthost_1host[row_index2] <- 100
+      } else if (5 %in% cats & !4 %in% cats) {
+        stats$pinsecthost_1host[row_index2] <- 0
       } else {
-        if (5 %in% cats & !4 %in% cats) {
-          stats$pinsecthost_1host[row_index2] <- 0
-        } else {
-          stats$pinsecthost_1host[row_index2] <- NA 
-        }
+        stats$pinsecthost_1host[row_index2] <- NA 
       }
     }
     
@@ -177,14 +180,14 @@ for (i in 1:length(insects)) {
                                            others = NA)
     
     # For all areas predicted suitable for the insect and one or more host
-    # plants: reclassify cells in overlap rasters that are >=4 as 1 
+    # plants: reclassify cells in overlap rasters that are >= 4 as 1 
     # (NA everywhere else)
     insecthost_list[[j]] <- terra::classify(x = insecthost_list[[j]],
                                             rcl = matrix(c(4, Inf, 1), nrow = 1),
                                             right = FALSE,
                                             others = NA)
   }
-  
+
   # Loop through distribution types
   for (distribution in distributions) {
     if (distribution == "total insect") {
@@ -195,19 +198,21 @@ for (i in 1:length(insects)) {
       message_spp <- paste0(short_name, " + hostplants")
     }
     
-    # Do calculations for current time period
+    # Do calculations for current time period (max value should always be 3 or greater #########)
     row_index_c <- which(stats$insect == insects[i] & 
                            stats$distribution == distribution &
                            stats$climate == "current")
     current <- raster_list[[1]]
-    
+
     # Calculate land area (in sq km) and add to summary
-    stats$area[row_index_c] <- round(terra::expanse(current, unit = "km"))
+    ca <- terra::expanse(current, unit = "km")
+    stats$area[row_index_c] <- round(ca[, "area"])
     
     # Create a data frame with lat/long for all non-NA cells
     current_df <- terra::as.data.frame(current, xy = TRUE, na.rm = TRUE)
     
-    # Calculate min/max values (median of 10 most extreme cells)
+    # Calculate min/max values (median of 10 most extreme cells). Similar to
+    # Grewe et al. 2013.
     stats$lat_max[row_index_c] <- round(median(tail(sort(current_df$y), 10)), 2)
     stats$lat_min[row_index_c] <- round(median(head(sort(current_df$y), 10)), 2)
     stats$lon_max[row_index_c] <- round(median(tail(sort(current_df$x), 10)), 2)
@@ -246,7 +251,8 @@ for (i in 1:length(insects)) {
       future <- raster_list[[j]]
       
       # Calculate land area (in sq km) and add to summary
-      stats$area[row_index] <- round(terra::expanse(future, unit = "km"))      
+      fa <- terra::expanse(future, unit = "km")
+      stats$area[row_index] <- round(fa[, "area"])  
       
       if (stats$area[row_index] == 0) {
         message("No areas predicted suitable for ", message_spp, ", ",
@@ -255,8 +261,7 @@ for (i in 1:length(insects)) {
         # Create a data frame with lat/long for all non-NA cells
         future_df <- terra::as.data.frame(future, xy = TRUE, na.rm = TRUE)
         
-        # Calculate min/max values (median of 10 most extreme cells). Similar to
-        # Grewe et al. 2013.
+        # Calculate min/max values (median of 10 most extreme cells). 
         stats$lat_max[row_index] <- round(median(tail(sort(future_df$y), 10)), 2)
         stats$lat_min[row_index] <- round(median(head(sort(future_df$y), 10)), 2)
         stats$lon_max[row_index] <- round(median(tail(sort(future_df$x), 10)), 2)
