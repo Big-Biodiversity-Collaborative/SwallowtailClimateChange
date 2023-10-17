@@ -10,8 +10,8 @@
 #' 
 #' @examples 
 #' \dontrun{
-#' script_run <- exec_script(script_name = "src/indiv/aletes_acaulis-SDM-brt.R,
-#'                           log_file = "logs/SDM-brt-out.log")
+#' script_run <- exec_script(script_name = "src/indiv/aletes_acaulis-1-CV.R,
+#'                           log_file = "logs/CV-out.log")
 #' }
 exec_script <- function(script_name, log_file = NULL) {
   tryCatch(
