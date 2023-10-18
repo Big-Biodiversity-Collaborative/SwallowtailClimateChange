@@ -3,6 +3,19 @@
 # jcoliver@arizona.edu
 # 2023-01-19
 
+# Logical indicating to skip libraries that are already installed (i.e. won't 
+# update libraries)
+skip_installed <- TRUE
+
+# If this script is called from bash (e.g. Rscript run-all-...), parse
+# arguments and update variables accordingly. e.g. 
+# $ Rscript install-libraries.R -u
+#    -u: sets skip_installed to FALSE
+args <- commandArgs(trailingOnly = TRUE)
+if (length(args) > 0) {
+  skip_installed <- !("-u" %in% args)
+}
+
 # Read in list of dependencies
 libs <- read.csv(file = "src/dependencies.csv", header = TRUE)
 libs <- libs[, 1]
@@ -15,8 +28,10 @@ libs <- c("remotes", libs)
 # Install each library and try to load after installation; use 
 # repos = "https://cran.microsoft.com/" to pre-select CRAN mirror
 
-# For now, we only install packages that are NOT already installed
 installed <- rownames(installed.packages())
+if (skip_installed) {
+  installed <- ""
+}
 for (one_lib in libs) {
   if (!(one_lib %in% installed)) {
     deps <- NA
