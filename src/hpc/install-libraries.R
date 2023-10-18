@@ -6,6 +6,9 @@
 # Read in list of dependencies
 libs <- read.csv(file = "src/dependencies.csv", header = TRUE)
 libs <- libs[, 1]
+# Add remotes because we need to install at least one from GitHub; adding at 
+# the very beginning of vector so it is installed/checked first
+libs <- c("remotes", libs)
 # To test just a pair of libraries
 # libs <- c("dplyr", "kernlab")
 
@@ -20,9 +23,13 @@ for (one_lib in libs) {
     if (one_lib == "ENMeval") {
       deps <- TRUE # So "Suggests" get installed, too
     }
-    install.packages(one_lib, 
-                     repos = "https://cran.microsoft.com/",
-                     dependencies = deps)
+    if (one_lib == "flexsdm") { # Not on CRAN
+      remotes::install_github(repo = "sjevelazco/flexsdm@HEAD")
+    } else {
+      install.packages(one_lib, 
+                       repos = "https://cran.microsoft.com/",
+                       dependencies = deps)
+    }
   } else {
     message(one_lib, " already installed.")
   }
