@@ -25,9 +25,6 @@ if (length(args) > 0) {
   rerun <- !("-f" %in% args)
 }
 
-# Extract data files # TODO: Need to have this done elsewhere
-unzip(zipfile = "data/gbif-pa.zip")
-
 # This is where we previously called a separate function, run_all_CV_scripts()
 
 logfile <- paste0("logs/CV-out.log")

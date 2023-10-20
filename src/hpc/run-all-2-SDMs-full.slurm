@@ -18,4 +18,5 @@ module load proj
 module load geos
 module load R/4.2.2
 src/bash/build-scripts-2-SDMs-full.sh
+Rscript src/hpc/prep-extract-data.R
 Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
