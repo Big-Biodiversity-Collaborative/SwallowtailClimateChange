@@ -1,5 +1,5 @@
 #!/bin/bash
-### Run SDMs on full datasets for all insects and hosts
+### Run SDMs on full datasets for subset of insects and hosts
 ### Jeff Oliver
 ### jcoliver@arizona.edu
 ### 2023-01-19
@@ -18,5 +18,4 @@ module load proj
 module load geos
 module load R/4.2.2
 src/bash/build-scripts-2-SDMs-full.sh
-Rscript src/hpc/prep-extract-data.R
-Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
+Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R

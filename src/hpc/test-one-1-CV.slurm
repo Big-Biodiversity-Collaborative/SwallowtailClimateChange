@@ -1,10 +1,10 @@
 #!/bin/bash
-### Run SDMs on full datasets for all insects and hosts
+### Run CV evaluation on one species (P. rumiko)
 ### Jeff Oliver
 ### jcoliver@arizona.edu
 ### 2023-01-19
 
-#SBATCH --job-name=2-SDMs-full-all
+#SBATCH --job-name=1-CV-all
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 10 hours
@@ -17,6 +17,5 @@ module load gdal
 module load proj
 module load geos
 module load R/4.2.2
-src/bash/build-scripts-2-SDMs-full.sh
-Rscript src/hpc/prep-extract-data.R
-Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
+src/bash/build-scripts-1-CV.sh
+Rscript src/indiv/papilio_rumiko-1-CV.R
