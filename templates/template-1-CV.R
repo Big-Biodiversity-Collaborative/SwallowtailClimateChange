@@ -183,7 +183,7 @@ optimal <- max_models@results %>%
 # ties by selecting model with the maximum average auc.val
 if (max(optimal$cbi.val.avg) <= 0) {
   optimal <- optimal %>%
-    dplyr::filter(cbi.val.avg == max(cbi.min)) %>%
+    dplyr::filter(cbi.val.avg == max(cbi.val.avg)) %>%
     dplyr::filter(or.10p.avg == min(or.10p.avg)) %>%
     dplyr::filter(auc.val.avg == max(auc.val.avg))
 } else {
