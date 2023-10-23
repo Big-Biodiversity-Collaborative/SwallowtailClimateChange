@@ -29,6 +29,11 @@ species <- "SPECIES"
 
 set.seed(20230927)
 
+# For parallel processing, use two fewer cores than are available
+# num_cores <- parallel::detectCores() - 2  
+# For running on HPC, where RAM is limited, run this part in serial
+num_cores <- 1
+
 # Name for reporting and looking up info in files
 species_name <- paste0(genus, " ", species)
 # A more compute-friendly name
@@ -144,9 +149,6 @@ em <- function(vars) {
                     thr = em$thr_value)
   return(out)
 }
-
-# For parallel processing, use two fewer cores than are available
-num_cores <- parallel::detectCores() - 2  
 
 # Run maxent models:
 max_models <- ENMevaluate(occs = occs, 
