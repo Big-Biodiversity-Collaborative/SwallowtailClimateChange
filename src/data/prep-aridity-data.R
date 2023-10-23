@@ -3,6 +3,8 @@
 # jcoliver@arizona.edu
 # 2022-10-17
 
+# DEPRECATED
+
 require(raster)  # handling environmental raster data
 require(dplyr)   # summarizing values
 require(ggplot2) # data visualization for quality assurance
