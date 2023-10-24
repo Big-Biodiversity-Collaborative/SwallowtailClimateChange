@@ -14,6 +14,15 @@ all_insects <- FALSE
 # where n is the number of cores available
 max_cores <- 1 # NULL
 
+# For parallel processing, do two fewer cores or max (whichever is lower)
+# Normally happens further along, but we use num_cores in reporting to log file
+num_cores <- parallel::detectCores() - 2
+if (!is.null(max_cores)) {
+  if (num_cores > max_cores) {
+    num_cores <- max_cores
+  }
+}
+
 # If this script is called from bash (e.g. Rscript run-all-...), parse
 # arguments and update variables accordingly. e.g. 
 # $ Rscript run-all-distribution-<method>-scripts.R -a -f
@@ -125,14 +134,6 @@ run_predict_script <- function(script_name,
   write(x = message_out, 
         file = log_file,
         append = TRUE)
-}
-
-# For parallel processing, do two fewer cores or max (whichever is lower)
-num_cores <- parallel::detectCores() - 2
-if (!is.null(max_cores)) {
-  if (num_cores > max_cores) {
-    num_cores <- max_cores
-  }
 }
 
 # Ready to run; set up cluster
