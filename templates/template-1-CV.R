@@ -150,18 +150,38 @@ em <- function(vars) {
   return(out)
 }
 
-# Run maxent models:
-max_models <- ENMevaluate(occs = occs, 
-                          bg = bg, 
-                          envs = pred_rs,
-                          algorithm = "maxnet",
-                          partitions = "user",
-                          user.grp = user.grp,
-                          tune.args = tune.args,
-                          other.settings = os,
-                          user.eval = em,
-                          parallel = TRUE,
-                          numCores = num_cores)
+# Run maxent models (Put this in a try() function because every once in a while
+# hinge features combined with a multiplier >=2 will cause an error. When this 
+# occurs, its easiest to remove "H" from the list of feature classes and re-run)
+max_models <- NULL
+try(
+  max_models <- ENMevaluate(occs = occs, 
+                            bg = bg, 
+                            envs = pred_rs,
+                            algorithm = "maxnet",
+                            partitions = "user",
+                            user.grp = user.grp,
+                            tune.args = tune.args,
+                            other.settings = os,
+                            user.eval = em,
+                            parallel = TRUE,
+                            numCores = num_cores) 
+)
+if (is.null(max_models)) {
+  feature_classes <-  c("L", "LQ", "LQH")
+  tune.args <- list(fc = feature_classes, rm = multipliers) 
+  max_models <- ENMevaluate(occs = occs, 
+                            bg = bg, 
+                            envs = pred_rs,
+                            algorithm = "maxnet",
+                            partitions = "user",
+                            user.grp = user.grp,
+                            tune.args = tune.args,
+                            other.settings = os,
+                            user.eval = em,
+                            parallel = TRUE,
+                            numCores = num_cores) 
+}
 
 # Save ENMeval object to file (contains 12 models with different tuning params)
 if (max_save) {
