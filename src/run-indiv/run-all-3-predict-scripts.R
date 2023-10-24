@@ -12,7 +12,7 @@ rerun <- TRUE
 all_insects <- FALSE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- 1 # NULL
+max_cores <- NULL # NULL
 
 # For parallel processing, do two fewer cores or max (whichever is lower)
 # Normally happens further along, but we use num_cores in reporting to log file
