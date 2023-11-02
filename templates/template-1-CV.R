@@ -195,10 +195,12 @@ other_summaries <- max_models@results.partitions %>%
   dplyr::summarize(n.partitions = length(fold)) %>%
   data.frame()
 # Occasionally, there are no results for one fold (maybe the model didn't
-# run ok?). Should remove this model from consideration. 
+# run ok?). And occasionally, average CBI value is NA. Should remove these 
+# models from consideration. 
 optimal <- max_models@results %>% 
   left_join(., other_summaries, by = "tune.args") %>%
-  dplyr::filter(n.partitions == 4)
+  dplyr::filter(n.partitions == 4) %>%
+  dplyr::filter(!is.na(cbi.val.avg))
 # If all mean CBIs are negative (which is very rare), pick the model with the 
 # highest mean CBI. If at least one mean CBI is positive, eliminate models with 
 # negative mean CBIs. Of those remaining, use minimum average or.10p. Break any
