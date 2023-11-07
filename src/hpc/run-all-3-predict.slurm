@@ -18,5 +18,5 @@ module load proj
 module load geos
 module load R/4.2.2
 src/bash/build-scripts-3-predict.sh
-Rscript src/hpc/prep-extract-data.R
+### Rscript src/hpc/prep-extract-data.R
 Rscript src/run-indiv/run-all-3-predict-scripts.R -a
