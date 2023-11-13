@@ -31,7 +31,7 @@ select it (it was 22).
 + Select 'y' to use autoconfig
 + Should open a browser window to login. Use UA NetID authentication credentials
 to log in to OneDrive
-+ When asked for Persmissions, click 'Accept'
++ When asked for Permissions, click 'Accept'
 + For account type, select number corresponding to OneDrive Personal or Business
 + Select '0' for the drive to use
 + Select 'y' to confirm business onedrive location (a URL)
@@ -140,6 +140,11 @@ and to actually copy:
 
 Tokens expire after 90 days if not used. To refresh tokens, run 
 `rclone config reconnect onedrive:`
+
+**Update 2023-11-13**: tokens are now (rclone >1.56?) longer than the buffer 
+size of pasting (i.e. copying from local and pasting into remote terminal 
+results in an incomplete token). Try solution at 
+https://rclone.org/remote_setup/#configuring-by-copying-the-config-file.
 
 ### References for rclone
 

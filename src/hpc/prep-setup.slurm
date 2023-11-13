@@ -1,10 +1,10 @@
 #!/bin/bash
-### Test for running one brt SDM (P. rumiko)
+### Extract data files and make sure dependencies are installed
 ### Jeff Oliver
 ### jcoliver@arizona.edu
-### 2023-01-20
+### 2023-01-19
 
-#SBATCH --job-name=test-SDM-brt-one
+#SBATCH --job-name=R-library-test
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 ### Asking for 10 minutes
@@ -17,5 +17,8 @@ module load gdal
 module load proj
 module load geos
 module load R/4.2.2
-src/bash/build-scripts-SDM.sh
-Rscript src/indiv/papilio_rumiko-SDM-brt.R
+### extraction now handled by prep-extract-data.R
+### unzip -uo data/gbif-pa.zip
+### unzip -uo data/gbif-shapefiles.zip
+Rscript src/hpc/prep-check-libraries.R
+Rscript src/hpc/prep-extract-data.R
