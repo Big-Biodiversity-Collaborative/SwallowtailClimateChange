@@ -200,7 +200,8 @@ other_summaries <- max_models@results.partitions %>%
 optimal <- max_models@results %>% 
   left_join(., other_summaries, by = "tune.args") %>%
   dplyr::filter(n.partitions == 4) %>%
-  dplyr::filter(!is.na(cbi.val.avg))
+  dplyr::filter(!is.na(cbi.val.avg)) %>%
+  mutate(fc = factor(fc, levels = c("L", "LQ", "H", "LQH")))
 # If all mean CBIs are negative (which is very rare), pick the model with the 
 # highest mean CBI. If at least one mean CBI is positive, eliminate models with 
 # negative mean CBIs. Of those remaining, use minimum average or.10p. Break any
@@ -209,12 +210,16 @@ if (max(optimal$cbi.val.avg) <= 0) {
   optimal <- optimal %>%
     dplyr::filter(cbi.val.avg == max(cbi.val.avg)) %>%
     dplyr::filter(or.10p.avg == min(or.10p.avg)) %>%
-    dplyr::filter(auc.val.avg == max(auc.val.avg))
+    dplyr::filter(auc.val.avg == max(auc.val.avg)) %>%
+    dplyr::filter(as.numeric(rm) == max(as.numeric(rm))) %>%
+    dplyr::filter(as.numeric(fc) == min(as.numeric(fc)))
 } else {
   optimal <- optimal %>%
     dplyr::filter(cbi.val.avg > 0) %>%
     dplyr::filter(or.10p.avg == min(or.10p.avg)) %>%
-    dplyr::filter(auc.val.avg == max(auc.val.avg))
+    dplyr::filter(auc.val.avg == max(auc.val.avg)) %>%
+    dplyr::filter(as.numeric(rm) == max(as.numeric(rm))) %>%
+    dplyr::filter(as.numeric(fc) == min(as.numeric(fc)))
 }
 
 # Save best model to file
