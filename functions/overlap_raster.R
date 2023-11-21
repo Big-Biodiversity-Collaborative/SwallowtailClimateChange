@@ -1,4 +1,4 @@
-#' RasterLayer with ranges of insect and host plant species based on SDM 
+#' SpatRaster with ranges of insect and host plant species based on SDM 
 #' predictions
 #' 
 #' @param species_name character vector with name of insect species, e.g. 
@@ -8,8 +8,8 @@
 #' @param model character vector of model used to generate species distribution
 #' model
 #' 
-#' @return a \code{RasterLayer} with cell values reflecting predicted 
-#' distribution for insect and host species. Pixels take one of four values:
+#' @return a \code{SpatRaster} with cell values reflecting predicted 
+#' distribution for insect and host species. Cells take one of four values:
 #' \describe{
 #'   \item{0}{Insect and all host plant species absent}
 #'   \item{1}{Insect present, but all host plant species absent}
@@ -19,8 +19,8 @@
 overlap_raster <- function(species_name, 
                            predictor,
                            model = c("glm", "svm", "maxent-notune", "gam")) {
-  if (!require(raster)) {
-    stop("overlap_raster requires raster package, but it could not be loaded")
+  if (!require(terra)) {
+    stop("overlap_raster requires terra package, but it could not be loaded")
   }
   # Load up the functions from the functions folder
   source(file = "load_functions.R")
