@@ -1,4 +1,5 @@
-#' A ggplot object of 
+#' A ggplot object of map showing predicted change in suitabilities for 
+#' individual species
 #' 
 #' @param species_name character vector with name of insect species, e.g. 
 #' "Papilio multicaudata"

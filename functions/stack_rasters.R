@@ -24,9 +24,6 @@
 #' @param A \code{SpatRaster} with cell values reflecting the sum of values 
 #' across rasters in \code{r}
 stack_rasters <- function(r, out = c("total", "binary")) {
-  if (!require(raster)) {
-    stop("stack_rasters requires raster package, but it could not be loaded")
-  }
   if (!require(terra)) {
     stop("stack_rasters requires terra package, but it could not be loaded")
   }
@@ -44,11 +41,9 @@ stack_rasters <- function(r, out = c("total", "binary")) {
     # Remove names from x because they cause issues?
     names(x) <- NULL
     x$fun = sum # named argument for do.call()
-    # x$na.rm = TRUE
-    
-    # Make a RasterLayer that is the sum of all values; missing and values of 
+
+    # Make a SpatRaster that is the sum of all values; missing and values of 
     # zero all become zero
-    # mosaic_raster <- do.call(raster::mosaic, x)
     mosaic_raster <- do.call(terra::mosaic, x)
     
     # We use this to keep track of the sum of cell values  
@@ -60,8 +55,6 @@ stack_rasters <- function(r, out = c("total", "binary")) {
       if (is.null(sum_r)) {
         # First one, so just extend the raster to the appropriate extent, 
         # leaving missing values as missing, and assign to sum_r
-        # sum_r <- raster::extend(x = one_raster,
-        #                         y = mosaic_raster)
         sum_r <- terra::extend(x = one_raster,
                                y = mosaic_raster)
       } else {
@@ -70,11 +63,6 @@ stack_rasters <- function(r, out = c("total", "binary")) {
         
         # We use the 0 raster for actual addition, but the NA raster to then 
         # turn any 0 that should be an NA *back* to NA
-        # one_raster_NA <- raster::extend(x = one_raster,
-        #                                 y = mosaic_raster)
-        # one_raster_0 <- raster::extend(x = one_raster,
-        #                                y = mosaic_raster,
-        #                                value = 0)
         one_raster_NA <- terra::extend(x = one_raster,
                                        y = mosaic_raster)
         one_raster_0 <- terra::extend(x = one_raster,
@@ -84,7 +72,8 @@ stack_rasters <- function(r, out = c("total", "binary")) {
         # manually set any remaining NAs to 0
         one_raster_0[is.na(one_raster_0)] <- 0
         
-        # We're adding to the sum_r raster, which has zeros and NAs at this point.
+        # We're adding to the sum_r raster, which has zeros and NAs at this 
+        # point.
         # Make a copy of sum_r, and convert the NAs to zeros, so we can sum the 
         # rasters
         sum_r_0 <- sum_r

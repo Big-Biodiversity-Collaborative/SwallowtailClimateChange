@@ -1,3 +1,5 @@
+#' DEPRECATED
+#' 
 #' A modified version of dismo::evaluate() that will work with glmnet model 
 #' objects (which require inputs as matrices).
 #'

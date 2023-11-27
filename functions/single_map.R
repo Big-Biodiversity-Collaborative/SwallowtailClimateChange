@@ -1,3 +1,5 @@
+#' DEPRECATED
+#' 
 #' A ggplot object of a species' predicted range
 #' 
 #' @param species_name character vector with name of species, e.g. 
