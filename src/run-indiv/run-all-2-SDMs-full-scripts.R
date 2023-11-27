@@ -93,12 +93,15 @@ run_SDMs_full_script <- function(script_name,
   if (file.exists(pa_file)) {
     pa_data <- read.csv(file = pa_file)
     
-    # File name that would be used for model output
-    # TODO: Cludge. Only looks for one file
-    # TODO: Solution could be to make rerun a toggle in the -2-SDMs-full script
-    model_out <- paste0("output/SDMs/", nice_name, "-brt.rds")
+    # See if all output files are on disk; if *any* are missing, re-run them 
+    # all if rerun is set to FALSE.
+    model_files <- paste0("output/SDMs/", nice_name, "-", 
+                          c("brt", "rf", "maxent", "lasso", "gam"),
+                          ".rds")
+    # If any model output files are missing, this is TRUE
+    model_out_missing <- !all(file.exists(model_files))
     
-    if (!file.exists(model_out) | rerun) {
+    if (model_out_missing | rerun) {
       if (file.exists(sdm_script)) {
         # Let user know (in log file) what's being run 
         # Note: sometimes these messages overwrite each other, so adding a small
