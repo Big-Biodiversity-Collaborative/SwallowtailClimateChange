@@ -141,24 +141,23 @@ run on a high-performance computing cluster)
    3. **src/hpc/run-all-3-predict.slurm**: Run the R script 
    src/run-indiv/run-all-3-predict-scripts.R via slurm
 5. Synthesizing results of single-species analyses (**UNDER CONSTRUCTION**)
-   1. **src/summary/create-overlap-maps-\<method\>.R**: Use predicted overlap 
-   rasters to generate maps (image files), one for each species of insect in 
-   data/insect-host.csv
-   2. **src/summary/calculate-range-sizes-\<method\>.R**: Calculate range sizes 
-   (in square kilometers) for each insect species, as well as area 
-   (km<sup>2</sup>) of the insect's range that overlaps with at least one host 
-   plant species' range and the area of the insect's range that overlaps with 
-   zero host plant species' ranges
-   3. **src/summary/calculate-variable-contributions-\<method\>.R**: Extract 
-   results of species distribution model to assess contributions of each 
-   predictor to model output
-   3. **src/summary/compare-range-changes-\<method\>.R**: **DEPRECATED** 
-   Compare the range sizes of current and forecast distributions, both 
-   considering insect ranges alone, and considering only the areas where 
-   insects are predicted to overlap with one or more host plant species
-   4. **src/summary/draw-species-richness-maps-\<method\>.R**: Draw maps of 
+   1. **src/summary/summary-1-create-overlap-rasters.R**: Create predicted 
+   overlap rasters for each species of insect; see details of raster cell 
+   values in the script. Will also create maps (ggplot-produced png files) if 
+   indicated.
+   2. **src/summary/summary-2-compare-ranges.R**: Compare the ranges of current 
+   to forecast distributions, both considering insect ranges alone, and 
+   considering only the areas where insects are predicted to overlap with one 
+   or more host plant species; several metrics calculated, including area and 
+   median latitude.
+   3. **src/summary/summary-3-create-delta-rasters.R**: Create raster of 
+   predicted differences in range between contemporary climate and forecast 
+   climate models. Will also create maps (currently png files) if indicated.
+   4. **src/summary/summary-4-draw-species-richness-maps.R**: Draw maps of 
    _Papilio_ species richness for current and forecast climate conditions and a 
-   map showing the change between current and forecast estimates
+   map showing the change between current and forecast estimates.
+   5. **src/summary/create-observations-maps.R**: Create graphics files 
+   (currently png) of filtered observations on a map.
 
 ### Analysis workflow example
 Analysis workflow with _Papilio rumiko_ and one of its host plants, 
@@ -176,7 +175,7 @@ above).
         + downloaded: data downloaded from GBIF; no QA/QC or filtering
         + filtered: filtered observation data (see src/data/gbif-2-filter.R)
         + presence-absence: observation data with presence and pseudo-absences
-        + shapefiles: minimum convex polygons
+        + shapefiles: minimum convex polygons based on filtered observations
     + lakes: North American large bodies of water shapefiles; used to exclude 
     climate data from such areas (see src/data/prep-climate-data.R)
     + wc2-1: current climate data
@@ -207,8 +206,8 @@ above).
     + SDMs: best-fit species distribution models for five SDM methods
     + suitabilities: predicted suitability values
     + summary-stats: summary statistics from model performances
-    + variable-contributions: summary of SDMs' relative contribution of each 
-    bioclimatic variable in predicting presence / absence
+    + variable-contributions: DEPRECATED summary of SDMs' relative contribution 
+    of each bioclimatic variable in predicting presence / absence
 + src: 
     + bash: bash scripts to generate individual species R scripts; also 
     includes a fairly brute force approach for identifying R package 
