@@ -62,7 +62,7 @@ for (i in 1:length(insects)) {
     str_replace(pattern = " ", replacement = "_") %>%
     tolower()
   
-  insect_files <- list.files("output/distributions/", 
+  insect_files <- list.files(path = "output/distributions", 
                              pattern = insect_nice_name,
                              full.names = TRUE)
   # Won't need this eventually, but for now, remove any files from list that 
@@ -95,7 +95,7 @@ for (i in 1:length(insects)) {
     
     for (j in 1:length(plants)) {
       
-      plant_files_new <- list.files("output/distributions/", 
+      plant_files_new <- list.files(path = "output/distributions", 
                                     pattern = plant_nice_names[j],
                                     full.names = TRUE)
       plant_files_new <- plant_files_new[!grepl(sdms, plant_files_new)]
@@ -146,7 +146,7 @@ for (i in 1:length(insects)) {
         }
         
         # Calculate spatial extent across all plant rasters
-        all_plants_ext <- ext(terra::sprc(plant_list))
+        all_plants_ext <- terra::ext(terra::sprc(plant_list))
         
         # Extend plant rasters where needed so they can be combined into a
         # single SpatRaster
@@ -171,14 +171,14 @@ for (i in 1:length(insects)) {
         # distribution, but it's possible that the resulting host distribution 
         # is smaller than the insect distribution.  If so, we'll need to extend 
         # it.
-        host_dist <- terra::extend(host_dist, insect_dist)
+        host_dist <- terra::extend(x = host_dist, y = insect_dist)
         
         # Mask host distribution so it has NA values wherever the insect
         # distribution is NA
-        host_dist <- terra::mask(host_dist, insect_dist)
+        host_dist <- terra::mask(x = host_dist, mask = insect_dist)
         
         # Calculate overlap values (0 to 5)
-        overlap <- rast(list(insect_dist, host_dist))
+        overlap <- terra::rast(list(insect_dist, host_dist))
         overlap <- sum(overlap)
 
         # Save overlap raster to file

@@ -19,8 +19,10 @@ For Linux, working through the program rclone. Alternative is to install the
 
 ### Installing and configuring rclone
 
-`sudo apt-get install rclone`
-`rclone config`
+```
+sudo apt-get install rclone
+rclone config
+```
 
 + Select 'n' for new remote
 + Name it 'onedrive'
@@ -87,8 +89,10 @@ and [https://public.confluence.arizona.edu/display/UAHPC/Transferring+Data#Trans
 Start the configuration process by starting an interactive session, then 
 running the configuration process:
 
-`interactive -a <username>`
-`rclone config`
+```
+interactive -a <username>
+rclone config
+```
 
 A couple of deviations from local setup:
 
@@ -165,6 +169,7 @@ SwallowtailClimateChange folder in place.
 5. Made a symbolic link from the "real" local output folder (the output folder 
 that lives with all the other assets under Git version control) to a "new" 
 output folder in the OneDrive SwallowtailClimateChange folder:
+
 ```
 mklink \d "C:\Users\username\OneDrive - University of Arizona\SwallowtailClimateChange\output" \
 "C:\Users\username\Documents\SwallowtailClimateChange\output"
