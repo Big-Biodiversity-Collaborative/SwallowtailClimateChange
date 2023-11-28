@@ -95,7 +95,13 @@ delta_map <- function(species_name,
       terra::vect() %>%
       terra::project(y = delta_raster)
     
+    # If we are drawing boundaries, we do so in two steps, with two calls 
+    # to geom_spatvector():
+    # 1. Add the *area*, filled in with the same color as "absent"
+    # 2. Add the *outline*, colored black
+    # The overlap raster information is plotted between these two calls
     delta_plot_base <- ggplot() +
+      geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
       geom_spatraster(data = delta_raster, maxcell = Inf) +
       scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
       geom_spatvector(data = boundaries, color = "black", fill = NA) +
