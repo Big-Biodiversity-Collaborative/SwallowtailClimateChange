@@ -117,7 +117,7 @@ for (i in 1:length(insects)) {
   cat(paste0("Summarizing overlap rasters for ", short_name, ".\n"))
   
   # Grab overlap rasters for insect
-  overlap_files <- list.files("output/overlaps", 
+  overlap_files <- list.files(path = "output/overlaps", 
                               pattern = nice_name, 
                               full.names = TRUE)
   
@@ -172,6 +172,20 @@ for (i in 1:length(insects)) {
       }
     }
     
+    # TODO: If we want to conform delta rasters to prior approach, should add 
+    # a value of 0 to any non-NA cells that are not reclassified. That is, 
+    # values of 0, 1, 2 for allinsect raster should be reclassified as 0 and 
+    # values of 0, 1, 2, 3 for insecthost raster should be reclassified as 0.
+    # Will have downstream effects! Will need to again reclassify, turning 
+    # those 0 values to NAs. Should be able to update the current classify 
+    # statement by making rcl a *2* row matrix
+    # for allinsect:
+    # rcl = matrix(data = c(0, 2, 0, 3, Inf, 1), nrow = 2, byrow = TRUE)
+    # for insecthost:
+    # rcl = matrix(data = c(0, 3, 0, 4, Inf, 1), nrow = 2, byrow = TRUE)
+    # for both, make sure right = FALSE works as expected (it should, since we 
+    # are dealing with integers)
+    
     # For all areas predicted suitable for the insect: reclassify cells in 
     # overlap rasters that are >= 3 as 1 (NA everywhere else)
     allinsect_list[[j]] <- terra::classify(x = allinsect_list[[j]],
@@ -202,6 +216,7 @@ for (i in 1:length(insects)) {
     row_index_c <- which(stats$insect == insects[i] & 
                            stats$distribution == distribution &
                            stats$climate == "current")
+    # Grab 0/1 raster and convert to a NA/1 raster
     current <- raster_list[[1]]
 
     # Calculate land area (in sq km) and add to summary
@@ -248,6 +263,7 @@ for (i in 1:length(insects)) {
       row_index <- which(stats$insect == insects[i] & 
                            stats$distribution == distribution &
                            stats$climate == clim_model)
+      # Grab 0/1 raster and convert to a NA/1 raster
       future <- raster_list[[j]]
       
       # Calculate land area (in sq km) and add to summary
@@ -366,8 +382,12 @@ for (i in 1:length(insects)) {
       future_lg <- terra::classify(x = future, 
                                    rcl = matrix(c(1, 2), nrow = 1),
                                    other = NA)
-      lg <- rast(list(current_lg, future_lg))
+      lg <- terra::rast(list(current_lg, future_lg))
       lg <- sum(lg, na.rm = TRUE)
+      # TODO: At this point, lg is a raster with values of 1, 2, 3
+      # (lost, gained, retained). It *does not* have values of 0, which were 
+      # previously used to indicate cells categorized as unsuitable in current 
+      # and forecast models...
       areas <- round(terra::expanse(lg, unit = "km", byValue = TRUE))
       if (1 %in% areas[, "value"]) {
         stats$area_lost[row_index] <- areas[areas[, "value"] == 1, "area"]
