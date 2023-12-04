@@ -404,9 +404,21 @@ for (i in 1:length(insects)) {
       } else {
         stats$area_retained[row_index] <- 0
       }
-    }
-  }
-}
+    # Create delta raster with 0 values:
+      # Read in original overlap raster (to identify land areas with proper ext)
+      full_overlap <- readRDS(overlap_files[j])
+      # Reclassify, so all non-NA cells have a value of 0
+      full_0 <- terra::classify(x = full_overlap,
+                                rcl = matrix(c(0, Inf, 0), nrow = 1),
+                                right = FALSE,
+                                others = NA)
+      delta <- terra::mosaic(full_0, lg, fun = "sum")
+      
+      # TODO Make sure above works, then save delta raster and create map
+      
+    } # future scenario
+  } # distribution type
+} # species
 
 # Write summary table to file
 datestamp <- Sys.Date()
