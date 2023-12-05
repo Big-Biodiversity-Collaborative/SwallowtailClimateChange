@@ -43,7 +43,7 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko")
+  insects <- c("Papilio rumiko", "Papilio cresphontes")
 }
 
 # Remove insects from list that have an insufficient number of filtered 

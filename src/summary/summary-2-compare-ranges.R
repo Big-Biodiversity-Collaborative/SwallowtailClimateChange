@@ -29,7 +29,7 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko")
+  insects <- c("Papilio rumiko", "Papilio cresphontes")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -171,21 +171,6 @@ for (i in 1:length(insects)) {
         stats$pinsecthost_1host[row_index2] <- NA 
       }
     }
-    
-    # TODO: If we want to conform delta rasters to prior approach, should add 
-    # a value of 0 to any non-NA cells that are not reclassified. That is, 
-    # values of 0, 1, 2 for allinsect raster should be reclassified as 0 and 
-    # values of 0, 1, 2, 3 for insecthost raster should be reclassified as 0.
-    # Will have downstream effects! Will need to again reclassify, turning 
-    # those 0 values to NAs. Should be able to update the current classify 
-    # statement by making rcl a *2* row matrix
-    # for allinsect:
-    # rcl = matrix(data = c(0, 2, 0, 3, Inf, 1), nrow = 2, byrow = TRUE)
-    # for insecthost:
-    # rcl = matrix(data = c(0, 3, 0, 4, Inf, 1), nrow = 2, byrow = TRUE)
-    # for both, make sure right = FALSE works as expected (it should, since we 
-    # are dealing with integers)
-    
     # For all areas predicted suitable for the insect: reclassify cells in 
     # overlap rasters that are >= 3 as 1 (NA everywhere else)
     allinsect_list[[j]] <- terra::classify(x = allinsect_list[[j]],
@@ -384,10 +369,8 @@ for (i in 1:length(insects)) {
                                    other = NA)
       lg <- terra::rast(list(current_lg, future_lg))
       lg <- sum(lg, na.rm = TRUE)
-      # TODO: At this point, lg is a raster with values of 1, 2, 3
-      # (lost, gained, retained). It *does not* have values of 0, which were 
-      # previously used to indicate cells categorized as unsuitable in current 
-      # and forecast models...
+      
+      # Grab values for area lost, gained, and retained
       areas <- round(terra::expanse(lg, unit = "km", byValue = TRUE))
       if (1 %in% areas[, "value"]) {
         stats$area_lost[row_index] <- areas[areas[, "value"] == 1, "area"]
@@ -404,7 +387,7 @@ for (i in 1:length(insects)) {
       } else {
         stats$area_retained[row_index] <- 0
       }
-    # Create delta raster with 0 values:
+      # Create delta raster with 0 values:
       # Read in original overlap raster (to identify land areas with proper ext)
       full_overlap <- readRDS(overlap_files[j])
       # Reclassify, so all non-NA cells have a value of 0
@@ -413,9 +396,14 @@ for (i in 1:length(insects)) {
                                 right = FALSE,
                                 others = NA)
       delta <- terra::mosaic(full_0, lg, fun = "sum")
-      
-      # TODO Make sure above works, then save delta raster and create map
-      
+      # Save delta raster (maps created elsewhere)
+      delta_file <- paste0("output/deltas/", 
+                           nice_name, 
+                           "-delta-",
+                           clim_model, 
+                           ".rds")
+      saveRDS(object = delta,
+              file = delta_file)
     } # future scenario
   } # distribution type
 } # species
