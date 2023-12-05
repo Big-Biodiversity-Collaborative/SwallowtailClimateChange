@@ -2,7 +2,7 @@
 # climate scenario for a given species
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-10-12
+# 2023-12-05
 
 require(stringr)
 require(ENMeval)
@@ -162,11 +162,9 @@ for (i in 2:nrow(climate_models)) {
   # Extract only those layers associated with climate variables in the model
   predictors <- terra::subset(predictors, climate_vars)
 
-  # Adjust buffered MCP as appropriate - allowing larger buffers
-  # for more distant time periods
-  dist_mult <- dplyr::if_else(clim_yr == "2041",
-                              true = 350,  # 350 km for 2041
-                              false = 900) # 900 km for 2071
+  # Extend buffered MCP for future time periods 
+  # (350 km, based on P. cresphontes [Wilson et al. 2021])
+  dist_mult <- 350
   buffered_mcp <- terra::buffer(mcp, width = dist_mult * 1000)
 
   # Cut off areas that fall outside the geographic extent of climate rasters
