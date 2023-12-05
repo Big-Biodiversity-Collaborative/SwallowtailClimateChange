@@ -196,8 +196,6 @@ above).
 + output: most files are not under version control, but directory structure is
     + areas: estimated areas and changes from contemporary distributions
     + aridity: DEPRECATED, early measurements of aridity
-    + consensus-rasters: DEPRECATED, early approach for combining raster 
-    predictions from different SDM methods
     + distributions: raster files of predicted distributions for individual 
     species; ensemble predictions based on five SDM methods
     + maps: distribution maps (image files) for insect species and hosts
