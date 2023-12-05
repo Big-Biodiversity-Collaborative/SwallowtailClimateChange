@@ -9,6 +9,51 @@ require(tidyr)
 require(dplyr)
 require(stringr)
 
+## Current set of summary stats ################################################
+# Summary stats that are calculated for each time period (and distribution type)
+  # area: total area (sqkm)
+  # lat_max: median latitude of 10 northernmost cells
+  # lat_min: median latitude of 10 southernmost cells
+  # lon_max: median longitude of 10 easternmost cells
+  # lon_min: median longitude of 10 westernmost cells
+  # lat_max_bands: median lat among the northernmost cells in each long band
+  # lat_min_bands: median lat among the southernmost cells in each long band
+  # lon_max_bands: median long among the easternmost cells in each lat band
+  # lon_min_bands: median long among the westernmost cells in each lat band
+
+# Summary stats that are calculated for each time period (across distribution types)
+  # pinsect_withhost: % of insect range that overlaps with >= 1 host plant
+  # pinsecthost_1host: % of insect + host range where only 1 host plant occurs 
+
+# Summary stats that are calculated between future and current time periods (for 
+# each distribution type)
+  # area_gained: area (sqkm) predicted suitable in future that wasn't in current range
+  # area_lost: area (sqkm) predicted unsuitable in future that was in current range
+  # area_retained: area (sqkm) predicted suitable in future that was in current range
+  # lat_max_shift: median value of shifts (km) along northern edge in each 
+  # longitudinal band (positive values = northward shift; negative values = 
+  #   southward shift)
+  # lat_min_shift: median value of shifts (km) along southern edge in each 
+  #   longitudinal band (pos values = northward; neg values = southward)
+  # lon_max_shift: median value of shifts (km) along eastern edge in each 
+  #   latitudinal band (positive values = eastward shift; negative values = 
+  #   westward shift)
+  # lon_min_shift: median value of shifts (km) along western edge in each 
+  #   latitudinal band (pos values = eastward; neg values = westward)
+  # Note for these shift calculations: only included bands with >= 1 cell 
+  #   considered suitable in both time periods
+
+# Note: Can calculate % of current range that's still suitable in future as 
+# area_retained/(area retained + area lost)
+
+# Also creates delta raster for each insect, with the following classification:
+# 0 = Area unsuitable* in current and forecast climate
+# 1 = Area suitable in current climate only (= lost)
+# 2 = Area suitable in forecast climate only (= gained)
+# 3 = Area suitable in current and forecast climate (= retained)
+# * Where a cell is considered suitable iff the insect was predicted as present 
+# in the cell AND at least one host plant is predicted present in the same cell
+
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
 
@@ -44,42 +89,6 @@ insects <- insects[!insects %in% exclude]
 # be suitable for the insect and one or more of its host plants (overlap = 4-5).
 distributions <- c("total insect", "insect + host")
 
-## Current set of summary stats ################################################
-# Summary stats that are calculated for each time period (and distribution type)
-  # area: total area (sqkm)
-  # lat_max: median latitude of 10 northernmost cells
-  # lat_min: median latitude of 10 southernmost cells
-  # lon_max: median longitude of 10 easternmost cells
-  # lon_min: median longitude of 10 westernmost cells
-  # lat_max_bands: median lat among the northernmost cells in each long band
-  # lat_min_bands: median lat among the southernmost cells in each long band
-  # lon_max_bands: median long among the easternmost cells in each lat band
-  # lon_min_bands: median long among the westernmost cells in each lat band
-
-# Summary stats that are calculated for each time period (across distribution types)
-  # pinsect_withhost: % of insect range that overlaps with >= 1 host plant
-  # pinsecthost_1host: % of insect + host range where only 1 host plant occurs 
-
-# Summary stats that are calculated between future and current time periods (for 
-# each distribution type)
-  # area_gained: area (sqkm) predicted suitable in future that wasn't in current range
-  # area_lost: area (sqkm) predicted unsuitable in future that was in current range
-  # area_retained: area (sqkm) predicted suitable in future that was in current range
-  # lat_max_shift: median value of shifts (km) along northern edge in each 
-    # longitudinal band (positive values = northward shift; negative values = 
-    # southward shift)
-  # lat_min_shift: median value of shifts (km) along southern edge in each 
-    #  longitudinal band (pos values = northward; neg values = southward)
-  # lon_max_shift: median value of shifts (km) along eastern edge in each 
-    # latitudinal band (positive values = eastward shift; negative values = 
-    # westward shift)
-  # lon_min_shift: median value of shifts (km) along western edge in each 
-    # latitudinal band (pos values = eastward; neg values = westward)
-  # Note for these shift calculations: only included bands with >= 1 cell 
-    # considered suitable in both time periods
-
-# Note: Can calculate % of current range that's still suitable in future as 
-  # area_retained/(area retained + area lost)
 ################################################################################
 
 # Create table to hold summary statistics
