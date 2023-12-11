@@ -31,7 +31,7 @@ require(stringr)
   # area_lost: area (sqkm) predicted unsuitable in future that was in current range
   # area_retained: area (sqkm) predicted suitable in future that was in current range
   # lat_max_shift: median value of shifts (km) along northern edge in each 
-  # longitudinal band (positive values = northward shift; negative values = 
+  #  longitudinal band (positive values = northward shift; negative values = 
   #   southward shift)
   # lat_min_shift: median value of shifts (km) along southern edge in each 
   #   longitudinal band (pos values = northward; neg values = southward)
@@ -74,7 +74,7 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko", "Papilio cresphontes")
+  insects <- c("Papilio rumiko")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -201,9 +201,11 @@ for (i in 1:length(insects)) {
     if (distribution == "total insect") {
       raster_list <- allinsect_list
       message_spp <- short_name
+      distrib_short <- "totalinsect"
     } else {
       raster_list <- insecthost_list
       message_spp <- paste0(short_name, " + hostplants")
+      distrib_short <- "insecthost"
     }
     
     # Do calculations for current time period (max value should always be 3 or greater #########)
@@ -406,11 +408,8 @@ for (i in 1:length(insects)) {
                                 others = NA)
       delta <- terra::mosaic(full_0, lg, fun = "sum")
       # Save delta raster (maps created elsewhere)
-      delta_file <- paste0("output/deltas/", 
-                           nice_name, 
-                           "-delta-",
-                           clim_model, 
-                           ".rds")
+      delta_file <- paste0("output/deltas/", nice_name, "-delta-",
+                           distrib_short, "-", clim_model, ".rds")
       saveRDS(object = delta,
               file = delta_file)
     } # future scenario
