@@ -16,6 +16,11 @@
 #' @param reference_model character vector of the model which is the reference 
 #' for determining, loss, gain, or stable. It is unlikely this should be 
 #' anything other than "current".
+#' @param prediction_area logical indicating whether to differentiate areas
+#' inside the prediction area from those outside the prediction area.  If FALSE,
+#' cells that were predicted to be unsuitable in both time periods would be
+#' shaded the same color as cells where no predictions were made. Will default
+#' to true if boundaries = FALSE.
 #' @param boundaries logical indicating whether or not to include political 
 #' boundaries
 #' @param obs_points logical indicating whether or not to include observation 
@@ -29,6 +34,7 @@ delta_map <- function(species_name,
                       include_legend = TRUE,
                       horizontal_legend = FALSE,
                       reference_model = "current",
+                      prediction_area = TRUE,
                       boundaries = TRUE,
                       obs_points = FALSE,
                       full_title = TRUE) {
@@ -94,18 +100,31 @@ delta_map <- function(species_name,
       terra::vect() %>%
       terra::project(y = delta_raster)
     
-    # If we are drawing boundaries, we do so in two steps, with two calls 
-    # to geom_spatvector():
-    # 1. Add the *area*, filled in with the same color as "absent"
-    # 2. Add the *outline*, colored black
-    # The overlap raster information is plotted between these two calls
-    delta_plot_base <- ggplot() +
-      geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
-      geom_spatraster(data = delta_raster, maxcell = Inf) +
-      scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-      geom_spatvector(data = boundaries, color = "black", fill = NA) +
-      coord_sf(xlim = xlim, ylim = ylim) +
-      theme_bw()
+    if (prediction_area) {
+      
+      delta_plot_base <- ggplot() +
+        geom_spatraster(data = delta_raster, maxcell = Inf) +
+        scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
+        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        coord_sf(xlim = xlim, ylim = ylim) +
+        theme_bw()
+      
+    } else {
+      
+      # If we are drawing boundaries and don't want to delineate the prediction 
+      # area, we do so in two steps, with two calls to geom_spatvector():
+      # 1. Add the *area*, filled in with the same color as "absent"
+      # 2. Add the *outline*, colored black
+      # The delta raster information is plotted between these two calls
+      delta_plot_base <- ggplot() +
+        geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
+        geom_spatraster(data = delta_raster, maxcell = Inf) +
+        scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
+        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        coord_sf(xlim = xlim, ylim = ylim) +
+        theme_bw()
+      
+    }
     
   } else {
     
@@ -118,36 +137,61 @@ delta_map <- function(species_name,
   }
   
   if (full_title) {
+    
     delta_plot_base <- delta_plot_base +   
       labs(title = paste0(abbr_name, ", ", reference_model, " vs. ", clim_model))
+    
   } else {
+    
     delta_plot_base <- delta_plot_base +  
       labs(title = abbr_name)
+    
   }
 
   if (include_legend == TRUE & horizontal_legend == TRUE) {
+    
     delta_plot <- delta_plot_base +
       theme(axis.title = element_blank(),
             legend.title = element_blank(),
-            legend.position = "bottom")
+            legend.position = "bottom",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 8),
+            plot.title = element_text(size = 10))
+    
   } else if (include_legend == TRUE & horizontal_legend == FALSE) {
+    
     delta_plot <- delta_plot_base +
       theme(axis.title = element_blank(),
-            legend.title = element_blank())    
+            legend.title = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 8),
+            plot.title = element_text(size = 10))   
+    
   } else {
+    
     delta_plot <- delta_plot_base +
       theme(axis.title = element_blank(),
-            legend.position = "None")    
+            legend.position = "None",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text = element_text(size = 8),
+            plot.title = element_text(size = 10))   
+    
   }
   
   # Add observation points, if appropriate
   if (obs_points) {
+    
     nice_name <- gsub(pattern = " ",
                       replacement = "_",
                       x = tolower(species_name))
     obs_file <- paste0("data/gbif/presence-absence/",
                        nice_name, "-pa.csv")
+    
     if (file.exists(obs_file)) {
+      
       observations <- read.csv(file = obs_file)
       observations <- observations %>%
         dplyr::filter(pa == 1) %>%
