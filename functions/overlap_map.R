@@ -14,6 +14,11 @@
 #' @param generic_legend logical indicating whether the legend should refer to
 #' butterflies (generic_legend = TRUE) or a particular butterfly species  
 #' (generic_legend = FALSE). Argument will be ignored if include_legend = FALSE.
+#' @param prediction_area logical indicating whether to differentiate areas
+#' inside the prediction area from those outside the prediction area.  If FALSE,
+#' cells that were predicted to be unsuitable in both time periods would be
+#' shaded the same color as cells where no predictions were made. Will default
+#' to true if boundaries = FALSE.
 #' @param boundaries logical indicating whether or not to include political 
 #' boundaries 
 #' @param obs_points logical indicating whether or not to include observation 
@@ -27,6 +32,7 @@ overlap_map <- function(species_name,
                         include_legend = TRUE,
                         horizontal_legend = FALSE,
                         generic_legend = FALSE,
+                        prediction_area = TRUE,
                         boundaries = TRUE,
                         obs_points = FALSE,
                         title_scenarioyear = TRUE) {
@@ -117,20 +123,35 @@ overlap_map <- function(species_name,
       dplyr::select(1) %>%
       terra::vect() %>%
       terra::project(y = overlap2)
+    
+    if (prediction_area) {
+      
+      overlap_plot_base <- ggplot() +
+        geom_spatraster(data = overlap2, maxcell = Inf) +
+        scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
+        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        coord_sf(xlim = xlim, ylim = ylim) +
+        title_text +
+        theme_bw() 
+      
+    } else {
+      
+      # If we are drawing boundaries and don't want to delineate the prediction 
+      # area, we do so in two steps, with two calls to geom_spatvector():
+      # 1. Add the *area*, filled in with the same color as "absent"
+      # 2. Add the *outline*, colored black
+      # The overlap raster information is plotted between these two calls
+      overlap_plot_base <- ggplot() +
+        geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
+        geom_spatraster(data = overlap2, maxcell = Inf) +
+        scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
+        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        coord_sf(xlim = xlim, ylim = ylim) +
+        title_text +
+        theme_bw()
+      
+    }
 
-    # If we are drawing boundaries, we do so in two steps, with two calls 
-    # to geom_spatvector():
-    # 1. Add the *area*, filled in with the same color as "absent"
-    # 2. Add the *outline*, colored black
-    # The overlap raster information is plotted between these two calls
-    overlap_plot_base <- ggplot() +
-      geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
-      geom_spatraster(data = overlap2, maxcell = Inf) +
-      scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-      geom_spatvector(data = boundaries, color = "black", fill = NA) +
-      coord_sf(xlim = xlim, ylim = ylim) +
-      title_text +
-      theme_bw()
   } else {
     overlap_plot_base <- ggplot() +
       geom_spatraster(data = overlap2, maxcell = Inf) +

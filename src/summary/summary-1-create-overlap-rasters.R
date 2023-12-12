@@ -43,7 +43,7 @@ if (all_insects) {
   insects <- unique(ih$insect)
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko", "Papilio cresphontes")
+  insects <- c("Papilio rumiko")
 }
 
 # Remove insects from list that have an insufficient number of filtered 
@@ -196,7 +196,8 @@ for (i in 1:length(insects)) {
                                     clim_model = clim_model,
                                     include_legend = TRUE,
                                     horizontal_legend = TRUE,
-                                    generic_legend = FALSE,
+                                    generic_legend = TRUE,
+                                    prediction_area = TRUE,
                                     boundaries = TRUE,
                                     obs_points = FALSE,
                                     title_scenarioyear = TRUE)

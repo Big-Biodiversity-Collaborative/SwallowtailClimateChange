@@ -9,9 +9,6 @@ require(stringr)
 require(ggplot2)
 require(tidyterra)
 
-#TODO: Should we use output/maps as destination, or create something new 
-# (eg, output/delta-maps). output/deltas is where we've stored the delta rasters
-
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
@@ -88,15 +85,12 @@ for (insect in insects) {
                               delta_raster = deltas,
                               clim_model = clim_model,
                               include_legend = TRUE,
-                              horizontal_legend = FALSE,
+                              horizontal_legend = TRUE,
+                              prediction_area = TRUE,
                               boundaries = TRUE,
                               obs_points = FALSE,
                               full_title = TRUE)
-      # TODO: currently there's no delineation of the "prediction area", so 
-      # raster cells that were classfied as unsuitable in both time periods
-      # are shaded the same color as cells where no predictions about
-      # suitability were ever made. Is this what we want?
-      
+
       ggsave(filename = map_file,
              plot = map_object, 
              width = 6, 
