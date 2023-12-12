@@ -61,7 +61,6 @@ delta_map <- function(species_name,
   # 1 = Area suitable in current climate only (= loss)
   # 2 = Area suitable in forecast climate only (= gain)
   # 3 = Area suitable in current and forecast climate (= stable)
-  # src/summary/create-delta-rasters.R for more details.
 
   # Labels for legend
   labels <- c("Absent", 
@@ -161,7 +160,6 @@ delta_map <- function(species_name,
                    alpha = 0.25)
     }
   }
-  
   
   return(delta_plot)  
 }
