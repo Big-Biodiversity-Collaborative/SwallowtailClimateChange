@@ -196,9 +196,12 @@ above).
 + output: most files are not under version control, but directory structure is
     + areas: estimated areas and changes from contemporary distributions
     + aridity: DEPRECATED, early measurements of aridity
+    + deltas: rasters comparing predicted contemporary distributions to 
+    predictions for the four forecast climate scenarios
     + distributions: raster files of predicted distributions for individual 
     species; ensemble predictions based on five SDM methods
-    + maps: distribution maps (image files) for insect species and hosts
+    + maps: distribution maps (image files) for insect species and hosts and 
+    predicted changes in distributions under four forecast climate scenarios
     + overlaps: composite rasters of insect and host species
     + plots: miscellaneous data visualizations
     + SDMs: best-fit species distribution models for five SDM methods

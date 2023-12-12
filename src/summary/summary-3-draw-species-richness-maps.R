@@ -9,10 +9,11 @@
 require(terra)
 require(dplyr)
 require(stringr)
+require(ggplot2)
+require(tidyterra) # for richness maps of SpatRasters
 
-#TODO: Should we use output/maps as destination, or create output/richness
-
-# Logical indicating whether to replace an overlap raster if one already exists
+# Logical indicating whether to replace an overlap raster/map if one already 
+# exists
 replace <- TRUE
 
 # Logical indicating whether to save overlap maps (i.e., images) to file
@@ -47,6 +48,11 @@ if (all_insects) {
 exclude <- species_info$species[species_info$pa_csv == "no"]
 insects <- insects[!insects %in% exclude]
 
+# Make vector of compute-friendly insect names
+nice_names <- insects %>%
+  str_replace(pattern = " ", replacement = "_") %>%
+  tolower()
+
 # Loop over all climate models (including current)
 # Read in all insect rasters
 # Convert rasters to 0/1
@@ -55,17 +61,71 @@ insects <- insects[!insects %in% exclude]
 # Save raster to output/maps
 # If save_maps is TRUE, create ggplot map and save to output/maps
 
-nice_names <- insects %>%
-  str_replace(pattern = " ", replacement = "_") %>%
-  tolower()
+# Will need to update raster values:
+#   {0, 3}: 0
+#   {4, 5}: 1
+# Reclassification matrix, 
+rcl <- matrix(data = c(0, 3, 0, 
+                       3.1, 5, 1), # Bit of a cludge to get classify to work
+              nrow = 2,
+              byrow = TRUE)
 
 # Iterate over each climate model, creating a Papilio species richness raster 
 # (and map if appropriate) for each model (5 total)
 for (clim_model in climate_models$name) {
   cat("Climate model: ", clim_model, "\n")
-  overlap_files <- paste0("output/overlaps/",
-                          nice_names, 
-                          "-overlap-", 
-                          clim_model, 
-                          ".rds")
+  output_basename <- paste0("output/richness/",
+                            clim_model, 
+                            "-richness")
+  richness_ras_filename <- paste0(output_basename, ".rds")
+  richness_map_filename <- paste0(output_basename, ".", file_ext)
+  
+  # Check to see if files exist and only replace if necessary
+  if (!file.exists(richness_ras_filename) | replace) {
+    overlap_files <- paste0("output/overlaps/",
+                            nice_names, 
+                            "-overlap-", 
+                            clim_model, 
+                            ".rds")
+    # Vector of logicals to see if any overlap files are missing
+    overlap_exists <- file.exists(overlap_files)
+    # If some *are* missing, let user know
+    if (!all(overlap_exists)) {
+      # Notifications
+      missing_overlap <- insects[!overlap_exists]
+      missing_message <- paste(missing_overlap, sep = ", ")
+      message("The following insects did not have overlap files on disk:")
+      message(missing_message)
+      # Remove any that are missing from the files vector so we do not try to 
+      # read them in
+      overlap_files <- overlap_files[overlap_exists]
+    }
+    # All rasters in a list
+    raster_list <- lapply(X = overlap_files, FUN = readRDS)
+    # Convert to 0/1
+    binary_rasters <- lapply(X = raster_list,
+                             FUN = terra::classify,
+                             rcl = rcl,
+                             include.lowest = TRUE)
+    # Add them all together, starting with a SpatRasterCollection, which turns 
+    # out to be easier to work with (don't have to worry about modifying extents 
+    # beforehand)
+    binary_coll <- terra::sprc(binary_rasters)
+    richness_ras <- terra::mosaic(x = binary_coll, fun = "sum")
+    saveRDS(object = richness_ras, file = richness_ras_filename)
+    
+    # Create map (image file) if necessary
+    if (save_maps) {
+      # TODO: Probably some cleanup here
+      richness_map <- ggplot() +
+        tidyterra::geom_spatraster(data = richness_ras) +
+        tidyterra::scale_fill_whitebox_c(palette = "gn_yl",
+                                         direction = -1,
+                                         name = "Richness") + # so 0 is lightest
+        
+        theme_minimal()
+      ggsave(filename = richness_map_filename,
+             plot = richness_map)
+    }
+  }
 }
