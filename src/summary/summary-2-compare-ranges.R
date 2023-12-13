@@ -1,13 +1,20 @@
 # Summarize rasters delineating geographic overlap between the predicted 
-# distributions of each insect species and its host plants
+# distributions of each insect species and its host plants, and save rasters for
+# each future period indicating areas of a species' distribution that were lost, 
+# gained, or retained since the current time period (delta raster)
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2023-10-17
+# 2023-12-13
 
 require(terra)
 require(tidyr)
 require(dplyr)
 require(stringr)
+
+# Logicals indicating whether to replace table with summary statistics and
+# delta rasters if they already exist
+replace_table <- TRUE
+replace_rasters <- TRUE
 
 ## Current set of summary stats ################################################
 # Summary stats that are calculated for each time period (and distribution type)
@@ -67,7 +74,7 @@ climate_names_short <- climate_models$name %>%
 
 # Logical indicating whether to summarize overlap rasters for all species or 
 # just a subset of insects
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
@@ -410,16 +417,15 @@ for (i in 1:length(insects)) {
       # Save delta raster (maps created elsewhere)
       delta_file <- paste0("output/deltas/", nice_name, "-delta-",
                            distrib_short, "-", clim_model, ".rds")
-      saveRDS(object = delta,
-              file = delta_file)
+      if (!(file.exists(delta_file) & replace_rasters == FALSE)) {
+        saveRDS(object = delta,
+                file = delta_file)
+      }
     } # future scenario
   } # distribution type
 } # species
 
 # Write summary table to file
-datestamp <- Sys.Date()
-datestamp <- str_remove_all(datestamp, "-")
-
 if (all_insects) {
   spp <- "allspp"
 } else {
@@ -427,9 +433,10 @@ if (all_insects) {
 }
 
 filename <- paste0("output/summary-stats/overlap-summary-", 
-                   spp, "-", datestamp, ".csv")
+                   spp, ".csv")
 
-write.csv(x = stats,
-          file = filename, 
-          row.names = FALSE)
-
+if (!(file.exists(filename) & replace_table == FALSE)) {
+  write.csv(x = stats,
+            file = filename, 
+            row.names = FALSE)
+}
