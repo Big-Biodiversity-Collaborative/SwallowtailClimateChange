@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 
+### DATA
 # Climate data
 data/wc2-1/annual/*
 !data/wc2-1/annual/.gitkeep
@@ -21,7 +22,6 @@ data/ensemble/bioclim/*
 data/envirem/*
 !data/envirem/.gitkeep
 
-
 # Data downloaded from GBIF
 data/gbif/*-gbif.csv
 data/gbif/downloaded/*-gbif.csv
@@ -36,6 +36,7 @@ data/gbif/presence-absence/*-pa.csv
 data/gbif/shapefiles/*
 !data/gbif/shapefiles/.gitkeep
 
+### OUTPUT
 # Estimated range areas
 output/areas/*.csv
 !output/areas/.gitkeep
@@ -47,10 +48,6 @@ output/aridity/*.csv
 # Comparisons between current and forecast distributions
 output/deltas/*.rds
 !output/deltas/.gitkeep
-
-# Predicted distributions
-output/distributions/*.rds
-!output/distributions/.gitkeep
 
 # Predicted probabilities of occurrence
 output/predicted-probabilities/*.rds
@@ -86,14 +83,25 @@ output/eval-metrics/*
 output/suitabilities/*
 !output/suitabilities/.gitkeep
 
+# Predicted distributions
+output/distributions/*.rds
+!output/distributions/.gitkeep
+
+# Richness rasters and maps
+output/richness/*
+!output/richness/.gitkeep
+
+### LOGS
 # Log files
 logs/*.log
 !/logs/.gitkeep
 
+### SCRIPTS
 # Auto-generated scripts for individual species
 scripts/*.R
 src/indiv/*.R
 
+### DEVELOPMENT
 # Presence-absence data in development folder
 development/data/presence-absence/*
 !development/data/presence-absence/.gitkeep
