@@ -121,5 +121,15 @@ for (clim_model in climate_models$name) {
       ggsave(filename = richness_map_filename,
              plot = rich_map)
     }
+    
+    # TODO
+    # If this is not current climate, do comparison with contemporary richness 
+    # to create a delta richness map
+
+    # Load contemporary richness raster
+    # Calculate delta of rasters
+    # Save delta raster
+    # If appropriate, save delta map
+    
   }
 }
