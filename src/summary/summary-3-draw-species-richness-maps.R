@@ -3,7 +3,6 @@
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2021-06-06
 
-# TODO: Placeholder script
 # Develop for all insects based on draw-species-richness-maps-glm.R
 
 require(terra)
@@ -11,6 +10,7 @@ require(dplyr)
 require(stringr)
 require(ggplot2)
 require(tidyterra) # for richness maps of SpatRasters
+source(file = "load_functions.R")
 
 # Logical indicating whether to replace an overlap raster/map if one already 
 # exists
@@ -116,16 +116,10 @@ for (clim_model in climate_models$name) {
     
     # Create map (image file) if necessary
     if (save_maps) {
-      # TODO: Probably some cleanup here
-      richness_map <- ggplot() +
-        tidyterra::geom_spatraster(data = richness_ras) +
-        tidyterra::scale_fill_whitebox_c(palette = "gn_yl",
-                                         direction = -1,
-                                         name = "Richness") + # so 0 is lightest
-        
-        theme_minimal()
+      rich_map <- richness_map(r = richness_ras,
+                                   predictor = clim_model)
       ggsave(filename = richness_map_filename,
-             plot = richness_map)
+             plot = rich_map)
     }
   }
 }
