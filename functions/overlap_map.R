@@ -54,6 +54,9 @@ overlap_map <- function(species_name,
   if (!require(rnaturalearthdata)) {
     stop("overlap_map requires rnaturalearthdata package, but it could not be loaded")
   }
+  if (!require(rnaturalearthhires)) {
+    stop("overlap_map requires rnaturalearthhires package, but it could not be loaded")
+  }
   
   # Want an abbreviated version of species name for title & legend
   name_split <- unlist(strsplit(x = species_name, split = " "))
@@ -117,10 +120,16 @@ overlap_map <- function(species_name,
   ylim = c(plot_ext[3], plot_ext[4])
   
   if (boundaries) {
-    boundaries <- rnaturalearth::ne_countries(continent = "north america",
-                                              scale = "medium",
-                                              returnclass = "sf") %>% 
-      dplyr::select(1) %>%
+    
+    countries <- rnaturalearth::ne_countries(continent = "north america",
+                                             scale = "medium",
+                                             returnclass = "sf") %>% 
+      terra::vect() %>%
+      terra::project(y = overlap2)
+    
+    states <- rnaturalearth::ne_states(country = c("canada", "united states of america", "mexico"),
+                                       returnclass = "sf") %>% 
+      
       terra::vect() %>%
       terra::project(y = overlap2)
     
@@ -129,7 +138,8 @@ overlap_map <- function(species_name,
       overlap_plot_base <- ggplot() +
         geom_spatraster(data = overlap2, maxcell = Inf) +
         scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        geom_spatvector(data = states, color = "gray50", fill = NA) +
+        geom_spatvector(data = countries, color = "black", fill = NA) +
         coord_sf(xlim = xlim, ylim = ylim) +
         title_text +
         theme_bw() 
@@ -145,7 +155,8 @@ overlap_map <- function(species_name,
         geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
         geom_spatraster(data = overlap2, maxcell = Inf) +
         scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        geom_spatvector(data = states, color = "gray50", fill = NA) +
+        geom_spatvector(data = countries, color = "black", fill = NA) +
         coord_sf(xlim = xlim, ylim = ylim) +
         title_text +
         theme_bw()

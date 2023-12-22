@@ -38,6 +38,7 @@ The project uses the following additional R packages:
 + raster
 + rnaturalearth
 + rnaturalearthdata
++ rnaturalearthhires
 + Rtools (needed to use the zip() function on Windows machines)
 + sp
 + spocc
@@ -47,6 +48,11 @@ The project uses the following additional R packages:
 + tidyr
 + tidyterra
 + TNRS
+
+Data to support much of the rnaturalearth package functionality are stored in 
+two data packages that should be installed using the following:
+devtools::install_github("ropensci/rnaturalearthdata")  
+devtools::install_github("ropensci/rnaturalearthhires")
 
 ## Workflow
 
