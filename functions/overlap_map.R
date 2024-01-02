@@ -48,15 +48,6 @@ overlap_map <- function(species_name,
   if (!require(ggplot2)) {
     stop("overlap_map requires ggplot2 package, but it could not be loaded")
   }
-  if (!require(rnaturalearth)) {
-    stop("overlap_map requires rnaturalearth package, but it could not be loaded")
-  }
-  if (!require(rnaturalearthdata)) {
-    stop("overlap_map requires rnaturalearthdata package, but it could not be loaded")
-  }
-  if (!require(rnaturalearthhires)) {
-    stop("overlap_map requires rnaturalearthhires package, but it could not be loaded")
-  }
   
   # Want an abbreviated version of species name for title & legend
   name_split <- unlist(strsplit(x = species_name, split = " "))
@@ -120,18 +111,9 @@ overlap_map <- function(species_name,
   ylim = c(plot_ext[3], plot_ext[4])
   
   if (boundaries) {
-    
-    countries <- rnaturalearth::ne_countries(continent = "north america",
-                                             scale = "medium",
-                                             returnclass = "sf") %>% 
-      terra::vect() %>%
-      terra::project(y = overlap2)
-    
-    states <- rnaturalearth::ne_states(country = c("canada", "united states of america", "mexico"),
-                                       returnclass = "sf") %>% 
-      
-      terra::vect() %>%
-      terra::project(y = overlap2)
+
+    countries <- vect("data/political-boundaries/countries.shp")
+    states <- vect("data/political-boundaries/states.shp")
     
     if (prediction_area) {
       
@@ -152,7 +134,7 @@ overlap_map <- function(species_name,
       # 2. Add the *outline*, colored black
       # The overlap raster information is plotted between these two calls
       overlap_plot_base <- ggplot() +
-        geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
+        geom_spatvector(data = countries, color = NA, fill = color_vec[1]) +
         geom_spatraster(data = overlap2, maxcell = Inf) +
         scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
         geom_spatvector(data = states, color = "gray50", fill = NA) +
