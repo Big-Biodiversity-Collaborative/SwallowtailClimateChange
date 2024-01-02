@@ -180,6 +180,12 @@ for (i in 1:length(insects)) {
         # Calculate overlap values (0 to 5)
         overlap <- terra::rast(list(insect_dist, host_dist))
         overlap <- sum(overlap)
+        
+        # Crop and mask overlap raster so it doesn't extend beyond boundaries of 
+        # US, Canada, Mexico
+        countries3 <- vect("data/political-boundaries/countries3.shp")
+        overlap <- crop(overlap, countries3)
+        overlap <- mask(overlap, countries3)
 
         # Save overlap raster to file
         saveRDS(object = overlap, 
