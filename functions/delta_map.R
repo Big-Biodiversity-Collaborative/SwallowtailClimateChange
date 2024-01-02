@@ -50,13 +50,7 @@ delta_map <- function(species_name,
   if (!require(ggplot2)) {
     stop("overlap_map requires ggplot2 package, but it could not be loaded")
   }
-  if (!require(rnaturalearth)) {
-    stop("delta_map_poster requires rnaturalearth package, but it could not be loaded")
-  }
-  if (!require(rnaturalearthdata)) {
-    stop("delta_map_poster requires rnaturalearthdata package, but it could not be loaded")
-  }
-  
+
   # Want an abbreviated version of species name for title & legend
   name_split <- unlist(strsplit(x = species_name, split = " "))
   abbr_name <- paste0(substr(x = name_split[1], start = 1, stop = 1),
@@ -93,19 +87,16 @@ delta_map <- function(species_name,
   # Start with base plot and add legend later based on settings  
   if (boundaries) {
     
-    boundaries <- rnaturalearth::ne_countries(continent = "north america",
-                                              scale = "medium",
-                                              returnclass = "sf") %>% 
-      dplyr::select(1) %>%
-      terra::vect() %>%
-      terra::project(y = delta_raster)
+    countries <- vect("data/political-boundaries/countries.shp")
+    states <- vect("data/political-boundaries/states.shp")
     
     if (prediction_area) {
       
       delta_plot_base <- ggplot() +
         geom_spatraster(data = delta_raster, maxcell = Inf) +
         scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        geom_spatvector(data = states, color = "gray50", fill = NA) +
+        geom_spatvector(data = countries, color = "black", fill = NA) +
         coord_sf(xlim = xlim, ylim = ylim) +
         theme_bw()
       
@@ -117,10 +108,11 @@ delta_map <- function(species_name,
       # 2. Add the *outline*, colored black
       # The delta raster information is plotted between these two calls
       delta_plot_base <- ggplot() +
-        geom_spatvector(data = boundaries, color = NA, fill = color_vec[1]) +
+        geom_spatvector(data = countries, color = NA, fill = color_vec[1]) +
         geom_spatraster(data = delta_raster, maxcell = Inf) +
         scale_fill_manual(name = "desc", values = color_vec, na.translate = FALSE) +
-        geom_spatvector(data = boundaries, color = "black", fill = NA) +
+        geom_spatvector(data = states, color = "gray50", fill = NA) +
+        geom_spatvector(data = countries, color = "black", fill = NA) +
         coord_sf(xlim = xlim, ylim = ylim) +
         theme_bw()
       
