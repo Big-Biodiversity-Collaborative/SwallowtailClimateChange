@@ -204,7 +204,7 @@ for (i in 1:length(insects)) {
                                     horizontal_legend = TRUE,
                                     generic_legend = TRUE,
                                     prediction_area = TRUE,
-                                    boundaries = TRUE,
+                                    projection = "auto",
                                     obs_points = FALSE,
                                     title_scenarioyear = TRUE)
           
