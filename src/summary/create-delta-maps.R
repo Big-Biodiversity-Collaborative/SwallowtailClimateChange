@@ -42,7 +42,7 @@ if (all_insects) {
   insects <- insects$species
 } else {
   # If not all insects, identify which insects to include
-  insects <- c("Papilio rumiko")
+  insects <- c("Papilio machaon")
 }
 
 # Vector with types of distributions/delta maps
@@ -81,13 +81,15 @@ for (insect in insects) {
       # 2 = Area suitable in forecast climate only (= gain)
       # 3 = Area suitable in current and forecast climate (= stable)
       
+      # Note: this can take a long time to run if using Lambert projection,
+      # especially for species with large ranges. Set to "latlon" below in case.
       map_object <- delta_map(species_name = insect, 
                               delta_raster = deltas,
                               clim_model = clim_model,
                               include_legend = TRUE,
                               horizontal_legend = TRUE,
                               prediction_area = TRUE,
-                              boundaries = TRUE,
+                              projection = "latlon",
                               obs_points = FALSE,
                               full_title = TRUE)
 
