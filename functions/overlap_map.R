@@ -148,7 +148,7 @@ overlap_map <- function(species_name,
         geom_spatvector(data = states, color = "gray50", fill = NA) +
         geom_spatvector(data = filter(countries, countries$adm0_a3 %in% c("USA", "CAN", "MEX")),
                         color = "black", fill = NA) +
-        coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim2, ylim = ylim2) +
+        coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim) +
         title_text +
         theme_bw()
     } else {
@@ -161,7 +161,7 @@ overlap_map <- function(species_name,
         geom_spatvector(data = states, color = "gray50", fill = NA) +
         geom_spatvector(data = filter(countries, countries$adm0_a3 %in% c("USA", "CAN", "MEX")),
                         color = "black", fill = NA) +
-        coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim2, ylim = ylim2) +
+        coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim) +
         title_text +
         theme_bw()
     }
@@ -181,7 +181,7 @@ overlap_map <- function(species_name,
         overlap_plot_base <- overlap_plot_base +
           geom_spatvector(data = obs, color = "red", size = 0.15,
                           shape = 16, alpha = 0.5) +
-          coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim2, ylim = ylim2)
+          coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim)
       }
     }
   } else {
