@@ -6,6 +6,14 @@
 #' @param xlim longitudinal limits for map in decimal degrees. Warning: this 
 #' will probably not work if map includes international date line
 #' @param ylim latitudinal limits for map in decimal degrees.
+#' @param palette character vector for color palette to use; see documentation 
+#' for \code{tidyterra::scale_fill_whitebox_c()} for valid values. "gn_yl" is 
+#' good for positive values (i.e. richness), while "purple" better accommodates
+#' showing differences (high values are green, low values are purple, middle 
+#' values are white)
+#' @param legend_name character vector to use for legend title
+#' @param direction numeric vector, either 1 or -1, for ordering color values; 
+#' 1 indicates darkest to lightest, -1 indicates lightest to darkest
 #' @param pal_limits numeric vector of length two indicating limits of color 
 #' palette (minimum and maximum). If \code{NULL}, limits will be determined 
 #' by values in \code{r}.
@@ -18,6 +26,9 @@ richness_map <- function(r,
                          predictor,
                          xlim = c(-170, -50),
                          ylim = c(10, 70),
+                         palette = "gn_yl",
+                         legend_name = "Richness",
+                         direction = 1, 
                          pal_limits = NULL) {
   if (!require(terra)) {
     stop("overlap_map requires terra package, but it could not be loaded")
@@ -60,9 +71,9 @@ richness_map <- function(r,
   richness_plot <- ggplot() +
     tidyterra::geom_spatraster(data = richness_raster, 
                                maxcell = Inf) +
-    tidyterra::scale_fill_whitebox_c(palette = "gn_yl",
-                                     direction = -1, # so 0 is lightest
-                                     name = "Richness") +
+    tidyterra::scale_fill_whitebox_c(palette = palette,
+                                     direction = direction,
+                                     name = legend_name) +
     geom_spatvector(data = boundaries, color = "black", fill = NA) +
     coord_sf(xlim = xlim, ylim = ylim) +
     # title_text +

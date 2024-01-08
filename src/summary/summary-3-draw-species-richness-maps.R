@@ -3,8 +3,6 @@
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2021-06-06
 
-# Develop for all insects based on draw-species-richness-maps-glm.R
-
 require(terra)
 require(dplyr)
 require(stringr)
@@ -53,14 +51,6 @@ nice_names <- insects %>%
   str_replace(pattern = " ", replacement = "_") %>%
   tolower()
 
-# Loop over all climate models (including current)
-# Read in all insect rasters
-# Convert rasters to 0/1
-# Extend all rasters to same extent
-# Sum all rasters together
-# Save raster to output/maps
-# If save_maps is TRUE, create ggplot map and save to output/maps
-
 # Will need to update raster values:
 #   {0, 3}: 0
 #   {4, 5}: 1
@@ -70,8 +60,16 @@ rcl <- matrix(data = c(0, 3, 0,
               nrow = 2,
               byrow = TRUE)
 
-# Iterate over each climate model, creating a Papilio species richness raster 
-# (and map if appropriate) for each model (5 total)
+# Loop over all climate models (including current)
+# Read in all insect rasters
+# Convert rasters to 0/1
+# Extend all rasters to same extent
+# Sum all rasters together
+# Save raster to output/maps
+# If save_maps is TRUE, create ggplot map and save to output/maps
+
+# Iterate over each climate model, creating a raster of Papilio species 
+# richness (and map if appropriate) for each model (5 total)
 for (clim_model in climate_models$name) {
   cat("Climate model: ", clim_model, "\n")
   output_basename <- paste0("output/richness/",
@@ -117,19 +115,48 @@ for (clim_model in climate_models$name) {
     # Create map (image file) if necessary
     if (save_maps) {
       rich_map <- richness_map(r = richness_ras,
-                                   predictor = clim_model)
+                               predictor = clim_model,
+                               direction = -1)
       ggsave(filename = richness_map_filename,
              plot = rich_map)
     }
-    
-    # TODO
+
     # If this is not current climate, do comparison with contemporary richness 
     # to create a delta richness map
+    if (clim_model != "current") {
+      current_file <- "output/richness/current-richness.rds"
+      if (file.exists(current_file)){
+        # Destination files
+        delta_basename <- paste0("output/richness/",
+                                 clim_model, 
+                                 "-delta-richness")
+        delta_ras_filename <- paste0(delta_basename, ".rds")
+        delta_map_filename <- paste0(delta_basename, ".", file_ext)
 
-    # Load contemporary richness raster
-    # Calculate delta of rasters
-    # Save delta raster
-    # If appropriate, save delta map
+        # Load contemporary richness raster
+        current_richness <- readRDS(file = current_file)
+        # Create a SpatRasterCollection from raster list, changing the current 
+        # raster to negative values so we can use the sum function in 
+        # terra::mosaic, i.e. Forecast richness - Current richness.
+        delta_coll <- terra::sprc(list((-1) * current_richness, richness_ras))
+        # Calculate delta of rasters
+        delta_ras <- terra::mosaic(x = delta_coll, fun = "sum")
+        # Save delta raster
+        saveRDS(object = richness_ras, file = delta_ras_filename)
+        
+        # If appropriate, save delta map
+        if (save_maps) {
+          delta_map <- richness_map(r = delta_ras,
+                                    predictor = clim_model,
+                                    palette = "purple",
+                                    legend = "Richness change")
+          ggsave(filename = delta_map_filename,
+                 plot = delta_map)
+        }
+      } else {
+        message("No current richness rasters on disk; deltas not created.")
+      }
+    }
     
   }
 }
