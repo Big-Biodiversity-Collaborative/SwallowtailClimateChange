@@ -1,4 +1,4 @@
-#' Make a map of species richness
+#' Species richness (or changes in richness) maps
 #' 
 #' @param r Raster* object where cells values are species richness 
 #' @param predictor character vector of the name of the climate model the on 

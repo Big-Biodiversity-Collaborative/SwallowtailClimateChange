@@ -7,7 +7,6 @@ require(terra)
 require(dplyr)
 require(stringr)
 require(ggplot2)
-require(tidyterra) # for richness maps of SpatRasters
 source(file = "load_functions.R")
 
 # Logical indicating whether to replace an overlap raster/map if one already 
@@ -156,7 +155,6 @@ for (clim_model in climate_models$name) {
       } else {
         message("No current richness rasters on disk; deltas not created.")
       }
-    }
-    
-  }
-}
+    } # End conditional for forecast model comparison with current
+  } # End conditional for file exists / replace
+} # End iteration over all climate models
