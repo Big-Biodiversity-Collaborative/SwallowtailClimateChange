@@ -17,6 +17,8 @@
 #' @param pal_limits numeric vector of length two indicating limits of color 
 #' palette (minimum and maximum). If \code{NULL}, limits will be determined 
 #' by values in \code{r}.
+#' @param plot_title character vector of length one to use as plot title; if 
+#' \code{NULL}, no title is included
 #' 
 #' @details Note that this script does no modeling or predicting, relying on 
 #' predictions being passed through the list of rasters, \code{r}.
@@ -29,7 +31,8 @@ richness_map <- function(r,
                          palette = "gn_yl",
                          legend_name = "Richness",
                          direction = 1, 
-                         pal_limits = NULL) {
+                         pal_limits = NULL,
+                         plot_title = NULL) {
   if (!require(terra)) {
     stop("overlap_map requires terra package, but it could not be loaded")
   }
@@ -52,15 +55,13 @@ richness_map <- function(r,
   source(file = "load_functions.R")
 
   richness_raster <- r
-  # Create new richness raster where values are factor
-  # richness_raster <- as.factor(richness_raster)
-  # levels(richness_raster) <- data.frame(value = 0:max(richness_raster))
 
   # Get limits for plot
   plot_ext <- terra::ext(richness_raster) * 1.04
   xlim = c(plot_ext[1], plot_ext[2])
   ylim = c(plot_ext[3], plot_ext[4])
-  
+
+  # Get political boundaries for map  
   boundaries <- rnaturalearth::ne_countries(continent = "north america",
                                             scale = "medium",
                                             returnclass = "sf") %>% 
@@ -68,6 +69,7 @@ richness_map <- function(r,
     terra::vect() %>%
     terra::project(y = richness_raster)
   
+  # Create plot object
   richness_plot <- ggplot() +
     tidyterra::geom_spatraster(data = richness_raster, 
                                maxcell = Inf) +
@@ -75,9 +77,17 @@ richness_map <- function(r,
                                      direction = direction,
                                      name = legend_name) +
     geom_spatvector(data = boundaries, color = "black", fill = NA) +
-    coord_sf(xlim = xlim, ylim = ylim) +
-    # title_text +
-    theme_bw() 
+    coord_sf(xlim = xlim, ylim = ylim)
+
+  # Add title if available
+  if (!is.null(plot_title)) {
+    richness_plot <- richness_plot + 
+      labs(title = plot_title[1])
+  }
   
+  # Apply theme
+  richness_plot <- richness_plot +
+    theme_bw()
+   
   return(richness_plot)
 }

@@ -146,19 +146,41 @@ for (clim_model in climate_models$name) {
     io_binary_coll <- terra::sprc(io_binary_rasters)
     io_richness_ras <- terra::mosaic(x = io_binary_coll, fun = "sum")
     saveRDS(object = io_richness_ras, file = io_richness_ras_filename)
-    
+
     # Create map (image file) if necessary
     if (save_maps) {
+      # Base title for plots
+      if (clim_model == "current") {
+        base_title <- "Current"
+      } else {
+        # Want to make human-readable version of the scenario + year
+        # ensemble_ssp245_2041
+        clim_model_split <- unlist(strsplit(x = clim_model, split = "_"))
+        ssp <- substr(x = clim_model_split[2], start = 4, stop = 4)
+        # Ugly, but transformation to numeric drops ".0" from integer values
+        # e.g. SSP3-7.0 becomes SSP3-7
+        rcp <- paste0(substr(x = clim_model_split[2], start = 5, stop = 5),
+                      ".",
+                      substr(x = clim_model_split[2], start = 6, stop = 6))
+        scenario <- paste0("SSP", ssp, "-", rcp)
+        yr <- clim_model_split[3]
+        base_title <- paste0(scenario, ", ", yr)
+      }
+      
       # Overlap version
       ov_rich_map <- richness_map(r = ov_richness_ras,
-                               predictor = clim_model,
-                               direction = -1)
+                                  predictor = clim_model,
+                                  direction = -1,
+                                  plot_title = paste0(base_title,
+                                                      ", overlaps with hosts"))
       ggsave(filename = ov_richness_map_filename,
              plot = ov_rich_map)
       # Insect-only version
       io_rich_map <- richness_map(r = io_richness_ras,
                                   predictor = clim_model,
-                                  direction = -1)
+                                  direction = -1,
+                                  plot_title = paste0(base_title,
+                                                      ", hosts not considered"))
       ggsave(filename = io_richness_map_filename,
              plot = io_rich_map)
     }
@@ -211,6 +233,8 @@ for (clim_model in climate_models$name) {
           ov_delta_map <- richness_map(r = ov_delta_ras,
                                     predictor = clim_model,
                                     palette = "purple",
+                                    plot_title = paste0(base_title,
+                                                        ", overlaps with hosts"),
                                     legend = "Richness change")
           ggsave(filename = ov_delta_map_filename,
                  plot = ov_delta_map)
@@ -218,6 +242,8 @@ for (clim_model in climate_models$name) {
           io_delta_map <- richness_map(r = io_delta_ras,
                                        predictor = clim_model,
                                        palette = "purple",
+                                       plot_title = paste0(base_title,
+                                                           ", hosts not considered"),
                                        legend = "Richness change")
           ggsave(filename = io_delta_map_filename,
                  plot = io_delta_map)
