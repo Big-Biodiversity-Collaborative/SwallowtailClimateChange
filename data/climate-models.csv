@@ -4,3 +4,5 @@ ensemble_ssp245_2041,"Ensemble forecast for SSP 4.5, 2041-2070",ensemble/ssp245/
 ensemble_ssp245_2071,"Ensemble forecast for SSP 4.5, 2071-2100",ensemble/ssp245/2071,2071,245
 ensemble_ssp370_2041,"Ensemble forecast for SSP 7.0, 2041-2070",ensemble/ssp370/2041,2041,370
 ensemble_ssp370_2071,"Ensemble forecast for SSP 7.0, 2071-2100",ensemble/ssp370/2071,2071,370
+ensemble_ssp585_2041,"Ensemble forecast for SSP 8.5, 2041-2070",ensemble/ssp585/2041,2041,585
+ensemble_ssp585_2071,"Ensemble forecast for SSP 8.5, 2071-2100",ensemble/ssp585/2071,2071,585
