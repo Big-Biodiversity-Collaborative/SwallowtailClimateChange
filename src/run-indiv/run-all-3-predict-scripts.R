@@ -107,7 +107,7 @@ run_predict_script <- function(script_name,
     pred_out_files <- list.files(path = "output/distributions",
                                  pattern = paste0(nice_name, 
                                                   "-distribution"))
-    if(length(pred_out_files) < 5 | rerun) {
+    if(length(pred_out_files) < 7 | rerun) {
       if (file.exists(script_name)) {
         # Let user know (in log file) what's being run 
         # Note: sometimes these messages overwrite each other, so adding a small
