@@ -146,6 +146,7 @@ stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
 
   # Run model
   rf_fit <- run_rf(full_data = pa_data,
+                   importance = TRUE,
                    ntree = 1000)
   
   # Bind everything into a list and save to file

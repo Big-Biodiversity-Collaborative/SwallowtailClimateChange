@@ -345,6 +345,7 @@ for (k in 1:nfolds) {
   
   # Run RF and evaluate with test data
   rf_fit <- run_rf(full_data = sdmtrain,
+                   importance = TRUE,
                    ntree = 1000)
   
   ev <- evaluate_sdm(test_data = sdmtest, 

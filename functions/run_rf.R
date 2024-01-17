@@ -2,6 +2,8 @@
 #' 
 #' @param full_data dataframe with presence-absence data (1/0), columns with 
 #' climate data
+#' @param importance logical indicating whether or not to assess importance of 
+#' predictors
 #' @param ntree number of trees to grow (default = 1000)
 #' 
 #' @details Uses \code{randomForest::randomForest()} for classification-type 
@@ -10,7 +12,7 @@
 #' @return An object of class randomForest, with parameter estimates for a 
 #' random forest SDM. Output of \code{randomForest::randomForest()}.
 
-run_rf <- function(full_data, ntree = 1000) {
+run_rf <- function(full_data, importance = TRUE, ntree = 1000) {
   # Extract the name of this function for reporting
   function_name <- as.character(match.call())[1]
   
@@ -54,6 +56,7 @@ run_rf <- function(full_data, ntree = 1000) {
                          data = full_data,
                          ntree = ntree,
                          sampsize = smpsize,
+                         importance = importance,
                          replace = TRUE)
   
   results <- rf_fit
