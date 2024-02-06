@@ -1,23 +1,14 @@
-# Download and prepare bioclimatic variables for 2000-2018
+# Download and prepare bioclimatic variables for 2000-2021
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu & ezylstra@arizona.edu
 # 2022-04-15
 
-require(sp)     # raster needs this
-require(raster) # only necessary for biovar calculation via dismo
-require(dismo)  # calculating bioclimate variables
 require(terra)  # raster manipulation
+require(predicts) # calculating bioclimate variables
 
-# TODO: Migrate away from use of raster package; most functionality provided by 
-# the terra package. Completed where possible, but the dismo::biovars function 
-# still requires RasterBrick/Stack objects as input. Eventually the 
-# dismo::biovars function should be replaced by a corresponding function in the 
-# predicts package: https://github.com/rspatial/dismo/issues/29
-
-# Calculates average values for the 19 bioclimatic variables for 2000-2018, 
-# based on monthly values for the 19 year span (yeah, two 19s, I'm sure this 
-# won't cause any confusion). Monthly climate data (tmin, tmax, and prec) 
-# sourced from https://worldclim.org/data/monthlywth.html.
+# Calculates average values for the 19 bioclimatic variables for 2000-2021, 
+# based on monthly values for the 22 year span. Monthly climate data (tmin, 
+# tmax, and prec) sourced from https://worldclim.org/data/monthlywth.html.
 
 # Much of the approach adapted from Keaton Wilson's work on Giant Swallowtails 
 # at https://github.com/keatonwilson/swallowtail_ms, especially the code in the 
@@ -26,16 +17,16 @@ require(terra)  # raster manipulation
 # WorldClim variables
 wc_vars <- c("tmin", "tmax", "prec")
 # Used for file downloads, based on names at WorldClim site
-time_periods <- c("2000-2009", "2010-2018")
+time_periods <- c("2000-2009", "2010-2019", "2020-2021")
 # Used for annual biovariable calculations
-year_span <- 2000:2018
+year_span <- 2000:2021
 # Rough bounding box for Canada + Mexico + USA
 coord_bounds <- c("xmin" = -169,
                   "xmax" = -48, 
                   "ymin" = 13,
                   "ymax" = 75)
-# geo_extent <- terra::ext(x = coord_bounds)
-geo_extent <- raster::extent(x = coord_bounds)
+geo_extent <- terra::ext(x = coord_bounds)
+# geo_extent <- raster::extent(x = coord_bounds)
 # For writing raster files to disk
 temp_raster_format <- ".tif"
 annual_raster_format <- ".tif"
@@ -60,7 +51,7 @@ remove_historic <- TRUE
 # https://www.worldclim.org/data/monthlywth.html if not here, and 
 # extract zip files
 timeout_default <- getOption("timeout")
-options(timeout = 15 * 60) # Set to 15 minutes, files are large
+options(timeout = 30 * 60) # Set to 20 minutes, some files are large (2.2 GB)
 for (one_var in wc_vars) {
   for (time_per in time_periods) {
     # Download zip file if it doesn't exist
@@ -68,7 +59,12 @@ for (one_var in wc_vars) {
                        "_", time_per, ".zip")
     if (!file.exists(zip_file)) {
       message(paste0("Downloading zip for ", one_var, ", ", time_per))
-      file_url <- paste0("https://biogeo.ucdavis.edu/data/worldclim/v2.1/hist/wc2.1_2.5m_",
+      # Old (pre 2024) URL
+      # file_url <- paste0("https://biogeo.ucdavis.edu/data/worldclim/v2.1/hist/wc2.1_2.5m_",
+      #                    one_var, "_", time_per, ".zip")
+      # Updated link e.g.:
+      # "https://geodata.ucdavis.edu/climate/worldclim/2_1/hist/cts4.06/2.5m/wc2.1_cruts4.06_2.5m_tmin_2010-2019.zip"
+      file_url <- paste0("https://geodata.ucdavis.edu/climate/worldclim/2_1/hist/cts4.06/2.5m/wc2.1_cruts4.06_2.5m_",
                          one_var, "_", time_per, ".zip")
       download.file(url = file_url,
                     destfile = zip_file)
@@ -82,10 +78,10 @@ for (one_var in wc_vars) {
 }
 options(timeout = timeout_default) # Reset to default
 
-# Need to create single RasterBrick/Stack for each of the three variables for 
-# a single year (so 12 layers each), then feed them to dismo::biovars()
+# Need to create single SpatRaster for each of the three variables for 
+# a single year (so 12 layers each), then feed them to predicts::bcvars()
 
-# We calculate the average for the entire span, 2000-2018, so we start by 
+# We calculate the average for the entire span, 2000-2021, so we start by 
 # calculating biovar for each year
 
 # Files have two-digit month, so creating a character vector for that
@@ -112,9 +108,11 @@ for (year_i in 1:length(year_span)) {
     # monthly files from the corresponding zip archive
     # Decide which of the two archives this year belongs in
     if (one_year < 2010) {
-      zip_years <- "2000-2009"
+      zip_years <- time_periods[1]
+    } else if (one_year < 2020) {
+      zip_years <- time_periods[2]
     } else {
-      zip_years <- "2010-2018"
+      zip_years <- time_periods[3]
     }
     # Iterate over the three worldclim variables, extracting monthly data for 
     # each, but only for this year
@@ -144,24 +142,21 @@ for (year_i in 1:length(year_span)) {
     # monthly layers for that variable
     raster_list <- vector("list", length(wc_vars))
     names(raster_list) <- wc_vars
-    # Create a RasterStack for each of the variables for this year
+    # Create a SpatRaster for each of the variables for this year
     for (one_var in wc_vars) {
       var_files <- as.list(paste0("data/wc2-1/monthly/wc2.1_2.5m_",
                                   one_var, "_", 
                                   one_year, "-", 
                                   month_vec, ".tif")) 
-      # Read in files as raster and stack them
+      # Read in files as raster and put them into single SpatRaster via c()
       raster_list[[one_var]] <- c(lapply(X = var_files,
                                          FUN = terra::rast))
       # Restrict to geographical area of this study (roughly CA, MX, US)
       raster_list[[one_var]] <- lapply(X = raster_list[[one_var]],
                                        FUN = terra::crop,
                                        y = geo_extent)
-      # Because dismo::biovars needs a RasterStack, convert to that type
       # This makes a 12-layer SpatRaster for each worldclim variable
       raster_list[[one_var]] <- terra::rast(raster_list[[one_var]])
-      # And this converts that SpatRaster to a RasterStack
-      raster_list[[one_var]] <- raster::stack(raster_list[[one_var]])
     }
     # Do biovars calculation for this year; can take several (> 10) minutes
     # This is sooooo slow. Might be faster to do the arithmetic for each of 
@@ -169,10 +164,10 @@ for (year_i in 1:length(year_span)) {
     # For variable calculations, see https://pubs.usgs.gov/ds/691/ds691.pdf
     # And terra arithmatic https://rspatial.org/pkg/4-algebra.html
     message(paste0(Sys.time(), " | Calculating biovars for ", one_year))
-    # dismo::biovars spits out a RasterBrick
-    biovars_annual[[year_i]] <- dismo::biovars(prec = raster_list[["prec"]],
-                                               tmin = raster_list[["tmin"]],
-                                               tmax = raster_list[["tmax"]])
+    # predicts::bcvars spits out a SpatRaster with 19 layers
+    biovars_annual[[year_i]] <- predicts::bcvars(prec = raster_list[["prec"]],
+                                                 tmin = raster_list[["tmin"]],
+                                                 tmax = raster_list[["tmax"]])
     message(paste0(Sys.time(), " | Finished calculating ", one_year, " biovars"))
     
     # Write each biovar to a raster file
