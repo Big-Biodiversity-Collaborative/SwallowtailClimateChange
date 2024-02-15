@@ -1,7 +1,7 @@
 # Script to create figures, tables, summary stats for manuscript
 # Erin Zylstra
 # ezylstra@arizona.edu
-# 2024-02-14
+# 2024-02-15
 
 require(dplyr)
 require(stringr)
@@ -10,24 +10,200 @@ require(ggplot2)
 require(tidyterra)
 require(cowplot)
 
-rm(list = ls())
-
-# Logical indicating whether to recreate maps/tables if they already exists
-replace <- TRUE
+# Logical indicating whether to recreate maps/tables if they already exist
+replace <- FALSE
 
 # Load insect-host information and gbif data summaries
 ih <- read.csv("data/insect-host.csv")
 gbif <- read.csv("data/gbif-pa-summary.csv")
 
-# Grab files with political boundaries
-countries <- vect("data/political-boundaries/countries.shp")
-countries3 <- filter(countries, countries$adm0_a3 %in% c("USA", "CAN", "MEX"))
-states <- vect("data/political-boundaries/states.shp")  
+# Load summary stats
+stats <- read.csv("output/summary-stats/overlap-summary-allspp.csv")
 
 # Base of output filenames
 output_basename <- "output/manuscript/"
 
-# Panels for workflow figure, using P. rumiko as an example -------------------#
+# Grab spatial files with political boundaries
+countries <- vect("data/political-boundaries/countries.shp")
+countries3 <- filter(countries, countries$adm0_a3 %in% c("USA", "CAN", "MEX"))
+states <- vect("data/political-boundaries/states.shp")  
+
+# Table: Papilio species ------------------------------------------------------#
+
+  # Get number of filtered records for each swallowtail spp
+  insects <- gbif %>%
+    filter(str_detect(species, "Papilio")) %>%
+    filter(pa_csv == "yes") %>%
+    select(species, n_filtered)
+  
+  # Get number of host plants (total or with 40+ filtered records)
+  ih2 <- ih %>%
+    select(insect, host_accepted) %>%
+    left_join(select(gbif, species, pa_csv), 
+              join_by("host_accepted" == "species")) %>%
+    group_by(insect) %>%
+    summarize(n_hosts = length(host_accepted),
+              n_hosts_suff = sum(pa_csv == "yes")) %>%
+    data.frame()
+  
+  insects <- left_join(insects, ih2, join_by("species" == "insect"))
+  
+  # Create east/west indicator
+  east <- "appalachiensis|brevicauda|canadensis|cresphontes|glaucus|palamedes|polyxenes|troilus"
+  west <- "euymedon|indra|machaon|multicaudata|rumiko|rutulus|zelicaon"
+  insects <- insects %>%
+    mutate(ew = ifelse(grepl(east, species), "East", "West")) %>%
+    mutate(species = str_replace(species, "Papilio", "P."))
+  
+  # Get range and mean/median number of records for each species
+  summary(insects)
+  
+  # Write table to file:
+  papilio_table <- paste0(output_basename, "papilio-table.csv")
+  if (!file.exists(papilio_table) | (file.exists(papilio_table) & replace)) {
+    write.csv(x = insects, 
+              file = papilio_table, 
+              row.names = FALSE)
+  }
+
+# Summaries: Climatically suitable areas --------------------------------------#
+
+  # Attach number of host plants (with SDMs) to stats dataframe
+  insects_simple <- insects %>%
+    select(species, n_hosts_suff) %>%
+    mutate(species = str_replace(species, "P. ", "Papilio ")) %>%
+    rename(insect = species,
+           n_hosts = n_hosts_suff)
+  stats <- left_join(stats, insects_simple, by = "insect")
+  
+  # There are many occasions when we will want summary stats that exclude
+  # P. appalachiensis or P. appalachiensis and P. palamedes, so creating
+  # additional stats dataframes to simplify.
+  stats14 <- filter(stats, insect != "Papilio appalachiensis")
+  stats13 <- filter(stats, !insect %in% c("Papilio appalachiensis", "Papilio palamedes"))
+
+  # Summarize amount of land area that's predicted to be climatically suitable
+  # (ignoring information about host plants). Columns with "all" are summaries 
+  # across all 15 species; columns with "14" are summaries with all species except 
+  # P. appalachiensis; columns with "13" are summaries with all species except
+  # P. applachiensis and P. palamedes
+  csuit_all <- stats %>%
+    filter(distribution == "total insect") %>%
+    group_by(climate) %>%
+    summarize(area_min_all = min(area),
+              area_mn_all = mean(area),
+              area_md_all = median(area),
+              area_max_all = max(area)) %>%
+    data.frame()
+  csuit_14 <- stats14 %>%
+    filter(distribution == "total insect") %>%
+    group_by(climate) %>%
+    summarize(area_min_14 = min(area),
+              area_mn_14 = mean(area),
+              area_md_14 = median(area),
+              area_max_14 = max(area)) %>%
+    data.frame()
+  csuit_13 <- stats13 %>%
+    filter(distribution == "total insect") %>%
+    group_by(climate) %>%
+    summarize(area_min_13 = min(area),
+              area_mn_13 = mean(area),
+              area_md_13 = median(area),
+              area_max_13 = max(area)) %>%
+    data.frame()
+  csuit <- left_join(csuit_all, csuit_14, by = "climate") %>%
+    left_join(csuit_13, by = "climate")
+
+  # Write table to file:
+  suit_area <- paste0(output_basename, "suitable-areas.csv")
+  if (!file.exists(suit_area) | (file.exists(suit_area) & replace)) {
+    write.csv(x = csuit, 
+              file = suit_area, 
+              row.names = FALSE)
+  }
+
+# Summaries: Percent overlap --------------------------------------------------#
+
+  # Summarize percent of area that's climatically suitable for insect that is 
+  # also climatically suitable for one or more host plants (referred to as 
+  # % overlap or swallowtail distribution). This info is captured in the 
+  # "pinsect_withhost" column for "total insect" distributions. Note that we can't 
+  # summarize % overlap for all 15 species because value for P. appalachiensis is 
+  # NA (no area for swallowtail)
+    
+  overlap_14 <- stats14 %>%
+    filter(distribution == "total insect") %>%
+    group_by(climate) %>%
+    summarize(overlap_min_14 = min(pinsect_withhost),
+              overlap_mn_14 = mean(pinsect_withhost),
+              overlap_md_14 = median(pinsect_withhost),
+              overlap_max_14 = max(pinsect_withhost)) %>%
+    data.frame()
+  overlap_13 <- stats13 %>%
+    filter(distribution == "total insect") %>%
+    group_by(climate) %>%
+    summarize(overlap_min_13 = min(pinsect_withhost),
+              overlap_mn_13 = mean(pinsect_withhost),
+              overlap_md_13 = median(pinsect_withhost),
+              overlap_max_13 = max(pinsect_withhost)) %>%
+    data.frame()
+    
+  # Use linear models to evaluate relationship between % overlap and total area
+  # climatically suitable for swallowtail, as well as relationship between 
+  # % overlap and number of host plants
+  clims <- sort(unique(stats$climate))
+  for (i in 1:length(clims)) {
+    lmod <- lm(pinsect_withhost ~ scale(area), 
+               data = filter(stats14, climate == clims[i]))
+    overlap_14$beta_area[i] <- summary(lmod)$coefficients[2, "Estimate"]
+    overlap_14$sd_area[i] <- summary(lmod)$coefficients[2, "Std. Error"]
+    overlap_14$t_area[i] <- summary(lmod)$coefficients[2, "t value"]
+    overlap_14$p_area[i] <- summary(lmod)$coefficients[2, "Pr(>|t|)"]
+    
+    lmod <- lm(pinsect_withhost ~ n_hosts, 
+                data = filter(stats14, climate == clims[i]))
+    overlap_14$beta_nhosts[i] <- summary(lmod)$coefficients[2, "Estimate"]
+    overlap_14$sd_nhosts[i] <- summary(lmod)$coefficients[2, "Std. Error"]
+    overlap_14$t_nhosts[i] <- summary(lmod)$coefficients[2, "t value"]
+    overlap_14$p_nhosts[i] <- summary(lmod)$coefficients[2, "Pr(>|t|)"]
+    
+    lmod13 <- lm(pinsect_withhost ~ scale(area), 
+                 data = filter(stats13, climate == clims[i]))
+    overlap_13$beta_area[i] <- summary(lmod13)$coefficients[2, "Estimate"]
+    overlap_13$sd_area[i] <- summary(lmod13)$coefficients[2, "Std. Error"]
+    overlap_13$t_area[i] <- summary(lmod13)$coefficients[2, "t value"]
+    overlap_13$p_area[i] <- summary(lmod13)$coefficients[2, "Pr(>|t|)"]
+    
+    lmoda <- lm(pinsect_withhost ~ n_hosts, 
+                data = filter(stats13, climate == clims[i]))
+    overlap_13$beta_nhosts[i] <- summary(lmoda)$coefficients[2, "Estimate"]
+    overlap_13$sd_nhosts[i] <- summary(lmoda)$coefficients[2, "Std. Error"]
+    overlap_13$t_nhosts[i] <- summary(lmoda)$coefficients[2, "t value"]
+    overlap_13$p_nhosts[i] <- summary(lmoda)$coefficients[2, "Pr(>|t|)"]  
+  }  
+
+  # Write tables to file:
+  o14 <- paste0(output_basename, "percent-overlap-14spp.csv")
+  if (!file.exists(o14) | (file.exists(o14) & replace)) {
+    write.csv(x = overlap_14, 
+              file = o14, 
+              row.names = FALSE)
+  }
+  o13 <- paste0(output_basename, "percent-overlap-13spp.csv")
+  if (!file.exists(o13) | (file.exists(o13) & replace)) {
+    write.csv(x = overlap_13, 
+              file = o13, 
+              row.names = FALSE)
+  }
+  
+# Summaries: Changes in distributions over time -------------------------------#
+
+# TODO: Pick up here. Will focus on distribution == "insect + host"
+
+
+
+# Figures: workflow (using P. rumiko as example) ------------------------------#
+
   workflow_spp <- "rumiko"
   ih_workflow <- ih %>% 
     filter(str_detect(insect, workflow_spp)) %>%
@@ -247,7 +423,8 @@ output_basename <- "output/manuscript/"
            units = "in")
   }
 
-# 2-swallowtail comparison (overlaps, deltas) ---------------------------------#
+# Figures: 2-swallowtail comparison (overlaps, deltas) ------------------------#
+  
   # For now, picking P. indra (western species; some gain [incl GB], some loss; 
   # not limited by host plants) and P. cresphontes (eastern species; some gain
   # [incl midwest], some loss; limited by host plants in FL)
@@ -438,7 +615,7 @@ output_basename <- "output/manuscript/"
            units = "in")
   }
 
-# Richness maps ---------------------------------------------------------------#
+# Figures: richness maps ------------------------------------------------------#
   
   # Future scenario
   scen <- "ssp370_2041"
