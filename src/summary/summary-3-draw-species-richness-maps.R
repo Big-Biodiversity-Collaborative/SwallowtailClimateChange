@@ -33,9 +33,9 @@ species_info <- read.csv("data/gbif-pa-summary.csv")
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
 
-# Logical indicating whether to create overlap rasters for all species or just a 
-# subset of insects
-all_insects <- FALSE
+# Logical indicating whether to include all insects in richness calculations or 
+# just a subset of insects
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
@@ -60,20 +60,20 @@ nice_names <- insects %>%
 # Will need to update raster values
 # For maps considering only areas where insect overlaps with at least one plant
 # species (inclusive)
-#   {0, 3}: 0
-#   {4, 5}: 1
+#   [0, 3]: 0
+#   [4, 5]: 1
 # Reclassification matrix, for overlap maps
-ov_rcl <- matrix(data = c(0, 3, 0, 
-                       3.1, 5, 1), # Bit of a cludge to get classify to work
+ov_rcl <- matrix(data = c(0, 3, 0,
+                          4, 5, 1),
               nrow = 2,
               byrow = TRUE)
 
 # For maps only considering insects
-#  {0, 2}: 0
-#  {3, 5}: 1
+#  [0, 2]: 0
+#  [3, 5]: 1
 # Reclassification matrix, for insect-only maps
-io_rcl <- matrix(data = c(0, 2, 0, 
-                       2.1, 5, 1), # Bit of a cludge to get classify to work
+io_rcl <- matrix(data = c(0, 2, 0,
+                          3, 5, 1),
               nrow = 2,
               byrow = TRUE)
 
@@ -128,7 +128,7 @@ for (clim_model in climate_models$name) {
     ov_binary_rasters <- lapply(X = raster_list,
                                 FUN = terra::classify,
                                 rcl = ov_rcl,
-                                include.lowest = TRUE)
+                                right = NA)
     # Add them all together, starting with a SpatRasterCollection, which turns 
     # out to be easier to work with (don't have to worry about modifying extents 
     # beforehand)
@@ -141,7 +141,7 @@ for (clim_model in climate_models$name) {
     io_binary_rasters <- lapply(X = raster_list,
                                 FUN = terra::classify,
                                 rcl = io_rcl,
-                                include.lowest = TRUE)
+                                right = NA)
     # Add them all together
     io_binary_coll <- terra::sprc(io_binary_rasters)
     io_richness_ras <- terra::mosaic(x = io_binary_coll, fun = "sum")
