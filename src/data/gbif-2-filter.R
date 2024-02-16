@@ -75,6 +75,9 @@ gbif_files <- list.files(path = "data/gbif/downloaded",
 filtered_files <- gsub(pattern = "downloaded",
                        replacement = "filtered",
                        x = gbif_files)
+# Character vector to keep track of species that end up with zero records after 
+# filtering (and thus no file is written)
+no_filtered_file <- character()
 
 # Load a tif file with climate data
 tif_file <- list.files(path = "data/wc2-1", 
@@ -278,6 +281,9 @@ for (i in 1:length(gbif_files)) {
   } else {
     message(paste0("** Zero filtered records of ", gbif_obs$species[i], 
                    ". No csv written to file. **"))
+    # Add this species to the list of files we did not create, so we do not try
+    # to include it in the archive
+    no_filtered_file <- c(no_filtered_file, filtered_files[i])
   }
 }
 
@@ -293,5 +299,8 @@ zipfile <- "data/gbif-filtered.zip"
 if (file.exists(zipfile)) {
     invisible(file.remove(zipfile))
 }
+# First drop any species that didn't have any observations after filtering
+filtered_files <- base::setdiff(x = filtered_files, y = no_filtered_file)
+# Now write files to archive
 zip(zipfile = zipfile,
     files = filtered_files)

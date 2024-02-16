@@ -11,8 +11,11 @@ source(file = "load_functions.R")
 gbif_data <- read.csv(file = "data/gbif-reconcile.csv")
 replace <- FALSE
 
+# How frequently to print message about number of species completed
+print_freq <- 20
+
 # File to write messages for failed queries; passed to download_gbif
-logfile <- "logs/download-log.txt"
+logfile <- "logs/download.log"
 
 sink(file = logfile)
 cat(as.character(Sys.time()), " download log", sep = "")
@@ -30,9 +33,13 @@ for (i in 1:nrow(gbif_data)) {
                 gbif_name = gbif_name,
                 replace = replace,
                 verbose = TRUE,
+                max_attempts = 10,
                 logfile = logfile)
   # Adding a 2 second sleep to slow things down.
   Sys.sleep(time = 2)
+  if (i %% print_freq == 0 | i == 1) {
+    cat("\n==== Finished querying ", i, " of ", nrow(gbif_data), " species ====\n")
+  }
 }
 
 # Need to determine the names of the files we just created
