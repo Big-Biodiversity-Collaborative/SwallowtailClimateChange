@@ -17,6 +17,9 @@ module load gdal
 module load proj
 module load geos
 module load R/4.2.2
-src/bash/build-scripts-1-CV.sh
 Rscript src/hpc/prep-extract-data.R
-Rscript src/run-indiv/run-all-1-CV-scripts.R -a
+### Old approach required building of individual species' scripts from template
+### src/bash/build-scripts-1-CV.sh
+### Rscript src/run-indiv/run-all-1-CV-scripts.R -a
+### New approach goes right to wrapper
+Rscript src/run-indiv/run-all-1-CV.R -a

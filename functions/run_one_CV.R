@@ -2,9 +2,8 @@
 
 #' Tune MaxEnt and BRT models and cross-validate all SDMs for a single species
 #' 
-#' @param genus character vector of genus of species to run, e.g. "Papilio"
-#' @param species character vector of specific epithet of species to run, e.g. 
-#' "rumiko"
+#' @param species_name character scientific name of species to run, e.g. 
+#' "Papilio rumiko"
 #' @param rerun logical indicating whether or not to re-run analyses if results
 #' are already disk
 #' @param max_save logical to indicate whether to save ENMeval object that 
@@ -13,7 +12,7 @@
 #' @param num_cores integer number of cores to use when evaluating MaxEnt 
 #' model; passed to \code{numCores} argument of \code{ENMevaluate}. Users are 
 #' strongly recommended to use default value (2)
-run_one_CV <- function(genus, species, rerun = TRUE, max_save = FALSE, 
+run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE, 
                        num_cores = 2) {
   # List necessary packages
   requirements <- c("dplyr", "ecospat", "ENMeval", "flexsdm", "gbm", "glmnet", 
@@ -39,15 +38,11 @@ run_one_CV <- function(genus, species, rerun = TRUE, max_save = FALSE,
     source(file = "load_functions.R")
   }
   
-  # Function is not vectorized, so just use first element in case of > 1
-  genus <- genus[1]
-  species <- species[1]
-  
-  # Name for reporting and looking up info in files
-  species_name <- paste0(genus, " ", species)
   # A more compute-friendly name
-  nice_name <- tolower(paste0(genus, "_", species))
-  
+  nice_name <- tolower(gsub(pattern = " ",
+                            replacement = "_",
+                            x = species_name))
+
   # Evaluation file to store results
   eval_file <- paste0("output/eval-metrics/", nice_name, "-CVevals.csv")
   
@@ -350,7 +345,9 @@ run_one_CV <- function(genus, species, rerun = TRUE, max_save = FALSE,
       write.csv(evals, 
                 file = eval_file,
                 row.names = FALSE)
-    } else {
+      # Final message about process complete
+      message("Model evaluation complete for ", species_name)
+    } else { # For missing data
       warning("No presence / absence data for ", species_name, 
               " on disk; no evaluations performed.")
     }
