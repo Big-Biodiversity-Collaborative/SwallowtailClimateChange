@@ -198,9 +198,56 @@ states <- vect("data/political-boundaries/states.shp")
   
 # Summaries: Changes in distributions over time -------------------------------#
 
-# TODO: Pick up here. Will focus on distribution == "insect + host"
+# Focus on insect + host distributions for 13 species, since two species are not
+# predicted to have suitable area or overlap with host plants
+dist <- stats %>%
+  filter(!insect %in% c("Papilio appalachiensis", "Papilio palamedes")) %>%
+  filter(distribution == "insect + host") %>%
+  select(-c(distribution, lat_max, lat_min, lon_max, lon_min, lat_max_bands, 
+            lat_min_bands, lon_max_bands, lon_min_bands, lon_max_shift, 
+            lon_min_shift, pinsect_withhost))
 
+# Calculate % of current distribution that's in future distribution 
+# (perc_current) and % change in area (perc_area_change)
+dist <- dist %>%
+  mutate(perc_current = area_retained / (area_retained + area_lost) * 100) %>%
+  group_by(insect) %>%
+  mutate(current_area = area[climate == "current"]) %>%
+  ungroup() %>%
+  data.frame() %>%
+  mutate(perc_area_change = if_else(climate == "current", NA, 
+                                    area / current_area * 100)) %>%
+  select(-current_area)
 
+# Summarize by time period, across species
+dist_change <- dist %>%
+  filter(climate != "current") %>%
+  group_by(climate) %>%
+  summarize(n_spp = length(insect),
+            perc_current_min = min(perc_current),
+            perc_current_mn = mean(perc_current),
+            perc_current_md = median(perc_current),
+            perc_current_max = max(perc_current),
+            perc_change_min = min(perc_area_change),
+            perc_change_mn = mean(perc_area_change),
+            perc_change_md = median(perc_area_change),
+            perc_change_max = max(perc_area_change),
+            N_shift_min = min(lat_max_shift),
+            N_shift_mn = mean(lat_max_shift),
+            N_shift_md = median(lat_max_shift),
+            N_shift_max = max(lat_max_shift),
+            S_shift_min = min(lat_min_shift),
+            S_shift_mn = mean(lat_min_shift),
+            S_shift_md = median(lat_min_shift),
+            S_shift_max = max(lat_min_shift)) %>%
+  data.frame()
+
+change <- paste0(output_basename, "distributional-changes.csv")
+if (!file.exists(change) | (file.exists(change) & replace)) {
+  write.csv(x = dist_change, 
+            file = change, 
+            row.names = FALSE)
+}
 
 # Figures: workflow (using P. rumiko as example) ------------------------------#
 
