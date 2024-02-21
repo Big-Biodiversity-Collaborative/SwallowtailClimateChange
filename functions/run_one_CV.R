@@ -12,6 +12,10 @@
 #' @param num_cores integer number of cores to use when evaluating MaxEnt 
 #' model; passed to \code{numCores} argument of \code{ENMevaluate}. Users are 
 #' strongly recommended to use default value (2)
+#' 
+#' @return Character vector with information about model evaluation, reporting 
+#' completion, any problems, or if evaluation process was skipped because file
+#' is already on disk and \code{rerun} was set to \code{FALSE}.
 run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE, 
                        num_cores = 2) {
   # List necessary packages
@@ -45,7 +49,10 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
 
   # Evaluation file to store results
   eval_file <- paste0("output/eval-metrics/", nice_name, "-CVevals.csv")
-  
+
+  # Character vector for reporting out
+  status_message <- ""
+    
   # Start by checking to see if we need to proceed (evaluation file is missing
   # or rerun is FALSE)
   if (!file.exists(eval_file) | rerun) {
@@ -346,15 +353,24 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
                 file = eval_file,
                 row.names = FALSE)
       # Final message about process complete
-      message("Model evaluation complete for ", species_name)
+      message("Model evaluation complete for ", species_name, ".")
+      status_message <- paste0(status_message, 
+                               "Model evaluation complete for ", species_name, ".")
     } else { # For missing data
+      status_message <- paste0(status_message, 
+                               "No presence / absence data for ", species_name, 
+                               " on disk; no evaluations performed.")
       warning("No presence / absence data for ", species_name, 
               " on disk; no evaluations performed.")
     }
   } else {
+    status_message <- paste0(status_message,
+                             "Evaluations for ", species_name, 
+                             " already on disk and rerun set to ", rerun, ".")
     message("Evaluations for ", species_name, 
             " already on disk and rerun set to ", rerun, ".")
   }
+  return(status_message)
 }
 
 #' Calculate evaluation metrics; passed to \code{user.eval} argument of 

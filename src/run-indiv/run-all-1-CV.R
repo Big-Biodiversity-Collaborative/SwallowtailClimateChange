@@ -62,23 +62,13 @@ species_to_run <- unique(c(insects, plants))
 #' for use in parallel processing. The bulk of the function is error/warning 
 #' handling via a tryCatch, to prevent a single species' analyses from bringing
 #' the whole thing crashing to a halt.
-#' 
 cv_run <- function(species_name, log_file, rerun) {
   # try/catch the function that would run the script; write status to log
   tryCatch(
     {
-      start_message <- paste0("Running model evaluation for ", species_name)
-      if (file.exists(log_file)) {
-        write(x = start_message, 
-              file = log_file,
-              append = TRUE)
-      } else {
-        message(start_message)
-      }
       # Call the function to evaluate models for this species
-      run_one_CV(species_name = species_name,
-                 rerun = rerun)
-      complete_message <- paste0("Model evaluation complete for ", species_name)
+      complete_message <- run_one_CV(species_name = species_name,
+                                     rerun = rerun)
       if (file.exists(log_file)) {
         write(x = complete_message, 
               file = log_file,
@@ -90,7 +80,7 @@ cv_run <- function(species_name, log_file, rerun) {
     # Handle errors (write to log)
     error = function(e) {
       error_message <- paste0("Error while evaluating models for ", 
-                              genus, " ", species, ": ", e)
+                              species_name, ": ", e)
       # Only try writing to a log if log file exists
       # Can't figure out how to do this in one step since R has to evaluate 
       # ALL conditions in an if statement...
@@ -110,7 +100,7 @@ cv_run <- function(species_name, log_file, rerun) {
     # Handle warnings (write to log)
     warning_f = function(w) {
       warning_message <- paste0("Warning while evaluating models for ", 
-                                genus, " ", species, ": ", w)
+                                species_name, ": ", w)
       
       # Only try writing to a log if a log filename was passed
       write_to_log <- !is.null(log_file)
