@@ -1,5 +1,3 @@
-# IN DEVELOPMENT. Not ready for use.
-
 #' Tune MaxEnt and BRT models and cross-validate all SDMs for a single species
 #' 
 #' @param species_name character scientific name of species to run, e.g. 
