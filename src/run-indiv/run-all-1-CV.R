@@ -63,13 +63,20 @@ species_to_run <- unique(c(insects, plants))
 #' handling via a tryCatch, to prevent a single species' analyses from bringing
 #' the whole thing crashing to a halt.
 cv_run <- function(species_name, log_file, rerun) {
+  # Only try writing to a log if log file exists
+  # Can't figure out how to do this in one step since R has to evaluate 
+  # ALL conditions in an if statement...
+  write_to_log <- !is.null(log_file)
+  if (write_to_log) {
+    write_to_log <- file.exists(log_file)
+  }
   # try/catch the function that would run the script; write status to log
   tryCatch(
     {
       # Call the function to evaluate models for this species
       complete_message <- run_one_CV(species_name = species_name,
                                      rerun = rerun)
-      if (file.exists(log_file)) {
+      if (write_to_log) {
         write(x = complete_message, 
               file = log_file,
               append = TRUE)
@@ -81,13 +88,6 @@ cv_run <- function(species_name, log_file, rerun) {
     error = function(e) {
       error_message <- paste0("Error while evaluating models for ", 
                               species_name, ": ", e)
-      # Only try writing to a log if log file exists
-      # Can't figure out how to do this in one step since R has to evaluate 
-      # ALL conditions in an if statement...
-      if (write_to_log) {
-        write_to_log <- file.exists(log_file)
-      }
-      
       if (write_to_log) {
         write(x = error_message, 
               file = log_file,
@@ -101,13 +101,6 @@ cv_run <- function(species_name, log_file, rerun) {
     warning_f = function(w) {
       warning_message <- paste0("Warning while evaluating models for ", 
                                 species_name, ": ", w)
-      
-      # Only try writing to a log if a log filename was passed
-      write_to_log <- !is.null(log_file)
-      # ...and the file exists
-      if (write_to_log) {
-        write_to_log <- file.exists(log_file)
-      }
       if (write_to_log) {
         write(x = warning_message, 
               file = log_file,
