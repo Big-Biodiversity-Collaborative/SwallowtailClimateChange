@@ -70,6 +70,14 @@ cv_run <- function(species_name, log_file, rerun) {
   if (write_to_log) {
     write_to_log <- file.exists(log_file)
   }
+  start_message <- paste0("About to run model evaluation on ", species_name, ".")
+  if (write_to_log) {
+    write(x = start_message,
+          file = log_file,
+          append = TRUE)
+  } else {
+    message(start_message)
+  }
   # try/catch the function that would run the script; write status to log
   tryCatch(
     {
