@@ -17,6 +17,9 @@ module load gdal
 module load proj
 module load geos
 module load R/4.2.2
-src/bash/build-scripts-2-SDMs-full.sh
-### Rscript src/hpc/prep-extract-data.R
-Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
+Rscript src/hpc/prep-extract-data.R
+### Old approach required building of individual species' scripts from template
+### src/bash/build-scripts-2-SDMs-full.sh
+### Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
+### New approach goes right to wrapper
+Rscript src/run-indiv/run-all-2-SDMs-full.R -a
