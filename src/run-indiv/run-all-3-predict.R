@@ -1,4 +1,4 @@
-# Estimate full models for all species in parallel
+# Run all predictions for full models in parallel
 # Jeff Oliver & Erin Zylstra
 # jcoliver@arizona.edu; ezylstra@arizona.edu
 # 2022-08-05
@@ -13,7 +13,7 @@ rerun <- TRUE
 all_insects <- FALSE
 # Integer for the maximum number of cores to utilize, if NULL, will use n - 2, 
 # where n is the number of cores available
-max_cores <- 8 # 8
+max_cores <- NULL # 8
 
 # If this script is called from bash (e.g. Rscript run-all-...), parse
 # arguments and update variables accordingly. e.g. 
@@ -27,7 +27,7 @@ if (length(args) > 0) {
 }
 
 # Log file to write status to
-logfile <- paste0("logs/SDMs-full-out.log")
+logfile <- paste0("logs/predict-full-out.log")
 # Create log file before running full SDMs
 f <- file.create(logfile)
 
@@ -47,20 +47,21 @@ plants <- ih$host_accepted[ih$insect %in% insects]
 # Combine insects and plants to a single vector
 species_to_run <- unique(c(insects, plants))
 
-#' Run model estimation for a single species
+#' Run predictions for a single species
 #' 
 #' @param species_name character scientific name of species to run, e.g. 
 #' "Papilio rumiko"
 #' @param log_file path to file for logging information
-#' @param rerun logical indicating whether or not to re-run all model 
-#' evaluations for \code{species_name}
+#' @param rerun logical indicating whether or not to re-run model 
+#' predictions for \code{species_name} regardless of whether or not files are
+#' already on disk
 #' 
 #' @details
-#' This function provides a wrapper that calls \code{run_one_SDMs_full} for a 
+#' This function provides a wrapper that calls \code{run_one_predict} for a 
 #' species, for use in parallel processing. The bulk of the function is 
 #' error/warning handling via a tryCatch, to prevent a single species' analyses 
 #' from bringing the whole thing crashing to a halt.
-SDMs_full_run <- function(species_name, log_file, rerun) {
+predict_run <- function(species_name, log_file, rerun) {
   # Only try writing to a log if log file exists
   # Can't figure out how to do this in one step since R has to evaluate 
   # ALL conditions in an if statement...
@@ -68,7 +69,7 @@ SDMs_full_run <- function(species_name, log_file, rerun) {
   if (write_to_log) {
     write_to_log <- file.exists(log_file)
   }
-  start_message <- paste0("About to run full model estimation on ", 
+  start_message <- paste0("About to model predictions on ", 
                           species_name, ".")
   if (write_to_log) {
     write(x = start_message,
@@ -80,9 +81,9 @@ SDMs_full_run <- function(species_name, log_file, rerun) {
   # try/catch the function that would run the script; write status to log
   tryCatch(
     {
-      # Call the function to evaluate models for this species
-      complete_message <- run_one_SDMs_full(species_name = species_name,
-                                            rerun = rerun)
+      # Call the function to make predictions for this species
+      complete_message <- run_one_predict(species_name = species_name,
+                                          rerun = rerun)
       if (write_to_log) {
         write(x = complete_message, 
               file = log_file,
@@ -93,7 +94,7 @@ SDMs_full_run <- function(species_name, log_file, rerun) {
     },
     # Handle errors (write to log)
     error = function(e) {
-      error_message <- paste0("Error while estimating models for ", 
+      error_message <- paste0("Error while making predictions for ", 
                               species_name, ": ", e)
       if (write_to_log) {
         write(x = error_message, 
@@ -106,7 +107,7 @@ SDMs_full_run <- function(species_name, log_file, rerun) {
     }, # End error function
     # Handle warnings (write to log)
     warning_f = function(w) {
-      warning_message <- paste0("Warning while estimating models for ", 
+      warning_message <- paste0("Warning while making predictions for ", 
                                 species_name, ": ", w)
       if (write_to_log) {
         write(x = warning_message, 
@@ -118,7 +119,7 @@ SDMs_full_run <- function(species_name, log_file, rerun) {
       return(warning_message)
     } # End warning function
   ) # end tryCatch
-} # end SDMs_full_run
+} # end predict_run
 
 # For parallel processing, do two fewer cores or max (whichever is lower)
 num_cores <- parallel::detectCores() - 2
@@ -138,7 +139,7 @@ invisible(clusterEvalQ(cl = clust,
 # Run each script in parallel
 r <- parallel::parLapply(cl = clust,
                          X = species_to_run,
-                         fun = SDMs_full_run,
+                         fun = predict_run,
                          log_file = logfile,
                          rerun = rerun)
 stopCluster(cl = clust)
