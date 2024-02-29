@@ -20,7 +20,7 @@
 run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
                               quad_gam = FALSE, quad_lasso = TRUE) {
   # List necessary packages
-  requirements <- c("dplyr", "dismo", "ENMeval", "gbm", "glmnet", 
+  requirements <- c("dismo", "dplyr", "ENMeval", "gbm", "glmnet", 
                     "mgcv", "randomForest", "raster", "stringr", "terra")
   # Attempt to load required packages
   reqs_met <- sapply(X = requirements, 
