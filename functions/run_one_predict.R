@@ -141,9 +141,21 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
     dist_file <- paste0("output/distributions/", nice_name, "-distribution-",
                         clim_name, ".rds")
 
+    # Future distribution files; we are grabbing these now to see if they 
+    # exist. The big issue is that if we are missing *any* of the forecast 
+    # distributions, we will need to re-run contemporary predictions in order 
+    # to get threshold value for determining presence/absence
+    future_dist_files <- paste0("output/distributions/", nice_name, 
+                                "-distribution-",
+                                climate_models$name[2:nrow(climate_models)], 
+                                ".rds")
+    
+    # Threshold value for determining presence/absence cutoff
+    thr <- NULL
+    
     # Only proceed if rerun is TRUE or suitability and/or distribution file(s) 
     # missing
-    if (rerun | !all(file.exists(c(wtmn_file, dist_file)))) {
+    if (rerun | !all(file.exists(c(wtmn_file, dist_file, future_dist_files)))) {
       status_message <- paste0("Making predictions for current climate for ", 
                                species_name, ".")
       # Iterate over all models.
@@ -210,8 +222,9 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
       # Only proceed if rerun is TRUE or suitability and/or distribution file(s) 
       # missing
       if (rerun | !all(file.exists(c(wtmn_file, dist_file)))) {
-        status_message <- paste0("Making predictions for ", clim_name, " for ", 
-                                 species_name, ".")
+        status_message <- c(status_message, paste0("Making predictions for ", 
+                                                   clim_name, " for ", 
+                                                   species_name, "."))
         
         # Grab predictors
         gcm_directory <- paste0("data/ensemble/ssp", clim_ssp, "/", clim_yr)
@@ -256,8 +269,15 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
         saveRDS(wtmn, wtmn_file)
         
         # Create and save raster with predicted distribution (suitability value > thr)
-        distrib <- wtmn > thr
-        saveRDS(distrib, dist_file)
+        if (!is.null(thr)) {
+          distrib <- wtmn > thr
+          saveRDS(distrib, dist_file)
+        } else {
+          status_message <- c(status_message, 
+                              paste0("Warning: Threshold missing for ", 
+                                     clim_name, " for ", species_name, 
+                                     "; distribution not available."))
+        }
       } else {
         status_message <- paste0(clim_name, " suitability predictions for ", 
                                  species_name, 

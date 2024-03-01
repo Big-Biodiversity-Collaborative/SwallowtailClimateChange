@@ -27,7 +27,7 @@ if (length(args) > 0) {
 }
 
 # Log file to write status to
-logfile <- paste0("logs/predict-full-out.log")
+logfile <- paste0("logs/predict-out.log")
 # Create log file before running full SDMs
 f <- file.create(logfile)
 
