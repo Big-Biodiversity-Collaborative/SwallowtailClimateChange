@@ -279,9 +279,10 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
                                      "; distribution not available."))
         }
       } else {
-        status_message <- paste0(clim_name, " suitability predictions for ", 
-                                 species_name, 
-                                 " already on disk and rerun set to FALSE.")
+        status_message <- c(status_message,
+                            paste0(clim_name, " suitability predictions for ", 
+                                   species_name, 
+                                   " already on disk and rerun set to FALSE."))
       }
     } # End iteration over all future climate scenarios
   } # End else for all files on disk
