@@ -197,7 +197,8 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
       distrib <- wtmn > thr
       saveRDS(distrib, dist_file)
     } else {
-      status_message <- paste0("Current climate suitability predictions for ", 
+      status_message <- paste0(status_message, "\n",
+                               "Current climate suitability predictions for ", 
                                species_name, 
                                " already on disk and rerun set to FALSE.")
     } # End conditional for contemporary climate predictions
@@ -222,9 +223,10 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
       # Only proceed if rerun is TRUE or suitability and/or distribution file(s) 
       # missing
       if (rerun | !all(file.exists(c(wtmn_file, dist_file)))) {
-        status_message <- c(status_message, paste0("Making predictions for ", 
-                                                   clim_name, " for ", 
-                                                   species_name, "."))
+        status_message <- paste0(status_message, "\n",
+                                 "Making predictions for ", 
+                                 clim_name, " for ", 
+                                 species_name, ".")
         
         # Grab predictors
         gcm_directory <- paste0("data/ensemble/ssp", clim_ssp, "/", clim_yr)
@@ -273,18 +275,22 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
           distrib <- wtmn > thr
           saveRDS(distrib, dist_file)
         } else {
-          status_message <- c(status_message, 
-                              paste0("Warning: Threshold missing for ", 
-                                     clim_name, " for ", species_name, 
-                                     "; distribution not available."))
+          status_message <- paste0(status_message, "/n",
+                                   "Warning: Threshold missing for ", 
+                                   clim_name, " for ", species_name, 
+                                   "; distribution not available.")
         }
       } else {
-        status_message <- c(status_message,
-                            paste0(clim_name, " suitability predictions for ", 
-                                   species_name, 
-                                   " already on disk and rerun set to FALSE."))
+        status_message <- paste0(status_message, "/n",
+                                 clim_name, 
+                                 " suitability predictions for ", 
+                                 species_name, 
+                                 " already on disk and rerun set to FALSE.")
       }
     } # End iteration over all future climate scenarios
+    status_message <- paste0(status_message, "\n", 
+                             "Prediction process complete for ", 
+                             species_name, ".")
   } # End else for all files on disk
   return(status_message)
 }

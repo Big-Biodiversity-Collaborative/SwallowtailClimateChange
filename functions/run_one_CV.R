@@ -352,17 +352,17 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
                 row.names = FALSE)
       # Final message about process complete
       message("Model evaluation complete for ", species_name, ".")
-      status_message <- paste0(status_message, 
+      status_message <- paste0(status_message, "\n",
                                "Model evaluation complete for ", species_name, ".")
     } else { # For missing data
-      status_message <- paste0(status_message, 
+      status_message <- paste0(status_message, "\n",
                                "No presence / absence data for ", species_name, 
                                " on disk; no evaluations performed.")
       warning("No presence / absence data for ", species_name, 
               " on disk; no evaluations performed.")
     }
   } else {
-    status_message <- paste0(status_message,
+    status_message <- paste0(status_message, "\n",
                              "Evaluations for ", species_name, 
                              " already on disk and rerun set to ", rerun, ".")
     message("Evaluations for ", species_name, 
