@@ -110,43 +110,25 @@ linear model and "maxent-notune" for untuned MaxEnt model.
    6. **src/data/prep-aridity-data.R**: Download measure(s) of aridity and 
    calculate mean and median values for each insect species; data stored as a 
    csv in data/aridity-statistics.csv.
-2. Preparing R scripts for analyses of individual species
-   1. **src/bash/build-scripts-1-CV.sh**: bash shell script to build an R 
-   script for each species to estimate and evaluate each SDM method with 
-   spatial folds cross-validation; one script is built for each row (species) 
-   in data/gbif-reconcile.csv
-   2. **src/bash/build-scripts-2-SDMs-full.sh**: bash shell script to build an 
-   R script for each species to estimate model parameters based on _all_ 
-   observation data for four of five SDM methods (MaxEnt models based on all 
-   observation data are already estimated in CV step, above); one script is 
-   built for each row (species) in data/gbif-reconcile.csv
-   3. **src/bash/build-scripts-3-predict.sh**: bash shell script to build an R 
-   script for each species to calculate predicted probabilities for each 
-   climate model for each SDM method; one script is built for each row 
-   (species) in data/gbif-reconcile.csv
-   4. **src/bash/build-scripts-4-overlap.sh**: bash shell script to build an R 
-   scripts for each species of insect to create overlap rasters of insect with 
-   its respective host plant(s)
-3. Bulk processing of single-species analyses (see below for example graphic)
-   1. **src/run-indiv/run-all-1-CV-scripts.R**: Run individual species' 
-   cross-validation scripts; can toggle on/off to run all species or just a 
-   subset.
-   2. **src/run-indiv/run-all-2-SDMs-full-scripts.R**: Run individual species' 
-   scripts for SDM estimation based on all data (for BRT, GAM, Lasso, and RF
-   methods); can toggle on/off to run all species or just a subset.
-   3. **src/run-indiv/run-all-3-predict-scripts.R**:  Run individual species' 
-   scripts for suitability prediction and combine for ensemble suitability and 
-   presence/absence rasters (for BRT, GAM, Lasso, MaxEnt, and RF methods); can 
-   toggle on/off to run all species or just a subset.
-4. Running analyses on HPC (if the the run-indiv scripts of step 3 are to be 
+2. Bulk processing of single-species analyses (see below for example graphic)
+   1. **src/run-indiv/run-all-1-CV.R**: Run model evaluation for individual
+   species; can toggle on/off to run all species or just a subset.
+   2. **src/run-indiv/run-all-2-SDMs-full.R**: Estimate SDMs on full data set 
+   for individual species' (for BRT, GAM, Lasso, and RF methods); can toggle 
+   on/off to run all species or just a subset.
+   3. **src/run-indiv/run-all-3-predict.R**: Predict suitabilities and 
+   distributions (presence/absence rasters) for individual species (for BRT, 
+   GAM, Lasso, MaxEnt, and RF methods); can toggle on/off to run all species or 
+   just a subset.
+3. Running analyses on HPC (if the the run-indiv scripts of step 3 are to be 
 run on a high-performance computing cluster)
    1. **src/hpc/run-all-1-CV.slurm**: Run the R script 
-   src/run-indiv/run-all-1-CV-scripts.R via slurm
+   src/run-indiv/run-all-1-CV.R via slurm
    2. **src/hpc/run-all-2-SDMs-full.slurm**: Run the R script 
-   src/run-indiv/run-all-2-SDMs-full-scripts.R via slurm
+   src/run-indiv/run-all-2-SDMs-full.R via slurm
    3. **src/hpc/run-all-3-predict.slurm**: Run the R script 
-   src/run-indiv/run-all-3-predict-scripts.R via slurm
-5. Synthesizing results of single-species analyses (**UNDER CONSTRUCTION**)
+   src/run-indiv/run-all-3-predict.R via slurm
+4. Synthesizing results of single-species analyses (**UNDER CONSTRUCTION**)
    1. **src/summary/summary-1-create-overlap-rasters.R**: Create predicted 
    overlap rasters for each species of insect; see details of raster cell 
    values in the script. Will also create maps (ggplot-produced png files) if 
@@ -155,11 +137,10 @@ run on a high-performance computing cluster)
    to forecast distributions, both considering insect ranges alone, and 
    considering only the areas where insects are predicted to overlap with one 
    or more host plant species; several metrics calculated, including area and 
-   median latitude.
-   3. **src/summary/summary-3-create-delta-rasters.R**: Create raster of 
-   predicted differences in range between contemporary climate and forecast 
-   climate models. Will also create maps (currently png files) if indicated.
-   4. **src/summary/summary-4-draw-species-richness-maps.R**: Draw maps of 
+   median latitude. Also create raster of predicted differences in range 
+   between contemporary climate and forecast climate models. Will also create 
+   maps (currently png files) if indicated.
+   3. **src/summary/summary-3-draw-species-richness-maps.R**: Draw maps of 
    _Papilio_ species richness for current and forecast climate conditions and a 
    map showing the change between current and forecast estimates.
    5. **src/summary/create-observations-maps.R**: Create graphics files 
@@ -184,6 +165,7 @@ above).
         + shapefiles: minimum convex polygons based on filtered observations
     + lakes: North American large bodies of water shapefiles; used to exclude 
     climate data from such areas (see src/data/prep-climate-data.R)
+    + political-boundaries: shapefiles of political boundaries for drawing maps
     + wc2-1: current climate data
 + development: directory for script development
     + data: data for developmental purposes
@@ -206,6 +188,9 @@ above).
     predictions for the four forecast climate scenarios
     + distributions: raster files of predicted distributions for individual 
     species; ensemble predictions based on five SDM methods
+    + eval-metrics: evaluation metrics for individual species distribution 
+    models and tuning parameters (where appropriate) for each species
+    + manuscript: summary statistics and manuscript figures
     + maps: distribution maps (image files) for insect species and hosts and 
     predicted changes in distributions under four forecast climate scenarios
     + overlaps: composite rasters of insect and host species
@@ -227,8 +212,8 @@ above).
     parallel
     + summary: R scripts to analyze and visualize results of individual species
     modeling and predictions
-+ templates: template R scripts used by shell scripts to generate modeling 
-and prediction scripts for individual species
++ templates: DEPRECATED template R scripts used by shell scripts to generate 
+modeling and prediction scripts for individual species
 + tests: woefully depauperate location for tests
 
 ## Miscellany
