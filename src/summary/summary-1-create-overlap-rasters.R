@@ -36,7 +36,7 @@ climate_models <- read.csv(file = "data/climate-models.csv")
 
 # Logical indicating whether to create overlap rasters for all species or just a 
 # subset of insects
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
@@ -71,7 +71,7 @@ for (i in 1:length(insects)) {
   insect_files <- insect_files[!grepl(sdms, insect_files)]
   
   # Abort if missing one or more distribution rasters for the insect
-  if (length(insect_files) < 5) {
+  if (length(insect_files) < nrow(climate_models)) {
     
     message("*** Missing one or more distribution rasters for ", insect, 
             ". Did not create overlap rasters.")
@@ -101,7 +101,7 @@ for (i in 1:length(insects)) {
       plant_files_new <- plant_files_new[!grepl(sdms, plant_files_new)]
       
       # Print message if distribution rasters are missing for a host plant
-      if (length(plant_files_new) < 5) {
+      if (length(plant_files_new) < nrow(climate_models)) {
         cat(paste0("Missing one or more distribution rasters for ", 
                    plants[j], " (host plant for ", insect, ").\n"))
       } else {
@@ -142,18 +142,23 @@ for (i in 1:length(insects)) {
         plant_list <- list()
         for (j in 1:(length(dist_files) - 1)) {
           plant_list[[j]] <- readRDS(dist_files[j + 1])
-          plant_list[[j]] <- terra::crop(plant_list[[j]], insect_dist)
         }
         
-        # Calculate spatial extent across all plant rasters
-        all_plants_ext <- terra::ext(terra::sprc(plant_list))
+        # Calculate spatial extent across all species
+        all_spp_list <- c(plant_list, insect_dist)
+        all_spp_ext <- terra::ext(terra::sprc(all_spp_list))
         
         # Extend plant rasters where needed so they can be combined into a
-        # single SpatRaster
+        # single SpatRaster and then crop to extent of insect
         for (j in 1:length(plant_list)) {
-          plant_list[[j]] <- terra::extend(plant_list[[j]], all_plants_ext)
+          plant_list[[j]] <- terra::extend(plant_list[[j]], all_spp_ext)
+          plant_list[[j]] <- terra::crop(plant_list[[j]], insect_dist)
         }
         host_dist <- terra::rast(plant_list)
+        
+        # Remove any rasters that are all NA
+        raster_sums <- global(host_dist, "sum", na.rm = TRUE)
+        host_dist <- host_dist[[which(!is.na(raster_sums$sum))]]
         
         # Calculate the number of host plants present in each cell
         host_dist <- sum(host_dist, na.rm = TRUE)
