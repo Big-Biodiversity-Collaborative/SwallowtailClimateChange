@@ -29,11 +29,20 @@ countries <- vect("data/political-boundaries/countries.shp")
 countries3 <- filter(countries, countries$adm0_a3 %in% c("USA", "CAN", "MEX"))
 states <- vect("data/political-boundaries/states.shp")  
 
+# Summary: % of species that have SDMs built with <10,000 background points ---#
+
+  spp_sdms <- gbif %>%
+    filter(pa_csv == "yes")
+  sum(spp_sdms$n_background < 10000) / nrow(spp_sdms) * 100
+
 # Table: Papilio species ------------------------------------------------------#
 
   # Get number of filtered records for each swallowtail spp
   insects <- gbif %>%
-    filter(str_detect(species, "Papilio")) %>%
+    filter(str_detect(species, "Papilio")) 
+  filter(insects, n_filtered < 40)
+  
+  insects <- insects %>%
     filter(pa_csv == "yes") %>%
     select(species, n_filtered)
   
@@ -76,6 +85,18 @@ states <- vect("data/political-boundaries/states.shp")
     rename(insect = species,
            n_hosts = n_hosts_suff)
   stats <- left_join(stats, insects_simple, by = "insect")
+  
+  # Predictions for P. appalachiensis
+  stats %>%
+    filter(insect == "Papilio appalachiensis", distribution == "total insect") %>%
+    select(climate, area)
+  # Predictions for P. palamedes
+  stats %>%
+    filter(insect == "Papilio palamedes", distribution == "total insect") %>%
+    select(climate, area)
+  stats %>%
+    filter(insect == "Papilio palamedes", distribution == "insect + host") %>%
+    select(climate, area)
   
   # There are many occasions when we will want summary stats that exclude
   # P. appalachiensis or P. appalachiensis and P. palamedes, so creating
