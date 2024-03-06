@@ -35,7 +35,7 @@ climate_models <- read.csv(file = "data/climate-models.csv")
 
 # Logical indicating whether to create overlap maps for all insects or just a 
 # subset of insects
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract insect names
 if (all_insects) {
@@ -82,14 +82,14 @@ for (insect in insects) {
       # 3 = Area suitable in current and forecast climate (= stable)
       
       # Note: this can take a long time to run if using Lambert projection,
-      # especially for species with large ranges. Set to "latlon" below in case.
+      # especially for species with large ranges.
       map_object <- delta_map(species_name = insect, 
                               delta_raster = deltas,
                               clim_model = clim_model,
                               include_legend = TRUE,
                               horizontal_legend = TRUE,
                               prediction_area = TRUE,
-                              projection = "latlon",
+                              projection = "auto",
                               obs_points = FALSE,
                               full_title = TRUE)
 
