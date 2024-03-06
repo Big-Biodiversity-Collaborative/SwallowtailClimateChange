@@ -91,10 +91,6 @@ output/distributions/*.rds
 output/richness/*
 !output/richness/.gitkeep
 
-# Figures and summary stats for manuscript
-output/manuscript/*
-!output/manuscript/.gitkeep
-
 ### LOGS
 # Log files
 logs/*.log

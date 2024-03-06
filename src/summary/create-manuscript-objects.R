@@ -8,6 +8,7 @@ require(stringr)
 require(terra)
 require(ggplot2)
 require(tidyterra)
+require(gridExtra)
 require(cowplot)
 
 # Logical indicating whether to recreate maps/tables if they already exist
@@ -628,12 +629,28 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"))
     
-  # Create legends
-  legend_o <- get_legend(overlapc1_plot + theme(legend.position = "bottom",
-                                                legend.title = element_blank()))
-  legend_d <- get_legend(delta1_plot + theme(legend.position = "bottom",
-                                             legend.title = element_blank()))
-  
+  # Create legends (Had to change things up, since cowplot::get_legend didn't 
+  # seem to work anymore)
+    # Function to grab legend from ggplot object
+    get_leg <- function(myggplot) {
+      tmp <- ggplot_gtable(ggplot_build(myggplot))
+      leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+      legend <- tmp$grobs[[leg]]
+      return(legend)
+    }
+    overlap_for_legend <- ggplot() +
+      geom_spatraster(data = overlapc1, maxcell = Inf) +
+      scale_fill_manual(name = "desc", values = color_vec_o, na.translate = FALSE) +
+      theme(legend.position = "bottom",
+            legend.title = element_blank())
+    legend_o <- get_leg(overlap_for_legend)
+    delta_for_legend <- ggplot() +
+      geom_spatraster(data = delta1, maxcell = Inf) +
+      scale_fill_manual(name = "desc", values = color_vec_d, na.translate = FALSE) +
+      theme(legend.position = "bottom",
+            legend.title = element_blank())
+    legend_d <- get_leg(delta_for_legend)
+
   # Combine things
   overlaps <- plot_grid(overlapc1_plot + theme(legend.position = "none"),
                         overlapc2_plot + theme(legend.position = "none"),
@@ -822,11 +839,11 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   
   # Combine everything
   r_lcc <- plot_grid(richness_c_lcc, richness_f_lcc, richness_d_lcc,
-                 align = "h",
-                 ncol = 1,
-                 labels = "auto",
-                 vjust = 1,
-                 hjust = 0)
+                     align = "vh",
+                     ncol = 1,
+                     labels = "auto",
+                     vjust = 1,
+                     hjust = 0)
   richness_lcc_3panel <- paste0(output_basename, "richness_lcc_3panel.png")
   if (!file.exists(richness_lcc_3panel) | (file.exists(richness_lcc_3panel) & replace)) {
     ggsave(filename = richness_lcc_3panel,
