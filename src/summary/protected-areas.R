@@ -70,7 +70,7 @@ climate_names_short <- climate_models$name %>%
 
 # Logical indicating whether to summarize protected area coverage for all 
 # insects or just a subset of them
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
