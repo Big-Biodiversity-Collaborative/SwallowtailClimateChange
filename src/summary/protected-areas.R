@@ -120,6 +120,9 @@ stats <- as.data.frame(expand_grid(insect = insects,
   mutate(area_sqkm = NA,
          area_protected_sqkm = NA)
 
+# Read in protected areas file
+pa <- vect("C:/Users/erin/Desktop/PAs/protected-areas.shp")
+
 # For each climate model and distribution type:
   # Reclassify overlap raster (species distribution = 1, everything else NA)
   # Create raster with cell values = land area
@@ -127,10 +130,7 @@ stats <- as.data.frame(expand_grid(insect = insects,
   # Calculate the proportion of area in species distribution that's protected
 
 for (i in 1:length(insects)) {
-  
-  # Read in protected areas file
-  pa <- vect("C:/Users/erin/Desktop/PAs/protected-areas.shp")
-  
+
   overlap_filenames <- paste0("output/overlaps/", nice_names[i], "-overlap-",
                               climate_models$name, ".rds")
   
