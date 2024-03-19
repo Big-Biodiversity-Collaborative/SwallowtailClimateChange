@@ -108,6 +108,10 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         # Calculate means, SDs for standardizing covariates
         stand_obj <- save_means_sds(pa_data, cols = climate_vars, verbose = FALSE)
 
+        # Setup status message for start of model estimation process
+        status_message <- paste0("About to estimate full models for ",
+                                 species_name, ".")
+        
         ########################################
         # Run BRT
         ########################################
@@ -115,6 +119,9 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         brt_file <- paste0("output/SDMs/", nice_name, "-", sdm, ".rds")
         if (!file.exists(brt_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
+          status_message <- paste0(status_message,
+                                   "/nRunning ", toupper(sdm), 
+                                   " model for ", species_name)
           # Extract settings from CV models
           brt_settings <- evals %>%
             dplyr::filter(sdm == "BRT" & fold == 1) %>%
@@ -138,6 +145,11 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
                               climate_vars = climate_vars)
           saveRDS(brt_results, brt_file)
         } else {
+          status_message <- paste0(status_message, "/n",
+                                   clim_name, 
+                                   " suitability predictions for ", 
+                                   species_name, 
+                                   " already on disk and rerun set to FALSE.")
           message("Results for ", sdm, " model for ", species_name, 
                   " already on disk and rerun set to FALSE.")
         }
@@ -149,6 +161,9 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         gam_file <- paste0("output/SDMs/", nice_name, "-", sdm, ".rds")
         if (!file.exists(gam_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
+          status_message <- paste0(status_message,
+                                   "/nRunning ", toupper(sdm), 
+                                   " model for ", species_name)
           quad <- quad_gam
           
           # Run model
@@ -175,6 +190,9 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         lasso_file <- paste0("output/SDMs/", nice_name, "-", sdm, ".rds")
         if (!file.exists(lasso_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
+          status_message <- paste0(status_message,
+                                   "/nRunning ", toupper(sdm), 
+                                   " model for ", species_name)
           quad <- quad_lasso
           
           # Run model
@@ -201,6 +219,9 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         rf_file <- paste0("output/SDMs/", nice_name, "-", sdm, ".rds")
         if (!file.exists(rf_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
+          status_message <- paste0(status_message,
+                                   "/nRunning ", toupper(sdm), 
+                                   " model for ", species_name)
           
           # Run model
           rf_fit <- run_rf(full_data = pa_data,
@@ -226,6 +247,9 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         # Load Maxent model and save as list (if not done already)
         sdm <- "maxent"
         message("Saving ", toupper(sdm), " model for ", species_name)
+        status_message <- paste0(status_message,
+                                 "/nSaving ", toupper(sdm), 
+                                 " model for ", species_name)
         
         # Load model
         max_file <- paste0("output/SDMs/", nice_name, "-", sdm, ".rds")
@@ -241,7 +265,8 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
                               climate_vars = climate_vars)
           saveRDS(max_results, max_file)
         }
-        status_message <- paste0("SDM model estimation complete for ", 
+        status_message <- paste0(status_message, 
+                                 "\nSDM model estimation complete for ", 
                                  species_name)
       }  # End else for shapefile exists
     } # End else for presence/absence file exists
