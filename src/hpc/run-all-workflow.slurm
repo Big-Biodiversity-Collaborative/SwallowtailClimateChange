@@ -21,7 +21,11 @@ module load R/4.2.2
 ### src/bash/build-scripts-1-CV.sh
 ### src/bash/build-scripts-2-CV.sh
 ### src/bash/build-scripts-3-CV.sh
-### Rscript src/hpc/prep-extract-data.R
-Rscript src/run-indiv/run-all-1-CV-scripts.R -a -f
-Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a -f
-Rscript src/run-indiv/run-all-3-predict-scripts.R -a -f
+Rscript src/hpc/prep-extract-data.R
+### Rscript src/run-indiv/run-all-1-CV-scripts.R -a -f
+### Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a -f
+### Rscript src/run-indiv/run-all-3-predict-scripts.R -a -f
+### New approach goes right to wrappers
+Rscript src/run-indiv/run-all-1-CV.R -a -f
+Rscript src/run-indiv/run-all-2-SDMs-full.R -a -f
+Rscript src/run-indiv/run-all-3-predict.R -a -f
