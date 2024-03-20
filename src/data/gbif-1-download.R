@@ -10,6 +10,7 @@ source(file = "load_functions.R")
 
 gbif_data <- read.csv(file = "data/gbif-reconcile.csv")
 replace <- FALSE
+verbose <- TRUE
 
 # How frequently to print message about number of species completed
 print_freq <- 20
@@ -62,21 +63,26 @@ for (i in 1:nrow(gbif_data)) {
       }
     }
 
-    write.csv(x = obs,
-              file = filename,
-              row.names = FALSE)
+    # Only write if there is at least one observation
+    if (!is.null(obs)) {
+      if (nrow(obs) > 0) {
+        write.csv(x = obs,
+                  file = filename,
+                  row.names = FALSE)
+      }
+    }
     
     if (verbose) {
       message(paste0(nrow(obs), " records of ", species_name,
                      " written to ", filename))
     }
+    # Adding a 2 second sleep to slow things down.
+    Sys.sleep(time = 2)
   } else {
     if (verbose) {
       message(species_name, " records already on disk and rerun set to FALSE.")
     }
   }
-  # Adding a 2 second sleep to slow things down.
-  Sys.sleep(time = 2)
   if (i %% print_freq == 0 | i == 1) {
     cat("\n==== Finished querying ", i, " of ", nrow(gbif_data), " species ====\n")
   }
