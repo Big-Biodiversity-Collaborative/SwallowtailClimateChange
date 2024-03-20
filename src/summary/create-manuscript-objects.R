@@ -12,7 +12,7 @@ require(gridExtra)
 require(cowplot)
 
 # Logical indicating whether to recreate maps/tables if they already exist
-replace <- FALSE
+replace <- TRUE
 
 # Load insect-host information and gbif data summaries
 ih <- read.csv("data/insect-host.csv")
