@@ -34,6 +34,11 @@ Carpinus,caroliniana,Carpinus caroliniana,Carpinus caroliniana,,,10147,2022-05-1
 Carum,carvi,Carum carvi,Carum carvi,,,616,2022-05-18,TRUE
 Casimiroa,greggii,Casimiroa greggii,Casimiroa greggii,,,142,2022-05-18,TRUE
 Catalpa,bignonioides,Catalpa bignonioides,Catalpa bignonioides,,,1575,2022-05-18,TRUE
+Ceanothus,fendleri,Ceanothus fendleri,Ceanothus fendleri,,,,,
+Ceanothus,prostratus,Ceanothus prostratus,Ceanothus prostratus,,,,,
+Ceanothus,sanguineus,Ceanothus sanguineus,Ceanothus sanguineus,,,,,
+Ceanothus,velutinus,Ceanothus velutinus,Ceanothus velutinus,,,,,
+Choisya,dumosa,Choisya dumosa,Choisya dumosa,,,,,
 Cicuta,bulbifera,Cicuta bulbifera,Cicuta bulbifera,,,1588,2022-05-18,TRUE
 Cicuta,douglasii,Cicuta douglasii,Cicuta douglasii,,,767,2022-05-18,TRUE
 Cicuta,maculata,Cicuta maculata,Cicuta maculata,,,4992,2022-05-18,TRUE
@@ -41,6 +46,8 @@ Cinnamomum,camphora,Cinnamomum camphora,Cinnamomum camphora,,,900,2022-05-18,TRU
 Conioselinum,chinense,Conioselinum chinense,Conioselinum chinense,,,443,2022-05-18,TRUE
 Conioselinum,scopulorum,Conioselinum scopulorum,Conioselinum scopulorum,,,376,2022-05-18,TRUE
 Conium,maculatum,Conium maculatum,Conium maculatum,,,8702,2022-05-18,TRUE
+Crataegus,douglasii,Crataegus douglasii,Crataegus douglasii,,,,,
+Crataegus,rivularis,Crataegus rivularis,Crataegus rivularis,,,,,
 Crithmum,maritimum,Crithmum maritimum,Crithmum maritimum,,Mediterranean species,5,2022-05-18,FALSE
 Cryptotaenia,canadensis,Cryptotaenia canadensis,Cryptotaenia canadensis,,,4134,2022-05-18,TRUE
 Cydonia,oblonga,Cydonia oblonga,Cydonia oblonga,,,332,2022-05-18,TRUE
@@ -59,6 +66,7 @@ Fraxinus,caroliniana,Fraxinus caroliniana,Fraxinus caroliniana,,,711,2022-05-18,
 Fraxinus,latifolia,Fraxinus latifolia,Fraxinus latifolia,,,1309,2022-05-18,TRUE
 Fraxinus,nigra,Fraxinus nigra,Fraxinus nigra,,,3231,2022-05-18,TRUE
 Fraxinus,pennsylvanica,Fraxinus pennsylvanica,Fraxinus pennsylvanica,,,60868,2022-05-18,TRUE
+Fraxinus,velutina,Fraxinus velutina,Fraxinus velutina,,,,,
 Haplophyllum,balcanicum,Haplophyllum balcanicum,Haplophyllum balcanicum,,Eurasian species,0,2022-05-18,FALSE
 Haplophyllum,linifolium,Haplophyllum linifolium,Haplophyllum linifolium,,European species,0,2022-05-18,FALSE
 Haplophyllum,tuberculatum,Haplophyllum tuberculatum,Haplophyllum tuberculatum,,Eurasian species,0,2022-05-18,FALSE
@@ -98,7 +106,7 @@ Oenanthe,sarmentosa,Oenanthe sarmentosa,Oenanthe sarmentosa,,,1360,2022-05-18,TR
 Osmorhiza,longistylis,Osmorhiza longistylis,Osmorhiza longistylis,,,2790,2022-05-18,TRUE
 Tiedemannia,canbyi,Tiedemannia canbyi,Tiedemannia canbyi,,"Rare, also known as Oxypolis canbyi",8,2022-05-18,TRUE
 Papilio,appalachiensis,Papilio appalachiensis,Papilio appalachiensis,,,128,2022-05-18,TRUE
-Papilio,aristodemus,Papilio aristodemus,Papilio aristodemus,,,44,2022-05-18,TRUE
+Papilio,aristodemus,Papilio aristodemus,Papilio aristodemus,Heraclides ponceana,,44,2022-05-18,TRUE
 Papilio,brevicauda,Papilio brevicauda,Papilio brevicauda,,,647,2022-05-18,TRUE
 Papilio,canadensis,Papilio canadensis,Papilio canadensis,,,15835,2022-05-18,TRUE
 Papilio,cresphontes,Papilio cresphontes,Papilio cresphontes,,includes some observations that are likely P. rumiko,16747,2022-05-18,TRUE
@@ -151,6 +159,7 @@ Pteryxia,petraea,Pteryxia petraea,Pteryxia petraea,,,247,2022-05-18,TRUE
 Pteryxia,terebinthina,Pteryxia terebinthina,Pteryxia terebinthina,,,605,2022-05-18,TRUE
 Ptilimnium,capillaceum,Ptilimnium capillaceum,Ptilimnium capillaceum,,,1013,2022-05-18,TRUE
 Rhamnus,californica,Rhamnus californica,Frangula californica,,,667,2022-05-18,TRUE
+Rhamnus,crocea,Rhamnus crocea,Rhamnus crocea,,,,,
 Ridolfia,segetum,Ridolfia segetum,Ridolfia segetum,,Mediterranean species,0,2022-05-18,FALSE
 Ruta,angustifolia,Ruta angustifolia,Ruta angustifolia,,Mediterranean species,0,2022-05-18,FALSE
 Ruta,chalepensis,Ruta chalepensis,Ruta chalepensis,,,305,2022-05-18,TRUE
