@@ -1,264 +1,291 @@
-"insect","host","host_accepted","source"
-"Papilio appalachiensis","Prunus serotina","Prunus serotina","https://www.butterfliesandmoths.org/species/Papilio-appalachiensis"
-"Papilio aristodemus","Amyris elemifera","Amyris elemifera","https://en.wikipedia.org/wiki/Papilio_aristodemus"
-"Papilio aristodemus","Ptelea trifoliata","Ptelea trifoliata","https://en.wikipedia.org/wiki/Papilio_aristodemus"
-"Papilio brevicauda","Angelica lucida","Angelica lucida","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Apium graveolens","Apium graveolens","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Conioselinum chinense","Conioselinum chinense","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Daucus carota","Daucus carota","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Heracleum maximum","Heracleum maximum","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Ligusticum scoticum","Ligusticum scoticum","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Pastinaca sativa","Pastinaca sativa","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio brevicauda","Petroselinum crispum","Petroselinum crispum","https://en.wikipedia.org/wiki/Papilio_brevicauda"
-"Papilio canadensis","Alnus incana","Alnus incana","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Amelanchier canadensis","Amelanchier canadensis","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Betula alba","Betula pubescens","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Betula alleghaniensis","Betula alleghaniensis","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Betula lenta","Betula lenta","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Betula papyrifera","Betula papyrifera","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Fraxinus americana","Fraxinus americana","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Fraxinus pennsylvanica","Fraxinus pennsylvanica","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Malus pumila","Malus domestica","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Populus balsamifera","Populus balsamifera","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Populus grandidentata","Populus grandidentata","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Populus tremuloides","Populus tremuloides","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Prunus cerasus","Prunus cerasus","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Prunus pensylvanica","Prunus pensylvanica","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Prunus persica","Prunus persica","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Prunus serotina","Prunus serotina","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Prunus virginiana","Prunus virginiana","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Sorbus americana","Sorbus americana","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Syringa vulgaris","Syringa vulgaris","Prudic et al. 2007 PNAS"
-"Papilio canadensis","Tilia americana","Tilia americana","Prudic et al. 2007 PNAS"
-"Papilio cresphontes","Ptelea trifoliata","Ptelea trifoliata","https://www.butterfliesandmoths.org/species/Papilio-cresphontes"
-"Papilio cresphontes","Ruta graveolens","Ruta graveolens","https://www.butterfliesandmoths.org/species/Papilio-cresphontes"
-"Papilio cresphontes","Zanthoxylum americanum","Zanthoxylum americanum","https://www.butterfliesandmoths.org/species/Papilio-cresphontes"
-"Papilio cresphontes","Zanthoxylum clava-herculis","Zanthoxylum clava-herculis",""
-"Papilio eurymedon","Alnus rubra","Alnus rubra","https://en.wikipedia.org/wiki/Papilio_eurymedon"
-"Papilio eurymedon","Eriodictyon californicum","Eriodictyon californicum","https://en.wikipedia.org/wiki/Papilio_eurymedon"
-"Papilio eurymedon","Holodiscus discolor","Holodiscus discolor","https://en.wikipedia.org/wiki/Papilio_eurymedon"
-"Papilio eurymedon","Prunus emarginata","Prunus emarginata","https://www.butterfliesandmoths.org/species/Papilio-eurymedon"
-"Papilio eurymedon","Rhamnus californica","Frangula californica","https://www.butterfliesandmoths.org/species/Papilio-eurymedon"
-"Papilio glaucus","Alnus incana","Alnus incana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Carpinus caroliniana","Carpinus caroliniana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Catalpa bignonioides","Catalpa bignonioides","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Cinnamomum camphora","Cinnamomum camphora","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Cydonia oblonga","Cydonia oblonga","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Fraxinus americana","Fraxinus americana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Fraxinus caroliniana","Fraxinus caroliniana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Fraxinus nigra","Fraxinus nigra","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Fraxinus pennsylvanica","Fraxinus pennsylvanica","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Lindera benzoin","Lindera benzoin","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Liriodendron tulipifera","Liriodendron tulipifera","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Magnolia acuminata","Magnolia acuminata","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Magnolia virginiana","Magnolia virginiana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Malus pumila","Malus domestica","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Populus deltoides","Populus deltoides","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Populus tremuloides","Populus tremuloides","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Prunus americana","Prunus americana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Prunus cerasus","Prunus cerasus","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Prunus domestica","Prunus domestica","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Prunus pensylvanica","Prunus pensylvanica","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Prunus serotina","Prunus serotina","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Prunus virginiana","Prunus virginiana","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Ptelea trifoliata","Ptelea trifoliata","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Sassafras albidum","Sassafras albidum","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Syringa vulgaris","Syringa vulgaris","Prudic et al. 2007 PNAS"
-"Papilio glaucus","Zanthoxylum americanum","Zanthoxylum americanum","Prudic et al. 2007 PNAS"
-"Papilio indra","Aletes acaulis","Aletes acaulis","Prudic et al. 2007 PNAS"
-"Papilio indra","Cymopterus panamintensis","Cymopterus panamintensis","Prudic et al. 2007 PNAS"
-"Papilio indra","Cymopterus purpureus","Cymopterus purpureus","Prudic et al. 2007 PNAS"
-"Papilio indra","Harbouria trachypleura","Harbouria trachypleura","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium dissectum","Lomatium dissectum","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium eastwoodiae","Lomatium eastwoodiae","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium grayi","Lomatium grayi","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium junceum","Lomatium junceum","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium latilobum","Lomatium latilobum","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium lucidum","Lomatium lucidum","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium marginatum","Lomatium marginatum","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium nuttallii","Lomatium nuttallii","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium parryi","Lomatium parryi","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium scabrum","Lomatium scabrum","Prudic et al. 2007 PNAS"
-"Papilio indra","Lomatium triternatum","Lomatium triternatum","Prudic et al. 2007 PNAS"
-"Papilio indra","Pteryxia hendersonii","Pteryxia hendersonii","Prudic et al. 2007 PNAS"
-"Papilio indra","Pteryxia petraea","Pteryxia petraea","Prudic et al. 2007 PNAS"
-"Papilio indra","Pteryxia terebinthina","Pteryxia terebinthina","Prudic et al. 2007 PNAS"
-"Papilio indra","Tauschia arguta","Tauschia arguta","Prudic et al. 2007 PNAS"
-"Papilio indra","Tauschia parishii","Tauschia parishii","Prudic et al. 2007 PNAS"
-"Papilio indra","Thamnosma montana","Thamnosma montana","Prudic et al. 2007 PNAS"
-"Papilio machaon","Aegopodium podagraria","Aegopodium podagraria","Prudic et al. 2007 PNAS"
-"Papilio machaon","Ammi visnaga","Ammi visnaga","Prudic et al. 2007 PNAS"
-"Papilio machaon","Anethum graveolens","Anethum graveolens","Prudic et al. 2007 PNAS"
-"Papilio machaon","Angelica archangelica","Angelica archangelica","Prudic et al. 2007 PNAS"
-"Papilio machaon","Angelica sylvestris","Angelica sylvestris","Prudic et al. 2007 PNAS"
-"Papilio machaon","Artemisia dracunculus","Artemisia dracunculus","Prudic et al. 2007 PNAS"
-"Papilio machaon","Artemisia norvegica","Artemisia norvegica","Prudic et al. 2007 PNAS"
-"Papilio machaon","Bupleurum falcatum","Bupleurum falcatum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Bupleurum fruticescens","Bupleurum fruticescens","Prudic et al. 2007 PNAS"
-"Papilio machaon","Carum carvi","Carum carvi","Prudic et al. 2007 PNAS"
-"Papilio machaon","Crithmum maritimum","Crithmum maritimum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Daucus carota","Daucus carota","Prudic et al. 2007 PNAS"
-"Papilio machaon","Dictamnus albus","Dictamnus albus","Prudic et al. 2007 PNAS"
-"Papilio machaon","Falcaria vulgaris","Falcaria vulgaris","Prudic et al. 2007 PNAS"
-"Papilio machaon","Ferula communis","Ferula communis","Prudic et al. 2007 PNAS"
-"Papilio machaon","Haplophyllum balcanicum","Haplophyllum balcanicum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Haplophyllum linifolium","Haplophyllum linifolium","Prudic et al. 2007 PNAS"
-"Papilio machaon","Haplophyllum tuberculatum","Haplophyllum tuberculatum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Heracleum maximum","Heracleum maximum","Prudic et al. 2007 PNAS (listed as H. lanatum)"
-"Papilio machaon","Heracleum sphondylium","Heracleum sphondylium","Prudic et al. 2007 PNAS"
-"Papilio machaon","Laserpitium halleri","Laserpitium halleri","Prudic et al. 2007 PNAS"
-"Papilio machaon","Laserpitium latifolium","Laserpitium latifolium","Prudic et al. 2007 PNAS"
-"Papilio machaon","Levisticum officinale","Levisticum officinale","Prudic et al. 2007 PNAS"
-"Papilio machaon","Meum athamanticum","Meum athamanticum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Petroselinum crispum","Petroselinum crispum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Peucedanum cervaria","Peucedanum cervaria","Prudic et al. 2007 PNAS"
-"Papilio machaon","Peucedanum officinale","Peucedanum officinale","Prudic et al. 2007 PNAS"
-"Papilio machaon","Peucedanum oreoselinum","Peucedanum oreoselinum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Pimpinella saxifraga","Pimpinella saxifraga","Prudic et al. 2007 PNAS"
-"Papilio machaon","Ridolfia segetum","Ridolfia segetum","Prudic et al. 2007 PNAS"
-"Papilio machaon","Ruta angustifolia","Ruta angustifolia","Prudic et al. 2007 PNAS"
-"Papilio machaon","Ruta chalepensis","Ruta chalepensis","Prudic et al. 2007 PNAS"
-"Papilio machaon","Ruta graveolens","Ruta graveolens","Prudic et al. 2007 PNAS"
-"Papilio machaon","Seseli libanotis","Seseli libanotis","Prudic et al. 2007 PNAS"
-"Papilio machaon","Seseli varium","Seseli varium","Prudic et al. 2007 PNAS"
-"Papilio machaon","Silaum silaus","Silaum silaus","Prudic et al. 2007 PNAS"
-"Papilio machaon","Selinum carvifolia","Selinum carvifolia","Prudic et al. 2007 PNAS"
-"Papilio machaon","Trinia glauca","Trinia glauca","Prudic et al. 2007 PNAS"
-"Papilio machaon","Zizia aptera","Zizia aptera","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Fraxinus anomala","Fraxinus anomala","https://en.wikipedia.org/wiki/Papilio_multicaudata"
-"Papilio multicaudata","Fraxinus latifolia","Fraxinus latifolia","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Fraxinus pennsylvanica","Fraxinus pennsylvanica","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Ligustrum lucidum","Ligustrum lucidum","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Ligustrum vulgare","Ligustrum vulgare","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Platanus racemosa","Platanus racemosa","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Platanus wrightii","Platanus wrightii","https://en.wikipedia.org/wiki/Papilio_multicaudata"
-"Papilio multicaudata","Prunus americana","Prunus americana","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Prunus serotina","Prunus serotina","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Prunus cerasus","Prunus cerasus","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Prunus emarginata","Prunus emarginata","https://en.wikipedia.org/wiki/Papilio_multicaudata"
-"Papilio multicaudata","Prunus virginiana","Prunus virginiana","https://en.wikipedia.org/wiki/Papilio_multicaudata"
-"Papilio multicaudata","Ptelea crenulata","Ptelea crenulata","Prudic et al. 2007 PNAS"
-"Papilio multicaudata","Ptelea trifoliata","Ptelea trifoliata","https://en.wikipedia.org/wiki/Papilio_multicaudata"
-"Papilio multicaudata","Vauquelinia californica","Vauquelinia californica","https://en.wikipedia.org/wiki/Papilio_multicaudata"
-"Papilio palamedes","Persea borbonia","Persea borbonia","Prudic et al. 2007 PNAS"
-"Papilio palamedes","Sassafras albidum","Sassafras albidum","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Anethum graveolens","Anethum graveolens","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Angelica ampla","Angelica ampla","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Angelica atropurpurea","Angelica atropurpurea","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Angelica venenosa","Angelica venenosa","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Apium graveolens","Apium graveolens","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Berula erecta","Berula erecta","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Carum carvi","Carum carvi","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Cicuta bulbifera","Cicuta bulbifera","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Cicuta douglasii","Cicuta douglasii","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Cicuta maculata","Cicuta maculata","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Conium maculatum","Conium maculatum","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Cryptotaenia canadensis","Cryptotaenia canadensis","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Cymopterus panamintensis","Cymopterus panamintensis","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Daucus carota","Daucus carota","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Daucus pusillus","Daucus pusillus","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Dictamnus albus","Dictamnus albus","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Foeniculum vulgare","Foeniculum vulgare","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Harbouria trachypleura","Harbouria trachypleura","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Heracleum maximum","Heracleum maximum","Prudic et al. 2007 PNAS (listed as H. lanatum)"
-"Papilio polyxenes","Levisticum officinale","Levisticum officinale","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Ligusticum scoticum","Ligusticum scoticum","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Osmorhiza longistylis","Osmorhiza longistylis","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Tiedemannia canbyi","Tiedemannia canbyi","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Pastinaca sativa","Pastinaca sativa","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Petroselinum crispum","Petroselinum crispum","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Ptilimnium capillaceum","Ptilimnium capillaceum","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Ruta graveolens","Ruta graveolens","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Sium suave","Sium suave","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Spermolepis divaricata","Spermolepis divaricata","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Taenidia integerrima","Taenidia integerrima","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Tauschia arguta","Tauschia arguta","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Tauschia parishii","Tauschia parishii","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Thamnosma montana","Thamnosma montana","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Thamnosma texana","Thamnosma texana","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Thaspium barbinode","Thaspium barbinode","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Zizia aptera","Zizia aptera","Prudic et al. 2007 PNAS"
-"Papilio polyxenes","Zizia aurea","Zizia aurea","Prudic et al. 2007 PNAS"
-"Papilio rumiko","Amyris texana","Amyris texana","https://en.wikipedia.org/wiki/Papilio_rumiko"
-"Papilio rumiko","Casimiroa greggii","Casimiroa greggii","https://en.wikipedia.org/wiki/Papilio_rumiko"
-"Papilio rumiko","Ptelea trifoliata","Ptelea trifoliata","https://en.wikipedia.org/wiki/Papilio_rumiko"
-"Papilio rumiko","Ruta graveolens","Ruta graveolens","https://en.wikipedia.org/wiki/Papilio_rumiko"
-"Papilio rumiko","Zanthoxylum fagara","Zanthoxylum fagara","https://en.wikipedia.org/wiki/Papilio_rumiko"
-"Papilio rutulus","Alnus alnobetula","Alnus alnobetula","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Alnus incana","Alnus incana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Alnus rubra","Alnus rubra","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Betula papyrifera","Betula papyrifera","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Malus pumila","Malus domestica","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Persea americana","Persea americana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Platanus racemosa","Platanus racemosa","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Populus angustifolia","Populus angustifolia","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Populus balsamifera","Populus balsamifera","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Populus tremuloides","Populus tremuloides","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Populus trichocarpa","Populus trichocarpa","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus americana","Prunus americana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus armeniaca","Prunus armeniaca","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus caroliniana","Prunus caroliniana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus cerasus","Prunus cerasus","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus domestica","Prunus domestica","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus emarginata","Prunus emarginata","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus ilicifolia","Prunus ilicifolia","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus persica","Prunus persica","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Prunus virginiana","Prunus virginiana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Ptelea trifoliata","Ptelea trifoliata","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Salix babylonica","Salix babylonica","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Salix exigua","Salix exigua","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Salix hookeriana","Salix hookeriana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Salix lasiandra","Salix lasiandra","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Salix lasiolepis","Salix lasiolepis","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Salix scouleriana","Salix scouleriana","Prudic et al. 2007 PNAS"
-"Papilio rutulus","Syringa vulgaris","Syringa vulgaris","Prudic et al. 2007 PNAS"
-"Papilio troilus","Cinnamomum camphora","Cinnamomum camphora","Prudic et al. 2007 PNAS"
-"Papilio troilus","Lindera benzoin","Lindera benzoin","Prudic et al. 2007 PNAS"
-"Papilio troilus","Liriodendron tulipifera","Liriodendron tulipifera","Prudic et al. 2007 PNAS"
-"Papilio troilus","Magnolia virginiana","Magnolia virginiana","Prudic et al. 2007 PNAS"
-"Papilio troilus","Persea borbonia","Persea borbonia","Prudic et al. 2007 PNAS"
-"Papilio troilus","Sassafras albidum","Sassafras albidum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Anethum graveolens","Anethum graveolens","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica ampla","Angelica ampla","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica arguta","Angelica arguta","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica hendersonii","Angelica hendersonii","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica kingii","Angelica kingii","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica lineariloba","Angelica lineariloba","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica lucida","Angelica lucida","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Angelica tomentosa","Angelica tomentosa","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Apium graveolens","Apium graveolens","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Carum carvi","Carum carvi","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Cicuta maculata","Cicuta maculata","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Conioselinum scopulorum","Conioselinum scopulorum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Conium maculatum","Conium maculatum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Daucus carota","Daucus carota","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Daucus pusillus","Daucus pusillus","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Foeniculum vulgare","Foeniculum vulgare","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Harbouria trachypleura","Harbouria trachypleura","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Heracleum maximum","Heracleum maximum","Prudic et al. 2007 PNAS (listed as H. lanatum)"
-"Papilio zelicaon","Heracleum sphondylium","Heracleum sphondylium","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Ligusticum grayi","Ligusticum grayi","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Ligusticum porteri","Ligusticum porteri","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium californicum","Lomatium californicum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium dasycarpum","Lomatium dasycarpum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium dissectum","Lomatium dissectum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium grayi","Lomatium grayi","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium marginatum","Lomatium marginatum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium nuttallii","Lomatium nuttallii","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium parryi","Lomatium parryi","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium triternatum","Lomatium triternatum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Lomatium utriculatum","Lomatium utriculatum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Oenanthe sarmentosa","Oenanthe sarmentosa","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Pastinaca sativa","Pastinaca sativa","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Perideridia bolanderi","Perideridia bolanderi","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Perideridia gairdneri","Perideridia gairdneri","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Perideridia kelloggii","Perideridia kelloggii","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Petroselinum crispum","Petroselinum crispum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Pseudocymopterus montanus","Pseudocymopterus montanus","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Pteryxia hendersonii","Pteryxia hendersonii","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Pteryxia petraea","Pteryxia petraea","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Pteryxia terebinthina","Pteryxia terebinthina","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Sphenosciadium capitellatum","Sphenosciadium capitellatum","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Tauschia arguta","Tauschia arguta","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Tauschia parishii","Tauschia parishii","Prudic et al. 2007 PNAS"
-"Papilio zelicaon","Zizia aptera","Zizia aptera","Prudic et al. 2007 PNAS"
+insect,host_source,host_accepted,source_name,source_doi
+Papilio appalachiensis,Prunus serotina,Prunus serotina,Pavulaan & Wright 2002,
+Papilio aristodemus,Amyris elemifera,Amyris elemifera,Rutkowski 1971,
+Papilio aristodemus,Amyris elemifera,Amyris elemifera,Scott 1986,10.1515/9781503624450
+Papilio aristodemus,Zanthoxylum fagara,Zanthoxylum fagara,Rutkowski 1971,
+Papilio aristodemus,Zanthoxylum fagara,Zanthoxylum fagara,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Angelica atropurpurea,Angelica atropurpurea,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Coelopleurum lucidum,Angelica lucida,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Apium graveolens,Apium graveolens,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Conioselinum chinense,Conioselinum chinense,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Daucus carota,Daucus carota,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Heracleum lanatum,Heracleum maximum,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Ligusticum scoticum,Ligusticum scoticum,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Pastinaca sativa,Pastinaca sativa,Scott 1986,10.1515/9781503624450
+Papilio brevicauda,Petroselinum crispum,Petroselinum crispum,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Alnus rugosa,Alnus incana,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Amelanchier canadensis,Amelanchier canadensis,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Betula alleghaniensis,Betula alleghaniensis,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Betula lenta,Betula lenta,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Betula papyrifera,Betula papyrifera,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Betula alba,Betula pubescens,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Fraxinus americana,Fraxinus americana,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Fraxinus pennsylvanica,Fraxinus pennsylvanica,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Malus pumila,Malus domestica,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Populus balsamifera,Populus balsamifera,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Populus grandidentata,Populus grandidentata,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Populus tremuloides,Populus tremuloides,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Prunus cerasus,Prunus cerasus,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Prunus pensylvanica,Prunus pensylvanica,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Prunus persica,Prunus persica,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Prunus serotina,Prunus serotina,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Prunus virginiana,Prunus virginiana,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Sorbus americana,Sorbus americana,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Syringa vulgaris,Syringa vulgaris,Scott 1986,10.1515/9781503624450
+Papilio canadensis,Tilia americana,Tilia americana,Scott 1986,10.1515/9781503624450
+Papilio cresphontes,Ptelea trifoliata,Ptelea trifoliata,Scott 1986,10.1515/9781503624450
+Papilio cresphontes,Ptelea trifoliata,Ptelea trifoliata,Tyler et al 1995,10.1086/419219
+Papilio cresphontes,Ruta graveolens,Ruta graveolens,Scott 1986,10.1515/9781503624450
+Papilio cresphontes,Ruta graveolens,Ruta graveolens,Tyler et al 1995,10.1086/419219
+Papilio cresphontes,Zanthoxylum americanum,Zanthoxylum americanum,Marks 2018,
+Papilio cresphontes,Zanthoxylum clava-herculis,Zanthoxylum clava-herculis,Marks 2018,
+Papilio eurymedon,Alnus rubra,Alnus rubra,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Ceanothus fendleri,Ceanothus fendleri,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Ceanothus prostratus,Ceanothus prostratus,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Ceanothus sanguineus,Ceanothus sanguineus,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Ceanothus velutinus,Ceanothus velutinus,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Crataegus douglasii,Crataegus douglasii,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Crataegus rivularis,Crataegus rivularis,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Rhamnus californica,Frangula californica,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Holodiscus discolor,Holodiscus discolor,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Malus pumila,Malus domestica,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Prunus domestica,Prunus domestica,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Prunus emarginata,Prunus emarginata,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Prunus ilicifolia,Prunus ilicifolia,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Prunus persica,Prunus persica,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Prunus virginiana,Prunus virginiana,Scott 1986,10.1515/9781503624450
+Papilio eurymedon,Rhamnus crocea,Rhamnus crocea,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Alnus incana,Alnus incana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Carpinus caroliniana,Carpinus caroliniana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Catalpa bignonioides,Catalpa bignonioides,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Cinnamomum camphora,Cinnamomum camphora,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Cydonia oblonga,Cydonia oblonga,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Fraxinus americana,Fraxinus americana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Fraxinus caroliniana,Fraxinus caroliniana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Fraxinus nigra,Fraxinus nigra,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Fraxinus pennsylvanica,Fraxinus pennsylvanica,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Lindera benzoin,Lindera benzoin,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Liriodendron tulipifera,Liriodendron tulipifera,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Magnolia acuminata,Magnolia acuminata,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Magnolia virginiana,Magnolia virginiana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Malus pumila,Malus domestica,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Populus deltoides,Populus deltoides,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Populus tremuloides,Populus tremuloides,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Prunus americana,Prunus americana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Prunus cerasus,Prunus cerasus,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Prunus domestica,Prunus domestica,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Prunus pensylvanica,Prunus pensylvanica,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Prunus serotina,Prunus serotina,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Prunus virginiana,Prunus virginiana,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Ptelea trifoliata,Ptelea trifoliata,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Sassafras albidum,Sassafras albidum,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Syringa vulgaris,Syringa vulgaris,Scott 1986,10.1515/9781503624450
+Papilio glaucus,Zanthoxylum americanum,Zanthoxylum americanum,Scott 1986,10.1515/9781503624450
+Papilio indra,Aletes acaulis,Aletes acaulis,Scott 1986,10.1515/9781503624450
+Papilio indra,Cymopterus panamintensis,Cymopterus panamintensis,Scott 1986,10.1515/9781503624450
+Papilio indra,Cymopterus purpureus,Cymopterus purpureus,Scott 1986,10.1515/9781503624450
+Papilio indra,Harbouria trachypleura,Harbouria trachypleura,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium dissectum,Lomatium dissectum,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium eastwoodiae,Lomatium eastwoodiae,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium grayi,Lomatium grayi,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium junceum,Lomatium junceum,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium latilobum,Lomatium latilobum,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium lucidum,Lomatium lucidum,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium marginatum,Lomatium marginatum,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium nuttallii,Lomatium nuttallii,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium parryi,Lomatium parryi,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium scabrum,Lomatium scabrum,Scott 1986,10.1515/9781503624450
+Papilio indra,Lomatium triternatum,Lomatium triternatum,Scott 1986,10.1515/9781503624450
+Papilio indra,Pteryxia hendersonii,Pteryxia hendersonii,Scott 1986,10.1515/9781503624450
+Papilio indra,Pteryxia petraea,Pteryxia petraea,Scott 1986,10.1515/9781503624450
+Papilio indra,Pteryxia terebinthina,Pteryxia terebinthina,Scott 1986,10.1515/9781503624450
+Papilio indra,Tauschia arguta,Tauschia arguta,Scott 1986,10.1515/9781503624450
+Papilio indra,Tauschia parishii,Tauschia parishii,Scott 1986,10.1515/9781503624450
+Papilio indra,Thamnosma montana,Thamnosma montana,Scott 1986,10.1515/9781503624450
+Papilio machaon,Aegopodium podagraria,Aegopodium podagraria,Tolman 1997,
+Papilio machaon,Ammi visnaga,Ammi visnaga,Tolman 1997,
+Papilio machaon,Anethum graveolens,Anethum graveolens,Tolman 1997,
+Papilio machaon,Angelica archangelica,Angelica archangelica,Sperling and Feeney 1995,10.1093/aesa/89.1.154
+Papilio machaon,Angelica archangelica,Angelica archangelica,Tolman 1997,
+Papilio machaon,Angelica sylvestris,Angelica sylvestris,Tolman 1997,
+Papilio machaon,Artemisia dracunculus,Artemisia dracunculus,Scott 1986,10.1515/9781503624450
+Papilio machaon,Artemisia norvegica,Artemisia norvegica,Scott 1986,10.1515/9781503624450
+Papilio machaon,Bupleurum falcatum,Bupleurum falcatum,Tolman 1997,
+Papilio machaon,Bupleurum fruticescens,Bupleurum fruticescens,Tolman 1997,
+Papilio machaon,Carum carvi,Carum carvi,Tolman 1997,
+Papilio machaon,Crithmum maritimum,Crithmum maritimum,Tolman 1997,
+Papilio machaon,Daucus carota,Daucus carota,Sperling and Feeney 1995,10.1093/aesa/89.1.154
+Papilio machaon,Daucus carota,Daucus carota,Tolman 1997,
+Papilio machaon,Dictamnus albus,Dictamnus albus,Tolman 1997,
+Papilio machaon,Falcaria vulgaris,Falcaria vulgaris,Tolman 1997,
+Papilio machaon,Ferula communis,Ferula communis,Tolman 1997,
+Papilio machaon,Foeniculum vulgare,Foeniculum vulgare,Sperling and Feeney 1995,10.1093/aesa/89.1.154
+Papilio machaon,Haplophyllum balcanicum,Haplophyllum balcanicum,Tolman 1997,
+Papilio machaon,Haplophyllum linifolium,Haplophyllum linifolium,Tolman 1997,
+Papilio machaon,Haplophyllum tuberculatum,Haplophyllum tuberculatum,Tolman 1997,
+Papilio machaon,Heracleum lanatum,Heracleum maximum,Scott 1986,10.1515/9781503624450
+Papilio machaon,Heracleum lanatum,Heracleum maximum,Sperling and Feeney 1995,10.1093/aesa/89.1.154
+Papilio machaon,Heracleum sphondylium,Heracleum sphondylium,Tolman 1997,
+Papilio machaon,Laserpitium halleri,Laserpitium halleri,Tolman 1997,
+Papilio machaon,Laserpitium latifolium,Laserpitium latifolium,Tolman 1997,
+Papilio machaon,Levisticum officinale,Levisticum officinale,Tolman 1997,
+Papilio machaon,Meum athamanticum,Meum athamanticum,Tolman 1997,
+Papilio machaon,Pastinaca sativa,Pastinaca sativa,Sperling and Feeney 1995,10.1093/aesa/89.1.154
+Papilio machaon,Petroselinum crispum,Petroselinum crispum,Tolman 1997,
+Papilio machaon,Peucedanum cervaria,Peucedanum cervaria,Tolman 1997,
+Papilio machaon,Peucedanum officinale,Peucedanum officinale,Tolman 1997,
+Papilio machaon,Peucedanum oreoselinum,Peucedanum oreoselinum,Tolman 1997,
+Papilio machaon,Pimpinella saxifraga,Pimpinella saxifraga,Tolman 1997,
+Papilio machaon,Ridolfia segetum,Ridolfia segetum,Tolman 1997,
+Papilio machaon,Ruta angustifolia,Ruta angustifolia,Tolman 1997,
+Papilio machaon,Ruta chalepensis,Ruta chalepensis,Tolman 1997,
+Papilio machaon,Ruta graveolens,Ruta graveolens,Tolman 1997,
+Papilio machaon,Selinum carvifolia,Selinum carvifolia,Tolman 1997,
+Papilio machaon,Seseli libanotis,Seseli libanotis,Tolman 1997,
+Papilio machaon,Seseli varium,Seseli varium,Tolman 1997,
+Papilio machaon,Silaum silaus,Silaum silaus,Tolman 1997,
+Papilio machaon,Trinia glauca,Trinia glauca,Tolman 1997,
+Papilio machaon,Zizia aptera,Zizia aptera,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Choisya dumosa,Choisya dumosa,Bailowitz & Brock 2021,
+Papilio multicaudata,Fraxinus anomala,Fraxinus anomala,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Fraxinus latifolia,Fraxinus latifolia,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Fraxinus pennsylvanica,Fraxinus pennsylvanica,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Fraxinus velutina,Fraxinus velutina,Bailowitz & Brock 2021,
+Papilio multicaudata,Ligustrum lucidum,Ligustrum lucidum,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Ligustrum vulgare,Ligustrum vulgare,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Platanus racemosa,Platanus racemosa,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Prunus americana,Prunus americana,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Prunus cerasus,Prunus cerasus,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Prunus emarginata,Prunus emarginata,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Prunus serotina,Prunus serotina,Bailowitz & Brock 2021,
+Papilio multicaudata,Prunus capuli,Prunus serotina,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Prunus virginiana,Prunus virginiana,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Ptelea crenulata,Ptelea crenulata,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Ptelea trifoliata,Ptelea trifoliata,Bailowitz & Brock 2021,
+Papilio multicaudata,Ptelea trifoliata,Ptelea trifoliata,Scott 1986,10.1515/9781503624450
+Papilio multicaudata,Vauquelinia californica,Vauquelinia californica,Bailowitz & Brock 2021,
+Papilio multicaudata,Vauquelinia californica,Vauquelinia californica,Scott 1986,10.1515/9781503624450
+Papilio palamedes,Persea borbonia,Persea borbonia,Scott 1986,10.1515/9781503624450
+Papilio palamedes,Sassafras albidum,Sassafras albidum,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Anethum graveolens,Anethum graveolens,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Angelica ampla,Angelica ampla,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Angelica atropurpurea,Angelica atropurpurea,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Angelica venenosa,Angelica venenosa,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Apium graveolens,Apium graveolens,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Berula erecta,Berula erecta,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Carum carvi,Carum carvi,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Cicuta bulbifera,Cicuta bulbifera,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Cicuta douglasii,Cicuta douglasii,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Cicuta maculata,Cicuta maculata,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Conium maculatum,Conium maculatum,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Cryptotaenia canadensis,Cryptotaenia canadensis,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Cymopterus panamintensis,Cymopterus panamintensis,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Daucus carota,Daucus carota,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Daucus pusillus,Daucus pusillus,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Dictamnus albus,Dictamnus albus,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Foeniculum vulgare,Foeniculum vulgare,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Harbouria trachypleura,Harbouria trachypleura,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Heracleum maximum,Heracleum maximum,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Levisticum officinale,Levisticum officinale,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Ligusticum scoticum,Ligusticum scoticum,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Osmorhiza longistylis,Osmorhiza longistylis,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Pastinaca sativa,Pastinaca sativa,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Petroselinum crispum,Petroselinum crispum,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Ptilimnium capillaceum,Ptilimnium capillaceum,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Ruta graveolens,Ruta graveolens,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Sium suave,Sium suave,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Spermolepis divaricata,Spermolepis divaricata,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Taenidia integerrima,Taenidia integerrima,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Tauschia arguta,Tauschia arguta,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Tauschia parishii,Tauschia parishii,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Thamnosma montana,Thamnosma montana,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Thamnosma texana,Thamnosma texana,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Thaspium barbinode,Thaspium barbinode,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Tiedemannia canbyi,Tiedemannia canbyi,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Zizia aptera,Zizia aptera,Scott 1986,10.1515/9781503624450
+Papilio polyxenes,Zizia aurea,Zizia aurea,Scott 1986,10.1515/9781503624450
+Papilio rumiko,Amyris texana,Amyris texana,Shiraiwa et al. 2014,10.3897/zookeys.468.8565
+Papilio rumiko,Casimiroa greggii,Casimiroa greggii,Shiraiwa et al. 2014,10.3897/zookeys.468.8565
+Papilio rumiko,Choisya dumosa,Choisya dumosa,Bailowitz & Brock 2021,
+Papilio rumiko,Ptelea trifoliata,Ptelea trifoliata,Bailowitz & Brock 2021,
+Papilio rumiko,Ptelea trifoliata,Ptelea trifoliata,Shiraiwa et al. 2014,10.3897/zookeys.468.8565
+Papilio rumiko,Ruta graveolens,Ruta graveolens,Shiraiwa et al. 2014,10.3897/zookeys.468.8565
+Papilio rumiko,Zanthoxylum fagara,Zanthoxylum fagara,Shiraiwa et al. 2014,10.3897/zookeys.468.8565
+Papilio rutulus,Alnus alnobetula,Alnus alnobetula,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Alnus tenuifolia,Alnus incana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Alnus rubra,Alnus rubra,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Betula papyrifera,Betula papyrifera,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Malus pumila,Malus domestica,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Persea americana,Persea americana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Platanus racemosa,Platanus racemosa,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Populus angustifolia,Populus angustifolia,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Populus balsamifera,Populus balsamifera,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Populus tremuloides,Populus tremuloides,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Populus trichocarpa,Populus trichocarpa,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus americana,Prunus americana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus armeniaca,Prunus armeniaca,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus caroliniana,Prunus caroliniana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus cerasus,Prunus cerasus,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus domestica,Prunus domestica,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus emarginata,Prunus emarginata,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus ilicifolia,Prunus ilicifolia,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus persica,Prunus persica,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Prunus virginiana,Prunus virginiana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Ptelea baldwinii,Ptelea trifoliata,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Salix babylonica,Salix babylonica,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Salix exigua,Salix exigua,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Salix hookeriana,Salix hookeriana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Salix lasiandra,Salix lasiandra,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Salix lasiolepis,Salix lasiolepis,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Salix scouleriana,Salix scouleriana,Scott 1986,10.1515/9781503624450
+Papilio rutulus,Syringa vulgaris,Syringa vulgaris,Scott 1986,10.1515/9781503624450
+Papilio troilus,Cinnamomum camphora,Cinnamomum camphora,Scott 1986,10.1515/9781503624450
+Papilio troilus,Lindera benzoin,Lindera benzoin,Scott 1986,10.1515/9781503624450
+Papilio troilus,Liriodendron tulipifera,Liriodendron tulipifera,Scott 1986,10.1515/9781503624450
+Papilio troilus,Magnolia virginiana,Magnolia virginiana,Scott 1986,10.1515/9781503624450
+Papilio troilus,Persea borbonia,Persea borbonia,Scott 1986,10.1515/9781503624450
+Papilio troilus,Sassafras albidum,Sassafras albidum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Anethum graveolens,Anethum graveolens,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica ampla,Angelica ampla,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica arguta,Angelica arguta,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica hendersonii,Angelica hendersonii,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica kingii,Angelica kingii,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica lineariloba,Angelica lineariloba,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica lucida,Angelica lucida,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Angelica tomentosa,Angelica tomentosa,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Apium graveolens,Apium graveolens,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Carum carvi,Carum carvi,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Cicuta maculata,Cicuta maculata,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Conioselinum scopulorum,Conioselinum scopulorum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Conium maculatum,Conium maculatum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Daucus carota,Daucus carota,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Daucus pusillus,Daucus pusillus,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Foeniculum vulgare,Foeniculum vulgare,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Harbouria trachypleura,Harbouria trachypleura,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Heracleum maximum,Heracleum maximum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Heracleum sphondylium,Heracleum sphondylium,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Ligusticum grayi,Ligusticum grayi,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Ligusticum porteri,Ligusticum porteri,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium californicum,Lomatium californicum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium dasycarpum,Lomatium dasycarpum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium dissectum,Lomatium dissectum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium grayi,Lomatium grayi,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium marginatum,Lomatium marginatum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium nuttallii,Lomatium nuttallii,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium parryi,Lomatium parryi,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium triternatum,Lomatium triternatum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Lomatium utriculatum,Lomatium utriculatum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Oenanthe sarmentosa,Oenanthe sarmentosa,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Pastinaca sativa,Pastinaca sativa,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Perideridia bolanderi,Perideridia bolanderi,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Perideridia gairdneri,Perideridia gairdneri,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Perideridia kelloggii,Perideridia kelloggii,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Petroselinum crispum,Petroselinum crispum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Pseudocymopterus montanus,Pseudocymopterus montanus,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Pteryxia hendersonii,Pteryxia hendersonii,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Pteryxia petraea,Pteryxia petraea,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Pteryxia terebinthina,Pteryxia terebinthina,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Sphenosciadium capitellatum,Sphenosciadium capitellatum,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Tauschia arguta,Tauschia arguta,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Tauschia parishii,Tauschia parishii,Scott 1986,10.1515/9781503624450
+Papilio zelicaon,Zizia aptera,Zizia aptera,Scott 1986,10.1515/9781503624450
