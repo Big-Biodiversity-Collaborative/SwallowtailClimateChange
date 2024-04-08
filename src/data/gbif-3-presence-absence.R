@@ -7,7 +7,7 @@ require(terra)
 require(dplyr)
 require(ENMeval)
 
-replace <- FALSE
+replace <- TRUE
 verbose <- TRUE
 
 # Minimum number of gbif records required to save a csv with presence-absence 
