@@ -22,4 +22,4 @@ Rscript src/hpc/prep-extract-data.R
 ### src/bash/build-scripts-1-CV.sh
 ### Rscript src/run-indiv/run-all-1-CV-scripts.R -a
 ### New approach goes right to wrapper
-Rscript src/run-indiv/run-all-1-CV.R -a
+Rscript src/run-indiv/run-all-1-CV.R -a -f

@@ -22,4 +22,4 @@ module load R/4.2.2
 ### Rscript src/hpc/prep-extract-data.R
 ### Rscript src/run-indiv/run-all-3-predict-scripts.R -a
 ### New approach goes right to wrapper
-Rscript src/run-indiv/run-all-3-predict.R -a
+Rscript src/run-indiv/run-all-3-predict.R -a -f

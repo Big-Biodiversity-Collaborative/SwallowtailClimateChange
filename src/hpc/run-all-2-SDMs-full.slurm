@@ -22,4 +22,4 @@ Rscript src/hpc/prep-extract-data.R
 ### src/bash/build-scripts-2-SDMs-full.sh
 ### Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
 ### New approach goes right to wrapper
-Rscript src/run-indiv/run-all-2-SDMs-full.R -a
+Rscript src/run-indiv/run-all-2-SDMs-full.R -a -f
