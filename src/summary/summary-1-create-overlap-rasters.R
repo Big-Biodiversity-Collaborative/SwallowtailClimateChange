@@ -87,6 +87,9 @@ for (i in 1:length(insects)) {
     # files may still remain in the output/distributions folder)
     plants <- plants[!plants %in% exclude]
     
+    # Some potential for duplicate names in plant list, so remove duplicates
+    plants <- unique(plants)
+    
     plant_nice_names <- plants %>%
       str_replace(pattern = " ", replacement = "_") %>%
       tolower()
