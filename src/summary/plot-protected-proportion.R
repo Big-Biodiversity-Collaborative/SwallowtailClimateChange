@@ -114,7 +114,7 @@ library(tidyr)
   pah_results <- read.csv("output/summary-stats/protected-areas-hotspots.csv")
   
   # Separate SSP and year data into two separate columns
-  pah_results <- pa_results %>%
+  pah_results <- pah_results %>%
     filter(distribution == "insect + host") %>%
     mutate(ssp = if_else(climate == "current", 
                          true = "current",
@@ -131,16 +131,17 @@ library(tidyr)
   
   # Now we want to duplicate the climate data so we effectively have a row of 
   # current climate for each ssp (as starting points)
-  curr_df <- tidyr::complete(data.frame(min_num_spp = unique(pah_results$min_num_spp),
-                                        ssp = c("245", "370", "585")),
-                             min_num_spp, ssp)
+  min_num_spp <- unique(pah_results$min_num_spp)
+  curr_df <- data.frame(min_num_spp = rep(min_num_spp, each = 3),
+                        ssp = rep(c("245", "370", "585"), length(min_num_spp)))
   curr_prop <- pah_results %>%
     filter(ssp == "current")
   
   # Add in the proportion of area protected
   new_df <- curr_prop %>%
     select(-ssp) %>%
-    left_join(curr_df, by = c("min_num_spp" = "min_num_spp"))
+    left_join(curr_df, by = c("min_num_spp" = "min_num_spp")) %>%
+    relocate(year, .after = "ssp")
   
   # And bind those rows back in
   pah_all <- pah_results %>%
@@ -149,12 +150,12 @@ library(tidyr)
     arrange(min_num_spp, ssp, year)
   
   # Select minimum number of species to define hotspot
-  min_spp <- 4
-  pah_all <- filter(pah_all, min_num_spp == min_spp)
+  min_spp <- 3
+  pah_min <- filter(pah_all, min_num_spp == min_spp)
   
   # Species-level plots
-  ggplot(data = pah_all, aes(x = year, y = proportion_protected, group = ssp,
-                            color = ssp)) +
+  ggplot(data = pah_min, aes(x = year, y = proportion_protected, group = ssp,
+                             color = ssp)) +
     geom_line() +
     geom_point() +
     labs(x = "Year", y = "Proportion protected", color = "SSP") +
