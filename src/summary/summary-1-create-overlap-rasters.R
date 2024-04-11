@@ -36,7 +36,7 @@ climate_models <- read.csv(file = "data/climate-models.csv")
 
 # Logical indicating whether to create overlap rasters for all species or just a 
 # subset of insects
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
