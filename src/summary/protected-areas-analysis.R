@@ -4,6 +4,7 @@
 # 2024-08-07
 
 library(dplyr)
+library(tidyr)
 library(lme4)
 library(lmerTest)
 
@@ -66,6 +67,77 @@ for (ssp_i in ssps) {
 
 results_summaries <- lapply(X = results_list, 
                             FUN = summary)
+
+########################################
+# Paired t-tests, looking (effectively) at slopes within a species, to see if 
+# magnitude of change (regardless of direction)
+# Start with creating data that is amenable to this analysis
+protected_wide <- protected_areas %>%
+  select(-c(distribution, climate, area_sqkm, area_protected_sqkm)) %>%
+  pivot_wider(id_cols = c("insect", "ew", "ssp"),
+              names_from = "model_year",
+              values_from = "proportion_protected")
+# Need to effectively "fill-in" starting proportion from 2010.5 for each of the 
+# three ssps. Ugly subset and join. So ugly.
+# Start by subsetting to just contemporary proportion of area that is protected
+protected_current <- protected_wide %>%
+  filter(is.na(ssp)) %>%
+  select(insect, `2010.5`)
+# Add back that column (after removing it from wide-formatted data) via join
+protected_wide <- protected_wide %>%
+  select(-`2010.5`) %>%
+  left_join(protected_current) %>%
+  filter(!is.na(ssp))
+# Do change calculations
+protected_wide <- protected_wide %>%
+  mutate(delta_2055.5 = `2055.5` - `2010.5`,
+         delta_2085.5 = `2085.5` - `2055.5`)
+
+# Now, for each ssp separately, run t-test on magnitude of change
+ssp245 <- protected_wide %>%
+  filter(ssp == "ssp245")
+t.test(x = abs(ssp245$delta_2055.5),
+       y = abs(ssp245$delta_2085.5),
+       paired = TRUE)
+
+ssp370 <- protected_wide %>%
+  filter(ssp == "ssp370")
+t.test(x = abs(ssp370$delta_2055.5),
+       y = abs(ssp370$delta_2085.5),
+       paired = TRUE)
+
+ssp585 <- protected_wide %>%
+  filter(ssp == "ssp585")
+t.test(x = abs(ssp585$delta_2055.5),
+       y = abs(ssp585$delta_2085.5),
+       paired = TRUE)
+
+########################################
+# TODO: Expand on the above, but include the East/West division would need to 
+# (explicitly) shift over to a regression approach...
+# Abs delta proportion protected ~ factor(timepoint) * ew
+protected_long <- protected_wide %>%
+  select(c(insect, ew, ssp, delta_2055.5, delta_2085.5)) %>%
+  pivot_longer(cols = -c(insect, ew, ssp),
+               names_to = "timepoint",
+               values_to = "delta") %>%
+  mutate(timepoint = as.factor(substr(x = timepoint, 7, 12))) %>%
+  mutate(abs_delta = abs(delta))
+
+ssp245 <- lm(abs_delta ~ timepoint * ew, 
+             data = protected_long %>% 
+               filter(ssp == "ssp245"))
+summary(ssp245)
+
+ssp370 <- lm(abs_delta ~ timepoint * ew, 
+             data = protected_long %>% 
+               filter(ssp == "ssp370"))
+summary(ssp370)
+
+ssp585 <- lm(abs_delta ~ timepoint * ew, 
+             data = protected_long %>% 
+               filter(ssp == "ssp585"))
+summary(ssp585)
 
 ################################################################################
 # Below is exploratory, but not likely appropriate ways of analyzing the data
