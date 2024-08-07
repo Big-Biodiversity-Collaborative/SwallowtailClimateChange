@@ -105,7 +105,33 @@ library(tidyr)
     theme_classic() +
     theme(legend.title = element_blank(),
           legend.position = c(0.95, 0.93))
+
+  # Plot percentage protected for eastern and western spp over time, with 
+  # average in each group (weighted by area)
+  ssp_labels <- c(`245` = "SSP2-4.5", 
+                  `370` = "SSP3-7.0", 
+                  `585` = "SSP5-8.5")
+  percent_protected_plot <- pa_all %>%
+    mutate(percent_protected = 100 * proportion_protected) %>%
+    ggplot(mapping = aes(x = year, y = percent_protected, group = insect, color = ew)) +
+    geom_line(linewidth = 0.5, alpha = 0.3) +
+    geom_point(size = 0.5, alpha = 0.3) +
+    geom_line(data = pa_means, 
+              aes(x = year, y = 100 * prop_protected_wgtd, group = ew, 
+                  color = ew), linewidth = 1.5, show.legend = FALSE) +
+    geom_point(data = pa_means, 
+               aes(x = year, y = 100 * prop_protected_wgtd, group = ew, 
+                   color = ew), size = 1.5, show.legend = FALSE) +
+    labs(x = "Year", y = "Percent protected") +
+    facet_grid(cols = vars(ssp), labeller = as_labeller(ssp_labels)) +
+    theme_classic() +
+    theme(legend.title = element_blank(),
+          legend.position = c(0.95, 0.93))
+  percent_protected_plot
   
+  ggsave(filename = "output/manuscript/protected_3panel.png",
+         plot = percent_protected_plot)
+    
 # Exploring amount of protected area for swallowtail diversity hotspots -------#
   
   # TODO: Run (and make edits to) code below after calculating protected areas
