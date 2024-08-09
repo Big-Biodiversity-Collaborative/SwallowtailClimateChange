@@ -21,10 +21,11 @@ shpfile_path <- "C:/Users/erin/Desktop/PAs/protected-areas.shp"
 # Before running this script, need to grab the original shapefile and run the
 # following once:
 
-  # # Identify location of original Protected Area shapefile (unzipped):
+  # # Identify location of original Protected Area shapefile (unzipped, file 
+  # name will be something like "CEC_NA_2021_terrestrial_IUCN_categories.shp"):
   # shpfile_orig <- "..."
   # # Read in protected areas file
-  # pa <- vect(shpfile_path)
+  # pa <- vect(shpfile_orig)
   #   # 62,272 polygons
   #   # Projected CRS = Sphere_ARC_INFO_Lambert_Azimuthal_Equal_Area
   # # count(data.frame(pa), COUNTRY)

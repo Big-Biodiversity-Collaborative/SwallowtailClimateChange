@@ -15,10 +15,10 @@ hotspots <- read.csv(file = "output/summary-stats/protected-areas-hotspots.csv")
 # Y-axis varies
 # One line for each climate model
 
-# Focus on 3 species minimum as "hotspot" criterion, and insect + host 
+# Focus on 4 species minimum as "hotspot" criterion, and insect + host 
 # distribution
 hotspots <- hotspots %>%
-  filter(min_num_spp == 3,
+  filter(min_num_spp == 4,
          distribution == "insect + host")
 
 # Need to transform to long, so we can facet
@@ -62,13 +62,37 @@ hotspots_long <- hotspots_long %>%
               mutate(model_name = "585")) %>%
   arrange(climate, stat)
 
+# Re-order (and transform to factor) the stat column so things plot in the 
+# order we would like them (total area, protected area, proportion protected).
+hotspots_long <- hotspots_long %>%
+  mutate(stat = factor(stat, levels = c("area_sqkm", "area_protected_sqkm", "proportion_protected")))
+
+# Make a name for the climate models that is more than just numbers
+# Alternatively could do this with substr & pasting
+hotspots_long <- hotspots_long %>%
+  mutate(model_ssp = case_when(model_name == "245" ~ "2-4.5",
+                               model_name == "370" ~ "3-7.0",
+                               model_name == "585" ~ "5-8.5"))
+
 # Now plot
-ggplot(data = hotspots_long, mapping = aes(x = model_year, 
-                                           y = value, 
-                                           group = model_name,
-                                           color = model_name)) +
+pa_hs_plot <- ggplot(data = hotspots_long, mapping = aes(x = model_year, 
+                                                         y = value, 
+                                                         group = model_ssp,
+                                                         color = model_ssp)) +
   geom_point() +
   geom_line() +
-  scale_color_brewer(palette = "Dark2") +
-  facet_wrap(~ stat, nrow = 3, ncol = 1, scales = "free_y") +
-  theme_bw()
+  scale_color_brewer(palette = "Dark2",
+                     name = "SSP") +
+  facet_wrap(~ stat, nrow = 3, ncol = 1, scales = "free_y",
+             strip.position = "left",
+             labeller = as_labeller(c(area_protected_sqkm = "Protected Area (sq km)", 
+                                      area_sqkm = "Total Area (sq km)", 
+                                      proportion_protected = "Proportion Protected"))) +
+  theme_bw() +
+  ylab(NULL) +
+  xlab("Year") +
+  theme(strip.background = element_blank(),
+        strip.placement = "outside")
+pa_hs_plot
+ggsave(filename = "output/manuscript/protected-changes.png",
+       plot = pa_hs_plot)
