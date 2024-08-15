@@ -166,6 +166,8 @@ above).
     + lakes: North American large bodies of water shapefiles; used to exclude 
     climate data from such areas (see src/data/prep-climate-data.R)
     + political-boundaries: shapefiles of political boundaries for drawing maps
+    + protected-areas-management.csv: categorization of protected areas into 
+    four categories: National, State, Local, and Private
     + wc2-1: current climate data
 + development: directory for script development
     + data: data for developmental purposes
