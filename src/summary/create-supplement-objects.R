@@ -34,7 +34,7 @@ get_leg <- function(myggplot) {
   return(legend)
 }
 
-# Creating overlap maps -------------------------------------------------------#
+# Creating overlap map figures ------------------------------------------------#
 
 species <- c("indra", "cresphontes")
 
@@ -119,7 +119,6 @@ for (spp in species) {
     geom_spatvector(data = states, color = "gray50", fill = NA) +
     geom_spatvector(data = countries, color = "black", fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim1, ylim = ylim1) +
-    scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     ylab("SSP245") +
     theme(plot.margin = unit(margins, "pt"), 
@@ -131,7 +130,6 @@ for (spp in species) {
     geom_spatvector(data = states, color = "gray50", fill = NA) +
     geom_spatvector(data = countries, color = "black", fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim1, ylim = ylim1) +
-    scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     ylab("SSP370") +
     theme(plot.margin = unit(margins, "pt"), 
@@ -143,7 +141,6 @@ for (spp in species) {
     geom_spatvector(data = states, color = "gray50", fill = NA) +
     geom_spatvector(data = countries, color = "black", fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim1, ylim = ylim1) +
-    scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     ylab("SSP585") +
     theme(plot.margin = unit(margins, "pt"), 
@@ -155,7 +152,6 @@ for (spp in species) {
     geom_spatvector(data = states, color = "gray50", fill = NA) +
     geom_spatvector(data = countries, color = "black", fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim1, ylim = ylim1) +
-    scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"), 
           axis.text = element_text(size = 10))
@@ -166,7 +162,6 @@ for (spp in species) {
     geom_spatvector(data = states, color = "gray50", fill = NA) +
     geom_spatvector(data = countries, color = "black", fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim1, ylim = ylim1) +
-    scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"), 
           axis.text = element_text(size = 10))
@@ -177,10 +172,23 @@ for (spp in species) {
     geom_spatvector(data = states, color = "gray50", fill = NA) +
     geom_spatvector(data = countries, color = "black", fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim1, ylim = ylim1) +
-    scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"), 
           axis.text = element_text(size = 10))
+  if (spp == "indra") {
+    overlap11_plot <- overlap11_plot +
+      scale_x_continuous(breaks = c(-120, -110, -100)) 
+    overlap21_plot <- overlap32_plot +
+      scale_x_continuous(breaks = c(-120, -110, -100)) 
+    overlap31_plot <- overlap31_plot +
+      scale_x_continuous(breaks = c(-120, -110, -100)) 
+    overlap12_plot <- overlap12_plot +
+      scale_x_continuous(breaks = c(-120, -110, -100)) 
+    overlap22_plot <- overlap22_plot +
+      scale_x_continuous(breaks = c(-120, -110, -100)) 
+    overlap32_plot <- overlap32_plot +
+      scale_x_continuous(breaks = c(-120, -110, -100))  
+  }
   
   overlap_for_legend <- ggplot() +
     geom_spatraster(data = overlap11, maxcell = Inf) +
@@ -215,3 +223,4 @@ for (spp in species) {
            units = "in")
   }
 }
+
