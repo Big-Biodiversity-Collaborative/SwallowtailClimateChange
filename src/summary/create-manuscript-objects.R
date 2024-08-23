@@ -726,18 +726,28 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   xlimr <- c(ext(delta)[1], ext(delta)[2])
   ylimr <- c(ext(delta)[3], ext(delta)[4])
   
+  # Few plotting parameters
   margins <- c(2, 0, 6, 0)
+  linewidth <- 0.1
+  
+  # Colors
+  # Light gray
+  graycol <- "#f2f2f2"
+  # For richnes, eBird abundance colors but add a light gray for 0
+  rich_cols <- c(graycol, ebirdst::ebirdst_palettes(7, "weekly"))
+  # For deltas, red-blue spectrum
+  delta_cols <- c("#D10000","#104e8b")
   
   # Create map objects
   richness_c <- ggplot() +
     geom_spatvector(data = countries, color = NA, fill = "white") +
     geom_spatraster(data = rich_c) +
-    scale_fill_whitebox_c(palette = "gn_yl",
-                          direction = -1,
-                          breaks = c(6, 4, 2, 0),
-                          name = "Richness") +
-    geom_spatvector(data = states, color = "gray65", fill = NA) +
-    geom_spatvector(data = countries, color = "black", fill = NA) +
+    scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+                         name = "Richness") +
+    geom_spatvector(data = states, color = "gray65", linewidth = linewidth,
+                    fill = NA) +
+    geom_spatvector(data = countries, color = "black", linewidth = linewidth, 
+                    fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr, ylim = ylimr) +
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"),
@@ -745,12 +755,12 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_f <- ggplot() +
     geom_spatvector(data = countries, color = NA, fill = "white") +
     geom_spatraster(data = rich_f, maxcell = Inf) +
-    scale_fill_whitebox_c(palette = "gn_yl",
-                          direction = -1,
-                          breaks = c(6, 4, 2, 0),
-                          name = "Richness") +
-    geom_spatvector(data = states, color = "gray65", fill = NA) +
-    geom_spatvector(data = countries, color = "black", fill = NA) +
+    scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+                         name = "Richness") +
+    geom_spatvector(data = states, color = "gray65", linewidth = linewidth,
+                    fill = NA) +
+    geom_spatvector(data = countries, color = "black", linewidth = linewidth, 
+                    fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr, ylim = ylimr) +
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"),
@@ -758,12 +768,13 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_d <- ggplot() +
     geom_spatvector(data = countries, color = NA, fill = "white") +
     geom_spatraster(data = delta) +
-    scale_fill_whitebox_c(palette = "purple",
-                          direction = -1,
-                          breaks = c(5, 0 , -5),
-                          name = "Change") +
-    geom_spatvector(data = states, color = "gray65", fill = NA) +
-    geom_spatvector(data = countries, color = "black", fill = NA) +
+    scale_fill_gradient2(low = delta_cols[1], high = delta_cols[2], 
+                         mid = graycol, na.value = NA, name = "Change", 
+                         breaks = c(-5, 0, 5)) +
+    geom_spatvector(data = states, color = "gray65", linewidth = linewidth, 
+                    fill = NA) +
+    geom_spatvector(data = countries, color = "black", linewidth = linewidth, 
+                    fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr, ylim = ylimr) +
     theme_bw() +
     theme(plot.margin = unit(margins, "pt"),
@@ -812,14 +823,13 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_c_lcc <- ggplot() +
     geom_spatvector(data = states_lcc, color = NA, fill = "white") +
     geom_spatraster(data = rich_c_lcc) +
-    scale_fill_whitebox_c(palette = "gn_yl",
-                          direction = -1,
-                          breaks = c(6, 4, 2, 0),
-                          name = "Richness") +
-    geom_spatvector(data = states_lcc, color = "gray50", fill = NA) +
+    scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+                         name = "Richness") +
+    geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                    fill = NA) +
     geom_spatvector(data = filter(countries_lcc, 
                                   countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
-                    color = "black", fill = NA) +
+                    color = "black", linewidth = linewidth, fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
              expand = FALSE) +
     theme_bw() +
@@ -828,14 +838,13 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_f_lcc <- ggplot() +
     geom_spatvector(data = states_lcc, color = NA, fill = "white") +
     geom_spatraster(data = rich_f_lcc) +
-    scale_fill_whitebox_c(palette = "gn_yl",
-                          direction = -1,
-                          breaks = c(6, 4, 2, 0),
-                          name = "Richness") +
-    geom_spatvector(data = states_lcc, color = "gray50", fill = NA) +
+    scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+                         name = "Richness") +
+    geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                    fill = NA) +
     geom_spatvector(data = filter(countries_lcc, 
                                   countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
-                    color = "black", fill = NA) +
+                    color = "black", linewidth = linewidth, fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
              expand = FALSE) +
     theme_bw() +
@@ -844,14 +853,14 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_d_lcc <- ggplot() +
     geom_spatvector(data = countries_lcc, color = NA, fill = "white") +
     geom_spatraster(data = rich_d_lcc) +
-    scale_fill_whitebox_c(palette = "purple",
-                          direction = -1,
-                          breaks = c(5, 0 , -5),
-                          name = "Change") +
-    geom_spatvector(data = states_lcc, color = "gray65", fill = NA) +
+    scale_fill_gradient2(low = delta_cols[1], high = delta_cols[2], 
+                         mid = graycol, na.value = NA, name = "Change", 
+                         breaks = c(-5, 0, 5)) +
+    geom_spatvector(data = states_lcc, color = "gray65", linewidth = linewidth,
+                    fill = NA) +
     geom_spatvector(data = filter(countries_lcc, 
                                   countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
-                    color = "black", fill = NA) +
+                    color = "black", linewidth = linewidth, fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
              expand = FALSE) +
     theme_bw() +
