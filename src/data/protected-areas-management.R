@@ -526,9 +526,20 @@ plot(yellowstone_agg)
 # Yah! There it is
 terra::polys(yellowstone_pa, col = c("blue", "green", "orange", "red"))
 
-# Try it for reals?
-pa_order <- order(data.frame(pa)$GIS_HA)
-pa_big3 <- pa_order %in% c(1:3)
-pa_subset <- terra::subset(pa, subset = pa_big3)
-pa_subset <- terra::project(x = pa_subset, y = "EPSG:4326")
-plot(pa_subset, col = "#FF0000")
+# First, add in the AGNCY_SHORT information to the pa object so we can use it 
+# with the by arguement of terra::aggregate
+pa[["AGNCY_SHORT"]] <- agencies$AGNCY_SHORT
+
+# Now union them (or "dissolve" in terra-speak). Can take 20-30 minutes, so be 
+# patient
+pa_categorized <- terra::aggregate(pa, by = "AGNCY_SHORT")
+# Reality check, also takes a few minutes to render
+plot(pa_categorized, 
+     col = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99"))
+# Re-project to EPSG:4326 before saving
+pa_categorized <- terra::project(x = pa_categorized, 
+                                 y = "EPSG:4326")
+# Write takes a while (like 30 minutes?)
+terra::writeVector(x = pa_categorized,
+                   filename = "data/protected-areas-categorized.shp")
+
