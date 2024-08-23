@@ -394,3 +394,190 @@ for (spp in species) {
            units = "in")
   }
 }
+
+# Creating richness figures ---------------------------------------------------#
+
+# Type of map 
+# ov = insect distributed only where one or more host also occurs
+# io = insect distribution depends only on climate)
+type <- "ov"
+
+# Load richness rasters
+rich11 <- readRDS(paste0("output/richness/ensemble_ssp245_2041-richness-",
+                         type, ".rds"))
+rich21 <- readRDS(paste0("output/richness/ensemble_ssp370_2041-richness-",
+                         type, ".rds"))
+rich31 <- readRDS(paste0("output/richness/ensemble_ssp585_2041-richness-",
+                         type, ".rds"))
+rich12 <- readRDS(paste0("output/richness/ensemble_ssp245_2071-richness-",
+                         type, ".rds"))
+rich22 <- readRDS(paste0("output/richness/ensemble_ssp370_2071-richness-",
+                         type, ".rds"))
+rich32 <- readRDS(paste0("output/richness/ensemble_ssp585_2071-richness-",
+                         type, ".rds"))
+
+# To make all the plots have the same scale, I think we need to set the same
+# breaks and limits for all the plots (note that the rich32 raster max value
+# is only 6, while it's 7 for all the rest)
+
+# Define color palette, wich light gray for 0 values
+rich_cols <- c("#f2f2f2", ebirdst::ebirdst_palettes(7, "weekly"))
+
+# Few plotting parameters
+margins <- c(2, 0, 6, 0)
+linewidth <- 0.1
+
+# Project maps using Lambert Conformal Conic North America. Croping the eastern
+# edge of states and countries layers. Also note that when plotting, we're 
+# removing boundaries for all countries except the US, Canada, and Mexico 
+# because with this projection that is centered in the US, country boundaries 
+# become very distorted for Greenland and Central America.
+state_ext <- ext(states)
+state_ext[2] <- -45
+states <- crop(states, state_ext)
+countries <- crop(countries, state_ext)
+states_lcc <- project(states, "ESRI:102009")
+countries_lcc <- project(countries, crs(states_lcc))
+rich11_lcc <- project(rich11, crs(states_lcc))
+rich21_lcc <- project(rich21, crs(states_lcc))
+rich31_lcc <- project(rich31, crs(states_lcc))
+rich12_lcc <- project(rich12, crs(states_lcc))
+rich22_lcc <- project(rich22, crs(states_lcc))
+rich32_lcc <- project(rich32, crs(states_lcc))
+
+# Get rid of NA values and calculate extent for plot area
+rich11_lcc <- drop_na(rich11_lcc)
+limsr_lcc <- ext(rich11_lcc) * 1.01
+xlimr_lcc <- c(ext(limsr_lcc)[1], ext(limsr_lcc)[2])
+ylimr_lcc <- c(ext(limsr_lcc)[3], ext(limsr_lcc)[4])
+
+# Create map objects
+richness11_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich11_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA,
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
+           expand = FALSE) +
+  theme_bw() +
+  ylab("SSP245") +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+richness21_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich21_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA,
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
+           expand = FALSE) +
+  theme_bw() +
+  ylab("SSP370") +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+richness31_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich31_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA,
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
+           expand = FALSE) +
+  theme_bw() +
+  ylab("SSP585") +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+richness12_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich12_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA,
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+richness22_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich22_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA,
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+richness32_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich32_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA,
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_lcc, ylim = ylimr_lcc,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+
+richness_for_legend <- ggplot() +
+  geom_spatraster(data = rich11_lcc, maxcell = Inf) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA, name = "Richness",
+                       breaks = c(0, 2, 4, 6), limits = c(0, 7)) +
+  theme(legend.position = "bottom")
+legend_r <- get_leg(richness_for_legend)
+
+# Combine things
+rich6 <- plot_grid(richness11_lcc + theme(legend.position = "none"),
+                   richness21_lcc + theme(legend.position = "none"),
+                   richness31_lcc + theme(legend.position = "none"),
+                   richness12_lcc + theme(legend.position = "none"),
+                   richness22_lcc + theme(legend.position = "none"),
+                   richness32_lcc + theme(legend.position = "none"),
+                   align = "vh",
+                   nrow = 3,
+                   byrow = FALSE)
+col_titles <- ggdraw() + 
+  draw_label("2041-2070", size = 12, x = 0.29) +
+  draw_label("2071-2100", size = 12, x = 0.79)
+
+p <- plot_grid(col_titles, rich6, legend_r,
+               ncol = 1, rel_heights = c(0.2, 8.6, 0.2))
+# TODO: fix placement of legend -- it's cutting off axis labels on bottom
+# plots, and the break labels on legend are missing.
+
+plot_name <- paste0(output_basename, "richness-lcc-6panel.png")
+if (!file.exists(plot_name) | (file.exists(plot_name) & replace)) {
+  ggsave(filename = plot_name,
+         plot = p,
+         width = 6.5,
+         height = 9,
+         units = "in")
+}
+
