@@ -494,52 +494,29 @@ write.csv(file = "data/protected-areas-management.csv",
 # unions for the four categories.
 agencies <- read.csv(file = "data/protected-areas-management.csv")
 
-# TODO: Reproject entire SpatVector to EPSG:4326 here?
-
-# Doing this the coarse way
-# pa_national <- terra::subset(pa, subset = agencies$AGNCY_SHORT == "National")
-# pa_national
-# 16487 areas
-# Hmm...this ran for > 60 minutes without finishing. See if it does what we 
-# really think it is doing
-# pa_national <- terra::union(pa_national)
-
-# Start by grabbing a couple of national parks, and testing terra::union
-parks <- substr(pa_df$MGMT_AGNCY, 1, 21) == "National Park Service"
-parks_df <- pa_df %>% filter(parks)
-sort(table(parks_df$COMMENTS))
-
-# Four rows (different polygons) for Yellowstone National Park. Pull those out
-yellowstone_rows <- pa_df$COMMENTS == "Yellowstone National Park"
-yellowstone_pa <- terra::subset(pa, subset = yellowstone_rows)
-plot(yellowstone_pa) # Three adjacent polygons
-yellowstone_union <- terra::union(yellowstone_pa)
-plot(yellowstone_union) # Now there are *FOUR* rows. Not really what we want
-# It is possible that the fourth is the actual union
-plot(terra::subset(yellowstone_union, subset = c(F, F, F, T)))
-# No. Definitely not
-terra::polys(yellowstone_pa, col = c("blue", "green", "orange", "red"))
-
-# Try terra::aggregate?
-yellowstone_agg <- terra::aggregate(yellowstone_pa)
-plot(yellowstone_agg)
-# Yah! There it is
-terra::polys(yellowstone_pa, col = c("blue", "green", "orange", "red"))
-
 # First, add in the AGNCY_SHORT information to the pa object so we can use it 
-# with the by arguement of terra::aggregate
+# with the by argument of terra::aggregate
 pa[["AGNCY_SHORT"]] <- agencies$AGNCY_SHORT
 
-# Now union them (or "dissolve" in terra-speak). Can take 20-30 minutes, so be 
-# patient
+# Now we can drop any areas outside the North America (mostly we just drop 
+# U.S. Territories and the state of Hawaii)
+state_prov_excl <- c("US-AS", "US-FM", "US-GU", "US-HI", "US-MH", "US-N/A",
+                     "US-PR", "US-PW", "US-UM", "US-VI")
+pa <- terra::subset(pa, subset = !(pa$STATE_PROV %in% state_prov_excl))
+
+# Now union them (or "dissolve" in terra-speak) with aggregate. Can take 20-30 
+# minutes, so be patient
 pa_categorized <- terra::aggregate(pa, by = "AGNCY_SHORT")
+
 # Reality check, also takes a few minutes to render
-plot(pa_categorized, 
-     col = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99"))
+# plot(pa_categorized,
+#      col = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99"))
+
 # Re-project to EPSG:4326 before saving
 pa_categorized <- terra::project(x = pa_categorized, 
                                  y = "EPSG:4326")
-# Write takes a while (like 30 minutes?)
-terra::writeVector(x = pa_categorized,
-                   filename = "data/protected-areas-categorized.shp")
 
+# Write takes a while (1:35, that's 95 minutes!)
+terra::writeVector(x = pa_categorized,
+                   filename = "data/protected-areas-categorized.shp",
+                   overwrite = TRUE)
