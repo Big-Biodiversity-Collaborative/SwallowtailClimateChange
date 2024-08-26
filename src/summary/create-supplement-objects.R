@@ -92,10 +92,11 @@ for (spp in species) {
   overlap32 <- as.factor(overlap32)
   levels(overlap32) <- data.frame(value = c(0, 1, 2, 3), desc = labels_o)
   
-  color_vec_o <- c("#e8e8e8",   # Absent
-                   "#89cf72",   # Hosts only
-                   "#90c3de",   # Insect only
-                   "#8f5cd6")   # Hosts and insect
+  # Using Paired color palette
+  color_vec_o <- c("#ededed",   # Absent
+                   "#b2df8a",   # Hosts only
+                   "#a6cee3",   # Insect only
+                   "#1f78b4")   # Hosts and insect
   names(color_vec_o) <- levels(overlap11)[[1]][,"desc"]
   
   # Get rid of NA values and calculate extent for plot areas
@@ -263,10 +264,11 @@ for (spp in species) {
   delta32 <- as.factor(delta32)
   levels(delta32) <- data.frame(value = c(0, 1, 2, 3), desc = labels_d)
   
-  color_vec_d <- c("#e8e8e8",   # Absent
-                   "#f0b041",   # Loss
-                   "#2f6cc2",   # Gain
-                   "#f6e8c3")   # Stable
+  # Tweaked version of RDYlBu palette (so colors pop on light gray background)
+  color_vec_d <- c("#ededed",   # Absent
+                   "#fc8d59",   # Loss
+                   "#2c7bb6",   # Gain
+                   "#ffffbf")   # Stable
   names(color_vec_d) <- levels(delta11)[[1]][,"desc"]
   
   # Get rid of NA values and calculate extent for plot areas
