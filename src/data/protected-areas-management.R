@@ -6,6 +6,24 @@
 require(dplyr)
 require(terra)
 
+################################################################################
+# README
+# This script does a lot. Probably too much. Currently it:
+# 1. Processes the IUCN protected areas shapefile to categorize each of the 
+#    62K polygons into one of four bins (see below)
+# 2. Merges all polygons within each category (technically, the union of all 
+#    polygons within a category) to create a SpatVector of four polygons and 
+#    writes that to disk as a shapefile
+# 3. Converts the SpatVector of four polygons into a SpatRaster of four layers
+# 4. Uses bioclimatic variable rasters to assess how much information is lost 
+#    when using the SpatRaster, rather than the SpatVector (polygon) data to 
+#    measure area
+################################################################################
+
+################################################################################
+# Categorization of polygons
+################################################################################
+
 # Data from 
 # http://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2021/
 # Includes information about agency (in the MGMT_AGNCY field). Would like to 
@@ -21,7 +39,7 @@ require(terra)
 shpfile_orig <- "~/Desktop/iucn/CEC_NA_2021_terrestrial_IUCN_categories.shp"
 
 # Read in protected areas file
-pa <- vect(shpfile_orig)
+pa <- terra::vect(shpfile_orig)
 
 # Make a quick data.frame copy to interrogate
 pa_df <- data.frame(pa)
@@ -37,9 +55,11 @@ agencies <- data.frame(pa) %>%
 sum(is.na(agencies$AGNCY_SHORT))
 # 62272
 
-################################################################################
-# MGMT_AGNCY field
-################################################################################
+####################
+# MGMT_AGNCY field #
+####################
+
+####################
 # Exact matches
 # Several agencies are named and easily categorized in the MGMT_AGNCY field. We
 # start here with those
@@ -200,7 +220,7 @@ agencies <- agencies %>%
 sum(is.na(agencies$AGNCY_SHORT))
 # 61222
 
-################################################################################
+####################
 # Partial matches
 # Still looking at the MGMT_AGNCY field, the beginning values can be used for 
 # some categorizations, e.g., "City of", "County of"
@@ -370,9 +390,10 @@ agencies <- agencies %>%
 sum(is.na(agencies$AGNCY_SHORT))
 # 2203
 
-################################################################################
-# TYPE_PA field
-################################################################################
+
+####################
+# TYPE_PA field    #
+####################
 # Partial matches
 # TYPE_PA strings often end with site-specific information, so we us partial 
 # matches with substrings
@@ -488,7 +509,7 @@ write.csv(file = "data/protected-areas-management.csv",
           row.names = FALSE)
 
 ################################################################################
-# UNIONIZE
+# Unionization of polygons within each category
 ################################################################################
 # We will go ahead and create a Spat with only four geometries, one each of the 
 # unions for the four categories.
@@ -520,3 +541,163 @@ pa_categorized <- terra::project(x = pa_categorized,
 terra::writeVector(x = pa_categorized,
                    filename = "data/protected-areas-categorized.shp",
                    overwrite = TRUE)
+
+################################################################################
+# Convert SpatVector to SpatRaster
+################################################################################
+
+# Takes about 3 minutes to load (a lot longer than original shapefile that is 
+# about 100MB *larger*)
+Sys.time()
+pa_categorized <- terra::vect(x = "data/protected-areas-categorized.shp")
+
+# Load in a bioclimate raster for resolution purposes
+bio1 <- terra::rast(x = "data/wc2-1/bio1.tif")
+
+# Proof of concept on a much smaller extent (around Tucson and northward)
+small_ext <- terra::ext(c(-112.14, -109.60, 32.07, 34.54))
+
+bio_small <- terra::crop(bio1, small_ext)
+# plot(bio_small)
+# 30 seconds for this crop
+pa_small <- terra::crop(pa_categorized, small_ext)
+# plot(pa_small, col = rainbow(10))
+
+# These polygons are much higher resolution than bioclimatic cells. Let's try 
+# a simple rasterize
+# DO NOT TRY TO USE by = "AGNCY_SHOR" WILL CRASH
+# pa_raster <- terra::rasterize(x = pa_small,
+#                               y = bio_small)
+# plot(pa_small, col = rainbow(10))
+# plot(pa_raster, add = TRUE)
+# Fine, but we want a different raster layer for each category. Will need to do 
+# this manually, as trying to do this via rasterize with by = "AGNCY_SHOR" 
+# causes a crash
+
+# Adding each as a layer to a single SpatRaster layer
+# National
+pa_raster <- terra::rasterize(x = pa_small[1],
+                                       y = bio_small)
+# State
+add(pa_raster) <- terra::rasterize(x = pa_small[2],
+                                       y = bio_small)
+# Local
+add(pa_raster) <- terra::rasterize(x = pa_small[3],
+                                       y = bio_small)
+# Private
+add(pa_raster) <- terra::rasterize(x = pa_small[4],
+                                       y = bio_small)
+names(pa_raster) <- c("National", "State", "Local", "Private")
+# plot(pa_raster)
+
+# Now create a binary map of the bioclim variable, 0 below mean, 1 above mean
+bio_binary <- bio_small
+# Gotta get real funky to calculate a mean for a raster layer
+bio_binary[bio_binary < global(bio_small, "mean", na.rm = TRUE)[[1]]] <- 0
+bio_binary[bio_binary >= global(bio_small, "mean", na.rm = TRUE)[[1]]] <- 1
+# plot(bio_binary)
+
+# Take that bio_binary SpatRaster and add it to each of the layers in pa_raster
+# use par = TRUE to add bio_binary to each of the pa_raster layers separately
+pa_raster_sum <- sum(pa_raster, bio_binary, par = TRUE)
+# plot(pa_raster_sum[[1]])
+# plot(pa_raster_sum[[2]])
+# plot(pa_raster_sum)
+
+# Now, finally, find the area of cells with a 2 in each of the pa_raster_sum 
+# layers
+pa_raster_sum[pa_raster_sum < 2] <- NA
+pa_raster_sizes <- terra::cellSize(x = pa_raster_sum,
+                                   mask = TRUE,
+                                   lyrs = TRUE,
+                                   unit = "km")
+names(pa_raster_sizes) <- c("National", "State", "Local", "Private")
+
+# Sum values for each layer. That is area protected.
+pa_areas <- terra::global(pa_raster_sizes, "sum", na.rm = TRUE)
+# pa_areas
+#                 sum
+# National   90.12276
+# State    3051.78588
+# Local      90.41891
+# Private   343.64057
+# BAM!
+
+# Now to do area calculation based on the polygons in pa_small
+# Very cludgy because I'm tired
+# make the bio_binary an area calculation
+bio_binary_area <- bio_binary
+bio_binary_area[bio_binary_area < 1] <- NA
+bio_binary_area <- terra::cellSize(bio_binary_area, 
+                                   mask = TRUE,
+                                   unit = "km")
+# National
+in_pa_national <- exactextractr::exact_extract(x = bio_binary_area,
+                                               y = sf::st_as_sf(pa_small[1]),
+                                               progress = TRUE)
+in_pa_national <- bind_rows(in_pa_national) %>%
+  dplyr::filter(!is.na(value)) %>%
+  dplyr::mutate(area_in = value * coverage_fraction)
+national_prot <- sum(in_pa_national$area_in)
+
+# State
+in_pa_state <- exactextractr::exact_extract(x = bio_binary_area,
+                                               y = sf::st_as_sf(pa_small[2]),
+                                               progress = TRUE)
+in_pa_state <- bind_rows(in_pa_state) %>%
+  dplyr::filter(!is.na(value)) %>%
+  dplyr::mutate(area_in = value * coverage_fraction)
+state_prot <- sum(in_pa_state$area_in)
+
+# Local
+in_pa_local <- exactextractr::exact_extract(x = bio_binary_area,
+                                               y = sf::st_as_sf(pa_small[3]),
+                                               progress = TRUE)
+in_pa_local <- bind_rows(in_pa_local) %>%
+  dplyr::filter(!is.na(value)) %>%
+  dplyr::mutate(area_in = value * coverage_fraction)
+local_prot <- sum(in_pa_local$area_in)
+
+# Private
+in_pa_private <- exactextractr::exact_extract(x = bio_binary_area,
+                                               y = sf::st_as_sf(pa_small[4]),
+                                               progress = TRUE)
+in_pa_private <- bind_rows(in_pa_private) %>%
+  dplyr::filter(!is.na(value)) %>%
+  dplyr::mutate(area_in = value * coverage_fraction)
+private_prot <- sum(in_pa_private$area_in)
+
+# Compare raster-based calculation
+# pa_areas
+# National   90.12276
+# State    3051.78588
+# Local      90.41891
+# Private   343.64057
+
+# to polygon-based calculation
+# national_prot # 132.16
+# state_prot    # 3001.63
+# local_prot    # 65.01
+# private_prot  # 312.25
+
+# Numbers are different enough to cause concern. But still need to think about 
+# the fact that our predicted area rasters are at the resolution of the cell 
+# (the bioclim variable)...
+
+# 0 0 0 0 0
+# 0 0 0 0 0
+# 0 0 0 0 0
+# 0 0 0 0 0
+# 1 0 0 0 0
+
+# 1 1 1 1 0
+# 1 1 1 1 1
+# 1 1 1 1 1
+# 1 1 1 1 1
+# 1 1 1 1 1
+
+
+# Crop the SpatVector (more time here...)
+Sys.time()
+pa_categorized <- terra::crop(pa_categorized, bio1)
+Sys.time()
