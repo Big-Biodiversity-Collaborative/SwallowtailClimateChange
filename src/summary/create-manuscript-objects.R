@@ -379,7 +379,7 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   suitb <- as.factor(as.numeric(suitb))
   levels(suitb) <- data.frame(value = c(0, 1), desc = labels_s)
   color_vec_s <- c("#f2f2f2", # Unsuitable
-                   "#90c3de") # Suitable
+                   "#a6cee3") # Suitable
   names(color_vec_s) <- levels(suitb)[[1]][,"desc"]
   
   suit_plot_base <- ggplot() +
@@ -420,7 +420,7 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
     suitp <- as.factor(as.numeric(suitp))
     levels(suitp) <- data.frame(value = c(0, 1), desc = labels_p)
     color_vec_p <- c("#f2f2f2", # Unsuitable 
-                     "#89cf72") # Suitable
+                     "#b2df8a") # Suitable
     names(color_vec_p) <- levels(suitp)[[1]][,"desc"]
     suit_plot_base <- ggplot() +
       geom_spatvector(data = countries, color = NA, fill = "white") +
@@ -461,10 +461,11 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   overlap2 <- as.factor(overlap2)
   levels(overlap2) <- data.frame(value = c(0, 1, 2, 3), desc = labels_o)
   
-  color_vec_o <- c("#e8e8e8",   # Absent
-                   "#89cf72",   # Hosts only
-                   "#90c3de",   # Insect only
-                   "#8f5cd6")   # Hosts and insect
+  # Using Paired color palette
+  color_vec_o <- c("#ededed",   # Absent
+                   "#b2df8a",   # Hosts only
+                   "#a6cee3",   # Insect only
+                   "#1f78b4")   # Hosts and insect
   names(color_vec_o) <- levels(overlap2)[[1]][,"desc"]
   
   overlap_plot_base <- ggplot() +
@@ -541,10 +542,11 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   overlapf2 <- as.factor(overlapf2)
   levels(overlapf2) <- data.frame(value = c(0, 1, 2, 3), desc = labels_o)
   
-  color_vec_o <- c("#e8e8e8",   # Absent
-                   "#89cf72",   # Hosts only
-                   "#90c3de",   # Insect only
-                   "#8f5cd6")   # Hosts and insect
+  # Using Paired color palette
+  color_vec_o <- c("#ededed",   # Absent
+                   "#b2df8a",   # Hosts only
+                   "#a6cee3",   # Insect only
+                   "#1f78b4")   # Hosts and insect
   names(color_vec_o) <- levels(overlapc1)[[1]][,"desc"]
   
   # Get rid of NA values and calculate extent for plot areas
@@ -617,10 +619,11 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   delta2 <- as.factor(delta2)
   levels(delta2) <- data.frame(value = c(0, 1, 2, 3), desc = labels_d)
   
-  color_vec_d <- c("#e8e8e8",   # Absent
-                   "#f0b041",   # Loss
-                   "#2f6cc2",   # Gain
-                   "#f6e8c3")   # Stable
+  # Tweaked version of RDYlBu palette (so colors pop on light gray background)
+  color_vec_d <- c("#ededed",   # Absent
+                   "#fc8d59",   # Loss
+                   "#2c7bb6",   # Gain
+                   "#ffffbf")   # Stable
   names(color_vec_d) <- levels(delta1)[[1]][,"desc"]
   
   # Get rid of NA values and calculate extent for plot areas
