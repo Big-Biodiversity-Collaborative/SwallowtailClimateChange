@@ -36,6 +36,10 @@ data/gbif/presence-absence/*-pa.csv
 data/gbif/shapefiles/*
 !data/gbif/shapefiles/.gitkeep
 
+# Protected areas shapefiles
+data/protected-areas/*
+!data/protected-areas/.gitkeep
+
 ### OUTPUT
 # Estimated range areas
 output/areas/*.csv
