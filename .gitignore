@@ -37,8 +37,7 @@ data/gbif/shapefiles/*
 !data/gbif/shapefiles/.gitkeep
 
 # Protected areas shapefiles
-data/protected-areas/*
-!data/protected-areas/.gitkeep
+data/protected-areas/protected-areas-categorized.*
 
 ### OUTPUT
 # Estimated range areas

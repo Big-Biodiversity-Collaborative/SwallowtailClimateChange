@@ -40,7 +40,7 @@ climate_names_short <- climate_models$name %>%
 
 # Logical indicating whether to summarize protected area coverage for all 
 # insects or just a subset of them
-all_insects <- FALSE
+all_insects <- TRUE
 
 # Extract species names
 if (all_insects) {
@@ -88,10 +88,10 @@ stats <- as.data.frame(expand_grid(insect = insects,
                                    distribution = distributions,
                                    climate = climate_names_short)) %>%
   mutate(area_sqkm = NA,
-         area_national_sqkm = NA,
-         area_state_sqkm = NA,
-         area_local_sqkm = NA,
-         area_private_sqkm = NA)
+         area_prot_sqkm_national = NA,
+         area_prot_sqkm_state = NA,
+         area_prot_sqkm_local = NA,
+         area_prot_sqkm_private = NA)
 
 # Read in protected areas file (may take ~3 minutes)
 pa <- terra::vect(shpfile_path)
@@ -193,10 +193,10 @@ for (i in 1:length(insects)) {
         
         # Blech, some lazy base R subsetting from me today (also, if_else is 
         # too picky)
-        stats$area_national_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "National"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "National"])
-        stats$area_state_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"])
-        stats$area_local_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"])
-        stats$area_private_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"])
+        stats$area_prot_sqkm_national[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "National"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "National"])
+        stats$area_prot_sqkm_state[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"])
+        stats$area_prot_sqkm_local[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"])
+        stats$area_prot_sqkm_private[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"])
       }
     }  
   }
@@ -204,13 +204,13 @@ for (i in 1:length(insects)) {
 
 # Calculate proportion of species' distributions that are protected
 stats$proportion_national <- ifelse(stats$area_sqkm == 0, NA,
-                                    stats$area_national_sqkm / stats$area_sqkm)
+                                    stats$area_prot_sqkm_national / stats$area_sqkm)
 stats$proportion_state <- ifelse(stats$area_sqkm == 0, NA,
-                                 stats$area_state_sqkm / stats$area_sqkm)
+                                 stats$area_prot_sqkm_state / stats$area_sqkm)
 stats$proportion_local <- ifelse(stats$area_sqkm == 0, NA,
-                                 stats$area_local_sqkm / stats$area_sqkm)
+                                 stats$area_prot_sqkm_local / stats$area_sqkm)
 stats$proportion_private <- ifelse(stats$area_sqkm == 0, NA,
-                                   stats$area_private_sqkm / stats$area_sqkm)
+                                   stats$area_prot_sqkm_private / stats$area_sqkm)
 
 # Write to file
 if (all_insects) {

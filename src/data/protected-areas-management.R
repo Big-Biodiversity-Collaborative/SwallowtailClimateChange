@@ -455,7 +455,7 @@ sum(is.na(agencies$AGNCY_SHORT))
 
 # The majority of remaining sites required searching the internet to find what 
 # type of agency manages the area. Information is stored in CSV file
-category_updates <- read.csv(file = "data/protected-areas-updates.csv")
+category_updates <- read.csv(file = "data/protected-areas/protected-areas-updates.csv")
 
 # Add those to agencies via join (after removing duplicate rows)
 category_updates <- category_updates %>%
@@ -504,7 +504,7 @@ sum(is.na(agencies$AGNCY_SHORT))
 # BAM
 
 # Next step is to write this information to file to save the record
-write.csv(file = "data/protected-areas-management.csv",
+write.csv(file = "data/protected-areas/protected-areas-management.csv",
           x = agencies,
           row.names = FALSE)
 
@@ -513,7 +513,7 @@ write.csv(file = "data/protected-areas-management.csv",
 ################################################################################
 # We will go ahead and create a Spat with only four geometries, one each of the 
 # unions for the four categories.
-agencies <- read.csv(file = "data/protected-areas-management.csv")
+agencies <- read.csv(file = "data/protected-areas/protected-areas-management.csv")
 
 # First, add in the AGNCY_SHORT information to the pa object so we can use it 
 # with the by argument of terra::aggregate
