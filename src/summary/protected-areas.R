@@ -1,7 +1,7 @@
 # Calculate proportion of species' distributions that are in protected areas
-# Erin Zylstra
-# ezylstra@arizona.edu
-# 2024-03-07
+# Erin Zylstra & Jeff Oliver
+# ezylstra@arizona.edu, jcoliver@arizona.edu
+# 2024-08-28
 
 require(dplyr)
 require(terra)
@@ -12,48 +12,17 @@ require(sf)
 
 # Identify where cropped, projected shapefile with protected areas in North
 # America will/does live:
-shpfile_path <- "C:/Users/erin/Desktop/PAs/protected-areas.shp"
+# shpfile_path <- "C:/Users/erin/Desktop/PAs/protected-areas.shp"
+# Will need to download zip archive and extract it into data/protected-areas
+shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
 
 # Protected areas database for North America is huge (tons of small polygons). 
 # It was obtained here:
 # http://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2021/
-# Right now, the original file has been downloaded to a zip file on Google Drive. 
-# Before running this script, need to grab the original shapefile and run the
-# following once:
-
-  # # Identify location of original Protected Area shapefile (unzipped, file 
-  # name will be something like "CEC_NA_2021_terrestrial_IUCN_categories.shp"):
-  # shpfile_orig <- "..."
-  # # Read in protected areas file
-  # pa <- vect(shpfile_orig)
-  #   # 62,272 polygons
-  #   # Projected CRS = Sphere_ARC_INFO_Lambert_Azimuthal_Equal_Area
-  # # count(data.frame(pa), COUNTRY)
-  #   # 8,377 CAN; 531 MEX; 53,364 USA
-  # # count(data.frame(pa), IUCN_CAT, IUCN_DES)
-  #   # Ia (Strict Nature Reserve): 1,301
-  #   # Ib (Wilderness Area): 2,314
-  #   # II (National Park): 1,808
-  #   # III (National Monument or Feature): 2,192
-  #   # IV (Habitat/Species Management Area): 5,514
-  #   # V (Protected Landscape/Seascape): 45,482
-  #   # VI (Protected Area w/Sustainable Use of Nat Resources): 3,661
-  # pa <- pa[, c("COUNTRY", "STATE_PROV", "IUCN_CAT", "GIS_HA")]
-  #  
-  # # Need to crop the protected areas layer before reprojecting (else R aborts)
-  # # Using a xmin value of -4000000 works (cuts off parts of AK that are far west)
-  # 
-  # # First, get rid of areas in US outside of 50 states, then crop and reproject
-  # pa <- pa %>%
-  #   terra::subset(!pa$STATE_PROV %in% c("US-AS", "US-FM", "US-GU", "US-MH",
-  #                                       "US-N/A","US-PR", "US-PW", "US-UM",
-  #                                       "US-VI"))
-  # pa_ext <- ext(pa)
-  # pa_ext[1] <- -4000000
-  # pa <- terra::crop(pa, pa_ext)
-  # pa <- terra::project(pa, "epsg:4326")
-  # # Write to file:
-  # writeVector(pa, shpfile_path)
+# The original file was processed to categorize each polygon as "National", 
+# "State", "Local", or "Private" in terms of management, then polygons in each 
+# category were merged to create a SpatVector with four layers, one for each 
+# management level.
 
 # Logical indicating whether to replace summary table if it already exists
 replace <- TRUE
@@ -67,11 +36,11 @@ species_info <- read.csv("data/gbif-pa-summary.csv")
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
 climate_names_short <- climate_models$name %>%
-  str_remove(pattern = "ensemble_")
+  stringr::str_remove(pattern = "ensemble_")
 
 # Logical indicating whether to summarize protected area coverage for all 
 # insects or just a subset of them
-all_insects <- TRUE
+all_insects <- FALSE
 
 # Extract species names
 if (all_insects) {
@@ -90,7 +59,7 @@ insects <- insects[!insects %in% exclude]
 
 # Make vector of compute-friendly insect names
 nice_names <- insects %>%
-  str_replace(pattern = " ", replacement = "_") %>%
+  stringr::str_replace(pattern = " ", replacement = "_") %>%
   tolower()
 
 # Will need to update raster values in insects' overlap raster
@@ -119,16 +88,21 @@ stats <- as.data.frame(expand_grid(insect = insects,
                                    distribution = distributions,
                                    climate = climate_names_short)) %>%
   mutate(area_sqkm = NA,
-         area_protected_sqkm = NA)
+         area_national_sqkm = NA,
+         area_state_sqkm = NA,
+         area_local_sqkm = NA,
+         area_private_sqkm = NA)
 
-# Read in protected areas file
-pa <- vect("C:/Users/erin/Desktop/PAs/protected-areas.shp")
+# Read in protected areas file (may take ~3 minutes)
+pa <- terra::vect(shpfile_path)
 
 # For each climate model and distribution type:
   # Reclassify overlap raster (species distribution = 1, everything else NA)
   # Create raster with cell values = land area
   # Calculate the fraction of each cell that falls in a protected area polygon
+  #     for each of four protected area categories
   # Calculate the proportion of area in species distribution that's protected
+  #     for each of four protected area categories
 
 for (i in 1:length(insects)) {
 
@@ -179,36 +153,64 @@ for (i in 1:length(insects)) {
               # This results in a data.frame with 3 columns: 
               # ID (polygon), area (raster cell value), fraction (proportion of each 
               # cell contained within polygon).
-        # Using exactextractr package instead:
+        # Using exactextractr package instead
+        
+        # For doing only one category (National, in this case)
+        # in_pa_national <- exactextractr::exact_extract(x = r, 
+        #                                                y = sf::st_as_sf(terra::subset(x = pa, pa$AGNCY_SHOR == "National")),
+        #                                                progress = TRUE)
+
+        # pa is a 4-layer SpatVector
         in_pa <- exactextractr::exact_extract(x = r, 
                                               y = sf::st_as_sf(pa),
                                               progress = FALSE)
-        
-        # Calculate the area within a species' distribution that's also within a
-        # protected area
-        in_pa <- bind_rows(in_pa) %>%
+        # Resulting in_pa is a 4-element, unnamed list. Get the names of the 
+        # elements from the pa SpatVector
+        names(in_pa) <- data.frame(pa)$AGNCY_SHOR
+
+        # Transform list into data frame, calculate areas, then sum for each 
+        # category
+        in_pa_df <- in_pa %>%
+          bind_rows(.id = "AGNCY_SHOR") %>%
           dplyr::filter(!is.na(value)) %>%
-          mutate(area_in = value * coverage_fraction)
-        spp_area_prot <- sum(in_pa$area_in)
+          mutate(area_in = value * coverage_fraction) %>%
+          group_by(AGNCY_SHOR) %>%
+          summarize(sum_area_in = sum(area_in))
         
         # Calculate area of species' distribution
         spp_area <- terra::global(r, "sum", na.rm = TRUE)$sum
         spp_area <- ifelse(is.na(spp_area), 0, spp_area)
-        
+
+        # Just a little memory leak paranoia here
+        rm(in_pa, r)
+        gc()
+
         # Put summary stats in table
         row_index <- which(stats$insect == insects[i] &
                              stats$climate == climate_names_short[j] &
                              stats$distribution == distributions[k])
         stats$area_sqkm[row_index] <- spp_area
-        stats$area_protected_sqkm[row_index] <- spp_area_prot
+        
+        # Blech, some lazy base R subsetting from me today (also, if_else is 
+        # too picky)
+        stats$area_national_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "National"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "National"])
+        stats$area_state_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"])
+        stats$area_local_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"])
+        stats$area_private_sqkm[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"])
       }
     }  
   }
 }
 
 # Calculate proportion of species' distributions that are protected
-stats$proportion_protected <- ifelse(stats$area_sqkm == 0, NA,
-                                     stats$area_protected_sqkm / stats$area_sqkm)
+stats$proportion_national <- ifelse(stats$area_sqkm == 0, NA,
+                                    stats$area_national_sqkm / stats$area_sqkm)
+stats$proportion_state <- ifelse(stats$area_sqkm == 0, NA,
+                                 stats$area_state_sqkm / stats$area_sqkm)
+stats$proportion_local <- ifelse(stats$area_sqkm == 0, NA,
+                                 stats$area_local_sqkm / stats$area_sqkm)
+stats$proportion_private <- ifelse(stats$area_sqkm == 0, NA,
+                                   stats$area_private_sqkm / stats$area_sqkm)
 
 # Write to file
 if (all_insects) {
@@ -225,6 +227,3 @@ if (!(file.exists(summary_filename) & replace == FALSE)) {
             file = summary_filename, 
             row.names = FALSE)
 }
-
-
-

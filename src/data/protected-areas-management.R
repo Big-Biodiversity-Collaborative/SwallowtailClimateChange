@@ -525,22 +525,49 @@ state_prov_excl <- c("US-AS", "US-FM", "US-GU", "US-HI", "US-MH", "US-N/A",
                      "US-PR", "US-PW", "US-UM", "US-VI")
 pa <- terra::subset(pa, subset = !(pa$STATE_PROV %in% state_prov_excl))
 
-# Now union them (or "dissolve" in terra-speak) with aggregate. Can take 20-30 
+# Now union them (or "dissolve" in terra-speak) with aggregate. Can take 20-40 
 # minutes, so be patient
+# Sys.time()
 pa_categorized <- terra::aggregate(pa, by = "AGNCY_SHORT")
+# Sys.time()
 
-# Reality check, also takes a few minutes to render
+# Reality check, also takes a few minutes to render. All polygons should now be
+# restricted to continental North America: Canada, Mexico, and U.S (including 
+# AK, but excluding HI and U.S. territories)
 # plot(pa_categorized,
-#      col = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99"))
+#     col = c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99"))
 
 # Re-project to EPSG:4326 before saving
 pa_categorized <- terra::project(x = pa_categorized, 
                                  y = "EPSG:4326")
 
 # Write takes a while (1:35, that's 95 minutes!)
+Sys.time()
 terra::writeVector(x = pa_categorized,
-                   filename = "data/protected-areas-categorized.shp",
+                   filename = "data/protected-areas/protected-areas-categorized.shp",
                    overwrite = TRUE)
+Sys.time()
+
+################################################################################
+# Crop SpatVector to climate data extent
+################################################################################
+Sys.time()
+pa_categorized <- terra::vect(x = "data/protected-areas/protected-areas-categorized.shp")
+
+# Load in a bioclimate raster for cropping purposes
+bio1 <- terra::rast(x = "data/wc2-1/bio1.tif")
+
+# Crop the SpatVector to the same extent as the climate data
+pa_categorized <- terra::crop(x = pa_categorized,
+                              y = bio1)
+
+# Write takes a while (1:35, that's 95 minutes!)
+Sys.time()
+terra::writeVector(x = pa_categorized,
+                   filename = "data/protected-areas/protected-areas-categorized.shp",
+                   overwrite = TRUE)
+Sys.time()
+
 
 ################################################################################
 # Convert SpatVector to SpatRaster
@@ -549,7 +576,7 @@ terra::writeVector(x = pa_categorized,
 # Takes about 3 minutes to load (a lot longer than original shapefile that is 
 # about 100MB *larger*)
 Sys.time()
-pa_categorized <- terra::vect(x = "data/protected-areas-categorized.shp")
+pa_categorized <- terra::vect(x = "data/protected-areas/protected-areas-categorized.shp")
 
 # Load in a bioclimate raster for resolution purposes
 bio1 <- terra::rast(x = "data/wc2-1/bio1.tif")
@@ -575,6 +602,7 @@ pa_small <- terra::crop(pa_categorized, small_ext)
 # causes a crash
 
 # Adding each as a layer to a single SpatRaster layer
+# TODO: Not sure that indexing by number aligns with category correctly
 # National
 pa_raster <- terra::rasterize(x = pa_small[1],
                                        y = bio_small)
