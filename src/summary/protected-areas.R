@@ -11,9 +11,8 @@ require(exactextractr)
 require(sf)
 
 # Identify where cropped, projected shapefile with protected areas in North
-# America will/does live:
+# America lives:
 # shpfile_path <- "C:/Users/erin/Desktop/PAs/protected-areas.shp"
-# Will need to download zip archive and extract it into data/protected-areas
 shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
 
 # Protected areas database for North America is huge (tons of small polygons). 
@@ -155,11 +154,6 @@ for (i in 1:length(insects)) {
               # cell contained within polygon).
         # Using exactextractr package instead
         
-        # For doing only one category (National, in this case)
-        # in_pa_national <- exactextractr::exact_extract(x = r, 
-        #                                                y = sf::st_as_sf(terra::subset(x = pa, pa$AGNCY_SHOR == "National")),
-        #                                                progress = TRUE)
-
         # pa is a 4-layer SpatVector
         in_pa <- exactextractr::exact_extract(x = r, 
                                               y = sf::st_as_sf(pa),
