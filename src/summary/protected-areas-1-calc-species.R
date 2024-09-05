@@ -10,18 +10,14 @@ require(tidyr)
 require(exactextractr)
 require(sf)
 
-# Identify where cropped, projected shapefile with protected areas in North
-# America lives:
-# shpfile_path <- "C:/Users/erin/Desktop/PAs/protected-areas.shp"
-shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
+# Before running this script, need to download the zip archive with shapefile 
+# that has data on protected areas. The file currently (2024-09-05) lives on 
+# Google Drive and is called "protected-areas-categorized.zip". Unzip the file
+# contents to data/protected-areas (.gitignore is set to ignore those files).
+# See src/data/protected-areas-management.R for provenance of those files.
 
-# Protected areas database for North America is huge (tons of small polygons). 
-# It was obtained here:
-# http://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2021/
-# The original file was processed to categorize each polygon as "National", 
-# "State", "Local", or "Private" in terms of management, then polygons in each 
-# category were merged to create a SpatVector with four layers, one for each 
-# management level.
+# Cropped, projected shapefile with protected areas in North America
+shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
 
 # Logical indicating whether to replace summary table if it already exists
 replace <- TRUE
