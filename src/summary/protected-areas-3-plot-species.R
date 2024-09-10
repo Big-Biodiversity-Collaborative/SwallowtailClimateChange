@@ -159,6 +159,7 @@ facet_labels <- c(`245` = "SSP2-4.5",
                   "state" = "State",
                   "local" = "Local",
                   "private" = "Private")
+ew_colors <- c("#80b1d3", "#fb8072")
 
 prop_protected_plot <- ggplot(data = pa_long %>% 
                                 filter(!(insect %in% c("Papilio appalachiensis", "Papilio palamedes"))) %>%
@@ -177,7 +178,7 @@ prop_protected_plot <- ggplot(data = pa_long %>%
                           group = ew, 
                           color = ew),
             linewidth = 1.0) +
-  scale_color_manual(name = "East/West", values = c("#80b1d3", "#fb8072")) +
+  scale_color_manual(name = "East/West", values = ew_colors) +
   facet_grid(category ~ ssp, 
              scales = "free_y",
              labeller = as_labeller(facet_labels)) +
@@ -188,3 +189,42 @@ prop_protected_plot <- ggplot(data = pa_long %>%
 
 ggsave(filename = "output/manuscript/protected-species-prop.png",
        plot = prop_protected_plot)
+
+# Now just plot SSP3-7.0, only using x-facet for the three measurements
+ssp370 <- pa_long %>%
+  filter(ssp == "370")
+ssp370_means <- pa_means %>%
+  filter(ssp == "370")
+
+prop_prot_370_plot <- ggplot(data = ssp370 %>% 
+                                filter(!(insect %in% c("Papilio appalachiensis", "Papilio palamedes"))) %>%
+                                filter(stat == "prop"),
+                              mapping = aes(x = year, y = value, group = insect, color = ew)) +
+  geom_line(linewidth = 0.6, alpha = 0.3,
+            show.legend = FALSE) +
+  geom_point(data = ssp370_means %>% filter(stat == "prop"),
+             mapping = aes(x = year, 
+                           y = mean_protected_wgtd, 
+                           group = ew, 
+                           color = ew)) +
+  geom_line(data = ssp370_means %>% filter(stat == "prop"),
+            mapping = aes(x = year, 
+                          y = mean_protected_wgtd, 
+                          group = ew, 
+                          color = ew),
+            linewidth = 1.0) +
+  scale_color_manual(name = "East/West", values = ew_colors) +
+  facet_wrap(~ category,
+             nrow = 2,
+             ncol = 2,
+             scales = "free_y",
+             labeller = as_labeller(facet_labels)) +
+  theme_bw() +
+  ylab("Proportion Protected") +
+  xlab("Year") +
+  theme(strip.background = element_blank(),
+        strip.placement = "outside")
+prop_prot_370_plot
+
+ggsave(filename = "output/manuscript/protected-species-prop-370.png",
+       plot = prop_prot_370_plot)
