@@ -44,10 +44,6 @@ data/protected-areas/protected-areas-categorized.*
 output/areas/*.csv
 !output/areas/.gitkeep
 
-# Measurements of species' aridity
-output/aridity/*.csv
-!output/aridity/.gitkeep
-
 # Comparisons between current and forecast distributions
 output/deltas/*.rds
 !output/deltas/.gitkeep
