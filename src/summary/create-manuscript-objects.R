@@ -736,16 +736,32 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   # Colors
   # Light gray
   graycol <- "#f2f2f2"
-  # For richnes, eBird abundance colors but add a light gray for 0
+  # For richness, eBird abundance colors but add a light gray for 0
   rich_cols <- c(graycol, ebirdst::ebirdst_palettes(7, "weekly"))
+  # Is there a way to do this with packages already used? Can get close with 
+  # Some base R...ebird package relies on viridisLite, which makes it easy to 
+  # get rid of that unpleasant yellow at the end of plasma...
+  # rich_cols <- rev(hcl.colors(n = 7, palette = "plasma"))
+  # gry_ramp <- colorRampPalette(c("#e6e6e6", rich_cols[1]))
+  # rich_cols <- c(gry_ramp(4)[2], rich_cols)
+  # rich_cols <- c(graycol, rich_cols)
+
+  # For deltas, could use same scale as for individual species' deltas, but 
+  # colors don't quite "pop" enough
+  # delta_cols <- c("#fc8d59",
+  #                 graycol,
+  #                 "#2c7bb6")
+  
   # For deltas, red-blue spectrum
-  delta_cols <- c("#D10000","#104e8b")
+  delta_cols <- c("#D10000",
+                  graycol,
+                  "#104e8b")
   
   # Create map objects
   richness_c <- ggplot() +
     geom_spatvector(data = countries, color = NA, fill = "white") +
     geom_spatraster(data = rich_c) +
-    scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+    scale_fill_gradientn(colors = rich_cols, na.value = NA,
                          name = "Richness") +
     geom_spatvector(data = states, color = "gray65", linewidth = linewidth,
                     fill = NA) +
@@ -771,8 +787,8 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_d <- ggplot() +
     geom_spatvector(data = countries, color = NA, fill = "white") +
     geom_spatraster(data = delta) +
-    scale_fill_gradient2(low = delta_cols[1], high = delta_cols[2], 
-                         mid = graycol, na.value = NA, name = "Change", 
+    scale_fill_gradient2(low = delta_cols[1], mid = delta_cols[2], 
+                         high = delta_cols[3], na.value = NA, name = "Change", 
                          breaks = c(-5, 0, 5)) +
     geom_spatvector(data = states, color = "gray65", linewidth = linewidth, 
                     fill = NA) +
