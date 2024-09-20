@@ -29,8 +29,13 @@ replace_rasters <- TRUE
   # lon_min_bands: median long among the westernmost cells in each lat band
 
 # Summary stats that are calculated for each time period (across distribution types)
-  # pinsect_withhost: % of insect range that overlaps with >= 1 host plant
-  # pinsecthost_1host: % of insect + host range where only 1 host plant occurs 
+  # pinsect_withhost: % of insect range that overlaps with >= 1 host plant; 
+  #   only calculated for rows where distribution == "total insect"
+  # pinsecthost_1host: % of insect + host range where only 1 host plant occurs; 
+  #   only calculated for rows where distribution == "insect + host" 
+  # phost_insect: % of host range that overlaps with insect (i.e. the percent
+  #   of host plant range that is actually suitable for the insect); only 
+  #   calculated for rows where distribution == "total insect"
 
 # Summary stats that are calculated between future and current time periods (for 
 # each distribution type)
@@ -119,7 +124,8 @@ stats <- as.data.frame(expand_grid(insect = insects,
          lon_max_shift = NA,
          lon_min_shift = NA,
          pinsect_withhost = NA,
-         pinsecthost_1host = NA)
+         pinsecthost_1host = NA,
+         phost_insect = NA)
 
 # Loop through insect species
 for (i in 1:length(insects)) {
@@ -161,13 +167,21 @@ for (i in 1:length(insects)) {
                           stats$distribution == "total insect" &
                           stats$climate == climate_names_short[j])
     if (max(cats) > 3) {
+      # Total area estimated to be suitable for insect
       insect_area <- sum(ih_areas[ih_areas[, "value"] %in% 3:5, "area"])
+      # Total area of suitable insect areas that are also suitable for one or 
+      # more hosts
       ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
       stats$pinsect_withhost[row_index1] <- round(ih_area / insect_area * 100, 2)
+      # Total area of areas suitable for hosts
+      host_area <- sum(ih_areas[ih_areas[, "value"] %in% c(1:2, 4:5), "area"])
+      stats$phost_insect[row_index1] <- round(ih_area / host_area * 100, 2)
     } else if (max(cats) == 3) {
       stats$pinsect_withhost[row_index1] <- 0
+      stats$phost_insect[row_index1] <- 0
     } else {
       stats$pinsect_withhost[row_index1] <- NA
+      stats$phost_insect[row_index1] <- NA
     }
     
     # Calculate the percent of insect + host range where only 1 host occurs
@@ -187,6 +201,7 @@ for (i in 1:length(insects)) {
         stats$pinsecthost_1host[row_index2] <- NA 
       }
     }
+
     # For all areas predicted suitable for the insect: reclassify cells in 
     # overlap rasters that are >= 3 as 1 (NA everywhere else)
     allinsect_list[[j]] <- terra::classify(x = allinsect_list[[j]],
