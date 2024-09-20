@@ -3,6 +3,8 @@
 # jcoliver@arizona.edu
 # 2024-03-08
 
+# INCOMPLETE
+
 # Primary goal of the script is to run this on the HPC after the final step 
 # (predictions) to assess if all prediction outputs have been created and, if 
 # not, to report which outputs are missing. Only considering those species for 
