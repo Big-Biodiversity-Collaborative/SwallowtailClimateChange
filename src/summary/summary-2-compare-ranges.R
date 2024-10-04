@@ -35,7 +35,7 @@ replace_rasters <- TRUE
   #   only calculated for rows where distribution == "insect + host" 
   # phost_insect: % of host range that overlaps with insect (i.e. the percent
   #   of host plant range that is actually suitable for the insect); only 
-  #   calculated for rows where distribution == "total insect"
+  #   calculated for rows where distribution == "total insect". NOT CALCULATED.
 
 # Summary stats that are calculated between future and current time periods (for 
 # each distribution type)
@@ -174,14 +174,14 @@ for (i in 1:length(insects)) {
       ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
       stats$pinsect_withhost[row_index1] <- round(ih_area / insect_area * 100, 2)
       # Total area of areas suitable for hosts
-      host_area <- sum(ih_areas[ih_areas[, "value"] %in% c(1:2, 4:5), "area"])
-      stats$phost_insect[row_index1] <- round(ih_area / host_area * 100, 2)
+      # host_area <- sum(ih_areas[ih_areas[, "value"] %in% c(1:2, 4:5), "area"])
+      # stats$phost_insect[row_index1] <- round(ih_area / host_area * 100, 2)
     } else if (max(cats) == 3) {
       stats$pinsect_withhost[row_index1] <- 0
-      stats$phost_insect[row_index1] <- 0
+      # stats$phost_insect[row_index1] <- 0
     } else {
       stats$pinsect_withhost[row_index1] <- NA
-      stats$phost_insect[row_index1] <- NA
+      # stats$phost_insect[row_index1] <- NA
     }
     
     # Calculate the percent of insect + host range where only 1 host occurs
