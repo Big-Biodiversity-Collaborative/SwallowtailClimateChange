@@ -4,6 +4,7 @@
 # 2024-10-07
 
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 
 # Plot histograms of (all from the output of 
@@ -77,6 +78,20 @@ southern <- ggplot(data = range_info, mapping = aes(x = lat_min_shift,
   theme_bw()
 southern
 
+southern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
+                                                             color = ew)) +
+  geom_point(mapping = aes(x = lat_min_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lat_min_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                    values = ew_colors) +
+  xlab(label = "Southern edge latitudinal shift (km)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  coord_flip() +
+  facet_grid(ssp ~ year)
+southern_lollipop
+
 # Northern (lat_max)
 northern <- ggplot(data = range_info, mapping = aes(x = lat_max_shift,
                                                     group = ew,
@@ -89,6 +104,20 @@ northern <- ggplot(data = range_info, mapping = aes(x = lat_max_shift,
   facet_grid(ssp ~ year) +
   theme_bw()
 northern
+
+northern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
+                                                             color = ew)) +
+  geom_point(mapping = aes(x = lat_max_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lat_max_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Northern edge latitudinal shift (km)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  coord_flip() +
+  facet_grid(ssp ~ year)
+northern_lollipop
 
 # Western (lon_min)
 western <- ggplot(data = range_info, mapping = aes(x = lon_min_shift,
@@ -103,6 +132,19 @@ western <- ggplot(data = range_info, mapping = aes(x = lon_min_shift,
   theme_bw()
 western
 
+western_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
+                                                             color = ew)) +
+  geom_point(mapping = aes(x = lon_min_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lon_min_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Western edge longitudinal shift (km)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  facet_grid(ssp ~ year)
+western_lollipop
+
 # Eastern (lon_max)
 eastern <- ggplot(data = range_info, mapping = aes(x = lon_max_shift,
                                                    group = ew,
@@ -115,6 +157,81 @@ eastern <- ggplot(data = range_info, mapping = aes(x = lon_max_shift,
   facet_grid(ssp ~ year) +
   theme_bw()
 eastern
+
+eastern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
+                                                            color = ew)) +
+  geom_point(mapping = aes(x = lon_max_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lon_max_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Eastern edge longitudinal shift (km)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  facet_grid(ssp ~ year)
+eastern_lollipop
+
+# Some paired lollipop plots for a single ssp & year, where longitude is one 
+# plot (two facets) and latitude is another plot (two facets).
+# Start with data wrangling to get long-formatted data
+range_info_long <- range_info %>%
+  select(insect, lat_min_shift, lat_max_shift, lon_min_shift, lon_max_shift,
+         ssp, year, ew) %>%
+  filter(ssp == "370", year == 2055) %>%
+  pivot_longer(cols = c(lat_min_shift, lat_max_shift, lon_min_shift, lon_max_shift),
+               names_to = "shift",
+               values_to = "value")
+
+facet_labels <- c("lon_min_shift" = "Western edge",
+                  "lon_max_shift" = "Eastern edge",
+                  "lat_min_shift" = "Southern edge",
+                  "lat_max_shift" = "Northern edge")
+
+longitude_lollipop <- ggplot(data = range_info_long %>% 
+                               filter(shift %in% c("lon_min_shift", "lon_max_shift")) %>%
+                               mutate(shift = factor(x = shift,
+                                                     levels = c("lon_min_shift",
+                                                                "lon_max_shift"))),
+                             mapping = aes(y = insect,
+                                           color = ew)) +
+  geom_point(mapping = aes(x = value)) +
+  geom_segment(mapping = aes(x = 0, xend = value)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab("Longitudinal shift (km)") +
+  ylab("Species") +
+  facet_wrap(~ shift, 
+             nrow = 1,
+             ncol = 2,
+             scales = "free_x", 
+             labeller = as_labeller(facet_labels)) +
+  theme_bw()
+longitude_lollipop
+
+latitude_lollipop <- ggplot(data = range_info_long %>% 
+                               filter(shift %in% c("lat_min_shift", "lat_max_shift")) %>%
+                               mutate(shift = factor(x = shift,
+                                                     levels = c("lat_max_shift",
+                                                                "lat_min_shift"))),
+                             mapping = aes(y = insect,
+                                           color = ew)) +
+  geom_point(mapping = aes(x = value)) +
+  geom_segment(mapping = aes(x = 0, xend = value)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab("Latitudinal shift (km)") +
+  ylab("Species") +
+  facet_wrap(~ shift, 
+             nrow = 2,
+             ncol = 1,
+             scales = "free_y", 
+             labeller = as_labeller(facet_labels)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  coord_flip()
+latitude_lollipop
 
 # Area gained 
 gained <- ggplot(data = range_info, mapping = aes(x = area_gained,
