@@ -172,10 +172,10 @@ for (i in 1:length(insects)) {
       # Total area of suitable insect areas that are also suitable for one or 
       # more hosts
       ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
-      stats$pinsect_withhost[row_index1] <- round(ih_area / insect_area * 100, 2)
+      stats$pinsect_withhost[row_index1] <- round(ih_area / insect_area * 100, 4)
       # Total area of areas suitable for hosts
       # host_area <- sum(ih_areas[ih_areas[, "value"] %in% c(1:2, 4:5), "area"])
-      # stats$phost_insect[row_index1] <- round(ih_area / host_area * 100, 2)
+      # stats$phost_insect[row_index1] <- round(ih_area / host_area * 100, 4)
     } else if (max(cats) == 3) {
       stats$pinsect_withhost[row_index1] <- 0
       # stats$phost_insect[row_index1] <- 0
@@ -191,7 +191,7 @@ for (i in 1:length(insects)) {
     if (all(4:5 %in% cats)) {
       ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
       ih1_area <- sum(ih_areas[ih_areas[, "value"] == 4, "area"])
-      stats$pinsecthost_1host[row_index2] <- round(ih1_area / ih_area * 100, 2)
+      stats$pinsecthost_1host[row_index2] <- round(ih1_area / ih_area * 100, 4)
     } else {
       if (4 %in% cats & !5 %in% cats) {
         stats$pinsecthost_1host[row_index2] <- 100
