@@ -63,12 +63,24 @@ ew <- read.csv(file = "data/insect-eastwest.csv")
 range_info <- range_info %>%
   left_join(ew)
 
-ew_colors <- c("#80b1d3", "#fb8072")
+# From here on out, the species names should have the genus abbreviated
+range_info <- range_info %>%
+  mutate(insect = gsub(pattern = "Papilio", 
+                       replacement = "P.", 
+                       x = insect))
+
+ew_colors <- c("#3eafa3", "#ce932a")
+
+# TODO: Could remove appalachiensis and palamedes from shift data...(filtering 
+# in ggplot call removes the former, but not the latter, which only has non-NA 
+# values for SSP245-2055)
 
 # Southern (lat_min)
-southern <- ggplot(data = range_info, mapping = aes(x = lat_min_shift,
-                                                    group = ew,
-                                                    fill = ew)) +
+southern <- ggplot(data = range_info %>%
+                     filter(!is.na(lat_min_shift)), 
+                   mapping = aes(x = lat_min_shift,
+                                 group = ew,
+                                 fill = ew)) +
   geom_histogram(position = "dodge") +
   scale_fill_manual(name = "East/West",
                     values = ew_colors) +
@@ -78,8 +90,10 @@ southern <- ggplot(data = range_info, mapping = aes(x = lat_min_shift,
   theme_bw()
 southern
 
-southern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
-                                                             color = ew)) +
+southern_lollipop <- ggplot(data = range_info %>%
+                              filter(!is.na(lat_min_shift)), 
+                            mapping = aes(y = insect,
+                                          color = ew)) +
   geom_point(mapping = aes(x = lat_min_shift)) +
   geom_segment(mapping = aes(x = 0, xend = lat_min_shift)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
@@ -87,15 +101,18 @@ southern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
                     values = ew_colors) +
   xlab(label = "Southern edge latitudinal shift (km)") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
+                                   hjust = 1, face = "italic")) +
   coord_flip() +
   facet_grid(ssp ~ year)
 southern_lollipop
 
 # Northern (lat_max)
-northern <- ggplot(data = range_info, mapping = aes(x = lat_max_shift,
-                                                    group = ew,
-                                                    fill = ew)) +
+northern <- ggplot(data = data = range_info %>%
+                     filter(!is.na(lat_min_shift)), 
+                   mapping = aes(x = lat_max_shift,
+                                 group = ew,
+                                 fill = ew)) +
   geom_histogram(position = "dodge") +
   scale_fill_manual(name = "East/West",
                     values = ew_colors) +
@@ -105,8 +122,10 @@ northern <- ggplot(data = range_info, mapping = aes(x = lat_max_shift,
   theme_bw()
 northern
 
-northern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
-                                                             color = ew)) +
+northern_lollipop <- ggplot(data = data = range_info %>%
+                              filter(!is.na(lat_min_shift)), 
+                            mapping = aes(y = insect,
+                                          color = ew)) +
   geom_point(mapping = aes(x = lat_max_shift)) +
   geom_segment(mapping = aes(x = 0, xend = lat_max_shift)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
@@ -120,9 +139,11 @@ northern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
 northern_lollipop
 
 # Western (lon_min)
-western <- ggplot(data = range_info, mapping = aes(x = lon_min_shift,
-                                                   group = ew,
-                                                   fill = ew)) +
+western <- ggplot(data = data = range_info %>%
+                    filter(!is.na(lat_min_shift)), 
+                  mapping = aes(x = lon_min_shift,
+                                group = ew,
+                                fill = ew)) +
   geom_histogram(position = "dodge") +
   scale_fill_manual(name = "East/West",
                     values = ew_colors) +
@@ -132,8 +153,10 @@ western <- ggplot(data = range_info, mapping = aes(x = lon_min_shift,
   theme_bw()
 western
 
-western_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
-                                                             color = ew)) +
+western_lollipop <- ggplot(data = data = range_info %>%
+                             filter(!is.na(lat_min_shift)), 
+                           mapping = aes(y = insect,
+                                         color = ew)) +
   geom_point(mapping = aes(x = lon_min_shift)) +
   geom_segment(mapping = aes(x = 0, xend = lon_min_shift)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
@@ -146,9 +169,11 @@ western_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
 western_lollipop
 
 # Eastern (lon_max)
-eastern <- ggplot(data = range_info, mapping = aes(x = lon_max_shift,
-                                                   group = ew,
-                                                   fill = ew)) +
+eastern <- ggplot(data = data = range_info %>%
+                    filter(!is.na(lat_min_shift)), 
+                  mapping = aes(x = lon_max_shift,
+                                group = ew,
+                                fill = ew)) +
   geom_histogram(position = "dodge") +
   scale_fill_manual(name = "East/West",
                     values = ew_colors) +
@@ -158,8 +183,10 @@ eastern <- ggplot(data = range_info, mapping = aes(x = lon_max_shift,
   theme_bw()
 eastern
 
-eastern_lollipop <- ggplot(data = range_info, mapping = aes(y = insect,
-                                                            color = ew)) +
+eastern_lollipop <- ggplot(data = data = range_info %>%
+                             filter(!is.na(lat_min_shift)), 
+                           mapping = aes(y = insect,
+                                         color = ew)) +
   geom_point(mapping = aes(x = lon_max_shift)) +
   geom_segment(mapping = aes(x = 0, xend = lon_max_shift)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
@@ -187,11 +214,15 @@ facet_labels <- c("lon_min_shift" = "Western edge",
                   "lat_min_shift" = "Southern edge",
                   "lat_max_shift" = "Northern edge")
 
+# We can drop P. appalachiensis & P. palamedes 
 longitude_lollipop <- ggplot(data = range_info_long %>% 
+                               filter(!(insect %in% c("P. appalachiensis", "P. palamedes"))) %>%
                                filter(shift %in% c("lon_min_shift", "lon_max_shift")) %>%
                                mutate(shift = factor(x = shift,
                                                      levels = c("lon_min_shift",
-                                                                "lon_max_shift"))),
+                                                                "lon_max_shift"))) %>%
+                               mutate(insect = factor(x = insect, 
+                                                      levels = rev(sort(unique(insect))))),
                              mapping = aes(y = insect,
                                            color = ew)) +
   geom_point(mapping = aes(x = value)) +
@@ -206,10 +237,14 @@ longitude_lollipop <- ggplot(data = range_info_long %>%
              ncol = 2,
              scales = "free_x", 
              labeller = as_labeller(facet_labels)) +
-  theme_bw()
+  theme_bw() +
+  theme(axis.text.y = element_text(face = "italic"))
 longitude_lollipop
+ggsave(file = "output/plots/lon-shift-ssp370_2041.png",
+       plot = longitude_lollipop)
 
 latitude_lollipop <- ggplot(data = range_info_long %>% 
+                              filter(!(insect %in% c("P. appalachiensis", "P. palamedes"))) %>% 
                                filter(shift %in% c("lat_min_shift", "lat_max_shift")) %>%
                                mutate(shift = factor(x = shift,
                                                      levels = c("lat_max_shift",
@@ -229,9 +264,12 @@ latitude_lollipop <- ggplot(data = range_info_long %>%
              scales = "free_y", 
              labeller = as_labeller(facet_labels)) +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 60, vjust = 1, 
+                                   hjust = 1, face = "italic")) +
   coord_flip()
 latitude_lollipop
+ggsave(file = "output/plots/lat-shift-ssp370_2041.png",
+       plot = latitude_lollipop)
 
 # Area gained 
 gained <- ggplot(data = range_info, mapping = aes(x = area_gained,
