@@ -51,12 +51,13 @@ range_info <- range_info %>%
 # Add the percent of current range retained to the data frame
 range_info <- range_info %>%
   mutate(perc_retained = 100 * (area_retained/(area_retained + area_lost)))
-# Total change in area
+# Total change in area (area_retained + area_gained) - (area_retained + area_lost)
+#   reduces to area_gained - area_lost
 range_info <- range_info %>%
-  mutate(area_delta = (area_gained - area_lost))
+  mutate(area_delta = area_gained - area_lost)
 # Change in area relative to current range (area_retained + area_lost)
 range_info <- range_info %>% 
-  mutate(perc_delta = 100 * ((area_gained + area_retained)/(area_lost + area_retained)))
+  mutate(perc_delta = (100 * ((area_gained + area_retained)/(area_lost + area_retained))) - 100)
 
 # Now add in east/west information for coloring
 ew <- read.csv(file = "data/insect-eastwest.csv")
@@ -74,22 +75,7 @@ ew_colors <- c("#3eafa3", "#ce932a")
 # TODO: Could remove appalachiensis and palamedes from shift data...(filtering 
 # in ggplot call removes the former, but not the latter, which only has non-NA 
 # values for SSP245-2055)
-
 # Southern (lat_min)
-southern <- ggplot(data = range_info %>%
-                     filter(!is.na(lat_min_shift)), 
-                   mapping = aes(x = lat_min_shift,
-                                 group = ew,
-                                 fill = ew)) +
-  geom_histogram(position = "dodge") +
-  scale_fill_manual(name = "East/West",
-                    values = ew_colors) +
-  xlab(label = "Southern range shift (km)") +
-  ylab(label = expression(paste("# ", italic("Papilio"), " species"))) +
-  facet_grid(ssp ~ year) +
-  theme_bw()
-southern
-
 southern_lollipop <- ggplot(data = range_info %>%
                               filter(!is.na(lat_min_shift)), 
                             mapping = aes(y = insect,
@@ -108,21 +94,7 @@ southern_lollipop <- ggplot(data = range_info %>%
 southern_lollipop
 
 # Northern (lat_max)
-northern <- ggplot(data = data = range_info %>%
-                     filter(!is.na(lat_min_shift)), 
-                   mapping = aes(x = lat_max_shift,
-                                 group = ew,
-                                 fill = ew)) +
-  geom_histogram(position = "dodge") +
-  scale_fill_manual(name = "East/West",
-                    values = ew_colors) +
-  xlab(label = "Northern range shift (km)") +
-  ylab(label = expression(paste("# ", italic("Papilio"), " species"))) +
-  facet_grid(ssp ~ year) +
-  theme_bw()
-northern
-
-northern_lollipop <- ggplot(data = data = range_info %>%
+northern_lollipop <- ggplot(data = range_info %>%
                               filter(!is.na(lat_min_shift)), 
                             mapping = aes(y = insect,
                                           color = ew)) +
@@ -139,21 +111,7 @@ northern_lollipop <- ggplot(data = data = range_info %>%
 northern_lollipop
 
 # Western (lon_min)
-western <- ggplot(data = data = range_info %>%
-                    filter(!is.na(lat_min_shift)), 
-                  mapping = aes(x = lon_min_shift,
-                                group = ew,
-                                fill = ew)) +
-  geom_histogram(position = "dodge") +
-  scale_fill_manual(name = "East/West",
-                    values = ew_colors) +
-  xlab(label = "Western range shift (km)") +
-  ylab(label = expression(paste("# ", italic("Papilio"), " species"))) +
-  facet_grid(ssp ~ year) +
-  theme_bw()
-western
-
-western_lollipop <- ggplot(data = data = range_info %>%
+western_lollipop <- ggplot(data = range_info %>%
                              filter(!is.na(lat_min_shift)), 
                            mapping = aes(y = insect,
                                          color = ew)) +
@@ -169,21 +127,7 @@ western_lollipop <- ggplot(data = data = range_info %>%
 western_lollipop
 
 # Eastern (lon_max)
-eastern <- ggplot(data = data = range_info %>%
-                    filter(!is.na(lat_min_shift)), 
-                  mapping = aes(x = lon_max_shift,
-                                group = ew,
-                                fill = ew)) +
-  geom_histogram(position = "dodge") +
-  scale_fill_manual(name = "East/West",
-                    values = ew_colors) +
-  xlab(label = "Eastern range shift (km)") +
-  ylab(label = expression(paste("# ", italic("Papilio"), " species"))) +
-  facet_grid(ssp ~ year) +
-  theme_bw()
-eastern
-
-eastern_lollipop <- ggplot(data = data = range_info %>%
+eastern_lollipop <- ggplot(data = range_info %>%
                              filter(!is.na(lat_min_shift)), 
                            mapping = aes(y = insect,
                                          color = ew)) +
@@ -200,7 +144,13 @@ eastern_lollipop
 
 # Some paired lollipop plots for a single ssp & year, where longitude is one 
 # plot (two facets) and latitude is another plot (two facets).
-# Start with data wrangling to get long-formatted data
+
+facet_labels <- c("lon_min_shift" = "Western edge",
+                  "lon_max_shift" = "Eastern edge",
+                  "lat_min_shift" = "Southern edge",
+                  "lat_max_shift" = "Northern edge")
+
+# Start with data wrangling to get long-formatted data for SSP 3-7.0, 2055
 range_info_long <- range_info %>%
   select(insect, lat_min_shift, lat_max_shift, lon_min_shift, lon_max_shift,
          ssp, year, ew) %>%
@@ -209,25 +159,26 @@ range_info_long <- range_info %>%
                names_to = "shift",
                values_to = "value")
 
-facet_labels <- c("lon_min_shift" = "Western edge",
-                  "lon_max_shift" = "Eastern edge",
-                  "lat_min_shift" = "Southern edge",
-                  "lat_max_shift" = "Northern edge")
-
 # We can drop P. appalachiensis & P. palamedes 
-longitude_lollipop <- ggplot(data = range_info_long %>% 
-                               filter(!(insect %in% c("P. appalachiensis", "P. palamedes"))) %>%
-                               filter(shift %in% c("lon_min_shift", "lon_max_shift")) %>%
+range_info_long <- range_info_long  %>% 
+  filter(!(insect %in% c("P. appalachiensis", "P. palamedes")))
+
+# Also want to re-level so east groups with east etc.
+range_info_long <- range_info_long %>%
+  arrange(ew, insect) %>%
+  mutate(insect = factor(x = insect,
+                         levels = rev(unique(insect))))
+
+# Longitude plots (west shifts on left, east shifts on right)
+longitude_lollipop <- ggplot(data = range_info_long %>%
+                             filter(shift %in% c("lon_min_shift", "lon_max_shift")) %>%
                                mutate(shift = factor(x = shift,
                                                      levels = c("lon_min_shift",
-                                                                "lon_max_shift"))) %>%
-                               mutate(insect = factor(x = insect, 
-                                                      levels = rev(sort(unique(insect))))),
-                             mapping = aes(y = insect,
-                                           color = ew)) +
-  geom_point(mapping = aes(x = value)) +
-  geom_segment(mapping = aes(x = 0, xend = value)) +
+                                                                "lon_max_shift"))),
+                             mapping = aes(y = insect, color = ew)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  geom_point(mapping = aes(x = value), size = 4) +
+  geom_segment(mapping = aes(x = 0, xend = value)) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
   xlab("Longitudinal shift (km)") +
@@ -235,41 +186,101 @@ longitude_lollipop <- ggplot(data = range_info_long %>%
   facet_wrap(~ shift, 
              nrow = 1,
              ncol = 2,
-             scales = "free_x", 
+             # scales = "free_x", 
              labeller = as_labeller(facet_labels)) +
   theme_bw() +
-  theme(axis.text.y = element_text(face = "italic"))
+  theme(axis.text.y = element_text(face = "italic", size = 10),
+        axis.title.y = element_blank(),
+        strip.background = element_blank())
 longitude_lollipop
 ggsave(file = "output/plots/lon-shift-ssp370_2041.png",
        plot = longitude_lollipop)
 
+# Latitude plots (north shifts on top, south shifts on bottom)
 latitude_lollipop <- ggplot(data = range_info_long %>% 
-                              filter(!(insect %in% c("P. appalachiensis", "P. palamedes"))) %>% 
                                filter(shift %in% c("lat_min_shift", "lat_max_shift")) %>%
                                mutate(shift = factor(x = shift,
                                                      levels = c("lat_max_shift",
                                                                 "lat_min_shift"))),
                              mapping = aes(y = insect,
                                            color = ew)) +
-  geom_point(mapping = aes(x = value)) +
-  geom_segment(mapping = aes(x = 0, xend = value)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  geom_point(mapping = aes(x = value), size = 4) +
+  geom_segment(mapping = aes(x = 0, xend = value)) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
   xlab("Latitudinal shift (km)") +
-  ylab("Species") +
+  # ylab("Species") +
   facet_wrap(~ shift, 
              nrow = 2,
              ncol = 1,
-             scales = "free_y", 
+             # scales = "free_y", 
              labeller = as_labeller(facet_labels)) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 60, vjust = 1, 
-                                   hjust = 1, face = "italic")) +
+                                   hjust = 1, face = "italic", size = 10),
+        axis.title.x = element_blank(),
+        strip.background = element_blank()) +
   coord_flip()
 latitude_lollipop
 ggsave(file = "output/plots/lat-shift-ssp370_2041.png",
        plot = latitude_lollipop)
+
+################################################################################
+# Area changes plots
+area_long <- range_info %>%
+  filter(ssp == "370", year == 2055) %>%
+  select(insect, area_gained, area_lost, area_retained, area_delta, perc_delta, ew) %>%
+  pivot_longer(-c(insect, ew),
+               names_to = "change",
+               values_to = "area_km") %>%
+  filter(!(insect %in% c("P. appalachiensis", "P. palamedes"))) %>%
+  arrange(ew, insect) %>%
+  mutate(insect = factor(x = insect,
+                         levels = rev(unique(insect))))
+
+# Area changes points, where the size of the circle indicates how much area was 
+# lost, retained, or gained. Not sure if it works.
+changes_points <- ggplot(data = area_long %>%
+                           filter(change %in% c("area_lost", 
+                                                "area_retained", 
+                                                "area_gained",
+                                                "area_delta")) %>%
+                           mutate(change = factor(x = change,
+                                                  levels = c("area_lost", 
+                                                             "area_retained", 
+                                                             "area_gained",
+                                                             "area_delta"))), 
+                         mapping = aes(x = insect,
+                                       y = change,
+                                       size = area_km,
+                                       color = ew)) +
+  geom_point() +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  theme_bw() +
+  coord_flip()
+changes_points
+
+# We have delta_area, could just do plot of that. The faceted plot works OK, 
+# it might be better to label the points with the perc_delta value
+delta_points <- ggplot(data = area_long %>%
+                         filter(change %in% c("area_delta", "perc_delta")),
+                       mapping = aes(x = insect, 
+                                     y = area_km,
+                                     color = ew)) +
+  geom_hline(yintercept = 0, linetype = 2, linewidth = 0.5) +
+  geom_point(size = 4) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(~ change, scale = "free_x") +
+  ylab(label = bquote("Change in Area"~(km^2))) +
+  theme(axis.text.y = element_text(face = "italic", size = 10),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank())
+delta_points
 
 # Area gained 
 gained <- ggplot(data = range_info, mapping = aes(x = area_gained,
