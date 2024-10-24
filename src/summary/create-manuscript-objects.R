@@ -58,11 +58,10 @@ states <- vect("data/political-boundaries/states.shp")
   
   insects <- left_join(insects, ih2, join_by("species" == "insect"))
   
-  # Create east/west indicator
-  east <- "appalachiensis|brevicauda|canadensis|cresphontes|glaucus|palamedes|polyxenes|troilus"
-  west <- "euymedon|indra|machaon|multicaudata|rumiko|rutulus|zelicaon"
+  # Add in east/west indicator & shorten names
+  ew <- read.csv(file = "data/insect-eastwest.csv")
   insects <- insects %>%
-    mutate(ew = ifelse(grepl(east, species), "East", "West")) %>%
+    dplyr::left_join(ew, by = c("species" = "insect")) %>%
     mutate(species = str_replace(species, "Papilio", "P."))
   
   # Get range and mean/median number of records for each species
@@ -736,22 +735,22 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   # Colors
   # Light gray
   graycol <- "#f2f2f2"
-  # For richness, eBird abundance colors but add a light gray for 0
-  rich_cols <- c(graycol, ebirdst::ebirdst_palettes(7, "weekly"))
-  # Is there a way to do this with packages already used? Can get close with 
-  # Some base R...ebird package relies on viridisLite, which makes it easy to 
-  # get rid of that unpleasant yellow at the end of plasma...
-  # rich_cols <- rev(hcl.colors(n = 7, palette = "plasma"))
-  # gry_ramp <- colorRampPalette(c("#e6e6e6", rich_cols[1]))
-  # rich_cols <- c(gry_ramp(4)[2], rich_cols)
-  # rich_cols <- c(graycol, rich_cols)
+  # For richness, eBird abundance colors but add a light gray for 0 (multiple
+  # steps to replicate ebirdst::ebirdst_palettes behavior)
+  rich_cols <- rev(hcl.colors(n = 7, palette = "plasma"))
+  # Drop the first value in the vector, which is ugly yellow
+  rich_cols <- rich_cols[-1]
+  # Create color function between our zero (light gray) and first yellow to 
+  # span gray to first color; otherwise contrast between 0 and 1 is too high
+  gry_ramp <- colorRampPalette(c(graycol, rich_cols[1]))
+  # Create final vector with gray (0), bridge to our palette (1), and remainder
+  # of palette (2-7)
+  rich_cols <- c(graycol, gry_ramp(6)[3], rich_cols)
+  # "#f2f2f2" "#EFDE91" "#ECC000" "#E8853A" "#D24E71" "#AB1488" "#72008D" "#001889"
+  # Compare with vector we would see with ebirdst::ebirdst_palettes
+  # rich_cols <- c(graycol, ebirdst::ebirdst_palettes(7, "weekly"))
+  # "#f2f2f2" "#EDDEA5" "#FCCE25" "#F58A47" "#D5536F" "#A51F99" "#6300A7" "#0D0887"
 
-  # For deltas, could use same scale as for individual species' deltas, but 
-  # colors don't quite "pop" enough
-  # delta_cols <- c("#fc8d59",
-  #                 graycol,
-  #                 "#2c7bb6")
-  
   # For deltas, red-blue spectrum
   delta_cols <- c("#D10000",
                   graycol,
@@ -872,8 +871,9 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
   richness_d_lcc <- ggplot() +
     geom_spatvector(data = countries_lcc, color = NA, fill = "white") +
     geom_spatraster(data = rich_d_lcc) +
-    scale_fill_gradient2(low = delta_cols[1], high = delta_cols[2], 
-                         mid = graycol, na.value = NA, name = "Change", 
+    scale_fill_gradient2(low = delta_cols[1], mid = delta_cols[2], 
+                         high = delta_cols[3],
+                         na.value = NA, name = "Change", 
                          breaks = c(-5, 0, 5)) +
     geom_spatvector(data = states_lcc, color = "gray65", linewidth = linewidth,
                     fill = NA) +
@@ -902,4 +902,183 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
            units = "in")
   }
 
-  
+# Create binary richness maps, where 0 is suitable for < 4spp. and 1 is 
+# suitable >= 4 species (richness "hotspot")
+# We have richness rasters (rich_c and rich_c_lcc), need to convert to binary
+rich_binary_c <- terra::classify(x = rich_c,
+                                 rcl = matrix(data = c(0, 3, 0,
+                                                       3.1, Inf, 1),
+                                              nrow = 2, byrow = TRUE))
+rich_binary_f <- terra::classify(x = rich_f,
+                                 rcl = matrix(data = c(0, 3, 0,
+                                                       3.1, Inf, 1),
+                                              nrow = 2, byrow = TRUE))
+
+# Now make the two binary plot objects
+richness_binary_c <- ggplot() +
+  geom_spatvector(data = countries, color = NA, fill = "white") +
+  geom_spatraster(data = rich_binary_c) +
+  scale_fill_gradientn(colors = rich_cols[c(1, 5)], na.value = NA,
+                       name = "Richness") +
+  geom_spatvector(data = states, color = "gray65", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries, color = "black", linewidth = linewidth, 
+                  fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr, ylim = ylimr) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+richness_binary_f <- ggplot() +
+  geom_spatvector(data = countries, color = NA, fill = "white") +
+  geom_spatraster(data = rich_binary_f) +
+  scale_fill_gradientn(colors = rich_cols[c(1, 5)], na.value = NA,
+                       name = "Richness") +
+  geom_spatvector(data = states, color = "gray65", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries, color = "black", linewidth = linewidth, 
+                  fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr, ylim = ylimr) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+# Add those binary maps to our multi-panel image, but first need to move the 
+# legend inside the plot for those richness and delta map
+# So much fiddly bits!
+legend_title_size <- 10
+legend_text_size <- 8
+legend_key_height <- 10
+legend_key_width <- 12
+legend_position <- c(0.15, 0.3)
+richness_c_5 <- richness_c +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position)
+richness_f_5 <- richness_f +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position)
+richness_d_5 <- richness_d +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position)
+
+# Combine everything
+r_5 <- plot_grid(richness_c_5, richness_binary_c,
+                 richness_f_5, richness_binary_f,
+                 richness_d_5,
+                 align = "h",
+                 ncol = 2,
+                 labels = "auto",
+                 vjust = 1,
+                 hjust = 0)
+richness_5panel <- paste0(output_basename, "richness_5panel.png")
+if (!file.exists(richness_5panel) | (file.exists(richness_5panel) & replace)) {
+  ggsave(filename = richness_5panel,
+         plot = r_5,
+         width = 9,
+         height = 8,
+         units = "in")
+}
+
+# And do the same 5-panel map for using the Lambert projection
+rich_binary_c_lcc <- project(rich_binary_c, crs(states_lcc))
+rich_binary_c_lcc <- drop_na(rich_binary_c_lcc)
+rich_binary_f_lcc <- project(rich_binary_f, crs(states_lcc))
+rich_binary_f_lcc <- drop_na(rich_binary_f_lcc)
+limsr_binary_lcc <- ext(rich_binary_c_lcc) * 1.01
+xlimr_binary_lcc <- c(ext(limsr_binary_lcc)[1], ext(limsr_binary_lcc)[2])
+ylimr_binary_lcc <- c(ext(limsr_binary_lcc)[3], ext(limsr_binary_lcc)[4])
+
+# Now create two binary plots
+richness_binary_c_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich_binary_c_lcc) +
+  scale_fill_gradientn(colors = rich_cols[c(1, 5)], na.value = NA) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_binary_lcc, 
+           ylim = ylimr_binary_lcc, expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+richness_binary_f_lcc <- ggplot() +
+  geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+  geom_spatraster(data = rich_binary_f_lcc) +
+  scale_fill_gradientn(colors = rich_cols[c(1, 5)], na.value = NA) +
+  geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries_lcc, 
+                                countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlimr_binary_lcc, 
+           ylim = ylimr_binary_lcc, expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+# Add those binary maps to our multi-panel image, but first need to move the 
+# legend inside the plot for those richness and delta map
+# So much fiddly bits!
+legend_title_size <- 8
+legend_text_size <- 6
+legend_key_height <- 10
+legend_key_width <- 12
+legend_position <- c(0.12, 0.22)
+legend_margin <- margin(c(0, 0, 0, 0))
+richness_c_lcc_5 <- richness_c_lcc +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position,
+        legend.margin = legend_margin)
+richness_f_lcc_5 <- richness_f_lcc +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position,
+        legend.margin = legend_margin)
+richness_d_lcc_5 <- richness_d_lcc +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position,
+        legend.margin = legend_margin)
+
+# Combine everything
+r_lcc_5 <- plot_grid(richness_c_lcc_5, richness_binary_c_lcc,
+                 richness_f_lcc_5, richness_binary_f_lcc,
+                 richness_d_lcc_5,
+                 align = "h",
+                 ncol = 2,
+                 labels = "auto",
+                 vjust = 1,
+                 hjust = 0)
+richness_lcc_5panel <- paste0(output_basename, "richness_lcc_5panel.png")
+if (!file.exists(richness_lcc_5panel) | (file.exists(richness_lcc_5panel) & replace)) {
+  ggsave(filename = richness_lcc_5panel,
+         plot = r_lcc_5,
+         width = 8,
+         height = 8,
+         units = "in")
+}
