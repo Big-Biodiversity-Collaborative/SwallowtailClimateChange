@@ -814,7 +814,7 @@ if (!file.exists(change) | (file.exists(change) & replace)) {
            units = "in")
   }
     
-  # Save figures, except with a different projection
+  # Same figures, except with a different projection
   # Crop the eastern edge of states and countries layers
   state_ext <- ext(states)
   state_ext[2] <- -45
@@ -1078,7 +1078,104 @@ richness_lcc_5panel <- paste0(output_basename, "richness_lcc_5panel.png")
 if (!file.exists(richness_lcc_5panel) | (file.exists(richness_lcc_5panel) & replace)) {
   ggsave(filename = richness_lcc_5panel,
          plot = r_lcc_5,
-         width = 8,
+         width = 6,
+         height = 8,
+         units = "in")
+}
+
+#####
+# Now we want a 6-panel figure of hotspots for each time (2) and climate (3) 
+# scenario. Only doing lambert projection for now.
+
+# Future scenarios
+scenarios <- c("ssp245", "ssp370", "ssp585")
+times <- c("2041", "2071")
+type <- "ov"
+
+# Colors
+graycol <- "#f2f2f2"
+hotspot_col <- "#D24E71" # Fifth color in richness colors from above
+
+# Crop the eastern edge of states and countries layers
+state_ext <- ext(states)
+state_ext[2] <- -45
+states <- crop(states, state_ext)
+countries <- crop(countries, state_ext)
+
+# Project layers to Lambert Conformal Conic North America
+states_lcc <- project(states, "ESRI:102009")
+countries_lcc <- project(countries, crs(states_lcc))
+
+# We will use same extent values as in delta plots
+lims_ext <- ext(c(-168, -48, 15, 75))
+
+# List to hold plots
+hotspot_plots <- vector(mode = "list", 
+                        length = length(scenarios) * length(times))
+
+element_i <- 1
+for (scenario_i in scenarios) {
+  for (time_i in times) {
+    scenario <- paste0(scenario_i, "_", time_i)
+    message("Plotting ", scenario, " hotspots")
+    richness_file <- paste0("output/richness/ensemble_", scenario, 
+                              "-richness-", type, ".rds")
+    richness_ras <- readRDS(file = richness_file)
+    # Crop to extent of interest (here the same a delta plots)
+    richness_ras <- crop(richness_ras, lims_ext)
+    
+    # Reproject in Lambert
+    richness_ras <- project(richness_ras, crs(states_lcc))
+    
+    # Get rid of NA values and calculate extent for plot area
+    richness_ras <- drop_na(richness_ras)
+    # Add a little bit to all sides of extent and use that extent for limits
+    rich_ext <- ext(richness_ras) * 1.01
+    xlim_rich <- c(ext(rich_ext)[1], ext(rich_ext)[2])
+    ylim_rich <- c(ext(rich_ext)[3], ext(rich_ext)[4])
+
+    # Now turn into binary map of hotspot (>= 4 species) or not 
+    richness_binary <- terra::classify(x = richness_ras,
+                                       rcl = matrix(data = c(-Inf, 3.1, 0,
+                                                             3.1, Inf, 1),
+                                                    nrow = 2, byrow = TRUE))
+    
+    # Plot the binary (hotspot or not) plot
+    richness_binary_plot <- ggplot() +
+      geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+      geom_spatraster(data = richness_binary) +
+      scale_fill_gradientn(colors = c(graycol, hotspot_col), na.value = NA) +
+      geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                      fill = NA) +
+      geom_spatvector(data = filter(countries_lcc, 
+                                    countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                      color = "black", linewidth = linewidth, fill = NA) +
+      coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim_rich, 
+               ylim = ylim_rich, expand = FALSE) +
+      theme_bw() +
+      theme(plot.margin = unit(margins, "pt"),
+            legend.position = "none")
+    
+    # Update our big plot list
+    hotspot_plots[[element_i]] <- richness_binary_plot
+    names(hotspot_plots)[element_i] <- scenario
+    element_i <- element_i + 1
+  }
+}
+
+# Make 3 x 2 panel plot
+h_6 <- plot_grid(plotlist = hotspot_plots,
+                 align = "h",
+                 ncol = 2,
+                 labels = names(hotspot_plots),
+                 label_size = 6,
+                 vjust = 34,
+                 hjust = -1.25)
+hotspots_6panel <- paste0(output_basename, "hotspots_6panel.png")
+if (!file.exists(hotspots_6panel) | (file.exists(hotspots_6panel) & replace)) {
+  ggsave(filename = hotspots_6panel,
+         plot = h_6,
+         width = 6,
          height = 8,
          units = "in")
 }
