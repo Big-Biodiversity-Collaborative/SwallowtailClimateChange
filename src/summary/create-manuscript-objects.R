@@ -1140,6 +1140,26 @@ for (scenario_i in scenarios) {
                                                              3.1, Inf, 1),
                                                     nrow = 2, byrow = TRUE))
     
+    # Get the scenario & time text for annotation
+    # Start by setting time value
+    time_text <- dplyr::if_else(time_i == "2041", 
+                                true = "2050s", 
+                                false = "2080s")
+
+    # Now add to end of re-formatted SSP scenario
+    anno_text <- paste0("SSP", 
+                        substr(scenario_i, start = 4, stop = 4), # 2, 3, or 5
+                        "-",
+                        substr(scenario_i, start = 5, stop = 5), # 4, 7, or 8,
+                        ".",
+                        substr(scenario_i, start = 6, stop = 6), # 5, 0, or 5
+                        "\n",
+                        time_text)
+    
+    anno_df <- data.frame(x = -3610000,
+                          y = -1700000,
+                          label = anno_text)
+    
     # Plot the binary (hotspot or not) plot
     richness_binary_plot <- ggplot() +
       geom_spatvector(data = states_lcc, color = NA, fill = "white") +
@@ -1150,11 +1170,16 @@ for (scenario_i in scenarios) {
       geom_spatvector(data = filter(countries_lcc, 
                                     countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
                       color = "black", linewidth = linewidth, fill = NA) +
+      # annotate(geom = "text", x = -3810000, y = 2900000, label = anno_text) +
+      geom_label(data = anno_df, mapping = aes(x = x, y = y, label = label),
+                 size = 3, hjust = 0) +
       coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim_rich, 
                ylim = ylim_rich, expand = FALSE) +
       theme_bw() +
       theme(plot.margin = unit(margins, "pt"),
-            legend.position = "none")
+            legend.position = "none",
+            axis.title = element_blank()) # only necessary because of geom_label
+    richness_binary_plot
     
     # Update our big plot list
     hotspot_plots[[element_i]] <- richness_binary_plot
@@ -1167,10 +1192,8 @@ for (scenario_i in scenarios) {
 h_6 <- plot_grid(plotlist = hotspot_plots,
                  align = "h",
                  ncol = 2,
-                 labels = names(hotspot_plots),
-                 label_size = 6,
-                 vjust = 34,
-                 hjust = -1.25)
+                 labels = "auto",
+                 hjust = -2)
 hotspots_6panel <- paste0(output_basename, "hotspots_6panel.png")
 if (!file.exists(hotspots_6panel) | (file.exists(hotspots_6panel) & replace)) {
   ggsave(filename = hotspots_6panel,
