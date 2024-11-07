@@ -41,13 +41,20 @@ range_info <- range_info %>%
   filter(climate != "current") %>%
   mutate(ssp = substr(climate, start = 4, stop = 6),
          year = substr(climate, start = 8, stop = 11)) %>%
-  # Update year information with midpoint of year data 
-  #     2041 -> 2055
-  #     2071 -> 2085
-  mutate(year = if_else(year == 2041, 
-                        true = 2055, 
-                        false = 2085))
-  
+  # Create year information for facet labels
+  #     2041 -> 2050s
+  #     2071 -> 2080s
+  mutate(year_text = if_else(year == 2041, 
+                             true = "2050s", 
+                             false = "2080s")) %>%
+  # Create cleaner ssp labels
+  mutate(ssp_text = paste0("SSP",
+                           substr(ssp, start = 1, stop = 1),
+                           "-",
+                           substr(ssp, start = 2, stop = 2),
+                           ".",
+                           substr(ssp, start = 3, stop = 3)))
+
 # Add the percent of current range retained to the data frame
 range_info <- range_info %>%
   mutate(perc_retained = 100 * (area_retained/(area_retained + area_lost)))
@@ -88,14 +95,16 @@ southern_lollipop <- ggplot(data = range_info %>%
   xlab(label = "Southern edge latitudinal shift (km)") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
-                                   hjust = 1, face = "italic")) +
+                                   hjust = 1, face = "italic"),
+        axis.title.x = element_blank(),
+        strip.background = element_rect(fill = "#F0F0F0")) +
   coord_flip() +
-  facet_grid(ssp ~ year)
+  facet_grid(ssp_text ~ year_text)
 southern_lollipop
 
 # Northern (lat_max)
 northern_lollipop <- ggplot(data = range_info %>%
-                              filter(!is.na(lat_min_shift)), 
+                              filter(!is.na(lat_max_shift)), 
                             mapping = aes(y = insect,
                                           color = ew)) +
   geom_point(mapping = aes(x = lat_max_shift)) +
@@ -105,14 +114,17 @@ northern_lollipop <- ggplot(data = range_info %>%
                      values = ew_colors) +
   xlab(label = "Northern edge latitudinal shift (km)") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
+                                   hjust = 1, face = "italic"),
+        axis.title.x = element_blank(),
+        strip.background = element_rect(fill = "#F0F0F0")) +
   coord_flip() +
-  facet_grid(ssp ~ year)
+  facet_grid(ssp_text ~ year_text)
 northern_lollipop
 
 # Western (lon_min)
 western_lollipop <- ggplot(data = range_info %>%
-                             filter(!is.na(lat_min_shift)), 
+                             filter(!is.na(lon_min_shift)), 
                            mapping = aes(y = insect,
                                          color = ew)) +
   geom_point(mapping = aes(x = lon_min_shift)) +
@@ -122,13 +134,15 @@ western_lollipop <- ggplot(data = range_info %>%
                      values = ew_colors) +
   xlab(label = "Western edge longitudinal shift (km)") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  facet_grid(ssp ~ year)
+  theme(axis.text.y = element_text(face = "italic"),
+        strip.background = element_rect(fill = "#F0F0F0"),
+        axis.title.y = element_blank()) +
+  facet_grid(ssp_text ~ year_text)
 western_lollipop
 
 # Eastern (lon_max)
 eastern_lollipop <- ggplot(data = range_info %>%
-                             filter(!is.na(lat_min_shift)), 
+                             filter(!is.na(lon_max_shift)), 
                            mapping = aes(y = insect,
                                          color = ew)) +
   geom_point(mapping = aes(x = lon_max_shift)) +
@@ -138,9 +152,17 @@ eastern_lollipop <- ggplot(data = range_info %>%
                      values = ew_colors) +
   xlab(label = "Eastern edge longitudinal shift (km)") +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  facet_grid(ssp ~ year)
+  theme(axis.text.y = element_text(face = "italic"),
+        strip.background = element_rect(fill = "#F0F0F0"),
+        axis.title.y = element_blank()) +
+  facet_grid(ssp_text ~ year_text)
 eastern_lollipop
+
+# For now, just saving each lollipop as separate file
+ggsave(plot = southern_lollipop, filename = "output/plots/shift-south.png")
+ggsave(plot = northern_lollipop, filename = "output/plots/shift-north.png")
+ggsave(plot = western_lollipop, filename = "output/plots/shift-west.png")
+ggsave(plot = eastern_lollipop, filename = "output/plots/shift-east.png")
 
 # Some paired lollipop plots for a single ssp & year, where longitude is one 
 # plot (two facets) and latitude is another plot (two facets).
@@ -225,6 +247,7 @@ latitude_lollipop <- ggplot(data = range_info_long %>%
 latitude_lollipop
 ggsave(file = "output/plots/lat-shift-ssp370_2041.png",
        plot = latitude_lollipop)
+
 
 ################################################################################
 # Area changes plots
