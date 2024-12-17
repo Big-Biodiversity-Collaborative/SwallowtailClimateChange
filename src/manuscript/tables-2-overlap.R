@@ -3,13 +3,10 @@
 # jcoliver@arizona.edu
 # 2024-10-21
 
-# File contents may ultimately be incorporated into create-manuscript-objects.R
-# or create-supplement-objects.R
-
 library(dplyr)
 
 # Table with four columns:
-# | species | Area (km2? Ha?) | Area >= 1 host | % >= 1 host |
+# | species | Area (km2) | Area (km2) >= 1 host | % >= 1 host |
 # Area and % info is in output/summary-stats/overlap-summary-allspp.csv
 # Want rows that are:
 #   distribution = "total insect"
@@ -30,6 +27,7 @@ areas <- areas %>%
   mutate(area_withhost = area * (pinsect_withhost/100)) %>%
   select(insect, area, area_withhost, pinsect_withhost)
 
+# Some number formatting, reducing decimal points
 areas <- areas %>%
   mutate(area_withhost = round(area_withhost, 0),
          pinsect_withhost = round(pinsect_withhost, 2))
@@ -49,22 +47,5 @@ areas <- areas %>%
 
 write.csv(x = areas,
           row.names = FALSE,
-          file = "output/summary-stats/sup-area-overlap.csv")
+          file = "output/manuscript/Table-Area-Overlap.csv")
 
-# Not currently incorporated, but if east/west distinction is useful
-# Finally, grab east/west information & join it
-ew <- read.csv(file = "data/insect-eastwest.csv")
-areas <- areas %>%
-  left_join(ew)
-
-# Sort by east/west then species
-areas <- areas %>%
-  arrange(ew, insect)
-
-library(ggplot2)
-ggplot(data = areas, mapping = aes(x = insect, 
-                                   y = pinsect_withhost,
-                                   color = ew)) +
-  geom_point() +
-  ylim(c(0, 100))
-  
