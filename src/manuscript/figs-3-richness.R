@@ -4,6 +4,7 @@
 # 2025-01-07
 
 library(dplyr)
+library(ggplot2)
 library(terra)
 library(tidyterra)
 source(file = "functions/get_colors.R")
@@ -88,7 +89,25 @@ rich_ext <- ext(rich_current) * 1.01
 xlim <- c(ext(rich_ext)[1], ext(rich_ext)[2])
 ylim <- c(ext(rich_ext)[3], ext(rich_ext)[4])
 
-
+# Note that when plotting, we're removing boundaries for all countries 
+# except the US, Canada, and Mexico because with this projection that is 
+# centered in the US, country boundaries become very distorted for Greenland 
+# and Central America
+rich_current_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = "white") +
+  geom_spatraster(data = rich_current) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+                       name = "Richness") +
+  geom_spatvector(data = states, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = filter(countries, 
+                                countries$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
 
 
 
