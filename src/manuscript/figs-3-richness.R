@@ -7,6 +7,7 @@ library(dplyr)
 library(ggplot2)
 library(terra)
 library(tidyterra)
+require(cowplot)
 source(file = "functions/get_colors.R")
 
 # Richness: Five panel figure showing
@@ -20,16 +21,13 @@ source(file = "functions/get_colors.R")
 # Supplemental Hotspots: Six panel figure of richness hotspots for all 
 #   combinations of forecast SSP / time points
 
+replace <- TRUE
 
+################################################################################
+# Data preparation
+################################################################################
 
-
-# Need to:
-# Use get_colors() where appropriate
-# Use climate & time names for figures from climate_models.csv
-# Focus only on Lambert Conformal Conic projection
-# Rename things as would be appropriate for this standalone script
-
-# Get climate model information
+# Get climate model information, removing "ensemble_" from climate name
 climate_models <- read.csv(file = "data/climate-models.csv") %>%
   mutate(name = gsub(pattern = "ensemble_", replacement = "", x = name))
 
@@ -40,6 +38,9 @@ climate_model <- "ssp370_2041"
 # ov = insect distributed only where one or more host also occurs
 # io = insect distribution depends only on climate)
 type <- "ov"
+
+# Base of output filenames
+output_basename <- "output/manuscript/"
 
 # Load richness rasters
 rich_current_file <- paste0("output/richness/current-richness-", type, ".rds")
@@ -53,6 +54,65 @@ rich_delta_file <- paste0("output/richness/ensemble_", climate_model,
                           "-delta-richness-", type, ".rds")
 rich_delta <- readRDS(rich_delta_file)
 
+# Grab spatial files with political boundaries
+countries <- vect("data/political-boundaries/countries.shp")
+states <- vect("data/political-boundaries/states.shp")  
+
+# Need to crop the eastern edge of states and countries layers for Lambert 
+# Conformal Conic North America projection ("LCC" here)
+# state_ext <- ext(states)
+# state_ext[2] <- -45
+
+# Crop to desired extent  
+# states <- crop(states, state_ext)
+# countries <- crop(countries, state_ext)
+
+# Reproject states and countries (can take a couple moments with first call to 
+# project)
+states <- project(states, "ESRI:102009")
+countries <- project(countries, crs(states))
+
+# For plotting purposes, we only need Canada, Mexico, and US because the LCC 
+# projection is centered in the US, and country boundaries become very 
+# distorted for Greenland and Central America
+countries <- countries %>%
+  filter(adm0_a3 %in% c("USA", "CAN", "MEX"))
+
+# Reproject the richness rasters, too (takes a moment)
+# Using nearest-neighbor method for cell values because we want to keep the 
+# cardinal nature of raster cell values (i.e. integers)
+rich_current <- project(rich_current, crs(states), method = "near")
+rich_forecast <- project(rich_forecast, crs(states), method = "near")
+rich_delta <- project(rich_delta, crs(states), method = "near")
+
+# Create binary rasters (species richness "hotspots"), where 0 is suitable for 
+# < 4spp. and 1 is suitable >= 4 species
+hotspot_current <- terra::classify(x = rich_current,
+                                   rcl = matrix(data = c(0, 3, 0,
+                                                         3.1, Inf, 1),
+                                                nrow = 2, byrow = TRUE))
+hotspot_forecast <- terra::classify(x = rich_forecast,
+                                    rcl = matrix(data = c(0, 3, 0,
+                                                          3.1, Inf, 1),
+                                                 nrow = 2, byrow = TRUE))
+
+# Get rid of NA values in richness raster and calculate extent for plot areas
+rich_current <- tidyterra::drop_na(rich_current)
+rich_ext <- ext(rich_current) * 1.01
+# Set western boundary of extent in order to make sure Aleutians are included 
+# in map
+rich_ext <- ext(c(-5e6, rich_ext[2:4]))
+xlim <- c(ext(rich_ext)[1], ext(rich_ext)[2])
+ylim <- c(ext(rich_ext)[3], ext(rich_ext)[4])
+
+# Crop the states & countries shapes to this expanded extent based on richness
+states <- crop(states, rich_ext)
+countries <- crop(countries, rich_ext)
+
+################################################################################
+# Creating individual plot objects
+################################################################################
+
 # Set a few plotting parameters
 margins <- c(2, 0, 6, 0)
 linewidth <- 0.1
@@ -60,61 +120,259 @@ linewidth <- 0.1
 # Get some colors 
 rich_cols <- get_colors(palette = "richness")
 delta_cols <- get_colors(palette = "richdelta")
+hotspot_cols <- get_colors(palette = "hotspot")
 
-# Grab spatial files with political boundaries
-countries <- vect("data/political-boundaries/countries.shp")
-states <- vect("data/political-boundaries/states.shp")  
+# Setting colors for state & country lines
+state_fill <- "white"
+state_color <- "gray50" # or should it be "gray65"?
+countries_color <- "black"
 
-# Need to crop the eastern edge of states and countries layers for Lambert 
-# Conformal Conic North America projection ("LCC" here)
-state_ext <- ext(states)
-state_ext[2] <- -45
-
-# Crop to desired extent  
-states <- crop(states, state_ext)
-countries <- crop(countries, state_ext)
-
-# Reproject states and countires
-states <- project(states, "ESRI:102009")
-countries <- project(countries, crs(states))
-
-# Reproject the richness rasters, too (takes a moment)
-rich_current <- project(rich_current, crs(states))
-rich_forecast <- project(rich_forecast, crs(states))
-rich_delta <- project(rich_delta, crs(states))
-
-# Get rid of NA values in richness raster and calculate extent for plot area
-rich_current <- tidyterra::drop_na(rich_current)
-rich_ext <- ext(rich_current) * 1.01
-xlim <- c(ext(rich_ext)[1], ext(rich_ext)[2])
-ylim <- c(ext(rich_ext)[3], ext(rich_ext)[4])
-
-# Note that when plotting, we're removing boundaries for all countries 
-# except the US, Canada, and Mexico because with this projection that is 
-# centered in the US, country boundaries become very distorted for Greenland 
-# and Central America
+# Contemporary species richness plot
 rich_current_plot <- ggplot() +
-  geom_spatvector(data = states, color = NA, fill = "white") +
+  geom_spatvector(data = states, color = NA, fill = state_fill) +
   geom_spatraster(data = rich_current) +
   scale_fill_gradientn(colors = rich_cols, na.value = NA, 
                        name = "Richness") +
-  geom_spatvector(data = states, color = "gray50", linewidth = linewidth,
+  geom_spatvector(data = states, color = state_color, linewidth = linewidth,
                   fill = NA) +
-  geom_spatvector(data = filter(countries, 
-                                countries$adm0_a3 %in% c("USA", "CAN", "MEX")),
-                  color = "black", linewidth = linewidth, fill = NA) +
+  geom_spatvector(data = countries,
+                  color = countries_color, linewidth = linewidth, fill = NA) +
   coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
            expand = FALSE) +
   theme_bw() +
   theme(plot.margin = unit(margins, "pt"),
         legend.spacing.y = unit(10, 'pt'))
 
+# Forecast species richness plot
+rich_forecast_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = state_fill) +
+  geom_spatraster(data = rich_forecast) +
+  scale_fill_gradientn(colors = rich_cols, na.value = NA, 
+                       name = "Richness") +
+  geom_spatvector(data = states, color = state_color, linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = state_color, linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+
+# Delta plot (difference between contemporary and forecast)
+rich_delta_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = state_fill) +
+  geom_spatraster(data = rich_delta) +
+  scale_fill_gradient2(low = delta_cols[1], mid = delta_cols[2], 
+                       high = delta_cols[3],
+                       na.value = NA, name = "Change", 
+                       breaks = c(-5, 0, 5)) +
+  geom_spatvector(data = states, color = state_color, linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = countries_color, linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+
+# Plot of contemporary richness hotspots
+hotspot_current_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = state_fill) +
+  geom_spatraster(data = hotspot_current) +
+  scale_fill_gradientn(colors = hotspot_cols, na.value = NA) +
+  geom_spatvector(data = states, color = state_color, linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = countries_color, linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim, 
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+# Plot of forecast richness hotspots
+hotspot_forecast_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = state_fill) +
+  geom_spatraster(data = hotspot_forecast) +
+  scale_fill_gradientn(colors = hotspot_cols, na.value = NA) +
+  geom_spatvector(data = states, color = state_color, linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = countries_color, linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim, 
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+################################################################################
+# Assemble into single, five-panel figure
+################################################################################
+# Start by moving legends inside plot area for richness and delta maps
+# Had to test lots of things to get these things to fit
+# Note the legends will appear too small in an IDE (i.e. RStudio) pane, but 
+# will be appropriately sized in output graphics file
+legend_title_size <- 8
+legend_text_size <- 6
+legend_key_height <- 10
+legend_key_width <- 12
+legend_position <- c(0.12, 0.22)
+legend_margin <- margin(c(0, 0, 0, 0))
+rich_current_plot <- rich_current_plot +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position,
+        legend.margin = legend_margin)
+rich_forecast_plot <- rich_forecast_plot +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position,
+        legend.margin = legend_margin)
+rich_delta_plot <- rich_delta_plot +
+  theme(legend.title = element_text(size = legend_title_size),
+        legend.text = element_text(size = legend_text_size),
+        legend.key.height = unit(legend_key_height, "pt"),
+        legend.key.width = unit(legend_key_width, "pt"),
+        legend.position = "inside",
+        legend.position.inside = legend_position,
+        legend.margin = legend_margin)
+
+# Combine everything into a single, five-panel figure
+five_panel <- cowplot::plot_grid(rich_current_plot, hotspot_current_plot,
+                                 rich_forecast_plot, hotspot_forecast_plot,
+                                 rich_delta_plot,
+                                 align = "h",
+                                 ncol = 2,
+                                 labels = "auto",
+                                 vjust = 1,
+                                 hjust = 0)
+five_panel_file <- paste0(output_basename, "Figure-Richness.png")
+# TODO: Seems like this question should be asked *before* and processing 
+# actually takes place :D
+if (!file.exists(five_panel_file) | (file.exists(five_panel_file) & replace)) {
+  ggsave(filename = five_panel_file,
+         plot = five_panel,
+         width = 6,
+         height = 8,
+         units = "in")
+}
+
+################################################################################
+# Six-panel figure of species richness for each time (2) and climate (3) 
+# scenario and six-panel figure of hotspots for each time (2) and climate (3) 
+# scenario. Doing it once to keep the number of loops down.
+################################################################################
+
+# Forecast scenarios and time points
+scenarios <- c("ssp245", "ssp370", "ssp585")
+times <- c("2041", "2071")
+
+# We will use same extent values as in delta plots
+# lims_ext <- ext(c(-168, -48, 15, 75))
+
+# Lists to hold plots
+rich_plots <- vector(mode = "list", 
+                     length = length(scenarios) * length(times))
+hotspot_plots <- vector(mode = "list", 
+                        length = length(scenarios) * length(times))
+
+# Keeping track of list position; 
+# TODO: should be able to do some algebra to do this cleaner...
+element_i <- 1
+for (scenario_i in scenarios) {
+  for (time_i in times) {
+    scenario <- paste0(scenario_i, "_", time_i)
+    message("Plotting ", scenario, " hotspots")
+    richness_file <- paste0("output/richness/ensemble_", scenario, 
+                            "-richness-", type, ".rds")
+    richness_ras <- readRDS(file = richness_file)
+    # Crop to extent of interest (here the same as contemporary richness plot)
+    richness_ras <- crop(richness_ras, rich_ext)
+    
+    # Reproject in Lambert
+    richness_ras <- project(richness_ras, crs(states), method = "near")
+    
+    # Get rid of NA values and calculate extent for plot area
+    richness_ras <- drop_na(richness_ras)
+    # Add a little bit to all sides of extent and use that extent for limits
+    rich_ext <- ext(richness_ras) * 1.01
+    xlim_rich <- c(ext(rich_ext)[1], ext(rich_ext)[2])
+    ylim_rich <- c(ext(rich_ext)[3], ext(rich_ext)[4])
+    
+    # Now turn into binary map of hotspot (>= 4 species) or not 
+    hotspot_ras <- terra::classify(x = richness_ras,
+                                       rcl = matrix(data = c(-Inf, 3.1, 0,
+                                                             3.1, Inf, 1),
+                                                    nrow = 2, byrow = TRUE))
+    
+    # Get the scenario & time text for annotation
+    # Start by setting time value
+    # TODO: Update this based on climate models CSV
+    time_text <- dplyr::if_else(time_i == "2041", 
+                                true = "2050s", 
+                                false = "2080s")
+    
+    # Now add to end of re-formatted SSP scenario
+    anno_text <- paste0("SSP", 
+                        substr(scenario_i, start = 4, stop = 4), # 2, 3, or 5
+                        "-",
+                        substr(scenario_i, start = 5, stop = 5), # 4, 7, or 8,
+                        ".",
+                        substr(scenario_i, start = 6, stop = 6), # 5, 0, or 5
+                        "\n",
+                        time_text)
+    
+    anno_df <- data.frame(x = -3610000,
+                          y = -1700000,
+                          label = anno_text)
+    
+    # Plot the binary (hotspot or not) plot
+    richness_binary_plot <- ggplot() +
+      geom_spatvector(data = states_lcc, color = NA, fill = "white") +
+      geom_spatraster(data = richness_binary) +
+      scale_fill_gradientn(colors = c(graycol, hotspot_col), na.value = NA) +
+      geom_spatvector(data = states_lcc, color = "gray50", linewidth = linewidth,
+                      fill = NA) +
+      geom_spatvector(data = filter(countries_lcc, 
+                                    countries_lcc$adm0_a3 %in% c("USA", "CAN", "MEX")),
+                      color = "black", linewidth = linewidth, fill = NA) +
+      # annotate(geom = "text", x = -3810000, y = 2900000, label = anno_text) +
+      geom_label(data = anno_df, mapping = aes(x = x, y = y, label = label),
+                 size = 3, hjust = 0) +
+      coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim_rich, 
+               ylim = ylim_rich, expand = FALSE) +
+      theme_bw() +
+      theme(plot.margin = unit(margins, "pt"),
+            legend.position = "none",
+            axis.title = element_blank()) # only necessary because of geom_label
+    richness_binary_plot
+    
+    # Update our big plot list
+    hotspot_plots[[element_i]] <- richness_binary_plot
+    names(hotspot_plots)[element_i] <- scenario
+    element_i <- element_i + 1
+  }
+}
+
+
+
+
+
+
 
 
 
 ################################################################################
-# Copy/paste of relevant sections of create-manuscript-objects.R (lines 706 
-# onward)
+# Below here is copy/paste of relevant sections of create-manuscript-objects.R 
+# (lines 706 onward)
 # Figures: richness maps ------------------------------------------------------#
 ################################################################################
 

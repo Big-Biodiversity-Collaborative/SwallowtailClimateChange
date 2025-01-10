@@ -10,8 +10,8 @@
 #'   range (absent, loss, gain, stable)}
 #'   \item{"eastwest"}{Two color palette used to indicate Eastern and Western 
 #'   species}
-#'   \item{"hotspot"}{Single element vector for coloring areas designated as 
-#'   richness hotspots}
+#'   \item{"hotspot"}{Two color palette for coloring areas designated as 
+#'   richness hotspots; uses first and fifth elements of richness palette}
 #'   \item{"overlap"}{Four color palette for indicating predicted presence / 
 #'   absence estimates (absent, only host present, only insect present, host 
 #'   and insect both present)"}
@@ -38,7 +38,8 @@ get_colors <- function(palette = c("distdelta", "eastwest", "hotspot",
                 distdelta = c(absent = "#ededed", loss = "#fc8d59",
                               gain = "#2c7bb6", stable = "#ffffbf"),
                 eastwest = c(east = "#3eafa3", west = "#ce932a"),
-                hotspot = "#D24E71",
+                # hotspot = "#D24E71",
+                hotspot = get_colors(palette = "richness")[c(1, 5)],
                 overlap = c(absent = "#ededed", host_only = "#b2df8a",
                             insect_only = "#a6cee3", both = "#1f78b4"),
                 protected = c(national = "#1B9E77", state = "#D95F02",
