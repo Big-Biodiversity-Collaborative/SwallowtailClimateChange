@@ -15,17 +15,134 @@ require(cowplot)
 #   + Predicted suitable areas for contemporary climate
 #   + Predicted suitable areas for 2050s, under SSP3-7.0
 #   + Difference in area between two predictions
-# Supplemental: woo boy. For every species, one figure with just predicted area 
-#   for current climate AND two six-panel figures:
+# Supplemental: woo boy. Two things, really.
+#   Multi-panel figure with predicted area for current climate for each species
+#     (a total of 15 species, including P. appalachiensis and P. palamedes), 
+#     this probably works best as two pages of 6 and one page of 3 panels, AND 
+#   Two 12-panel figures for each species with forecast predictions (I think 
+#     it is just 13 species, excluding P. appalachiensis and P. palamedes):
 #   + Page 1, column 1: suitable areas for 2041 for three SSPs
 #   + Page 1, column 2: differences in area from current predicted areas
 #   + Page 2, column 1: suitable areas for 2071 for three SSPs
 #   + Page 2, column 2: differences in area from current predicted areas
 
+# To ensure consistency across figures, we will go ahead and make plot objects
+# for each species (that we have the appropriate data for), and store these in 
+# a list (of lists?). We'll do subsequent iteration across the list to create 
+# the figure for the main manuscript and for the supplemental. Note 
+# supplemental will be slightly duplicative, as it will also include the two 
+# species in the main manuscript figure.
+
+ih <- read.csv("data/insect-host.csv")
+gbif <- read.csv("data/gbif-pa-summary.csv")
+
+# Figure out how many (and which) species have contemporary predictions
+# One way, maybe not the best
+# spp_sdms <- gbif %>%
+#   filter(pa_csv == "yes")
+# sum(spp_sdms$n_background < 10000) / nrow(spp_sdms) * 100
+
+# Pull species with contemporary predictions out of the ih data.frame
+species <- NULL # TODO: make a vector of species names
+
+# List to hold contemporary species predictions
+contemporary_plots <- vector(mode = "list", length = length(species))
+names(contemporary_plots) <- species
+
+# List to hold all the forecast and delta plots
+# TODO: Need to figure out how many have forecast predictions..?
+species_plots <- vector(mode = "list", length = length(species))
+names(species_plots) <- species
+
+# Forecast scenarios and time points
+scenarios <- c("ssp245", "ssp370", "ssp585")
+times <- c("2041", "2071")
+
+# TODO: testing iteration stuff here
+species <- c("indra", "rumiko", "rutulus", "zelicaon")
+for (species_i in 1:length(species)) {
+  one_species <- species[species_i]
+  for (time_i in 1:length(times)) {
+    time <- times[time_i]
+    for (scenario_i in 1:length(scenarios)) {
+      scenario <- scenarios[scenario_i]
+      # For the list of plots for this species (up to 12 plots), we need to 
+      # keep track of the forecast plot and the delta plot for this 
+      # scenario/time combination.
+      #  1  2   SSP2 (1)  2041 (1)
+      #  3  4   SSP3 (2)  2041 (1)
+      #  5  6   SSP5 (3)  2041 (1)
+      #  7  8   SSP2 (1)  2071 (2)
+      #  9 10   SSP3 (2)  2071 (2)
+      # 11 12   SSP5 (3)  2071 (2)
+      
+      # Starting point is how many full sets have already been done
+      base <- (time_i - 1) * length(scenarios) * 2 + 1 
+      scenario_add <- (scenario_i - 1) * 2
+      forecast_i <- (time_i - 1) * length(scenarios) * 2 + 1 + (scenario_i - 1) * 2
+      delta_i <- forecast_i + 1
+      
+      # "model" is the text combination of the scenario (ssp) & time (year)
+      model <- paste0(scenario, "_", time)
+      
+      message(model, ": ", forecast_i, ", ", delta_i)
+    }
+  }
+}      
 
 
+# Iterate over all species
+for (species_i in 1:length(species)) {
+  one_species <- species[species_i]
+  one_species_plots <- vector(mode = "list", 
+                              length = length(scenarios) * length(times) * 2)
+    
+  # Get raster of contemporary predictions
 
+  # Do re-projection to Lambert
+  
+  # Make plot for contemporary predictions
+  current_plot <- ggplot()
+  contemporary_plots[[one_species]] <- current_plot
+  # Now make forecast and delta plot for each ssp and future time period, as 
+  # supplemental output is going to have one time period per page, we use the 
+  # time (year) as the outer loop and scenario (SSP) as the inner loop to make 
+  # subsequent cowplot::plot_grid wrangling a little easier.
+  for (time_i in 1:length(times)) {
+    time <- times[time_i]
+    for (scenario_i in 1:length(scenarios)) {
+      scenario <- scenarios[scenario_i]
+      # Enumerator to keep track of list elements
+      # TODO: Needs to be updated because we now have two plots for each 
+      # ssp/time combo: prediction & delta
+      list_i <- (time_i - 1) * length(scenario) + scenario_i
 
+      # "model" is the text combination of the scenario (ssp) & time (year)
+      model <- paste0(scenario, "_", time)
+      # message("Plotting ", model, " richness & hotspots [", list_i, "]")
+      
+      # Get forecast raster
+      
+      # Do re-projection to Lambert
+      
+      # Get delta raster
+      
+      # Re-project delta to Lambert
+      
+      # Any necessary cropping?
+      
+      # Make forecast plot
+      forecast_plot <- ggplot()
+      
+      # Store forecast plot
+      
+      # Make delta plot
+      delta_plot <- ggplot()
+      
+      # Store forecast plot
+    }
+  }
+}
 
 
 ################################################################################
