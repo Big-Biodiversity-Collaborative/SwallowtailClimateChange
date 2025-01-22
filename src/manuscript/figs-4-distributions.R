@@ -8,6 +8,7 @@ require(terra)
 require(ggplot2)
 require(tidyterra)
 require(cowplot)
+source(file = "functions/get_colors.R")
 
 # Two figures
 # Main manuscript: six panel figure, one column each for P. cresphontes & P. 
@@ -36,21 +37,35 @@ require(cowplot)
 ih <- read.csv("data/insect-host.csv")
 gbif <- read.csv("data/gbif-pa-summary.csv")
 
-# Figure out how many (and which) species have contemporary predictions
-# One way, maybe not the best
-# spp_sdms <- gbif %>%
-#   filter(pa_csv == "yes")
-# sum(spp_sdms$n_background < 10000) / nrow(spp_sdms) * 100
+# Figure out which species have current predictions (currently based on 
+# whether or not the presence/absence data were created)
+gbif <- gbif %>%
+  dplyr::filter(species %in% unique(ih$insect)) %>%
+  dplyr::filter(pa_csv == "yes")
 
-# Pull species with contemporary predictions out of the ih data.frame
-species <- NULL # TODO: make a vector of species names
+# Pull species with current predictions out of the gbif data.frame
+species <- gbif$species
 
-# List to hold contemporary species predictions
-contemporary_plots <- vector(mode = "list", length = length(species))
-names(contemporary_plots) <- species
+# Grab spatial files with political boundaries
+states <- vect("data/political-boundaries/states.shp")  
+countries <- vect("data/political-boundaries/countries.shp")
+
+# Reproject states and countries (can take a couple moments with first call to 
+# project)
+states <- project(states, "ESRI:102009")
+countries <- project(countries, crs(states))
+
+# For plotting purposes, we only need Canada, Mexico, and US because the LCC 
+# projection is centered in the US, and country boundaries become very 
+# distorted for Greenland and Central America
+countries <- countries %>%
+  filter(adm0_a3 %in% c("USA", "CAN", "MEX"))
+
+# List to hold current species predictions
+current_plots <- vector(mode = "list", length = length(species))
+names(current_plots) <- species
 
 # List to hold all the forecast and delta plots
-# TODO: Need to figure out how many have forecast predictions..?
 species_plots <- vector(mode = "list", length = length(species))
 names(species_plots) <- species
 
@@ -58,84 +73,196 @@ names(species_plots) <- species
 scenarios <- c("ssp245", "ssp370", "ssp585")
 times <- c("2041", "2071")
 
-# TODO: testing iteration stuff here
-species <- c("indra", "rumiko", "rutulus", "zelicaon")
-for (species_i in 1:length(species)) {
-  one_species <- species[species_i]
-  for (time_i in 1:length(times)) {
-    time <- times[time_i]
-    for (scenario_i in 1:length(scenarios)) {
-      scenario <- scenarios[scenario_i]
-      # For the list of plots for this species (up to 12 plots), we need to 
-      # keep track of the forecast plot and the delta plot for this 
-      # scenario/time combination.
-      #  1  2   SSP2 (1)  2041 (1)
-      #  3  4   SSP3 (2)  2041 (1)
-      #  5  6   SSP5 (3)  2041 (1)
-      #  7  8   SSP2 (1)  2071 (2)
-      #  9 10   SSP3 (2)  2071 (2)
-      # 11 12   SSP5 (3)  2071 (2)
-      
-      # Starting point is how many full sets have already been done
-      base <- (time_i - 1) * length(scenarios) * 2 + 1 
-      scenario_add <- (scenario_i - 1) * 2
-      forecast_i <- (time_i - 1) * length(scenarios) * 2 + 1 + (scenario_i - 1) * 2
-      delta_i <- forecast_i + 1
-      
-      # "model" is the text combination of the scenario (ssp) & time (year)
-      model <- paste0(scenario, "_", time)
-      
-      message(model, ": ", forecast_i, ", ", delta_i)
-    }
-  }
-}      
+# TODO: testing iteration stuff here. Skipping for now. Requires combinatorics 
+# expertise I don't have the time for.
+# species <- c("indra", "rumiko", "rutulus", "zelicaon")
+# for (species_i in 1:length(species)) {
+#   one_species <- species[species_i]
+#   for (time_i in 1:length(times)) {
+#     time <- times[time_i]
+#     for (scenario_i in 1:length(scenarios)) {
+#       scenario <- scenarios[scenario_i]
+#       # For the list of plots for this species (up to 12 plots), we need to 
+#       # keep track of the forecast plot and the delta plot for this 
+#       # scenario/time combination.
+#       #  1  2   SSP2 (1)  2041 (1)
+#       #  3  4   SSP3 (2)  2041 (1)
+#       #  5  6   SSP5 (3)  2041 (1)
+#       #  7  8   SSP2 (1)  2071 (2)
+#       #  9 10   SSP3 (2)  2071 (2)
+#       # 11 12   SSP5 (3)  2071 (2)
+#       
+#       # Starting point is how many full sets have already been done
+#       base <- (time_i - 1) * length(scenarios) * 2 + 1 
+#       scenario_add <- (scenario_i - 1) * 2
+#       forecast_i <- (time_i - 1) * length(scenarios) * 2 + 1 + (scenario_i - 1) * 2
+#       delta_i <- forecast_i + 1
+#       
+#       # "model" is the text combination of the scenario (ssp) & time (year)
+#       model <- paste0(scenario, "_", time)
+#       
+#       message(model, ": ", forecast_i, ", ", delta_i)
+#     }
+#   }
+# }      
 
+# Get colors for plots
+dist_cols <- get_colors(palette = "overlap")
+names(dist_cols) <- c("Absent", "Hosts only", "Swallowtail only", 
+                      "Swallowtail and hosts")  
+delta_cols <- get_colors(palette = "distdelta")
+
+# Setting colors for state & country lines
+state_fill <- "white"
+state_color <- "gray50"
+countries_color <- "black"
+
+# TODO: Not used
+# margins <- c(4, 0, 6, 0)
 
 # Iterate over all species
-for (species_i in 1:length(species)) {
-  one_species <- species[species_i]
+nice_names <- tolower(gsub(pattern = " ",
+                           replacement = "_",
+                           x = species))
+for (species_i in 1:length(nice_names)) {
+  one_species <- nice_names[species_i]
+  # This list will hold all forecast & delta plots for one species (and become 
+  # one element of the species_plots list)
   one_species_plots <- vector(mode = "list", 
                               length = length(scenarios) * length(times) * 2)
     
   # Get raster of contemporary predictions
+  current <- readRDS(paste0("output/overlaps/", one_species,
+                                 "-overlap-current.rds"))
+  
+  # Update the rasters to have values we want (1, 2, 3, 4). Rasters coming in 
+  # should have the following values:
+  # 0 = (Insect and hosts absent) Insect and all host plants predicted absent
+  # 1 = (1 host only) Insect predicted absent, only 1 host predicted present
+  # 2 = (2 or more hosts) Insect predicted absent, >= 2 hosts predicted present
+  # 3 = (Insect, no hosts) Insect predicted present, all hosts predicted absent
+  # 4 = (Insect, only 1 host) Insect and only 1 host predicted present
+  # 5 = (Insect, 2 or more hosts) Insect and >= 2 hosts predicted present
+  # Update these to 0-3 scale
+  
+  current[current %in% 1:2] <- 1
+  current[current == 3] <- 2
+  current[current %in% 4:5] <- 3
+  current <- as.factor(current)
+  levels(current) <- data.frame(value = 0:3, label = names(dist_cols))
+  
+  # Do re-projection to Lambert & drop missing
+  current <- project(current, crs(states), method = "near")
+  current <- drop_na(current)
 
-  # Do re-projection to Lambert
+  # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+  xlim_current <- c(ext(current)[1], ext(current)[2])
+  ylim_current <- c(ext(current)[3], ext(current)[4])
   
   # Make plot for contemporary predictions
-  current_plot <- ggplot()
-  contemporary_plots[[one_species]] <- current_plot
+  current_plot <- ggplot() +
+    geom_spatvector(data = states, color = NA, fill = state_fill) +
+    geom_spatraster(data = current, maxcell = Inf) +
+    scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+    geom_spatvector(data = states, color = state_color, fill = NA) +
+    geom_spatvector(data = countries, color = countries_color, fill = NA) +
+    coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim) +
+    # scale_x_continuous(breaks = c(-120, -110, -100)) +
+    theme_bw() +
+    theme(legend.position = "none")
+    # theme(plot.margin = unit(margins, "pt"), 
+    #       axis.text = element_text(size = 10))
+  
+  current_plots[[one_species]] <- current_plot
   # Now make forecast and delta plot for each ssp and future time period, as 
   # supplemental output is going to have one time period per page, we use the 
   # time (year) as the outer loop and scenario (SSP) as the inner loop to make 
   # subsequent cowplot::plot_grid wrangling a little easier.
+  # Keeps track of which spot in the list to insert the plot
+  element_i <- 1
   for (time_i in 1:length(times)) {
     time <- times[time_i]
     for (scenario_i in 1:length(scenarios)) {
       scenario <- scenarios[scenario_i]
-      # Enumerator to keep track of list elements
-      # TODO: Needs to be updated because we now have two plots for each 
-      # ssp/time combo: prediction & delta
-      list_i <- (time_i - 1) * length(scenario) + scenario_i
-
       # "model" is the text combination of the scenario (ssp) & time (year)
       model <- paste0(scenario, "_", time)
-      # message("Plotting ", model, " richness & hotspots [", list_i, "]")
-      
+
       # Get forecast raster
+      forecast <- readRDS(paste0("output/overlaps/", one_species,
+                                 "-overlap-ensemble_", model, ".rds"))
+
+      # Update to 0-3 scale
+      forecast[forecast %in% 1:2] <- 1
+      forecast[forecast == 3] <- 2
+      forecast[forecast %in% 4:5] <- 3
+      forecast <- as.factor(forecast)
+      levels(forecast) <- data.frame(value = 0:3, label = names(dist_cols))
       
-      # Do re-projection to Lambert
+      # Do re-projection to Lambert & drop missing
+      forecast <- project(forecast, crs(states), method = "near")
+      forecast <- drop_na(forecast)
+      
+      # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+      xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
+      ylim_forecast <- c(ext(forecast)[3], ext(forecast)[4])
+      
+      # Make plot for forecast predictions
+      forecast_plot <- ggplot() +
+        geom_spatvector(data = states, color = NA, fill = state_fill) +
+        geom_spatraster(data = forecast, maxcell = Inf) +
+        scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+        geom_spatvector(data = states, color = state_color, fill = NA) +
+        geom_spatvector(data = countries, color = countries_color, fill = NA) +
+        coord_sf(datum = sf::st_crs("EPSG:4326"), 
+                 xlim = xlim_forecast, 
+                 ylim = ylim_forecast) +
+        theme_bw() +
+        theme(legend.position = "none")
+
+      one_species_plots[[element_i]] <- forecast_plot
+      # Increment list element counter
+      # TODO: Yuck yuck yuck
+      element_i <- element_i + 1
       
       # Get delta raster
+      delta <- readRDS(paste0("output/deltas/", one_species,
+                                 "-delta-insecthost_", model, ".rds"))
       
+      # Update to 0-2 scale
+      # TODO: To here
+
+      
+      levels(forecast) <- data.frame(value = 0:3, label = names(dist_cols))
+      
+      # Do re-projection to Lambert & drop missing
+      forecast <- project(forecast, crs(states), method = "near")
+      forecast <- drop_na(forecast)
+      
+      # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+      xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
+      ylim_forecast <- c(ext(forecast)[3], ext(forecast)[4])
+      
+      # Make plot for forecast predictions
+      forecast_plot <- ggplot() +
+        geom_spatvector(data = states, color = NA, fill = state_fill) +
+        geom_spatraster(data = forecast, maxcell = Inf) +
+        scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+        geom_spatvector(data = states, color = state_color, fill = NA) +
+        geom_spatvector(data = countries, color = countries_color, fill = NA) +
+        coord_sf(datum = sf::st_crs("EPSG:4326"), 
+                 xlim = xlim_forecast, 
+                 ylim = ylim_forecast) +
+        theme_bw() +
+        theme(legend.position = "none")
+
+      # Store forecast plot
+      
+            
       # Re-project delta to Lambert
       
       # Any necessary cropping?
       
-      # Make forecast plot
-      forecast_plot <- ggplot()
-      
-      # Store forecast plot
-      
+
       # Make delta plot
       delta_plot <- ggplot()
       
@@ -143,6 +270,39 @@ for (species_i in 1:length(species)) {
     }
   }
 }
+
+# We now have contemporary and forecast plots stored in lists. Need to pull out 
+# specific plots to create main and supplemental figures
+
+# Main manuscript: six panel figure, one column each for P. cresphontes & P. 
+#   rumiko
+#   + Predicted suitable areas for contemporary climate
+#   + Predicted suitable areas for 2050s, under SSP3-7.0
+#   + Difference in area between two predictions
+
+# Pull out the two contemporary plots of interest
+
+# Pull out the two list elements of forecast plot list corresponding to the two 
+# species of interest
+
+# Pull out the two forecast plots of interest (2050s + SSP3-7.0, and the delta) 
+# for each of the two species
+
+# Make six-panel plot with those six images
+
+# Supplemental: woo boy. Two things, really.
+#   Multi-panel figure with predicted area for current climate for each species
+#     (a total of 15 species, including P. appalachiensis and P. palamedes), 
+#     this probably works best as two pages of 6 and one page of 3 panels, AND 
+#   Two 12-panel figures for each species with forecast predictions (I think 
+#     it is just 13 species, excluding P. appalachiensis and P. palamedes):
+#   + Page 1, column 1: suitable areas for 2041 for three SSPs
+#   + Page 1, column 2: differences in area from current predicted areas
+#   + Page 2, column 1: suitable areas for 2071 for three SSPs
+#   + Page 2, column 2: differences in area from current predicted areas
+
+
+
 
 
 ################################################################################
