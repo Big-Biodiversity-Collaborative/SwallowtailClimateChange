@@ -11,6 +11,8 @@
 #' writes data to file, instead returns data.frame of observations (see 
 #' \textbf{Value})
 #' @param verbose logical indicating whether or not to print progress messages
+#' @param year_range character vector of length two indicating beginning and 
+#' ending years for observations
 #' @param countries character vector of country codes to restrict search 
 #' @param query_limit integer number of results to return per query
 #' @param max_attempts integer maximum number of times to try querying gbif
@@ -18,7 +20,7 @@
 #' 
 #' @return tibble of observations
 download_gbif <- function(species_name, gbif_name = NULL, verbatim_name = NULL, 
-                          replace = FALSE, verbose = FALSE, 
+                          replace = FALSE, verbose = FALSE, year_range = NULL,
                           countries = c("CA", "MX", "US"), query_limit = 200, 
                           max_attempts = 5, logfile = NULL) {
   if (!require(dplyr)) {
@@ -52,6 +54,19 @@ download_gbif <- function(species_name, gbif_name = NULL, verbatim_name = NULL,
   } else { # when searching for verbatim_name
     list_name <- "custom_query"
   }
+  
+  # rgbif query required year range to be in smaller, larger order, so we check 
+  # that here and rearrange if necessary
+  if (!is.null(year_range)) {
+    if (length(year_range) > 1) {
+      if (year_range[1] > year_range[2]) {
+        year_range <- year_range[c(2, 1)]
+      }
+    }
+    # And we need to actually pass as a single character string
+    year_range_text <- paste0(year_range[c(1,2)], collapse = ",")
+  }
+  
   # To restrict to three countries, need to do three separate queries
   total <- 0
   obs <- NULL
@@ -77,12 +92,14 @@ download_gbif <- function(species_name, gbif_name = NULL, verbatim_name = NULL,
                                from = "gbif",
                                limit = 1,
                                has_coords = TRUE,
-                               gbifopts = list(country = country))
+                               gbifopts = list(country = country, 
+                                               year = year_range_text))
     } else {
       gbif_count <- spocc::occ(from = "gbif",
                                limit = 1,
                                has_coords = TRUE,
-                               gbifopts = list(country = country,
+                               gbifopts = list(country = country, 
+                                               year = year_range_text,
                                                verbatimScientificName = verbatim_name))
     }
     
@@ -128,13 +145,15 @@ download_gbif <- function(species_name, gbif_name = NULL, verbatim_name = NULL,
                                          limit = query_limit,
                                          start = start,
                                          has_coords = TRUE,
-                                         gbifopts = list(country = country))
+                                         gbifopts = list(country = country, 
+                                                         year = year_range_text))
               } else {
                 gbif_query <- spocc::occ(from = "gbif",
                                          limit = query_limit,
                                          start = start,
                                          has_coords = TRUE,
-                                         gbifopts = list(country = country,
+                                         gbifopts = list(country = country, 
+                                                         year = year_range_text,
                                                          verbatimScientificName = verbatim_name))
               }
               

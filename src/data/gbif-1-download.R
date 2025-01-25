@@ -11,6 +11,7 @@ source(file = "load_functions.R")
 gbif_data <- read.csv(file = "data/gbif-reconcile.csv")
 replace <- FALSE
 verbose <- TRUE
+year_range <- c(2000, 2024)
 
 # How frequently to print message about number of species completed
 print_freq <- 20
@@ -40,6 +41,7 @@ for (i in 1:nrow(gbif_data)) {
                          gbif_name = gbif_name,
                          replace = replace,
                          verbose = TRUE,
+                         year_range = year_range,
                          max_attempts = 10,
                          logfile = logfile)
     # Check for other names (where the name of the thing on GBIF might not be 
@@ -56,6 +58,7 @@ for (i in 1:nrow(gbif_data)) {
                                    verbatim_name = other_name,
                                    replace = replace,
                                    verbose = TRUE,
+                                   year_range = year_range,
                                    max_attempts = 10,
                                    logfile = logfile)
         obs <- obs %>%
