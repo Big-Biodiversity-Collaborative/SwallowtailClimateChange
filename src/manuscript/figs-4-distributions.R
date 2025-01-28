@@ -267,7 +267,7 @@ for (species_i in 1:length(nice_names)) {
       element_i <- element_i + 1
     } # end iterating over scenarios (SSPs)
   } # end iterating over times (years)
-  species_plots[[species_i]] <- one_species_plots
+  species_plots[[one_species]] <- one_species_plots
 } # end iterating over species
 
 # We now have contemporary and forecast plots stored in lists. Need to pull out 
