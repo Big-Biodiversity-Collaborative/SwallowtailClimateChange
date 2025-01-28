@@ -108,9 +108,12 @@ times <- c("2041", "2071")
 
 # Get colors for plots
 dist_cols <- get_colors(palette = "overlap")
+# TODO: Consider moving this to the get_colors() function
 names(dist_cols) <- c("Absent", "Hosts only", "Swallowtail only", 
                       "Swallowtail and hosts")  
 delta_cols <- get_colors(palette = "distdelta")
+# TODO: Consider moving this to the get_colors() function
+names(delta_cols) <- c("Absent", "Loss", "Gain", "Stable")  
 
 # Setting colors for state & country lines
 state_fill <- "white"
@@ -126,6 +129,7 @@ nice_names <- tolower(gsub(pattern = " ",
                            x = species))
 for (species_i in 1:length(nice_names)) {
   one_species <- nice_names[species_i]
+  message("Plotting predictions & deltas for ", one_species)
   # This list will hold all forecast & delta plots for one species (and become 
   # one element of the species_plots list)
   one_species_plots <- vector(mode = "list", 
@@ -166,7 +170,8 @@ for (species_i in 1:length(nice_names)) {
     scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
     geom_spatvector(data = states, color = state_color, fill = NA) +
     geom_spatvector(data = countries, color = countries_color, fill = NA) +
-    coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim) +
+    coord_sf(datum = sf::st_crs("EPSG:4326"), 
+             xlim = xlim_current, ylim = ylim_current) +
     # scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     theme(legend.position = "none")
@@ -219,57 +224,51 @@ for (species_i in 1:length(nice_names)) {
         theme_bw() +
         theme(legend.position = "none")
 
+      # Store forecast plot
       one_species_plots[[element_i]] <- forecast_plot
+      
       # Increment list element counter
       # TODO: Yuck yuck yuck
       element_i <- element_i + 1
       
       # Get delta raster
       delta <- readRDS(paste0("output/deltas/", one_species,
-                                 "-delta-insecthost_", model, ".rds"))
+                                 "-delta-insecthost-", model, ".rds"))
       
-      # Update to 0-2 scale
-      # TODO: To here
-
-      
-      levels(forecast) <- data.frame(value = 0:3, label = names(dist_cols))
+      # See src/summary/summary-2-compare-ranges.R
+      delta <- as.factor(delta)
+      levels(delta) <- data.frame(value = 0:3, label = names(delta_cols))
       
       # Do re-projection to Lambert & drop missing
-      forecast <- project(forecast, crs(states), method = "near")
-      forecast <- drop_na(forecast)
+      delta <- project(delta, crs(states), method = "near")
+      delta <- drop_na(delta)
       
       # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
-      xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
-      ylim_forecast <- c(ext(forecast)[3], ext(forecast)[4])
+      xlim_delta <- c(ext(delta)[1], ext(delta)[2])
+      ylim_delta <- c(ext(delta)[3], ext(delta)[4])
       
-      # Make plot for forecast predictions
-      forecast_plot <- ggplot() +
+      # Make plot for change in predicted ranges
+      delta_plot <- ggplot() +
         geom_spatvector(data = states, color = NA, fill = state_fill) +
-        geom_spatraster(data = forecast, maxcell = Inf) +
-        scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+        geom_spatraster(data = delta, maxcell = Inf) +
+        scale_fill_manual(name = "label", values = delta_cols, na.translate = FALSE) +
         geom_spatvector(data = states, color = state_color, fill = NA) +
         geom_spatvector(data = countries, color = countries_color, fill = NA) +
         coord_sf(datum = sf::st_crs("EPSG:4326"), 
-                 xlim = xlim_forecast, 
-                 ylim = ylim_forecast) +
+                 xlim = xlim_delta, 
+                 ylim = ylim_delta) +
         theme_bw() +
         theme(legend.position = "none")
 
-      # Store forecast plot
-      
-            
-      # Re-project delta to Lambert
-      
-      # Any necessary cropping?
-      
-
-      # Make delta plot
-      delta_plot <- ggplot()
-      
-      # Store forecast plot
-    }
-  }
-}
+      # Store delta plot
+      one_species_plots[[element_i]] <- delta_plot
+      # Increment list element counter
+      # TODO: Still ick
+      element_i <- element_i + 1
+    } # end iterating over scenarios (SSPs)
+  } # end iterating over times (years)
+  species_plots[[species_i]] <- one_species_plots
+} # end iterating over species
 
 # We now have contemporary and forecast plots stored in lists. Need to pull out 
 # specific plots to create main and supplemental figures
@@ -300,6 +299,12 @@ for (species_i in 1:length(nice_names)) {
 #   + Page 1, column 2: differences in area from current predicted areas
 #   + Page 2, column 1: suitable areas for 2071 for three SSPs
 #   + Page 2, column 2: differences in area from current predicted areas
+
+
+
+
+
+
 
 
 

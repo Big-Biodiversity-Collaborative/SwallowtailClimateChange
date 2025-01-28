@@ -9,7 +9,7 @@ require(dplyr)   # data wrangling
 
 # Filter observations for each species, so observations:
 #     are not on the basis of barcodes only
-#     occur between 2000-2023
+#     occur between 2000-2024
 #     are in locations where climate data are available
 #     are thinned to a max of X observations per grid cell (of climate raster)
 #     are inside the 98% contour of observations
@@ -36,7 +36,7 @@ remove_material <- TRUE
 # Logical indicating whether or not to remove observations that are outside the 
 # range of desired years
 remove_old <- TRUE
-year_range <- 2000:2023
+year_range <- 2000:2024
 
 ########################################
 # Climate data filter settings
