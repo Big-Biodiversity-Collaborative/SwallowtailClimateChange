@@ -1,10 +1,23 @@
-# Compare recent GBIF download to prior counts
+# Compare recent observation p/a data to prior counts
 # Jeff Oliver
 # jcoliver@arizona.edu
 # 2025-01-28
 
 library(dplyr)
 
+# Look at two versions of pa-summary file to see what changed
+old_summary <- read.csv(file = "~/Desktop/gbif-pa-summary.csv")
+new_summary <- read.csv(file = "data/gbif-pa-summary.csv")
+
+summaries <- old_summary %>%
+  left_join(new_summary, by = c("species" = "species")) %>%
+  mutate(delta = n_filtered.y - n_filtered.x,
+         pa_gain = (pa_csv.x == "no" & pa_csv.y == "yes"),
+         pa_loss = (pa_csv.x == "yes" & pa_csv.y == "no")) %>%
+  # arrange(desc(pa_gain), desc(pa_loss), delta)
+  arrange(delta)
+
+##### FILTERED CHECK
 # Make this super-easy and just count rows of data.
 old_files_dir <- "~/Desktop/gbif-filtered/data/gbif/filtered"
 # old_files <- list.files(old_files_dir)
