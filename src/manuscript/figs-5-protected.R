@@ -6,7 +6,7 @@
 require(dplyr)
 require(ggplot2)
 require(tidyr)
-require(cowplot)
+require(cowplot)  # For plot_grid() function
 source(file = "functions/get_colors.R")
 
 # Making two figures (well, one figure for manuscript, and multi-panel figure 
@@ -27,6 +27,9 @@ climate_models <- climate_models %>%
 # The SSP to use in the main manuscript
 main_ssp <- "370"
 
+# Base of output filenames
+output_basename <- "output/manuscript/"
+
 # Focus on 4 species minimum as "hotspot" criterion, and insect + host 
 # distribution
 hotspots <- hotspots %>%
@@ -35,11 +38,11 @@ hotspots <- hotspots %>%
   select(-c(min_num_spp, distribution))
 
 # Need to transform to long for easier subsetting. Will need
-#     + climate ("current" or one of the SSPs)
-#     + stat (the name of the thing being measured)
-#     + value
-#     + type of protection category ("total" for total area)
-#     + year
+#   + climate ("current" or one of the SSPs)
+#   + stat (the name of the thing being measured)
+#   + value
+#   + type of protection category ("total" for total area)
+#   + year
 hotspots_long <- hotspots %>%
   pivot_longer(cols = -climate,
                names_to = "stat",
@@ -144,11 +147,16 @@ ssp_plots <- vector(mode = "list",
                     length = length(ssps))
 names(ssp_plots) <- ssps
 
-# TODO: Will probably want to make sure scales (y axis limits) are consistent
-# across all SSPs. Add that in here.
+# TODO: May want to make sure scales (y axis limits) are consistent across all 
+# SSPs. Not currently implemented - ylim() commented out in each plot.
+total_ylim <- c(min(hotspots_long$value[hotspots_long$stat == "total"]),
+                max(hotspots_long$value[hotspots_long$stat == "total"]))
+area_ylim <- c(0, max(hotspots_long$value[hotspots_long$stat == "area"]))
+perc_ylim <- c(0, max(hotspots_long$value[hotspots_long$stat == "prop"])) * 100
 
-# TODO: For Total Area line plot, could we use space more efficiently by 
-# plotting thousands of square kilometers? e.g. 675000 -> 675
+# TODO: In all cases, want to move the management type legend into the plot 
+# area (with a white box) in the AMOUNT area protected and remove the legend 
+# from the PERCENT area protected
 
 # Get the colors for the different management categories
 management_cols <- get_colors(palette = "protected")
@@ -165,23 +173,27 @@ for (ssp_i in 1:length(ssps)) {
   
   # Line plot of total area
   line_total <- ggplot(data = ssp_data %>% filter(stat == "total"), 
-                       mapping = aes(x = yr_midpoint, y = value)) +
+                       mapping = aes(x = yr_midpoint, y = value/1000)) +
     geom_point() +
     geom_line() +
-    labs(x = "Year", y = "Total Area (sq km)") +
+    labs(x = "Year", y = "Total Area (1K sq km)") +
+    # ylim(total_ylim) +
     theme_bw()
   plot_list[[1]] <- line_total
     
   # Stacked area amount of area protected (in sq km)
   stacked_area <- ggplot(data = ssp_data %>% filter(stat == "area"),
                          mapping = aes(x = yr_midpoint, 
-                                       y = value, 
+                                       y = value/1000, 
                                        fill = category)) +
     geom_area() +
     scale_fill_manual(name = "Management",
                       values = management_cols) +
-    labs(x = "Year", y = "Protected Area (sq km)") +
-    theme_bw()
+    labs(x = "Year", y = "Protected Area (1K sq km)") +
+    # ylim(area_ylim) +
+    theme_bw() +
+    theme(legend.position = "inside",
+          legend.position.inside = c(0.8, 0.55))
   plot_list[[2]] <- stacked_area
 
   # Stacked area percentage of area protected (100 X prop values)
@@ -192,8 +204,11 @@ for (ssp_i in 1:length(ssps)) {
     geom_area() +
     scale_fill_manual(name = "Management",
                       values = management_cols) +
+    scale_y_continuous(labels = function(x) round(x, 0)) +
     labs(x = "Year", y = "% Area Protected") +
-    theme_bw()
+    # ylim(perc_ylim) +
+    theme_bw() +
+    theme(legend.position = "none")
   plot_list[[3]] <- stacked_perc
   
   # Finally, add that list to the appropriate spot in the ssp list
@@ -203,6 +218,8 @@ for (ssp_i in 1:length(ssps)) {
 # Now we make multi-panel figures. For SSP of interest (3-7.0 for now), this is 
 # one column, three row figure for main manuscript. For other SSPs, it will be 
 # one column per SSP (so two columns), and three rows
+main_plot_file <- paste0(output_basename, "Figure-Protected.png")
+supp_plot_file <- paste0(output_basename, "Supplemental-Figure-Protected.png")
 
 # Starting with ssp of interest
 main_plot_list <- ssp_plots[[main_ssp]]
@@ -210,7 +227,12 @@ main_plot <- plot_grid(plotlist = main_plot_list,
                        align = "h",
                        ncol = 1,
                        labels = "auto")
-main_plot
+# main_plot
+ggsave(filename = main_plot_file,
+       plot = main_plot,
+       width = 3,
+       height = 5,
+       units = "in")
 
 # Now create same thing, but with remaining SSPs
 main_plot_i <- which(names(ssp_plots) == main_ssp)
@@ -224,4 +246,9 @@ supp_plot <- plot_grid(plotlist = supp_plot_list,
                        ncol = num_cols,
                        byrow = FALSE,
                        labels = "auto")
-supp_plot
+# supp_plot
+ggsave(filename = supp_plot_file,
+       plot = supp_plot,
+       width = 6,
+       height = 5,
+       units = "in")
