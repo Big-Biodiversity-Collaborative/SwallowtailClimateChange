@@ -111,9 +111,9 @@ dist_cols <- get_colors(palette = "overlap")
 # TODO: Consider moving this to the get_colors() function
 names(dist_cols) <- c("Absent", "Hosts only", "Swallowtail only", 
                       "Swallowtail and hosts")  
+
 delta_cols <- get_colors(palette = "distdelta")
-# TODO: Consider moving this to the get_colors() function
-names(delta_cols) <- c("Absent", "Loss", "Gain", "Stable")  
+names(delta_cols) <- tools::toTitleCase(names(delta_cols))  
 
 # Setting colors for state & country lines
 state_fill <- "white"

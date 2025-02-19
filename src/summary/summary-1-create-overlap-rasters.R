@@ -26,7 +26,8 @@ file_ext <- "png"
 source(file = "load_functions.R")
 
 # Load insect-host file
-ih <- read.csv("data/insect-host.csv")
+ih <- read.csv("data/insect-host.csv") %>%
+  dplyr::select(insect, host_accepted)
 
 # Load information about data availability for each species
 species_info <- read.csv("data/gbif-pa-summary.csv")
@@ -52,6 +53,8 @@ if (all_insects) {
 # files may still remain in the output/distributions folder)
 exclude <- species_info$species[species_info$pa_csv == "no"]
 insects <- insects[!insects %in% exclude]
+
+countries3 <- vect("data/political-boundaries/countries3.shp")
 
 # Loop through insect species to create an overlap raster for each climate model
 for (i in 1:length(insects)) {
@@ -158,6 +161,8 @@ for (i in 1:length(insects)) {
           plant_list[[j]] <- terra::crop(plant_list[[j]], insect_dist)
         }
         host_dist <- terra::rast(plant_list)
+        rm(plant_list)
+        invisible(gc())
         
         # Remove any rasters that are all NA
         raster_sums <- global(host_dist, "sum", na.rm = TRUE)
@@ -191,7 +196,6 @@ for (i in 1:length(insects)) {
         
         # Crop and mask overlap raster so it doesn't extend beyond boundaries of 
         # US, Canada, Mexico
-        countries3 <- vect("data/political-boundaries/countries3.shp")
         overlap <- crop(overlap, countries3)
         overlap <- mask(overlap, countries3)
 
@@ -227,7 +231,16 @@ for (i in 1:length(insects)) {
                  width = 6, 
                  height = 6,
                  units = "in")
+          
+          # Some manual garbage collection
+          rm(map_object)
+          # Plot gets stored in cache; so want to clean that, too
+          ggplot2::set_last_plot(NULL)
+          invisible(gc())
         }
+        rm(insect_dist, overlap, host_dist,
+           all_spp_list, all_spp_ext)
+        invisible(gc())
       }
     } 
   }

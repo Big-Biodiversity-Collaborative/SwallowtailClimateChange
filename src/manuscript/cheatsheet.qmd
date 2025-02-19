@@ -1,0 +1,32 @@
+---
+title: "Swallowtails Cheat Sheet"
+format: pdf
+---
+
+A document that includes figures and legends for manuscript.
+
+Figure 1 (workflow)
+
+Figure 2 (distributions and changes for two species)
+
+Supplemental Table 1 (% and total area overlapping with at least one host plant)
+
+Figure 3 (shifts in longitude and latitude)
+
+Figure 4 (richness, hotspots, and change)
+
+Figure 5 (protected areas)
+
+## Supplemental
+
+Figure S1 (distributions and changes for remaining species)
+
+Figure S2 (shifts in longitude and latitude)
+
+Figure S3 (richness) 
+
+Figure S4 (hotspots)
+
+Figure S5? (richness change)
+
+Figure S6 (protected areas)
