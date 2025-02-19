@@ -194,6 +194,8 @@ for (i in 1:length(insects)) {
         overlap <- terra::rast(list(insect_dist, host_dist))
         overlap <- sum(overlap)
         
+        rm(insect_dist, host_dist)
+        
         # Crop and mask overlap raster so it doesn't extend beyond boundaries of 
         # US, Canada, Mexico
         overlap <- crop(overlap, countries3)
@@ -238,8 +240,7 @@ for (i in 1:length(insects)) {
           ggplot2::set_last_plot(NULL)
           invisible(gc())
         }
-        rm(insect_dist, overlap, host_dist,
-           all_spp_list, all_spp_ext)
+        rm(overlap, all_spp_list, all_spp_ext)
         invisible(gc())
       }
     } 
