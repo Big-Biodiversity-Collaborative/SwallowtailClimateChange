@@ -10,6 +10,17 @@ require(tidyterra)
 require(cowplot)
 source(file = "functions/get_colors.R")
 
+# Figures are based on 15 x (1 + 2 x 3 x 2) = 195 ggplot objects!!!
+# 15 species: one current plot, plus forecast and delta plots of three SSPs for
+# two time periods
+# It seems too much to ask to create *ALL* the ggplot objects (thus requiring 
+# R to hold all of this in memory) before plotting. So will be doing things on 
+# a figure/page basis. So start with the two-species figure for the main 
+# manuscript (a single page), then do the supplemental figure. The latter 
+# could be done multiple steps: first, create the pages (3) for the current 
+# distributions, then go species-by-species to create the pages (2/species) for 
+# forecast distributions.
+
 # Two figures
 # Main manuscript: six panel figure, one column each for P. cresphontes & P. 
 #   rumiko
@@ -34,6 +45,14 @@ source(file = "functions/get_colors.R")
 # supplemental will be slightly duplicative, as it will also include the two 
 # species in the main manuscript figure.
 
+# If replace_ggplots is TRUE, the script will re-create individual plots, save 
+# them to local files (in output/manuscript/distribution-figs), and use those 
+# figures to create manuscript figures. If FALSE, it will attempt to read files
+# from disk and use those plots for manuscript figures (if file does not exist 
+# on disk and replace_ggplots is FALSE, script will attempt to make the ggplot 
+# object and save it)
+replace_ggplots <- FALSE
+
 ih <- read.csv("data/insect-host.csv")
 gbif <- read.csv("data/gbif-pa-summary.csv")
 
@@ -45,6 +64,9 @@ gbif <- gbif %>%
 
 # Pull species with current predictions out of the gbif data.frame
 species <- gbif$species
+nice_names <- tolower(gsub(pattern = " ",
+                           replacement = "_",
+                           x = species))
 
 # Grab spatial files with political boundaries
 states <- vect("data/political-boundaries/states.shp")  
@@ -62,12 +84,12 @@ countries <- countries %>%
   filter(adm0_a3 %in% c("USA", "CAN", "MEX"))
 
 # List to hold current species predictions
-current_plots <- vector(mode = "list", length = length(species))
-names(current_plots) <- species
+current_plots <- vector(mode = "list", length = length(nice_names))
+names(current_plots) <- nice_names
 
 # List to hold all the forecast and delta plots
-species_plots <- vector(mode = "list", length = length(species))
-names(species_plots) <- species
+species_plots <- vector(mode = "list", length = length(nice_names))
+names(species_plots) <- nice_names
 
 # Forecast scenarios and time points
 scenarios <- c("ssp245", "ssp370", "ssp585")
@@ -120,25 +142,26 @@ state_fill <- "white"
 state_color <- "gray50"
 countries_color <- "black"
 
-# TODO: Not used
-# margins <- c(4, 0, 6, 0)
+# Main manuscript figure for two species
+main_species <- c("papilio_cresphontes", "papilio_rumiko")
 
-# Iterate over all species
-nice_names <- tolower(gsub(pattern = " ",
-                           replacement = "_",
-                           x = species))
-for (species_i in 1:length(nice_names)) {
-  one_species <- nice_names[species_i]
-  message("Plotting predictions & deltas for ", one_species)
-  # This list will hold all forecast & delta plots for one species (and become 
-  # one element of the species_plots list)
-  one_species_plots <- vector(mode = "list", 
-                              length = length(scenarios) * length(times) * 2)
-    
+# + Predicted suitable areas for contemporary climate
+# + Predicted suitable areas for 2050s, under SSP3-7.0
+# + Difference in area between two predictions
+
+main_plots_list <- vector(mode = "list", length = 6)
+
+# Iterate over the species of interest
+for (i in 1:length(main_species)) {
+  one_species <- main_species[i]
+  # Indices for list elements so things get put in the right place
+  current_index <- (i - 1) * 3 + 1
+  forecast_index <- current_index + 1
+  delta_index <- current_index + 2
+  
   # Get raster of contemporary predictions
   current <- readRDS(paste0("output/overlaps/", one_species,
-                                 "-overlap-current.rds"))
-  
+                            "-overlap-current.rds"))
   # Update the rasters to have values we want (1, 2, 3, 4). Rasters coming in 
   # should have the following values:
   # 0 = (Insect and hosts absent) Insect and all host plants predicted absent
@@ -158,13 +181,13 @@ for (species_i in 1:length(nice_names)) {
   # Do re-projection to Lambert & drop missing
   current <- project(current, crs(states), method = "near")
   current <- drop_na(current)
-
+  
   # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
   xlim_current <- c(ext(current)[1], ext(current)[2])
   ylim_current <- c(ext(current)[3], ext(current)[4])
   
   # Make plot for contemporary predictions
-  current_plot <- ggplot() +
+  main_plots_list[[current_index]] <- ggplot() +
     geom_spatvector(data = states, color = NA, fill = state_fill) +
     geom_spatraster(data = current, maxcell = Inf) +
     scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
@@ -172,13 +195,171 @@ for (species_i in 1:length(nice_names)) {
     geom_spatvector(data = countries, color = countries_color, fill = NA) +
     coord_sf(datum = sf::st_crs("EPSG:4326"), 
              xlim = xlim_current, ylim = ylim_current) +
-    # scale_x_continuous(breaks = c(-120, -110, -100)) +
     theme_bw() +
     theme(legend.position = "none")
+  ggplot2::set_last_plot(NULL)
+  invisible(gc())
+  
+  # Make forecast plot for SSP3-7.0, 2050s
+  model <- "ssp370_2041"
+  
+  forecast_plot_file <- paste0("output/manuscript/distribution-figs/",
+                               one_species, "-ggplot-", model, ".rds")
+    # Get forecast raster
+    forecast <- readRDS(paste0("output/overlaps/", one_species,
+                               "-overlap-ensemble_", model, ".rds"))
+    
+    # Update to 0-3 scale
+    forecast[forecast %in% 1:2] <- 1
+    forecast[forecast == 3] <- 2
+    forecast[forecast %in% 4:5] <- 3
+    forecast <- as.factor(forecast)
+    levels(forecast) <- data.frame(value = 0:3, label = names(dist_cols))
+    
+    # Do re-projection to Lambert & drop missing
+    forecast <- project(forecast, crs(states), method = "near")
+    forecast <- drop_na(forecast)
+    
+    # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+    xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
+    ylim_forecast <- c(ext(forecast)[3], ext(forecast)[4])
+    
+    # Make plot for forecast predictions
+    main_plots_list[[forecast_index]] <- ggplot() +
+      geom_spatvector(data = states, color = NA, fill = state_fill) +
+      geom_spatraster(data = forecast, maxcell = Inf) +
+      scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+      geom_spatvector(data = states, color = state_color, fill = NA) +
+      geom_spatvector(data = countries, color = countries_color, fill = NA) +
+      coord_sf(datum = sf::st_crs("EPSG:4326"), 
+               xlim = xlim_forecast, 
+               ylim = ylim_forecast) +
+      theme_bw() +
+      theme(legend.position = "none")
+    ggplot2::set_last_plot(NULL)
+  invisible(gc())
+
+  delta_plot_file <- paste0("output/manuscript/distribution-figs/",
+                            one_species, "-ggplot-delta-", model, ".rds")
+    # Get delta raster
+    delta <- readRDS(paste0("output/deltas/", one_species,
+                            "-delta-insecthost-", model, ".rds"))
+    
+    # See src/summary/summary-2-compare-ranges.R
+    delta <- as.factor(delta)
+    levels(delta) <- data.frame(value = 0:3, label = names(delta_cols))
+    
+    # Do re-projection to Lambert & drop missing
+    delta <- project(delta, crs(states), method = "near")
+    delta <- drop_na(delta)
+    
+    # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+    xlim_delta <- c(ext(delta)[1], ext(delta)[2])
+    ylim_delta <- c(ext(delta)[3], ext(delta)[4])
+    
+    # Make plot for change in predicted ranges
+    main_plots_list[[delta_index]] <- ggplot() +
+      geom_spatvector(data = states, color = NA, fill = state_fill) +
+      geom_spatraster(data = delta, maxcell = Inf) +
+      scale_fill_manual(name = "label", values = delta_cols, na.translate = FALSE) +
+      geom_spatvector(data = states, color = state_color, fill = NA) +
+      geom_spatvector(data = countries, color = countries_color, fill = NA) +
+      coord_sf(datum = sf::st_crs("EPSG:4326"), 
+               xlim = xlim_delta, 
+               ylim = ylim_delta) +
+      theme_bw() +
+      theme(legend.position = "none")
+    ggplot2::set_last_plot(NULL)
+    invisible(gc())
+}
+
+# Use the list to create the multi-panel figure
+main_plots <- cowplot::plot_grid(main_plots_list,
+                                 byrow = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Iterate over all species
+for (species_i in 1:length(nice_names)) {
+  # This list will hold all forecast & delta plots for one species (and become 
+  # one element of the species_plots list)
+  one_species_plots <- vector(mode = "list", 
+                              length = length(scenarios) * length(times) * 2)
+
+  one_species <- nice_names[species_i]
+  current_plot_file <- paste0("output/manuscript/distribution-figs/",
+                              one_species, "ggplot-current.rds")
+  current_plot_file <- paste0("output/manuscript/distribution-figs/",
+                              one_species, "-ggplot-current.RData")
+
+  if (replace_ggplots | !file.exists(current_plot_file)) {
+    message("Plotting current distribution for ", one_species)
+    
+    # Get raster of contemporary predictions
+    current <- readRDS(paste0("output/overlaps/", one_species,
+                              "-overlap-current.rds"))
+    
+    # Update the rasters to have values we want (1, 2, 3, 4). Rasters coming in 
+    # should have the following values:
+    # 0 = (Insect and hosts absent) Insect and all host plants predicted absent
+    # 1 = (1 host only) Insect predicted absent, only 1 host predicted present
+    # 2 = (2 or more hosts) Insect predicted absent, >= 2 hosts predicted present
+    # 3 = (Insect, no hosts) Insect predicted present, all hosts predicted absent
+    # 4 = (Insect, only 1 host) Insect and only 1 host predicted present
+    # 5 = (Insect, 2 or more hosts) Insect and >= 2 hosts predicted present
+    # Update these to 0-3 scale
+    
+    current[current %in% 1:2] <- 1
+    current[current == 3] <- 2
+    current[current %in% 4:5] <- 3
+    current <- as.factor(current)
+    levels(current) <- data.frame(value = 0:3, label = names(dist_cols))
+    
+    # Do re-projection to Lambert & drop missing
+    current <- project(current, crs(states), method = "near")
+    current <- drop_na(current)
+    
+    # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+    xlim_current <- c(ext(current)[1], ext(current)[2])
+    ylim_current <- c(ext(current)[3], ext(current)[4])
+    
+    # Make plot for contemporary predictions
+    current_plot <- ggplot() +
+      geom_spatvector(data = states, color = NA, fill = state_fill) +
+      geom_spatraster(data = current, maxcell = Inf) +
+      scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+      geom_spatvector(data = states, color = state_color, fill = NA) +
+      geom_spatvector(data = countries, color = countries_color, fill = NA) +
+      coord_sf(datum = sf::st_crs("EPSG:4326"), 
+               xlim = xlim_current, ylim = ylim_current) +
+      # scale_x_continuous(breaks = c(-120, -110, -100)) +
+      theme_bw() +
+      theme(legend.position = "none")
     # theme(plot.margin = unit(margins, "pt"), 
     #       axis.text = element_text(size = 10))
-  
+    
+    saveRDS(current_plot, file = current_plot_file)
+    save(current_plot, file = current_plot_file)
+  } else { # Plot is not on disk or replace_ggplot is TRUE
+    message("Loading current distribution for ", one_species)
+    current_plot <- readRDS(file = current_plot_file)
+    load(current_plot_file)
+  }
   current_plots[[one_species]] <- current_plot
+  rm(current_plot)
+  ggplot2::set_last_plot(NULL)
+  invisible(gc())
+  
   # Now make forecast and delta plot for each ssp and future time period, as 
   # supplemental output is going to have one time period per page, we use the 
   # time (year) as the outer loop and scenario (SSP) as the inner loop to make 
@@ -192,82 +373,109 @@ for (species_i in 1:length(nice_names)) {
       # "model" is the text combination of the scenario (ssp) & time (year)
       model <- paste0(scenario, "_", time)
 
-      # Get forecast raster
-      forecast <- readRDS(paste0("output/overlaps/", one_species,
-                                 "-overlap-ensemble_", model, ".rds"))
-
-      # Update to 0-3 scale
-      forecast[forecast %in% 1:2] <- 1
-      forecast[forecast == 3] <- 2
-      forecast[forecast %in% 4:5] <- 3
-      forecast <- as.factor(forecast)
-      levels(forecast) <- data.frame(value = 0:3, label = names(dist_cols))
+      forecast_plot_file <- paste0("output/manuscript/distribution-figs/",
+                                   one_species, "-ggplot-", model, ".rds")
       
-      # Do re-projection to Lambert & drop missing
-      forecast <- project(forecast, crs(states), method = "near")
-      forecast <- drop_na(forecast)
-      
-      # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
-      xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
-      ylim_forecast <- c(ext(forecast)[3], ext(forecast)[4])
-      
-      # Make plot for forecast predictions
-      forecast_plot <- ggplot() +
-        geom_spatvector(data = states, color = NA, fill = state_fill) +
-        geom_spatraster(data = forecast, maxcell = Inf) +
-        scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
-        geom_spatvector(data = states, color = state_color, fill = NA) +
-        geom_spatvector(data = countries, color = countries_color, fill = NA) +
-        coord_sf(datum = sf::st_crs("EPSG:4326"), 
-                 xlim = xlim_forecast, 
-                 ylim = ylim_forecast) +
-        theme_bw() +
-        theme(legend.position = "none")
-
-      # Store forecast plot
+      if (replace_ggplots | !file.exists(forecast_plot_file)) {
+        message("Plotting forecast distribution ", model, " for ", one_species)
+        # Get forecast raster
+        forecast <- readRDS(paste0("output/overlaps/", one_species,
+                                   "-overlap-ensemble_", model, ".rds"))
+        
+        # Update to 0-3 scale
+        forecast[forecast %in% 1:2] <- 1
+        forecast[forecast == 3] <- 2
+        forecast[forecast %in% 4:5] <- 3
+        forecast <- as.factor(forecast)
+        levels(forecast) <- data.frame(value = 0:3, label = names(dist_cols))
+        
+        # Do re-projection to Lambert & drop missing
+        forecast <- project(forecast, crs(states), method = "near")
+        forecast <- drop_na(forecast)
+        
+        # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+        xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
+        ylim_forecast <- c(ext(forecast)[3], ext(forecast)[4])
+        
+        # Make plot for forecast predictions
+        forecast_plot <- ggplot() +
+          geom_spatvector(data = states, color = NA, fill = state_fill) +
+          geom_spatraster(data = forecast, maxcell = Inf) +
+          scale_fill_manual(name = "label", values = dist_cols, na.translate = FALSE) +
+          geom_spatvector(data = states, color = state_color, fill = NA) +
+          geom_spatvector(data = countries, color = countries_color, fill = NA) +
+          coord_sf(datum = sf::st_crs("EPSG:4326"), 
+                   xlim = xlim_forecast, 
+                   ylim = ylim_forecast) +
+          theme_bw() +
+          theme(legend.position = "none")
+        
+        # Store forecast plot
+        saveRDS(forecast_plot, file = forecast_plot_file)
+      } else {
+        message("Loading forecast distribution ", model, " for ", one_species)
+        forecast_plot <- readRDS(file = forecast_plot_file)
+      }
       one_species_plots[[element_i]] <- forecast_plot
-      
+      rm(forecast_plot)
+      ggplot2::set_last_plot(NULL)
+      invisible(gc())
       # Increment list element counter
       # TODO: Yuck yuck yuck
       element_i <- element_i + 1
       
-      # Get delta raster
-      delta <- readRDS(paste0("output/deltas/", one_species,
-                                 "-delta-insecthost-", model, ".rds"))
-      
-      # See src/summary/summary-2-compare-ranges.R
-      delta <- as.factor(delta)
-      levels(delta) <- data.frame(value = 0:3, label = names(delta_cols))
-      
-      # Do re-projection to Lambert & drop missing
-      delta <- project(delta, crs(states), method = "near")
-      delta <- drop_na(delta)
-      
-      # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
-      xlim_delta <- c(ext(delta)[1], ext(delta)[2])
-      ylim_delta <- c(ext(delta)[3], ext(delta)[4])
-      
-      # Make plot for change in predicted ranges
-      delta_plot <- ggplot() +
-        geom_spatvector(data = states, color = NA, fill = state_fill) +
-        geom_spatraster(data = delta, maxcell = Inf) +
-        scale_fill_manual(name = "label", values = delta_cols, na.translate = FALSE) +
-        geom_spatvector(data = states, color = state_color, fill = NA) +
-        geom_spatvector(data = countries, color = countries_color, fill = NA) +
-        coord_sf(datum = sf::st_crs("EPSG:4326"), 
-                 xlim = xlim_delta, 
-                 ylim = ylim_delta) +
-        theme_bw() +
-        theme(legend.position = "none")
-
-      # Store delta plot
+      delta_plot_file <- paste0("output/manuscript/distribution-figs/",
+                                   one_species, "-ggplot-delta-", model, ".rds")
+      if (replace_ggplots | !file.exists(delta_plot_file)) {
+        message("Plotting delta distribution ", model, " for ", one_species)
+        # Get delta raster
+        delta <- readRDS(paste0("output/deltas/", one_species,
+                                "-delta-insecthost-", model, ".rds"))
+        
+        # See src/summary/summary-2-compare-ranges.R
+        delta <- as.factor(delta)
+        levels(delta) <- data.frame(value = 0:3, label = names(delta_cols))
+        
+        # Do re-projection to Lambert & drop missing
+        delta <- project(delta, crs(states), method = "near")
+        delta <- drop_na(delta)
+        
+        # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
+        xlim_delta <- c(ext(delta)[1], ext(delta)[2])
+        ylim_delta <- c(ext(delta)[3], ext(delta)[4])
+        
+        # Make plot for change in predicted ranges
+        delta_plot <- ggplot() +
+          geom_spatvector(data = states, color = NA, fill = state_fill) +
+          geom_spatraster(data = delta, maxcell = Inf) +
+          scale_fill_manual(name = "label", values = delta_cols, na.translate = FALSE) +
+          geom_spatvector(data = states, color = state_color, fill = NA) +
+          geom_spatvector(data = countries, color = countries_color, fill = NA) +
+          coord_sf(datum = sf::st_crs("EPSG:4326"), 
+                   xlim = xlim_delta, 
+                   ylim = ylim_delta) +
+          theme_bw() +
+          theme(legend.position = "none")
+        
+        # Store delta plot
+        saveRDS(delta_plot, file = delta_plot_file)
+      } else {
+        message("Loading delta distribution ", model, " for ", one_species)
+        delta_plot <- readRDS(file = delta_plot_file)
+      }
       one_species_plots[[element_i]] <- delta_plot
+      rm(delta_plot)
+      ggplot2::set_last_plot(NULL)
+      invisible(gc())
       # Increment list element counter
       # TODO: Still ick
       element_i <- element_i + 1
     } # end iterating over scenarios (SSPs)
   } # end iterating over times (years)
   species_plots[[one_species]] <- one_species_plots
+  rm(one_species_plots)
+  ggplot2::set_last_plot(NULL)
+  invisible(gc())
 } # end iterating over species
 
 # We now have contemporary and forecast plots stored in lists. Need to pull out 
