@@ -93,12 +93,12 @@ countries <- countries %>%
 
 # TODO: Are these two plots lists necessary?
 # List to hold current species predictions
-current_plots <- vector(mode = "list", length = length(nice_names))
-names(current_plots) <- nice_names
+# current_plots <- vector(mode = "list", length = length(nice_names))
+# names(current_plots) <- nice_names
 
 # List to hold all the forecast and delta plots
-species_plots <- vector(mode = "list", length = length(nice_names))
-names(species_plots) <- nice_names
+# species_plots <- vector(mode = "list", length = length(nice_names))
+# names(species_plots) <- nice_names
 
 # Forecast scenarios and time points
 scenarios <- c("ssp245", "ssp370", "ssp585")
@@ -139,8 +139,10 @@ plot_params <- list(states = states,
 #' @param nice_name character Compute-friendly name, i.e. "papilio_rumiko"
 #' @param plot_params list Plot parameters, such as colors and state/country 
 #' border objects
+#' @param title character If not null, includes string as title to plot; also 
+#' accepts \code{expression} objects
 #' @return ggplot object
-current_ggplot <- function(nice_name, plot_params) {
+current_ggplot <- function(nice_name, plot_params, title = NULL) {
   current <- readRDS(paste0("output/overlaps/", nice_name,
                             "-overlap-current.rds"))
   # Update the rasters to have values we want (1, 2, 3, 4). Rasters coming in 
@@ -178,6 +180,12 @@ current_ggplot <- function(nice_name, plot_params) {
              xlim = xlim_current, ylim = ylim_current) +
     theme_bw() +
     theme(legend.position = "none")
+
+  if (!is.null(title)) {
+    current_plot <- current_plot +
+      labs(title = title)
+  }
+  
   ggplot2::set_last_plot(NULL)
   invisible(gc())
   return(current_plot)
@@ -190,8 +198,10 @@ current_ggplot <- function(nice_name, plot_params) {
 #' "ssp370_2041"
 #' @param plot_params list Plot parameters, such as colors and state/country 
 #' border objects
+#' @param title character If not null, includes string as title to plot; also 
+#' accepts \code{expression} objects
 #' @return ggplot object
-forecast_ggplot <- function(nice_name, model, plot_params) {
+forecast_ggplot <- function(nice_name, model, plot_params, title = NULL) {
   # Get forecast raster
   forecast <- readRDS(paste0("output/overlaps/", nice_name,
                              "-overlap-ensemble_", model, ".rds"))
@@ -223,6 +233,12 @@ forecast_ggplot <- function(nice_name, model, plot_params) {
              ylim = ylim_forecast) +
     theme_bw() +
     theme(legend.position = "none")
+  
+  if (!is.null(title)) {
+    current_plot <- current_plot +
+      labs(title = title)
+  }
+  
   ggplot2::set_last_plot(NULL)
   invisible(gc())
   return(forecast_plot)
@@ -235,8 +251,10 @@ forecast_ggplot <- function(nice_name, model, plot_params) {
 #' "ssp370_2041"
 #' @param plot_params list Plot parameters, such as colors and state/country 
 #' border objects
+#' @param title character If not null, includes string as title to plot; also 
+#' accepts \code{expression} objects
 #' @return ggplot object
-delta_ggplot <- function(nice_name, model, plot_params) {
+delta_ggplot <- function(nice_name, model, plot_params, title = NULL) {
   # Get delta raster
   delta <- readRDS(paste0("output/deltas/", nice_name,
                           "-delta-insecthost-", model, ".rds"))
@@ -265,6 +283,12 @@ delta_ggplot <- function(nice_name, model, plot_params) {
              ylim = ylim_delta) +
     theme_bw() +
     theme(legend.position = "none")
+  
+  if (!is.null(title)) {
+    current_plot <- current_plot +
+      labs(title = title)
+  }
+  
   ggplot2::set_last_plot(NULL)
   invisible(gc())
   return(delta_plot)
@@ -334,18 +358,60 @@ invisible(gc())
 # distributions, then go species-by-species to create the pages (2/species) for 
 # forecast distributions.
 
-# iterate over all species
+# iterate over all species for contemporary suitability plots
+current_plots_list <- NULL
+for (species_i in 1:length(nice_names)) {
+  one_species <- nice_names[species_i]
 
-# Draw the current plot. If this is sixth plot, (list length == 6) or last 
-#   species (i == length(nice_names))
-#     + make the six*-panel figure with plot_grid (*Last page won't necessarily
-#       have six panels)
-#     + save the six-panel figure to file (output/manuscript/supp-dist/ ?), 
-#       including page number
-#     + clean out the list (one_list <- NULL, grow via one_list$a <- "a")
-#     + increment the page number
+  print_name <- gsub(x = one_species,
+                     pattern = "papilio_",
+                     replacement = "P. ")
+  
+  message("Plotting ", print_name)
 
+  # Make the title of the plot (just the species name, for now)
+  # Using bquote, need to wrap any variables we want evaluated inside .()
+  title <- bquote(italic(.(print_name)))
 
+  # Draw plot
+  current_plots_list[[one_species]] <- current_ggplot(nice_name = one_species,
+                                                      plot_params = plot_params,
+                                                      title = title)
+  ggplot2::set_last_plot(NULL)
+  invisible(gc())
+  
+  # We are on the sixth or last species, so create the output plot
+  if (species_i %% 6 == 0 || species_i == length(nice_names)) {
+    message("Saving multi-panel page ", ceiling(species_i/6),
+            " of ", ceiling(length(nice_names)/6))
+    
+    # Use the list to create the multi-panel figure
+    current_plots <- cowplot::plot_grid(plotlist = current_plots_list,
+                                        byrow = FALSE,
+                                        ncol = 2,
+                                        # align = "h",
+                                        axis = "l",
+                                        nrow = 3,
+                                        labels = "auto", 
+                                        vjust = 1,
+                                        hjust = 0)
+    
+    current_page_file <- paste0(output_basename, 
+                             "distribution-pages/current-p-",
+                             ceiling(species_i/6),
+                             ".png")
+    
+    ggsave(filename = current_page_file,
+           plot = current_plots,
+           width = 6,
+           height = 8,
+           units = "in")
+
+    current_plots_list <- NULL
+    ggplot2::set_last_plot(NULL)
+    invisible(gc())
+  }
+}
 
 
 
