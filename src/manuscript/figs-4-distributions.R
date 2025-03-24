@@ -387,10 +387,10 @@ for (species_i in 1:length(nice_names)) {
     
     # Use the list to create the multi-panel figure
     current_plots <- cowplot::plot_grid(plotlist = current_plots_list,
-                                        byrow = FALSE,
+                                        byrow = TRUE,
                                         ncol = 2,
                                         # align = "h",
-                                        axis = "l",
+                                        axis = "tl",
                                         nrow = 3,
                                         labels = "auto", 
                                         vjust = 1,
