@@ -235,7 +235,7 @@ forecast_ggplot <- function(nice_name, model, plot_params, title = NULL) {
     theme(legend.position = "none")
   
   if (!is.null(title)) {
-    current_plot <- current_plot +
+    forecast_plot <- forecast_plot +
       labs(title = title)
   }
   
@@ -285,7 +285,7 @@ delta_ggplot <- function(nice_name, model, plot_params, title = NULL) {
     theme(legend.position = "none")
   
   if (!is.null(title)) {
-    current_plot <- current_plot +
+    delta_plot <- delta_plot +
       labs(title = title)
   }
   
@@ -354,9 +354,7 @@ invisible(gc())
 # Supplemental manuscript figures for all species. Will write [XX] image files 
 # to disk and paste together later.
 
-# could be done multiple steps: first, create the pages (3) for the current 
-# distributions, then go species-by-species to create the pages (2/species) for 
-# forecast distributions.
+# Step 2.1: Create the three pages for the current distributions
 
 # iterate over all species for contemporary suitability plots
 current_plots_list <- NULL
@@ -386,11 +384,13 @@ for (species_i in 1:length(nice_names)) {
             " of ", ceiling(length(nice_names)/6))
     
     # Use the list to create the multi-panel figure
+    # TODO: all the plots are currently center-aligned, but it would be nice if 
+    # they were instead left-justified. The align and axis parameters of 
+    # plot_grid do not help in accomplishing this. Most of the plots have 
+    # different aspect ratios from one another...
     current_plots <- cowplot::plot_grid(plotlist = current_plots_list,
                                         byrow = TRUE,
                                         ncol = 2,
-                                        # align = "h",
-                                        axis = "tl",
                                         nrow = 3,
                                         labels = "auto", 
                                         vjust = 1,
@@ -413,6 +413,94 @@ for (species_i in 1:length(nice_names)) {
   }
 }
 
+# Step 2.2: Create the pages (2/species) for forecast distributions and 
+# accompanying delta maps.
+#   + Page 1, column 1: suitable areas for 2041 for three SSPs
+#   + Page 1, column 2: differences in area from current predicted areas
+#   + Page 2, column 1: suitable areas for 2071 for three SSPs
+#   + Page 2, column 2: differences in area from current predicted areas
+
+# Get information about models (mostly for text to use in plot titles)
+climate_models <- read.csv(file = "data/climate-models.csv")
+climate_models$name <- gsub(x = climate_models$name,
+                            pattern = "ensemble_",
+                            replacement = "")
+
+# Iterate over all species
+for (species_i in 1:length(nice_names)) {
+  one_species <- nice_names[species_i]
+  
+  print_name <- gsub(x = one_species,
+                     pattern = "papilio_",
+                     replacement = "P. ")
+  
+  message("Plotting forecasts & deltas for ", print_name)
+  
+  # Iterate over all years
+  for (time_i in 1:length(times)) {
+    time <- times[time_i]
+    # Create a list for the six plots for this year
+    time_plots_list <- NULL
+    # Iterate over all three SSPs
+    for (scenario_i in 1:length(scenarios)) {
+      scenario <- scenarios[scenario_i]
+      # Get the name of the model for plot title
+      model <- paste0(scenario, "_", time)
+      model_name <- paste0(climate_models$yr_text[climate_models$name == model],
+                           ", ",
+                           climate_models$ssp_text[climate_models$name == model])
+      
+      # Create title for forecast plot
+      # title <- bquote(italic(.(print_name)), ", ", .(model_name), " forecast")
+      title <- bquote(italic(.(print_name))~.(model_name))
+      forecast_element_name <- paste0(model, "-forecast")
+      
+      # Create forecast plot for this scenario + year
+      time_plots_list[[forecast_element_name]] <- forecast_ggplot(nice_name = one_species,
+                                                                  model = model,
+                                                                  plot_params = plot_params,
+                                                                  title = title)
+      # Create title for delta plot
+      # title <- bquote(italic(.(print_name)), ", ", .(model_name), " changes")
+      title <- bquote(italic(.(print_name))~.(paste0(model_name, ", changes")))
+      delta_element_name <- paste0(model_name, "-delta")
+      
+      # Create delta plot for this scenario + year
+      time_plots_list[[delta_element_name]] <- delta_ggplot(nice_name = one_species,
+                                                            model = model,
+                                                            plot_params = plot_params,
+                                                            title = title)
+    }
+    # Finished creating the forecast and delta plots for the year, for the 
+    # three SSPs. Now combine them all.
+    
+    # Create the six-panel plot with plot_grid
+    time_plots <- cowplot::plot_grid(plotlist = time_plots_list,
+                                     byrow = TRUE,
+                                     ncol = 2,
+                                     nrow = 3,
+                                     labels = "auto", 
+                                     vjust = 1,
+                                     hjust = 0)
+
+    # Save the plot to file
+    one_time_file <- paste0(output_basename, 
+                            "distribution-pages/forecast-",
+                            nice_name, "-", time,
+                            ".png")
+    
+    ggsave(filename = one_time_file,
+           plot = time_plots,
+           width = 6,
+           height = 8,
+           units = "in")
+    
+    time_plots_list <- NULL
+    rm(time_plots)
+    ggplot2::set_last_plot(NULL)
+    invisible(gc())
+  }
+}
 
 
 
