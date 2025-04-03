@@ -48,19 +48,24 @@ output/areas/*.csv
 output/deltas/*.rds
 !output/deltas/.gitkeep
 
-# Predicted probabilities of occurrence
-output/predicted-probabilities/*.rds
-!output/predicted-probabilities/.gitkeep
+# Predicted distributions
+output/distributions/*.rds
+!output/distributions/.gitkeep
+
+# CV evaluation metrics
+output/eval-metrics/*
+!output/eval-metrics/.gitkeep
 
 # Map files
 output/maps/*
 !output/maps/.gitkeep
 
-# Output of modeling
-output/models/*.rds
-!output/models/.gitkeep
-output/SDMs/*.rds
-!output/SDMs/.gitkeep
+# Temporary distribution figures
+output/manuscript/distribution-pages/*
+!output/manuscript/distribution-pages/.gitkeep
+
+# A big supplemental image file
+output/manuscript/Supplemental-Figure-Distributions.pdf
 
 # Predicted overlaps of insects and hosts
 output/overlaps/*
@@ -70,25 +75,29 @@ output/overlaps/*
 output/plots/*
 !output/plots/.gitkeep
 
-# Range area calculations
-output/ranges/*
-!output/ranges/.gitkeep
+# Richness rasters and maps
+output/richness/*
+!output/richness/.gitkeep
 
-# CV evaluation metrics
-output/eval-metrics/*
-!output/eval-metrics/.gitkeep
+# Predicted probabilities of occurrence
+output/predicted-probabilities/*.rds
+!output/predicted-probabilities/.gitkeep
+
+# SDM model output
+output/SDMs/*.rds
+!output/SDMs/.gitkeep
 
 # Predicted suitability values
 output/suitabilities/*
 !output/suitabilities/.gitkeep
 
-# Predicted distributions
-output/distributions/*.rds
-!output/distributions/.gitkeep
+# Output of modeling
+output/models/*.rds
+!output/models/.gitkeep
 
-# Richness rasters and maps
-output/richness/*
-!output/richness/.gitkeep
+# Range area calculations
+output/ranges/*
+!output/ranges/.gitkeep
 
 ### LOGS
 # Log files
