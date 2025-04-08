@@ -6,7 +6,8 @@
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-source(file = "functions/get_colors.R")
+library(cowplot) # For joining lat & long lollipops into one figure
+(file = "functions/get_colors.R")
 
 # Plots based on the output of src/summary/summary-2-compare-ranges.R, which is 
 # written to output/summary-stats/overlap-summary-allspp.csv
@@ -214,7 +215,7 @@ longitude_lollipop <- ggplot(data = range_info_long %>%
                                                       levels = rev(unique(insect)))),
                              mapping = aes(y = insect, color = ew)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
-  geom_point(mapping = aes(x = value), size = 4) +
+  geom_point(mapping = aes(x = value), size = 2.5) +
   geom_segment(mapping = aes(x = 0, xend = value)) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
@@ -229,8 +230,10 @@ longitude_lollipop <- ggplot(data = range_info_long %>%
   theme(axis.text.y = element_text(face = "italic", size = 10),
         axis.title.y = element_blank(),
         strip.background = element_blank(),
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 8),
         legend.position = "inside",
-        legend.position.inside = c(0.1, 0.1))
+        legend.position.inside = c(0.1, 0.85))
 longitude_lollipop
 ggsave(file = "output/manuscript/Figure-Shifts-Longitude.png",
        plot = longitude_lollipop)
@@ -244,7 +247,7 @@ latitude_lollipop <- ggplot(data = range_info_long %>%
                              mapping = aes(y = insect,
                                            color = ew)) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
-  geom_point(mapping = aes(x = value), size = 4) +
+  geom_point(mapping = aes(x = value), size = 2.5) +
   geom_segment(mapping = aes(x = 0, xend = value)) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
@@ -260,9 +263,29 @@ latitude_lollipop <- ggplot(data = range_info_long %>%
                                    hjust = 1, face = "italic", size = 10),
         axis.title.x = element_blank(),
         strip.background = element_blank(),
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 8),
         legend.position = "inside",
-        legend.position.inside = c(0.1, 0.9)) +
+        legend.position.inside = c(0.1, 0.85)) +
   coord_flip()
 latitude_lollipop
 ggsave(file = "output/manuscript/Figure-Shifts-Latitude.png",
        plot = latitude_lollipop)
+
+#####
+# Single png with both longitude and latitude lollipop shifts
+# Remove legend from latitude because it doesn't fit
+latitude_lollipop <- latitude_lollipop +
+  theme(legend.position = "none")
+
+lollipop_shifts <- cowplot::plot_grid(plotlist = list(longitude_lollipop,
+                                                      latitude_lollipop),
+                                      labels = "auto",
+                                      ncol = 1,
+                                      vjust = 1, 
+                                      hjust = 0)
+ggsave(file = "output/manuscript/Figure-Shifts.png",
+       plot = lollipop_shifts,
+       width = 6,
+       height = 8,
+       units = "in")

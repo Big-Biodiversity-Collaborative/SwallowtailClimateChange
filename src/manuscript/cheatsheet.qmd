@@ -1,32 +1,87 @@
 ---
 title: "Swallowtails Cheat Sheet"
-format: pdf
+format: pdf: 
+geometry:
+  - margin=.75in
 ---
+
+```{r setup, echo = FALSE}
+library(knitr) # For formatting output table
+```
 
 A document that includes figures and legends for manuscript.
 
-Figure 1 (workflow)
+Figure 1 (workflow) **TODO**
 
-Figure 2 (distributions and changes for two species)
+::: {#fig-distributions}
 
-Supplemental Table 1 (% and total area overlapping with at least one host plant)
+![](../../output/manuscript/Figure-Distributions.png)
 
-Figure 3 (shifts in longitude and latitude)
+**Predicted areas of suitability for two _Papilio_ species.** Areas 
+predicted to be suitable for _P. cresphontes_  and _P. rumiko_ under current 
+climate conditions (a, b) and under the SSP3-7.0 model in the 2050s (c, d). The 
+changes in suitability between current conditions and SSP3-7.0 in the 2050s are 
+shown in (e) and (f).
+:::
 
-Figure 4 (richness, hotspots, and change)
+::: {tbl-area-overlap}
 
-Figure 5 (protected areas)
+```{r sup-table-1, echo = FALSE}
+#| tbl-colwidths: [25, 25, 25, 25]
+area_overlap <- read.csv(file = "../../output/manuscript/Table-Area-Overlap.csv")
+colnames(area_overlap)[c(2:4)] <- c("Total Area (km2)", 
+                                      "Area with at least one host (km2)",
+                                      "% Range overlap with at least one host")
+kable(area_overlap)
+```
+
+Supplemental Table 1. Total suitable area and suitable area overlapping the 
+suitable area for at least one host plant species for `r nrow(area_overlap)` 
+species of _Papilio_ under current climate conditions.
+:::
+
+::: {#fig-shifts}
+
+![](../../output/manuscript/Figure-Shifts.png)
+
+**Predicted changes in distribution under the SSP3-7.0 model in the 2050s.** 
+Longitudinal (a) and latitudinal (b) changes in margins of suitable area (_this 
+could be better defined_) between current climate and forecast climate for the 
+2050s under the SSP3-7.0 model.
+:::
+
+::: {fig-richness}
+
+![](../../output/manuscript/Figure-Richness.png)
+
+**Species richness and richness hotspots of North American _Papilio_ species.** 
+Total species richness of areas predicted to be suitable for _Papilio_ species 
+under current climate conditions (a) and the SSP3-7.0 model in the 2050s (c). 
+Areas designated as richness hotspots for current (b) and the 2050s under 
+SSP3-7.0 (d). The change in species richness between the two timepoint is shown 
+in (e).
+:::
+
+::: {fig-protected}
+
+![](../../output/manuscript/Figure-Protected.png)
+
+**Species richness hotspots area changes under SSP3-7.0 model climate conditions.**
+Total area suitable for at least four species of North American _Papilio_ shown 
+in (a). Total area (b) and percent area (c) of richness hotspots that occur on 
+lands currently protected under one of four management categories.
+:::
 
 ## Supplemental
 
-Figure S1 (distributions and changes for remaining species)
+Figure S1 (distributions and changes for remaining species) **TODO**
 
-Figure S2 (shifts in longitude and latitude)
+Figure S2 (shifts in longitude and latitude) **TODO**
 
-Figure S3 (richness) 
+Figure S3 (richness) **TODO**
 
-Figure S4 (hotspots)
+Figure S4 (hotspots) **TODO**
 
-Figure S5? (richness change)
+Figure S5? (richness change) **TODO**
 
-Figure S6 (protected areas)
+Figure S6 (protected areas) **TODO**
