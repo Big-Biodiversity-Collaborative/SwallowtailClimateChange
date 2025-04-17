@@ -7,7 +7,8 @@ require(dplyr)
 require(terra)
 require(ggplot2)
 require(tidyterra)
-require(cowplot)
+require(cowplot)   # Multi-panel figure
+require(quarto)    # Assembly of supplemental figure file
 source(file = "functions/get_colors.R")
 
 # Figures are based on 15 x (1 + 2 x 3 x 2) = 195 ggplot objects!!!
@@ -60,7 +61,7 @@ countries <- vect("data/political-boundaries/countries.shp")
 output_basename <- "output/manuscript/"
 
 # Supplemental image file format (should be png or pdf)
-supp_image_ext <- ".pdf" # .png or .pdf
+supp_image_ext <- ".png" # .png or .pdf
 
 # Reproject states and countries (can take a couple moments with first call to 
 # project)
@@ -505,3 +506,19 @@ for (species_i in 1:length(nice_names)) {
     invisible(gc())
   }
 }
+
+# Finally, use the Quarto template to put all the individual species's png 
+# files into a single document.
+# Use the execute_params argument in quarto_render in place of 
+# rmarkdown::render's param argument
+# e.g. execute_params = list(state = state)
+# or, in our case, it would be something like
+# execute_params = list(species = species)
+quarto::quarto_render(input = "templates/figs-4-distributions-supplemental.qmd",
+                      execute_params = list(species = species),
+                      output_format = "pdf",
+                      output_file = "Supplemental-Figure-Distributions.pdf")
+
+# Move the file to where we want it to be
+# file.copy(from = "Supplemental-Figure-Distributions.pdf",
+#           to = "output/manuscript/Supplemental-Figure-Distributions.pdf")

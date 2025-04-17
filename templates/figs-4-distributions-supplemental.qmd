@@ -1,0 +1,98 @@
+---
+title: "Predicted Distributions"
+format: pdf
+params:
+  species: NULL
+---
+
+```{r setup}
+#| include: false
+
+knitr::opts_chunk$set(echo = FALSE)
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(ggplot2))
+```
+
+```{r print_plots}
+#| output: asis
+#| echo: false
+
+# TODO: Remove subsetting when ready for prime time
+species <- unlist(params$species)
+species <- species[3:5]
+
+# For each species, 
+# Insert the figure path
+# Add a legend with panel descriptions
+for (species_i in 1:length(species)) {
+  # species_name <- params$species[species_i][[1]]
+  species_name <- species[species_i]
+  # cat("params$species[species_i]: ", class(species_name))
+
+  short_name <- gsub(pattern = "Papilio",
+                     replacement = "P.",
+                     x = species_name)
+  
+  # Get the nice name
+  nice_name <- tolower(gsub(pattern = " ",
+                           replacement = "_",
+                           x = species_name))
+
+  # cat("# _No sites returned for ", center_info$name[1], "_\n\n")
+  # TODO: Remove after debugging
+  # cat("Printing ", short_name)
+  
+  # Determine figure number (remember, two figures (pages) per species) for 
+  # the two figures (first is 2041, second is 2071)
+  fig_2071_num <- 2 * species_i
+  fig_2041_num <- fig_2071_num - 1
+  
+  # Insert first figure here (2041, distributions & deltas), with caption for 
+  # a - f
+  
+  # fig_2041_file <- paste0("../../output/manuscript/distribution-pages/forecast-",
+  #                         nice_name, 
+  #                         "-2041.png")
+  
+  # Dummy png to try
+  fig_2041_file <- "../output/manuscript/papilio_cresphontes-overlap-6panel.png"
+  
+  fig_2041_caption <- paste0("Figure ", fig_2041_num, 
+                             ". Predicted suitable areas for the 2050s and 
+                             changes compared to contemporary predictions for ",
+                             short_name, ".")
+
+  # cat("Caption:", fig_2041_caption)
+  # cat("![", fig_2041_caption, "](", fig_2041_file, ")", sep = "")
+  # Need to use this syntax:
+  # ![Elephant](elephant.png "Title: An elephant"){fig-alt="A drawing of an elephant."}
+  # cat("![Figure X.](", fig_2041_file, "'Title: My caption'){height=50%}", sep = "")
+  # cat("![From codeblock, the caption is Papilio](../output/manuscript/papilio_cresphontes-overlap-6panel.png 'Title: Papilio'){fig-alt='Papilio ranges.' height=80%}")
+  
+  # This line below works! So build off of that.
+  cat("![Caption from codeblock](../output/manuscript/papilio_cresphontes-overlap-6panel.png)\n")
+  
+  
+  # Add pagebreak between figures
+  cat("{{< pagebreak >}}\n")
+  
+  # Insert second figure here (2071, distributions & deltas), with caption for 
+  # a - f
+
+  # End of figures for this species, if not the last species, add a pagebreak
+  if (species_i < length(params$species)) {
+    cat("{{< pagebreak >}}\n")
+  }
+}
+```
+
+### Just printing a figure
+
+![Caption here.](../output/manuscript/papilio_cresphontes-overlap-6panel.png){height=50%}
+
+{{< pagebreak >}}
+
+This one works: (should have "Figure 2: The caption is Papilio"). No height 
+specification is necessary.
+
+![The caption is Papilio](../output/manuscript/papilio_cresphontes-overlap-6panel.png)
