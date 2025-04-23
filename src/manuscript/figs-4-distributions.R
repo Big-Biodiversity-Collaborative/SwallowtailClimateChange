@@ -520,5 +520,9 @@ quarto::quarto_render(input = "templates/figs-4-distributions-supplemental.qmd",
                       output_file = "Supplemental-Figure-Distributions.pdf")
 
 # Move the file to where we want it to be
-# file.copy(from = "Supplemental-Figure-Distributions.pdf",
-#           to = "output/manuscript/Supplemental-Figure-Distributions.pdf")
+if (file.copy(from = "Supplemental-Figure-Distributions.pdf",
+              to = "output/manuscript/Supplemental-Figure-Distributions.pdf",
+              overwrite = TRUE)) {
+  invisible(file.remove("Supplemental-Figure-Distributions.pdf"))
+}
+

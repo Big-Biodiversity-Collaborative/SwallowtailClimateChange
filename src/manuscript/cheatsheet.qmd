@@ -1,6 +1,6 @@
 ---
 title: "Swallowtails Cheat Sheet"
-format: pdf: 
+format: pdf
 geometry:
   - margin=.75in
 ---
@@ -74,9 +74,55 @@ lands currently protected under one of four management categories.
 
 ## Supplemental
 
-Figure S1 (distributions and changes for remaining species) **TODO**
+Figure S1 - see separate file, Supplemental-Figure-Distributions.pdf.
 
-Figure S2 (shifts in longitude and latitude) **TODO**
+::: {fig-shift-south}
+
+![](../../output/manuscript/shifts/shift-south.png)
+
+**Shifts in southern edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median southern latitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-shift-north}
+
+![](../../output/manuscript/shifts/shift-north.png)
+
+**Shifts in northern edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median northern latitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-shift-west}
+
+![](../../output/manuscript/shifts/shift-west.png)
+
+**Shifts in western edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median western longitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-shift-east}
+
+![](../../output/manuscript/shifts/shift-east.png)
+
+**Shifts in eastern edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median eastern longitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points.
+:::
+
+{{< pagebreak >}}
 
 Figure S3 (richness) **TODO**
 

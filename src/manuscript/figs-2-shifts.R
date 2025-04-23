@@ -171,10 +171,10 @@ eastern_lollipop
 # gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -dAutoRotatePages=/None \
 #    -sOUTPUTFILE=Figure-Supplemental-Shifts.pdf \
 #    shift-south.pdf shift-north.pdf shift-west.pdf shift-east.pdf
-ggsave(plot = southern_lollipop, filename = "output/plots/shift-south.pdf")
-ggsave(plot = northern_lollipop, filename = "output/plots/shift-north.pdf")
-ggsave(plot = western_lollipop, filename = "output/plots/shift-west.pdf")
-ggsave(plot = eastern_lollipop, filename = "output/plots/shift-east.pdf")
+ggsave(plot = southern_lollipop, filename = "output/manuscript/shifts/shift-south.png")
+ggsave(plot = northern_lollipop, filename = "output/manuscript/shifts/shift-north.png")
+ggsave(plot = western_lollipop, filename = "output/manuscript/shifts/shift-west.png")
+ggsave(plot = eastern_lollipop, filename = "output/manuscript/shifts/shift-east.png")
 
 # Some paired lollipop plots for a single ssp & year, where longitude is one 
 # plot (two facets) and latitude is another plot (two facets).

@@ -19,7 +19,7 @@ suppressPackageStartupMessages(library(ggplot2))
 
 # TODO: Remove subsetting when ready for prime time
 species <- unlist(params$species)
-species <- species[3:5]
+# species <- species[3:5]
 
 # For each species, 
 # Insert the figure path
@@ -39,45 +39,41 @@ for (species_i in 1:length(species)) {
                            x = species_name))
 
   # cat("# _No sites returned for ", center_info$name[1], "_\n\n")
-  # TODO: Remove after debugging
-  # cat("Printing ", short_name)
-  
+
+  # Figures get auto-numbered, although not sure if it is Quarto or pandoc that 
+  # handles it...
   # Determine figure number (remember, two figures (pages) per species) for 
   # the two figures (first is 2041, second is 2071)
-  fig_2071_num <- 2 * species_i
-  fig_2041_num <- fig_2071_num - 1
+  # fig_2071_num <- 2 * species_i
+  # fig_2041_num <- fig_2071_num - 1
   
   # Insert first figure here (2041, distributions & deltas), with caption for 
   # a - f
-  
-  # fig_2041_file <- paste0("../../output/manuscript/distribution-pages/forecast-",
-  #                         nice_name, 
-  #                         "-2041.png")
-  
-  # Dummy png to try
-  fig_2041_file <- "../output/manuscript/papilio_cresphontes-overlap-6panel.png"
-  
-  fig_2041_caption <- paste0("Figure ", fig_2041_num, 
-                             ". Predicted suitable areas for the 2050s and 
-                             changes compared to contemporary predictions for ",
-                             short_name, ".")
-
-  # cat("Caption:", fig_2041_caption)
-  # cat("![", fig_2041_caption, "](", fig_2041_file, ")", sep = "")
-  # Need to use this syntax:
-  # ![Elephant](elephant.png "Title: An elephant"){fig-alt="A drawing of an elephant."}
-  # cat("![Figure X.](", fig_2041_file, "'Title: My caption'){height=50%}", sep = "")
-  # cat("![From codeblock, the caption is Papilio](../output/manuscript/papilio_cresphontes-overlap-6panel.png 'Title: Papilio'){fig-alt='Papilio ranges.' height=80%}")
-  
-  # This line below works! So build off of that.
-  cat("![Caption from codeblock](../output/manuscript/papilio_cresphontes-overlap-6panel.png)\n")
-  
+  fig_2041_file <- paste0("../output/manuscript/distribution-pages/forecast-",
+                          nice_name,
+                          "-2041.png")
+  # Asterisks for italics of short_name
+  fig_2041_caption <- paste0("Predicted suitable areas for the 2050s (a, c, e) 
+                             and changes compared to contemporary predictions 
+                             (b, d, f) for *",
+                             short_name, "*.")
+  # The actual markdown to make the figure + caption
+  cat("![", fig_2041_caption, "](", fig_2041_file, ")\n", sep = "")
   
   # Add pagebreak between figures
   cat("{{< pagebreak >}}\n")
   
   # Insert second figure here (2071, distributions & deltas), with caption for 
   # a - f
+  fig_2071_file <- paste0("../output/manuscript/distribution-pages/forecast-",
+                          nice_name,
+                          "-2071.png")
+  # Asterisks around short_name will italicize it
+  fig_2071_caption <- paste0("Predicted suitable areas for the 2080s (a, c, e)
+                             and changes compared to contemporary predictions
+                             (b, d, f) for *",
+                             short_name, "*.")
+  cat("![", fig_2071_caption, "](", fig_2071_file, ")\n", sep = "")
 
   # End of figures for this species, if not the last species, add a pagebreak
   if (species_i < length(params$species)) {
@@ -85,14 +81,3 @@ for (species_i in 1:length(species)) {
   }
 }
 ```
-
-### Just printing a figure
-
-![Caption here.](../output/manuscript/papilio_cresphontes-overlap-6panel.png){height=50%}
-
-{{< pagebreak >}}
-
-This one works: (should have "Figure 2: The caption is Papilio"). No height 
-specification is necessary.
-
-![The caption is Papilio](../output/manuscript/papilio_cresphontes-overlap-6panel.png)
