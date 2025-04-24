@@ -1,0 +1,188 @@
+---
+title: "Swallowtails Cheat Sheet"
+format: pdf
+geometry:
+  - margin=.75in
+---
+
+```{r setup, echo = FALSE}
+library(knitr) # For formatting output table
+```
+
+A document that includes figures and legends for manuscript.
+
+Figure 1 (workflow) **TODO**
+
+{{< pagebreak >}}
+
+::: {#fig-distributions}
+
+![](../output/manuscript/Figure-Distributions.png)
+
+**Predicted areas of suitability for two _Papilio_ species.** Areas 
+predicted to be suitable for _P. cresphontes_  and _P. rumiko_ under current 
+climate conditions (a, b) and under the SSP3-7.0 model in the 2050s (c, d). The 
+changes in suitability between current conditions and SSP3-7.0 in the 2050s are 
+shown in (e) and (f).
+:::
+
+::: {#fig-shifts}
+
+![](../output/manuscript/Figure-Shifts.png)
+
+**Predicted changes in distribution under the SSP3-7.0 model in the 2050s.** 
+Longitudinal (a) and latitudinal (b) changes in margins of suitable area (_this 
+could be better defined_) between current climate and forecast climate for the 
+2050s under the SSP3-7.0 model.
+:::
+
+::: {fig-richness}
+
+![](../output/manuscript/Figure-Richness.png)
+
+**Species richness and richness hotspots of North American _Papilio_ species.** 
+Total species richness of areas predicted to be suitable for _Papilio_ species 
+under current climate conditions (a) and the SSP3-7.0 model in the 2050s (c). 
+Areas designated as richness hotspots for current (b) and the 2050s under 
+SSP3-7.0 (d). The change in species richness between current conditions and the 
+2050s is shown in (e).
+:::
+
+::: {fig-protected}
+
+![](../output/manuscript/Figure-Protected.png)
+
+**Species richness hotspots area changes under SSP3-7.0 model climate conditions.**
+Total area suitable for at least four species of North American _Papilio_ shown 
+in (a). Total area (b) and percent area (c) of richness hotspots that occur on 
+lands currently protected under one of four management categories.
+:::
+
+## Supplemental
+
+Figure S1 - see separate file, Supplemental-Figure-Distributions.pdf.
+
+::: {fig-s-shift-south}
+
+![](../output/manuscript/shifts/shift-south.png)
+
+**Shifts in southern edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median southern latitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points. Points above the horizontal 
+dashed line indicate range contractions northward and points below the 
+horizontal dashed line indicate range expansions southward.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-s-shift-north}
+
+![](../output/manuscript/shifts/shift-north.png)
+
+**Shifts in northern edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median northern latitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points. Points above the horizontal 
+dashed line indicate range expansions northward and points below the 
+horizontal dashed line indicate range contractions southward.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-s-shift-west}
+
+![](../output/manuscript/shifts/shift-west.png)
+
+**Shifts in western edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median western longitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points. Points left of the horizontal 
+dashed line indicate range expansions westward and points right of the 
+horizontal dashed line indicate range contractions eastward.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-s-shift-east}
+
+![](../output/manuscript/shifts/shift-east.png)
+
+**Shifts in eastern edge of predicted suitable areas.** Change in kilometers 
+(relative to contemporary predictions) in the median eastern longitude of areas 
+predicted as suitable for each *Papilio* species and at least one host plant 
+species under three SSPs and two time points. Points left of the horizontal 
+dashed line indicate range contractions westward and points right of the 
+horizontal dashed line indicate range expansions eastward.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-s-richness}
+
+![](../output/manuscript/Supplemental-Figure-Richness.png)
+
+**Species richness and richness hotspots of North American _Papilio_ species.** 
+Total species richness of areas predicted to be suitable for _Papilio_ species 
+under the SSP2-4.5 model for the 2050s (a) and 2080s (b), under the SSP3-7.0 
+model for the 2050s (c) and 2080s (d), and under the SSP5-8.5 model for the 
+2050s (e) and 2080s (f).
+:::
+
+{{< pagebreak >}}
+
+::: {fig-s-hotspots}
+
+![](../output/manuscript/Supplemental-Figure-Hotspots.png)
+
+**Areas designated as richness hotspots for forecast climate conditions.** 
+Richness hotspots (areas predicted to be suitable for four or more _Papilio_ 
+species under the SSP2-4.5 model for the 2050s (a) and 2080s (b), under the 
+SSP3-7.0 model for the 2050s (c) and 2080s (d), and under the SSP5-8.5 model 
+for the 2050s (e) and 2080s (f).
+:::
+
+{{< pagebreak >}}
+
+## Figure S5? (richness change) **TODO**
+
+This figure isn't made. It would be like panel e of the main manuscript 
+richness figure, shown below:
+
+::: {fig-s-delta}
+
+![](../output/manuscript/Figure-Richness.png)
+
+**Illustration purposes only**. See panel e and note above figure.
+:::
+
+{{< pagebreak >}}
+
+::: {fig-s-protected}
+
+![](../output/manuscript/Supplemental-Figure-Protected.png)
+
+**Species richness hotspots area changes under forecast model climate conditions.**
+Total area suitable for at least four species of North American _Papilio_ shown 
+for SSP2-4.5 (a) and SSP5-8.5 (b). Total area for SSP2-4.5 (c) and SSP5-8.5 (d) 
+and percent area for SSP2-4.5 (e) and SSP5-8.5 (f) of richness hotspots that 
+occur on lands currently protected under one of four management categories.
+:::
+
+{{< pagebreak >}}
+
+::: {tbl-area-overlap}
+
+```{r sup-table-1, echo = FALSE}
+#| tbl-colwidths: [25, 25, 25, 25]
+area_overlap <- read.csv(file = "../output/manuscript/Table-Area-Overlap.csv")
+colnames(area_overlap)[c(2:4)] <- c("Total Area (km2)", 
+                                      "Area with at least one host (km2)",
+                                      "% Range overlap with at least one host")
+kable(area_overlap)
+```
+
+Supplemental Table 1. Total suitable area and suitable area overlapping the 
+suitable area for at least one host plant species for `r nrow(area_overlap)` 
+species of _Papilio_ under current climate conditions.
+:::
