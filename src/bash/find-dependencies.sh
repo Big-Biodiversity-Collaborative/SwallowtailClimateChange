@@ -7,10 +7,11 @@
 TEMPLATES=$(grep -r "require(" templates/)
 DATA=$(grep -r "require(" src/data/)
 WRAPPERS=$(grep -r "require(" src/run-indiv/)
+MANUSCRIPT=$(grep -r "require(" src/manuscript/)
 SUMMARY=$(grep -r "require(" src/summary/)
 
 # Concatenate all these strings together
-ALL=$TEMPLATES$DATA$WRAPPERS$SUMMARY$FUNREQUIRE
+ALL=$TEMPLATES$DATA$WRAPPERS$MANUSCRIPT$SUMMARY
 
 # Just extract library names
 LEFT=$(sed 's/.*(//g' <<< "$ALL")

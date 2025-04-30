@@ -5,6 +5,9 @@
 
 require(stringr)
 
+# DEPRECATED
+# 2025-04-30 Not sure this is used anywhere...
+
 file_ext <- "png"
 # Load up the functions (really just needed to load the overlap_map function)
 source(file = "load_functions.R")

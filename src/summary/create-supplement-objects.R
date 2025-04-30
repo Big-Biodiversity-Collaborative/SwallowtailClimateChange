@@ -11,6 +11,10 @@ require(tidyterra)
 require(gridExtra)
 require(cowplot)
 
+# DEPRECATED
+# For the most part. Most of this is farmed out to various scripts in 
+# src/manuscript now.
+
 # Creating 6-panel figures (3x2)for each future climate scenario
   # Left column = 2041-2070; right column = 2071-2100
   # Top row = SSP245; middle = SSP370; bottom = SSP585

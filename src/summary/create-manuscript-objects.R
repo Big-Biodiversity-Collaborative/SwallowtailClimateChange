@@ -11,6 +11,10 @@ require(tidyterra)
 require(gridExtra)
 require(cowplot)
 
+# DEPRECATED
+# For the most part. Most of this is farmed out to various scripts in 
+# src/manuscript now.
+
 # Logical indicating whether to recreate maps/tables if they already exist
 replace <- TRUE
 

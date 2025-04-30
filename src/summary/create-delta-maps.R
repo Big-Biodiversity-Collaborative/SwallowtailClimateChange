@@ -9,6 +9,8 @@ require(stringr)
 require(ggplot2)
 require(tidyterra)
 
+# DEPRECATED
+
 # Load up the functions from the functions folder
 source(file = "load_functions.R")
 
