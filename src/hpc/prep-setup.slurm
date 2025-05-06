@@ -16,7 +16,7 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.2.2
+module load R/4.3.2
 ### extraction now handled by prep-extract-data.R
 ### unzip -uo data/gbif-pa.zip
 ### unzip -uo data/gbif-shapefiles.zip

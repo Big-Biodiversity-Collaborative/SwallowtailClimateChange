@@ -16,6 +16,6 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.2.2
+module load R/4.3.2
 src/bash/build-scripts-1-CV.sh
 Rscript src/indiv/papilio_rumiko-1-CV.R

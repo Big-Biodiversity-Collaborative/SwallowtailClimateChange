@@ -16,5 +16,5 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.2.2
+module load R/4.3.2
 Rscript src/hpc/install-libraries.R -u
