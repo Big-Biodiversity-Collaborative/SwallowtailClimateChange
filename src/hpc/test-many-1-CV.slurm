@@ -16,6 +16,6 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.3.2
+module load R/4.4
 src/bash/build-scripts-1-CV.sh
 Rscript src/run-indiv/run-all-1-CV-scripts.R

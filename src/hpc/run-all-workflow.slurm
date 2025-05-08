@@ -16,7 +16,7 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.3.2
+module load R/4.4
 ### Run the script builders and data extraction before submitting job
 ### src/bash/build-scripts-1-CV.sh
 ### src/bash/build-scripts-2-CV.sh

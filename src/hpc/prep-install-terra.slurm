@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2023-01-19
 
-#SBATCH --job-name=R-library-install
+#SBATCH --job-name=R-terra-install
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 ### Asking for 2 hours
@@ -12,10 +12,9 @@
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
-### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
+### GDAL and PROJ modules necessary for some packages
 module load gdal
 module load proj
 module load geos
 module load R/4.4
-# Install libraries
-Rscript src/hpc/prep-install-libraries.R -u
+Rscript src/hpc/prep-install-terra.R

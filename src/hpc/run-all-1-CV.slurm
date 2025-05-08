@@ -16,7 +16,7 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.3.2
+module load R/4.4
 Rscript src/hpc/prep-extract-data.R
 ### Old approach required building of individual species' scripts from template
 ### src/bash/build-scripts-1-CV.sh

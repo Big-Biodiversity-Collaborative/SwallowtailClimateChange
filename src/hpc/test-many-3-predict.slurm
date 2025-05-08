@@ -16,6 +16,6 @@
 module load gdal
 module load proj
 module load geos
-module load R/4.3.2
+module load R/4.4
 src/bash/build-scripts-3-predict.sh
 Rscript src/run-indiv/run-all-3-predict-scripts.R
