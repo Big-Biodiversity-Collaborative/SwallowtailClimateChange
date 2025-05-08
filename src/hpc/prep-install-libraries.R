@@ -45,7 +45,8 @@ for (one_lib in libs) {
       remotes::install_github(repo = "sjevelazco/flexsdm@HEAD")
     } else {
       install.packages(one_lib, 
-                       repos = "https://cran.microsoft.com/",
+                       # repos = "https://cran.microsoft.com/",
+                       repos = "https://ftp.osuosl.org/pub/cran/",
                        dependencies = deps)
     }
   } else {
