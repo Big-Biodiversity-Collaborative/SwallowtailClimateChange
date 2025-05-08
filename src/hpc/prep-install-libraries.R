@@ -28,8 +28,11 @@ libs <- c("remotes", libs)
 # Install each library and try to load after installation; use 
 # repos = "https://cran.microsoft.com/" to pre-select CRAN mirror
 
+# Vector of all currently installed packages
 installed <- rownames(installed.packages())
-if (skip_installed) {
+# If we do not want to skip installed, overwrite this vector to be an empty 
+# string (so none of the dependencies are %in% the vector)
+if (!skip_installed) {
   installed <- ""
 }
 for (one_lib in libs) {
