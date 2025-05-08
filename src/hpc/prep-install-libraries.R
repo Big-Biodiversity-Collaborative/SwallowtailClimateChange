@@ -36,27 +36,29 @@ if (!skip_installed) {
   installed <- ""
 }
 for (one_lib in libs) {
-  if (one_lib == "terra") {
-    message(one_lib, " installation skipped.")
-  } else {
-    if (!(one_lib %in% installed)) {
-      deps <- NA
-      if (one_lib == "ENMeval") {
-        deps <- TRUE # So "Suggests" get installed, too
-      }
-      if (one_lib == "flexsdm") { # Not on CRAN
-        remotes::install_github(repo = "sjevelazco/flexsdm@HEAD")
-      } else {
-        install.packages(one_lib, 
-                         # repos = "https://cran.microsoft.com/",
-                         repos = "https://ftp.osuosl.org/pub/cran/",
-                         dependencies = deps)
-      }
-    } else {
-      message(one_lib, " already installed.")
+  if (!(one_lib %in% installed)) {
+    deps <- NA
+    if (one_lib == "ENMeval") {
+      deps <- TRUE # So "Suggests" get installed, too
     }
-  }
-}
+    # Two libraries aren't on CRAN, so install from GitHub
+    if (one_lib %in% c("flexsdm", "fitMaxnet")) { # Not on CRAN
+      if (one_lib == "flexsdm") {
+        remotes::install_github(repo = "sjevelazco/flexsdm@HEAD")
+      }
+      if (one_lib == "fitMaxnet") {
+        # remotes::install_github(repo = "peterbat1/fitMaxnet@HEAD")
+        message("Skipping ", one_lib)
+      }
+    } else { # Remaining packages are on CRAN
+      install.packages(one_lib, 
+                       repos = "https://ftp.osuosl.org/pub/cran/",
+                       dependencies = deps)
+    } # end else for CRAN package installation
+  } else {
+    message(one_lib, " already installed.")
+  } # end else for library already installed
+} # end for loop
 
 # Now run through each of the dependencies attempting to load
 for (one_lib in libs) {
