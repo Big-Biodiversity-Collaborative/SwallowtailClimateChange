@@ -36,21 +36,25 @@ if (!skip_installed) {
   installed <- ""
 }
 for (one_lib in libs) {
-  if (!(one_lib %in% installed)) {
-    deps <- NA
-    if (one_lib == "ENMeval") {
-      deps <- TRUE # So "Suggests" get installed, too
-    }
-    if (one_lib == "flexsdm") { # Not on CRAN
-      remotes::install_github(repo = "sjevelazco/flexsdm@HEAD")
-    } else {
-      install.packages(one_lib, 
-                       # repos = "https://cran.microsoft.com/",
-                       repos = "https://ftp.osuosl.org/pub/cran/",
-                       dependencies = deps)
-    }
+  if (one_lib == "terra") {
+    message(one_lib, " installation skipped.")
   } else {
-    message(one_lib, " already installed.")
+    if (!(one_lib %in% installed)) {
+      deps <- NA
+      if (one_lib == "ENMeval") {
+        deps <- TRUE # So "Suggests" get installed, too
+      }
+      if (one_lib == "flexsdm") { # Not on CRAN
+        remotes::install_github(repo = "sjevelazco/flexsdm@HEAD")
+      } else {
+        install.packages(one_lib, 
+                         # repos = "https://cran.microsoft.com/",
+                         repos = "https://ftp.osuosl.org/pub/cran/",
+                         dependencies = deps)
+      }
+    } else {
+      message(one_lib, " already installed.")
+    }
   }
 }
 
