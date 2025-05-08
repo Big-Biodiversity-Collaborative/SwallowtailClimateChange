@@ -12,14 +12,8 @@
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
-### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
-module load gdal
-module load proj
-module load geos
-module load R/4.4
+### GDAL will load PROJ and GEOS modules, too
+module load gdal/3.3.2
+module load R/4.3
 Rscript src/hpc/prep-extract-data.R
-### Old approach required building of individual species' scripts from template
-### src/bash/build-scripts-2-SDMs-full.sh
-### Rscript src/run-indiv/run-all-2-SDMs-full-scripts.R -a
-### New approach goes right to wrapper
 Rscript src/run-indiv/run-all-2-SDMs-full.R -a -f

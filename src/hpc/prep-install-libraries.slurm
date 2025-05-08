@@ -12,10 +12,11 @@
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
-### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
-module load gdal
-module load proj
-module load geos
-module load R/4.4
+### GDAL, PROJ, and GEOS modules necessary for some packages; PROJ and GEOS 
+# get loaded by GDAL, so no need to load them explicitly. Using specific 
+# version of GDAL module because the terra install may require a specific
+# (older) version of PROJ (the version with 3.3.2 GDAL module)
+module load gdal/3.3.2
+module load R/4.3
 # Install libraries
 Rscript src/hpc/prep-install-libraries.R -u

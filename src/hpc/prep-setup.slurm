@@ -12,11 +12,9 @@
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
-### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
-module load gdal
-module load proj
-module load geos
-module load R/4.4
+### GDAL will load PROJ and GEOS modules, too
+module load gdal/3.3.2
+module load R/4.3
 ### extraction now handled by prep-extract-data.R
 ### unzip -uo data/gbif-pa.zip
 ### unzip -uo data/gbif-shapefiles.zip

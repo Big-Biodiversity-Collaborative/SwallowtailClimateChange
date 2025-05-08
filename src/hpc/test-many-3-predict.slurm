@@ -12,10 +12,8 @@
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 
-### GDAL and PROJ modules necessary for some packages (e.g. rgdal)
-module load gdal
-module load proj
-module load geos
-module load R/4.4
+### GDAL will load PROJ and GEOS modules, too
+module load gdal/3.3.2
+module load R/4.3
 src/bash/build-scripts-3-predict.sh
 Rscript src/run-indiv/run-all-3-predict-scripts.R
