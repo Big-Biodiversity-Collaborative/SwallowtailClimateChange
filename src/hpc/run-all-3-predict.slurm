@@ -15,4 +15,4 @@
 ### GDAL will load PROJ and GEOS modules, too
 module load gdal/3.3.2
 module load R/4.3
-Rscript src/run-indiv/run-all-3-predict.R -a -f
+Rscript src/run-analyses/run-all-3-predict.R -a -f
