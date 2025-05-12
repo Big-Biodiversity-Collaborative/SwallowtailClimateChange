@@ -31,14 +31,15 @@ logfile <- paste0("logs/predict-out.log")
 # Create log file before running full SDMs
 f <- file.create(logfile)
 # Write some stuff at start of log file (as long as it was created successfully)
-if (!is.null(logfile)) {
-  if (file.exists(logfile)) {
-    write(x = paste0("Predictions on subset. ", Sys.Date()), 
-          file = logfile,
-          append = TRUE)
-  }
+head_message <- paste0("START: 3-predict. ", Sys.Date(), "\n",
+                       "all_insects = ", all_insects, "\n",
+                       "rerun = ", rerun, "\n")
+if (file.exists(logfile)) {
+  write(x = head_message, 
+        file = logfile,
+        append = TRUE)
 } else {
-  message("Predictions on subset. ", Sys.Date())
+  message(head_message)
 }
 
 # Load insect-host file
@@ -153,3 +154,13 @@ r <- parallel::parLapply(cl = clust,
                          log_file = logfile,
                          rerun = rerun)
 stopCluster(cl = clust)
+
+# Final closing message to log
+tail_message <- paste0("END: 3-predict. ", Sys.Date())
+if (file.exists(logfile)) {
+  write(x = tail_message, 
+        file = logfile,
+        append = TRUE)
+} else {
+  message(tail_message)
+}

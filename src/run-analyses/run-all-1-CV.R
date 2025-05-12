@@ -31,14 +31,15 @@ logfile <- paste0("logs/CV-out.log")
 # Create log file before evaluating models
 f <- file.create(logfile)
 # Write some stuff at start of log file (as long as it was created successfully)
-if (!is.null(logfile)) {
-  if (file.exists(logfile)) {
-    write(x = paste0("CV on subset. ", Sys.Date()), 
-          file = logfile,
-          append = TRUE)
-  }
+head_message <- paste0("START: 1-CV. ", Sys.Date(), "\n",
+                       "all_insects = ", all_insects, "\n",
+                       "rerun = ", rerun, "\n")
+if (file.exists(logfile)) {
+  write(x = head_message, 
+        file = logfile,
+        append = TRUE)
 } else {
-  message("CV on subset. ", Sys.Date())
+  message(head_message)
 }
 
 # Load insect-host file
@@ -151,3 +152,13 @@ r <- parallel::parLapply(cl = clust,
                          log_file = logfile,
                          rerun = rerun)
 stopCluster(cl = clust)
+
+# Final closing message to log
+tail_message <- paste0("END: 1-CV. ", Sys.Date())
+if (file.exists(logfile)) {
+  write(x = tail_message, 
+        file = logfile,
+        append = TRUE)
+} else {
+  message(tail_message)
+}
