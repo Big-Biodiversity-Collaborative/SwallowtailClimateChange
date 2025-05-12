@@ -18,7 +18,7 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
                        num_cores = 2) {
   # List necessary packages
   requirements <- c("dplyr", "ecospat", "ENMeval", "flexsdm", "gbm", "glmnet", 
-                    "mgcv", "randomForest", "raster", "stringr", "terra")
+                    "mgcv", "randomForest", "stringr", "terra") # "raster"
   # Attempt to load required packages
   reqs_met <- sapply(X = requirements, 
                      FUN = require, 
@@ -90,7 +90,7 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
       pred_mask <- terra::crop(predictors, buffered_mcp, snap = "out")
       pred_mask <- terra::mask(pred_mask, buffered_mcp)  
       # Create RasterStack (needed for MAXENT model)
-      pred_rs <- raster::stack(pred_mask) 
+      # pred_rs <- raster::stack(pred_mask) 
       
       # Extract value of predictors at each presence/background location (needed for 
       # all SDMs except MAXENT). 
@@ -142,7 +142,8 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
       try(
         max_models <- ENMevaluate(occs = occs, 
                                   bg = bg, 
-                                  envs = pred_rs,
+                                  envs = pred_mask,
+                                  # envs = pred_rs,
                                   algorithm = "maxnet",
                                   partitions = "user",
                                   user.grp = user.grp,
@@ -157,7 +158,8 @@ run_one_CV <- function(species_name, rerun = TRUE, max_save = FALSE,
         tune.args <- list(fc = feature_classes, rm = multipliers) 
         max_models <- ENMevaluate(occs = occs, 
                                   bg = bg, 
-                                  envs = pred_rs,
+                                  envs = pred_mask,
+                                  # envs = pred_rs,
                                   algorithm = "maxnet",
                                   partitions = "user",
                                   user.grp = user.grp,

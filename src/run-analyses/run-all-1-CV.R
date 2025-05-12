@@ -134,6 +134,16 @@ invisible(clusterEvalQ(cl = clust,
                          source(file = "load_functions.R")
                        }))
 
+if (!is.null(log_file)) {
+  if (file.exists(log_file)) {
+    write(x = paste0("CV on subset. ", Sys.Date()), 
+          file = log_file,
+          append = TRUE)
+  }
+} else {
+  message("CV on subset. ", Sys.Date())
+}
+
 # Run each script in parallel
 r <- parallel::parLapply(cl = clust,
                          X = species_to_run,
