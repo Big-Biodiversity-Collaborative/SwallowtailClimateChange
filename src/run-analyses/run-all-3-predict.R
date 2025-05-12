@@ -30,6 +30,16 @@ if (length(args) > 0) {
 logfile <- paste0("logs/predict-out.log")
 # Create log file before running full SDMs
 f <- file.create(logfile)
+# Write some stuff at start of log file (as long as it was created successfully)
+if (!is.null(logfile)) {
+  if (file.exists(logfile)) {
+    write(x = paste0("Predictions on subset. ", Sys.Date()), 
+          file = logfile,
+          append = TRUE)
+  }
+} else {
+  message("Predictions on subset. ", Sys.Date())
+}
 
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")

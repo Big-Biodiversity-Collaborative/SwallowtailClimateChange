@@ -31,6 +31,17 @@ logfile <- paste0("logs/SDMs-full-out.log")
 # Create log file before running full SDMs
 f <- file.create(logfile)
 
+# Write some stuff at start of log file (as long as it was created successfully)
+if (!is.null(logfile)) {
+  if (file.exists(logfile)) {
+    write(x = paste0("SDMs on subset. ", Sys.Date()), 
+          file = logfile,
+          append = TRUE)
+  }
+} else {
+  message("SDMs on subset. ", Sys.Date())
+}
+
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
 

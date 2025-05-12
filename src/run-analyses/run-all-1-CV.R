@@ -30,6 +30,16 @@ if (length(args) > 0) {
 logfile <- paste0("logs/CV-out.log")
 # Create log file before evaluating models
 f <- file.create(logfile)
+# Write some stuff at start of log file (as long as it was created successfully)
+if (!is.null(logfile)) {
+  if (file.exists(logfile)) {
+    write(x = paste0("CV on subset. ", Sys.Date()), 
+          file = logfile,
+          append = TRUE)
+  }
+} else {
+  message("CV on subset. ", Sys.Date())
+}
 
 # Load insect-host file
 ih <- read.csv("data/insect-host.csv")
@@ -133,16 +143,6 @@ invisible(clusterEvalQ(cl = clust,
                        expr = {
                          source(file = "load_functions.R")
                        }))
-
-if (!is.null(log_file)) {
-  if (file.exists(log_file)) {
-    write(x = paste0("CV on subset. ", Sys.Date()), 
-          file = log_file,
-          append = TRUE)
-  }
-} else {
-  message("CV on subset. ", Sys.Date())
-}
 
 # Run each script in parallel
 r <- parallel::parLapply(cl = clust,
