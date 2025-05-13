@@ -78,9 +78,11 @@ predict_sdm <- function(nice_name,
   # If using a Maxent model (with maxnet algorithm), need enm.maxnet@predict
   # See ?ENMevaluate or https://github.com/jamiemkass/ENMeval/issues/112
   if (sdm_method == "maxent") {
-    preds <- enm.maxnet@predict(model, predictors_rs,
+    # preds <- enm.maxnet@predict(model, predictors_rs,
+    #                             list(pred.type = "cloglog", doClamp = FALSE))
+    preds <- enm.maxnet@predict(model, predictors,
                                 list(pred.type = "cloglog", doClamp = FALSE))
-    preds <- terra::rast(preds)
+    # preds <- terra::rast(preds)
   }
   
   # If using a RF model, need raster package to work with classification model
