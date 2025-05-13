@@ -72,9 +72,6 @@ predict_sdm <- function(nice_name,
     }
   }
   
-  # Convert SpatRaster to a RasterStack (only needed for Maxent or RF models)
-  predictors_rs <- raster::stack(predictors)
-
   # If using a Maxent model (with maxnet algorithm), need enm.maxnet@predict
   # See ?ENMevaluate or https://github.com/jamiemkass/ENMeval/issues/112
   if (sdm_method == "maxent") {
@@ -82,9 +79,22 @@ predict_sdm <- function(nice_name,
     #                             list(pred.type = "cloglog", doClamp = FALSE))
     preds <- enm.maxnet@predict(model, predictors,
                                 list(pred.type = "cloglog", doClamp = FALSE))
+    # The resultant preds object has no CRS, so grab the one attached to the 
+    # predictors
+    terra::crs(preds) <- terra::crs(predictors)
+    
+    # We also want to ensure the extent of the predictions match the extent of 
+    # the predictors, so that happens here, too.
+    preds <- terra::crop(x = preds, y = predictors)
+    preds <- terra::extend(x = preds, y = predictors)
+    terra::ext(preds) <- terra::ext(predictors)
+
     # preds <- terra::rast(preds)
   }
-  
+
+  # Convert SpatRaster to a RasterStack (only needed for RF model)
+  predictors_rs <- raster::stack(predictors)
+
   # If using a RF model, need raster package to work with classification model
   if (sdm_method == "rf") {
     preds <- raster::predict(object = predictors_rs,
