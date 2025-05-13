@@ -31,7 +31,7 @@ logfile <- paste0("logs/CV-out.log")
 # Create log file before evaluating models
 f <- file.create(logfile)
 # Write some stuff at start of log file (as long as it was created successfully)
-head_message <- paste0("START: 1-CV. ", Sys.Date(), "\n",
+head_message <- paste0("START: 1-CV. ", Sys.time(), "\n",
                        "all_insects = ", all_insects, "\n",
                        "rerun = ", rerun, "\n")
 if (file.exists(logfile)) {
@@ -154,7 +154,7 @@ r <- parallel::parLapply(cl = clust,
 stopCluster(cl = clust)
 
 # Final closing message to log
-tail_message <- paste0("END: 1-CV. ", Sys.Date())
+tail_message <- paste0("END: 1-CV. ", Sys.time())
 if (file.exists(logfile)) {
   write(x = tail_message, 
         file = logfile,
