@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2025-05-12
 
-#SBATCH --job-name=2-SDMs-full-all
+#SBATCH --job-name=2-SDMs-full-many
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 10 hours

@@ -7,8 +7,8 @@
 #SBATCH --job-name=1-CV-all
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
-### Asking for 10 hours
-#SBATCH --time=10:00:00
+### Asking for 60 hours
+#SBATCH --time=60:00:00
 #SBATCH --partition=standard
 #SBATCH --account=jcoliver
 

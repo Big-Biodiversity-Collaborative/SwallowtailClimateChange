@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2025-05-12
 
-#SBATCH --job-name=3-predict-all
+#SBATCH --job-name=3-predict-many
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 10 hours

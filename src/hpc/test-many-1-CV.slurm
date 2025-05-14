@@ -4,7 +4,7 @@
 ### jcoliver@arizona.edu
 ### 2025-05-12
 
-#SBATCH --job-name=1-CV-all
+#SBATCH --job-name=1-CV-many
 #SBATCH --ntasks=8
 #SBATCH --nodes=1
 ### Asking for 10 hours
