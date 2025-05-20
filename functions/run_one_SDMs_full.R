@@ -120,7 +120,7 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         if (!file.exists(brt_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
           status_message <- paste0(status_message,
-                                   "/nRunning ", toupper(sdm), 
+                                   "\nRunning ", toupper(sdm), 
                                    " model for ", species_name)
           # Extract settings from CV models
           brt_settings <- evals %>%
@@ -157,7 +157,7 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         if (!file.exists(gam_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
           status_message <- paste0(status_message,
-                                   "/nRunning ", toupper(sdm), 
+                                   "\nRunning ", toupper(sdm), 
                                    " model for ", species_name)
           quad <- quad_gam
           
@@ -186,7 +186,7 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         if (!file.exists(lasso_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
           status_message <- paste0(status_message,
-                                   "/nRunning ", toupper(sdm), 
+                                   "\nRunning ", toupper(sdm), 
                                    " model for ", species_name)
           quad <- quad_lasso
           
@@ -215,7 +215,7 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         if (!file.exists(rf_file) | rerun) {
           message("Running ", toupper(sdm), " model for ", species_name)
           status_message <- paste0(status_message,
-                                   "/nRunning ", toupper(sdm), 
+                                   "\nRunning ", toupper(sdm), 
                                    " model for ", species_name)
           
           # Run model
