@@ -145,11 +145,6 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
                               climate_vars = climate_vars)
           saveRDS(brt_results, brt_file)
         } else {
-          status_message <- paste0(status_message, "/n",
-                                   clim_name, 
-                                   " suitability predictions for ", 
-                                   species_name, 
-                                   " already on disk and rerun set to FALSE.")
           message("Results for ", sdm, " model for ", species_name, 
                   " already on disk and rerun set to FALSE.")
         }
