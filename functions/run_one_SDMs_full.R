@@ -243,7 +243,7 @@ run_one_SDMs_full <- function(species_name, rerun = TRUE, num_cores = 2,
         sdm <- "maxent"
         message("Saving ", toupper(sdm), " model for ", species_name)
         status_message <- paste0(status_message,
-                                 "/nSaving ", toupper(sdm), 
+                                 "\nSaving ", toupper(sdm), 
                                  " model for ", species_name)
         
         # Load model
