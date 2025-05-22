@@ -120,7 +120,7 @@ run_one_predict <- function(species_name, rerun = TRUE, sdm_raster_save = TRUE) 
 
     # Cut off areas that fall outside the geographic extent of climate rasters
     # (could occur in any time period)
-    mcp <- terra::crop(mcp, ext(predictors))  
+    mcp <- terra::crop(mcp, terra::ext(predictors))  
     
     # Crop and mask as appropriate
     pred_mask <- terra::crop(predictors, mcp, snap = "out")

@@ -17,7 +17,45 @@
 #' 
 #' @return SpatRaster with predicted suitability values based on given 
 #' species distribution model and global climate model data
-
+#' 
+#' #' \dontrun{
+#' # Test predictions of current climate for P. rumiko for RF and MaxEnt models
+#' nice_name <- "papilio_rumiko"
+#' predictors <- terra::rast(list.files(path = "data/wc2-1",
+#'                                      pattern = ".tif$",
+#'                                      full.names = TRUE))
+#' # Get and subset climate variables                                    
+#' all_climate_vars <- read.csv("data/climate-variables.csv")
+#' climate_vars <- all_climate_vars$variable[all_climate_vars$include == TRUE]
+#' predictors <- terra::subset(predictors, climate_vars)
+#' # Get minimum convex polygon for this species and crop to extent of 
+#' # predictors
+#' mcp <- terra::vect(paste0("data/gbif/shapefiles/",
+#'                           nice_name, 
+#'                           "-buffered-mcp.shp"))
+#' mcp <- terra::crop(mcp, terra::ext(predictors))  
+#' 
+#' # Crop and mask *predictors* to mcp
+#' pred_mask <- terra::crop(predictors, mcp, snap = "out")
+#' pred_mask <- terra::mask(pred_mask, mcp)
+#' # Make predictions
+#' # Random forest model
+#' model_list <- readRDS(file = paste0("output/SDMs/", nice_name, "-rf.rds"))
+#' preds_rf <- predict_sdm(nice_name = nice_name,
+#'                         sdm_method = "rf",
+#'                         model = model_list$model,
+#'                         stand_obj = model_list$stand_obj,
+#'                         quad = model_list$quad,
+#'                         predictors = pred_mask)
+#' # MaxEnt model
+#' model_list <- readRDS(file = paste0("output/SDMs/", nice_name, "-maxent.rds"))
+#' preds_maxent <- predict_sdm(nice_name = nice_name,
+#'                             sdm_method = "maxent",
+#'                             model = model_list$model,
+#'                             stand_obj = model_list$stand_obj,
+#'                             quad = model_list$quad,
+#'                             predictors = pred_mask)
+#' }
 predict_sdm <- function(nice_name, 
                         sdm_method = c("brt", "gam", "lasso", "maxent", "rf"),
                         model, 
@@ -66,17 +104,10 @@ predict_sdm <- function(nice_name,
       stop("predict_sdm requires stand_obj and quad arguments")
     }
   }
-  if (sdm_method == "maxent" | sdm_method == "rf") {
-    if(!require(raster)) {
-      stop("predict_sdm requires raster package, but it could not be loaded")
-    }
-  }
-  
+
   # If using a Maxent model (with maxnet algorithm), need enm.maxnet@predict
   # See ?ENMevaluate or https://github.com/jamiemkass/ENMeval/issues/112
   if (sdm_method == "maxent") {
-    # preds <- enm.maxnet@predict(model, predictors_rs,
-    #                             list(pred.type = "cloglog", doClamp = FALSE))
     preds <- enm.maxnet@predict(model, predictors,
                                 list(pred.type = "cloglog", doClamp = FALSE))
     # The resultant preds object has no CRS, so grab the one attached to the 
@@ -89,19 +120,15 @@ predict_sdm <- function(nice_name,
     preds <- terra::extend(x = preds, y = predictors)
     terra::ext(preds) <- terra::ext(predictors)
 
-    # preds <- terra::rast(preds)
   }
 
-  # Convert SpatRaster to a RasterStack (only needed for RF model)
-  predictors_rs <- raster::stack(predictors)
-
-  # If using a RF model, need raster package to work with classification model
+  # Random forest prediction we want second index (i.e. the probability a cell 
+  # is scored as a 1; first index is probability a cell is scored as a 0)
   if (sdm_method == "rf") {
-    preds <- raster::predict(object = predictors_rs,
-                             model = model, 
-                             type = "prob",
-                             index = 2)
-    preds <- terra::rast(preds)
+    preds <- terra::predict(object = predictors,
+                            model = model,
+                            type = "prob",
+                            index = 2)
   }
 
   # If using a GAM or LASSO model, need to standardize predictors using means 
