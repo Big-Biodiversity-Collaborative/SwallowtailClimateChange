@@ -142,13 +142,29 @@ and to actually copy:
 
 ### Troubleshooting
 
-Tokens expire after 90 days if not used. To refresh tokens, run 
-`rclone config reconnect onedrive:`
+Tokens expire after 90 days if not used. To refresh tokens, follow the process 
+(taken from https://rclone.org/remote_setup/#configuring-by-copying-the-config-file):
 
-**Update 2023-11-13**: tokens are now (rclone >1.56?) longer than the buffer 
-size of pasting (i.e. copying from local and pasting into remote terminal 
-results in an incomplete token). Try solution at 
-https://rclone.org/remote_setup/#configuring-by-copying-the-config-file.
+#### Configuring by copying the config file
+
+1. Configure rclone on your desktop machine with
+
+`rclone config`
+
+and choose "e" to edit the current remote. At some point, config will ask 
+whether or not to create a new token. Answer "yes" (the default).
+
+2. Find the config file by running rclone config file, for example
+
+```
+$ rclone config file
+Configuration file is stored at:
+/home/user/.rclone.conf
+```
+
+3. Now transfer it to the remote box (scp, cut paste, ftp, sftp, etc.) and 
+place it in the correct place (use `rclone config file` on the remote box to 
+find out where).
 
 ### References for rclone
 
