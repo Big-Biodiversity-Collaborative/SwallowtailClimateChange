@@ -27,6 +27,7 @@ climate_models <- read.csv(file = "data/climate-models.csv")[, "name"]
 # 12 = one contemporary ensemble + (two time periods x three scenarios) 
 #      + five individual model suitabilities for contemporary climate
 sdms <- c("brt", "gam", "lasso", "maxent", "rf")
+sdms <- paste0(sdms, "-current")
 # Calling this a "tail" for end of file names
 suitabilities_tails <- c(sdms, climate_models)
 
@@ -52,7 +53,7 @@ distributions_tails <- climate_models
 distributions_mat <- vapply(X = distributions_tails,
                             FUN = function(x, cols = nice_names){
                               species_files <- paste0("output/distributions/",
-                                                      cols, "-", x, ".rds")
+                                                      cols, "-distribution-", x, ".rds")
                               return(file.exists(species_files))
                             },
                             FUN.VALUE = logical(length = length(nice_names)))
