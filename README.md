@@ -204,7 +204,7 @@ scripts are run **serially** to ensure that inputs for each step are available
    (main and supplemental) into a single reference pdf.
    6. **src/manuscript/tables-1-species.R**: Table (in CSV format) with summary 
    stats for each species.
-   1. **src/manuscript/tables-2-overlap.R**: Table of predicted suitability 
+   7. **src/manuscript/tables-2-overlap.R**: Table of predicted suitability 
    areas and overlap with areas suitable for at least one host species.
 
 ### Analysis workflow example

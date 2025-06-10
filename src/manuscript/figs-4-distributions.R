@@ -306,7 +306,7 @@ for (i in 1:length(main_species)) {
 
   message("Plotting ", gsub(pattern = "papilio_",
                             replacement = "Papilio ",
-                            x = one_species))
+                            x = one_species), " for main manuscript.")
   main_plots_list[[current_index]] <- current_ggplot(nice_name = one_species,
                                                         plot_params = plot_params)
   
@@ -362,7 +362,7 @@ for (species_i in 1:length(nice_names)) {
                      pattern = "papilio_",
                      replacement = "P. ")
   
-  message("Plotting ", print_name)
+  message("Plotting ", print_name, " for supplemental figures")
 
   # Make the title of the plot (just the species name, for now)
   # Using bquote, need to wrap any variables we want evaluated inside .()

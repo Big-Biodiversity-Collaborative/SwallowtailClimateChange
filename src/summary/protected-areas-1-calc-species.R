@@ -89,7 +89,9 @@ stats <- as.data.frame(expand_grid(insect = insects,
          area_prot_sqkm_private = NA)
 
 # Read in protected areas file (may take ~3 minutes)
+message("Reading protected areas shapefile (may take a few minutes)...")
 pa <- terra::vect(shpfile_path)
+message("Protected areas shapefile read.")
 
 # For each climate model and distribution type:
   # Reclassify overlap raster (species distribution = 1, everything else NA)

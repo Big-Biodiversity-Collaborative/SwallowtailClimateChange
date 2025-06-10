@@ -7,7 +7,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(cowplot) # For joining lat & long lollipops into one figure
-(file = "functions/get_colors.R")
+source(file = "functions/get_colors.R")
 
 # Plots based on the output of src/summary/summary-2-compare-ranges.R, which is 
 # written to output/summary-stats/overlap-summary-allspp.csv
