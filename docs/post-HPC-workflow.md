@@ -9,7 +9,7 @@ and tables). These are run in the following order:
 
 - [ ] src/summary/summary-1-create-overlap-rasters.R
 - [ ] src/summary/summary-2-compare-ranges.R
-- [ ] src/summary/summary-3-draw-species-richness-maps.R
+- [ ] src/summary/summary-3-create-richness-rasters.R
 - [ ] src/protected-areas-1-calc-species.R
 - [ ] src/protected-areas-2-calc-hotspots.R
 - [ ] src/protected-areas-3-plot-species.R
