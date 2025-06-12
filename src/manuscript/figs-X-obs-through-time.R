@@ -46,8 +46,9 @@ observations_plot <- ggplot() +
   transition_states(year,
                     transition_length = 1,
                     state_length = 1) +
-  # enter_appear() + # these don't do much
-  # exit_disappear() +
+  labs(title = "Year: {closest_state}") +
+  enter_fade() + # these don't do much
+  exit_fade() +
   theme_bw() +
   theme(axis.title = element_blank())
 
