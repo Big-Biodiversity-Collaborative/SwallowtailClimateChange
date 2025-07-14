@@ -246,6 +246,9 @@ delta_ggplot <- function(nice_name, model, plot_params, title = NULL,
   delta <- readRDS(paste0("output/deltas/", nice_name,
                           "-delta-insecthost-", model, ".rds"))
   
+  # TODO: Before proceeding, do we need to unwrap?
+  # [1] "This is a PackedSpatRaster object. Use 'terra::unwrap()' to unpack it"
+
   # See src/summary/summary-2-compare-ranges.R
   delta <- as.factor(delta)
   levels(delta) <- data.frame(value = 0:3, label = names(plot_params$delta_cols))

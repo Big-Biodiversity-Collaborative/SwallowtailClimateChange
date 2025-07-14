@@ -4,14 +4,12 @@
 # 2025-01-07
 
 require(dplyr)
-require(ggplot2)
-require(sf) # should be imported by tidyterra, but just in case...
 require(terra)
+require(ggplot2)
 require(tidyterra)
+require(sf) # should be imported by tidyterra, but just in case...
 require(cowplot)
 source(file = "functions/get_colors.R")
-
-# TODO: Consider better use of replace (or maybe not even have the option...)
 
 # Richness: Five panel figure showing
 #   (a) contemporary species richness, 
@@ -19,12 +17,11 @@ source(file = "functions/get_colors.R")
 #   (c) forecast richness for SSP3-7.0, 2050s, 
 #   (d) forecast richness hotspots for SSP3-7.0, 2050s, and 
 #   (e) the difference in richness between (a) and (c)
+#   (f) the difference in hotspots between (b) and (d)
 # Supplemental Richness: Six panel figure of species richness estimates of all 
 #   combinations of forecast SSP / time points
 # Supplemental Hotspots: Six panel figure of richness hotspots for all 
 #   combinations of forecast SSP / time points
-
-replace <- TRUE
 
 ################################################################################
 # Data preparation
@@ -57,6 +54,36 @@ rich_delta_file <- paste0("output/richness/ensemble_", climate_model,
                           "-delta-richness-", type, ".rds")
 rich_delta <- readRDS(rich_delta_file)
 
+# Create the hotspot rasters. We need to do this *before* re-projecting, 
+# because terra::mosaic seems to have challenges if we try it after re-
+# projection
+
+# Create binary rasters (species richness "hotspots"), where 0 is suitable for 
+# < 4spp. and 1 is suitable >= 4 species
+hotspot_current <- terra::classify(x = rich_current,
+                                   rcl = matrix(data = c(0, 3, 0,
+                                                         3.1, Inf, 1),
+                                                nrow = 2, byrow = TRUE))
+hotspot_forecast <- terra::classify(x = rich_forecast,
+                                    rcl = matrix(data = c(0, 3, 0,
+                                                          3.1, Inf, 1),
+                                                 nrow = 2, byrow = TRUE))
+# Create a delta hotspot raster; need to 
+# create a SpatRasterCollection from a list of rasters (two in this case, the 
+# current hotspot and forecast hotspot rasters), changing the current raster to 
+# negative values so we can use the sum function in terra::mosaic, i.e. 
+# Forecast hotspot - Current hotspot.
+# We also need to be sure we can tell the gains from losses, so we first 
+# multiply the forecast hotspots raster so values are 0, 2, when we add the two
+# rasters together, we get a raster with four values:
+#   0 = not a hotspot in current or forecast
+#   1 = hotspot only in current climate (= loss)
+#   2 = hotspot only in forecast climate (= gain)
+#   3 = hotspot in both current and forecast (= stable)
+hotspot_delta_coll <- terra::sprc(list(hotspot_current, 2 * hotspot_forecast))
+# Calculate delta in new single raster
+hotspot_delta <- terra::mosaic(x = hotspot_delta_coll, fun = "sum")
+
 # Grab spatial files with political boundaries
 countries <- vect("data/political-boundaries/countries.shp")
 states <- vect("data/political-boundaries/states.shp")  
@@ -78,17 +105,9 @@ countries <- countries %>%
 rich_current <- project(rich_current, crs(states), method = "near")
 rich_forecast <- project(rich_forecast, crs(states), method = "near")
 rich_delta <- project(rich_delta, crs(states), method = "near")
-
-# Create binary rasters (species richness "hotspots"), where 0 is suitable for 
-# < 4spp. and 1 is suitable >= 4 species
-hotspot_current <- terra::classify(x = rich_current,
-                                   rcl = matrix(data = c(0, 3, 0,
-                                                         3.1, Inf, 1),
-                                                nrow = 2, byrow = TRUE))
-hotspot_forecast <- terra::classify(x = rich_forecast,
-                                    rcl = matrix(data = c(0, 3, 0,
-                                                          3.1, Inf, 1),
-                                                 nrow = 2, byrow = TRUE))
+hotspot_current <- project(hotspot_current, crs(states), method = "near")
+hotspot_forecast <- project(hotspot_forecast, crs(states), method = "near")
+hotspot_delta <- project(hotspot_delta, crs(states), method = "near")
 
 # Get rid of NA values in richness raster and calculate extent for plot areas
 rich_current <- tidyterra::drop_na(rich_current)
@@ -114,8 +133,9 @@ linewidth <- 0.1
 
 # Get some colors 
 rich_cols <- get_colors(palette = "richness")
-delta_cols <- get_colors(palette = "richdelta")
+rich_delta_cols <- get_colors(palette = "richdelta")
 hotspot_cols <- get_colors(palette = "hotspot")
+hotspot_delta_cols <- get_colors(palette = "distdelta")
 
 # Setting colors for state & country lines
 state_fill <- "white"
@@ -154,12 +174,12 @@ rich_forecast_plot <- ggplot() +
   theme(plot.margin = unit(margins, "pt"),
         legend.spacing.y = unit(10, 'pt'))
 
-# Delta plot (difference between contemporary and forecast)
+# Delta richness plot (difference between contemporary and forecast richness)
 rich_delta_plot <- ggplot() +
   geom_spatvector(data = states, color = NA, fill = state_fill) +
   geom_spatraster(data = rich_delta) +
-  scale_fill_gradient2(low = delta_cols[1], mid = delta_cols[2], 
-                       high = delta_cols[3],
+  scale_fill_gradient2(low = rich_delta_cols[1], mid = rich_delta_cols[2], 
+                       high = rich_delta_cols[3],
                        na.value = NA, name = "Change", 
                        breaks = c(-5, 0, 5)) +
   geom_spatvector(data = states, color = state_color, linewidth = linewidth,
@@ -202,8 +222,36 @@ hotspot_forecast_plot <- ggplot() +
   theme(plot.margin = unit(margins, "pt"),
         legend.position = "none")
 
+# Delta hotspot plot (difference between contemporary and forecast hotspots)
+hotspot_delta <- as.factor(hotspot_delta)
+levels(hotspot_delta) <- data.frame(value = 0:3, 
+                                    label = names(hotspot_delta_cols))
+hotspot_delta <- drop_na(hotspot_delta)
+#  Currently failing with:
+# Warning messages:
+#   1: Computation failed in `stat_terra_spat_raster()`.
+# Caused by error:
+#   ! [spatSample] at least one of 'values', 'cells', or 'xy' must be TRUE; or 'as.points' must be TRUE 
+# 2: No shared levels found between `names(values)` of the manual scale and the data's fill values. 
+# Look at figs-4-distributions.R to see how that one works
+
+hotspot_delta_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = state_fill) +
+  geom_spatraster(data = hotspot_delta, maxcell = Inf) +
+  scale_fill_manual(name = "label", values = hotspot_delta_cols, na.translate = FALSE) +
+  geom_spatvector(data = states, color = state_color, linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = countries_color, linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.position = "none")
+
+
 ################################################################################
-# Assemble into single, five-panel figure
+# Assemble into single, six-panel figure
 ################################################################################
 # Start by moving legends inside plot area for richness and delta maps
 # Had to test lots of things to get these things to fit
@@ -240,23 +288,21 @@ rich_delta_plot <- rich_delta_plot +
         legend.position.inside = legend_position,
         legend.margin = legend_margin)
 
-# Combine everything into a single, five-panel figure
-five_panel <- cowplot::plot_grid(rich_current_plot, hotspot_current_plot,
+# Combine everything into a single, five-panel figure (this can take a moment)
+six_panel <- cowplot::plot_grid(rich_current_plot, hotspot_current_plot,
                                  rich_forecast_plot, hotspot_forecast_plot,
-                                 rich_delta_plot,
+                                 rich_delta_plot, hotspot_delta_plot,
                                  align = "h",
                                  ncol = 2,
                                  labels = "auto",
                                  vjust = 1,
                                  hjust = 0)
-five_panel_file <- paste0(output_basename, "Figure-Richness.png")
-if (!file.exists(five_panel_file) | (file.exists(five_panel_file) & replace)) {
-  ggsave(filename = five_panel_file,
-         plot = five_panel,
-         width = 6,
-         height = 8,
-         units = "in")
-}
+six_panel_file <- paste0(output_basename, "Figure-Richness.png")
+ggsave(filename = six_panel_file,
+       plot = six_panel,
+       width = 6,
+       height = 8,
+       units = "in")
 
 ################################################################################
 # Six-panel figure of species richness for each time (2) and climate (3) 
@@ -400,13 +446,12 @@ rich_6 <- plot_grid(plotlist = rich_plots,
                     vjust = 1, # justification so a, b, c... labels do 
                     hjust = 0) # not overlap with figure stuff
 rich_6_file <- paste0(output_basename, "Supplemental-Figure-Richness.png")
-if (!file.exists(rich_6_file) | (file.exists(rich_6_file) & replace)) {
-  ggsave(filename = rich_6_file,
-         plot = rich_6,
-         width = 6,
-         height = 8,
-         units = "in")
-}
+ggsave(filename = rich_6_file,
+       plot = rich_6,
+       width = 6,
+       height = 8,
+       units = "in")
+
 
 # Make 3 x 2 panel plot of hotspots
 hotspot_6 <- plot_grid(plotlist = hotspot_plots,
@@ -416,10 +461,8 @@ hotspot_6 <- plot_grid(plotlist = hotspot_plots,
                        vjust = 1,
                        hjust = 0)
 hotspots_6_file <- paste0(output_basename, "Supplemental-Figure-Hotspots.png")
-if (!file.exists(hotspots_6_file) | (file.exists(hotspots_6_file) & replace)) {
-  ggsave(filename = hotspots_6_file,
-         plot = hotspot_6,
-         width = 6,
-         height = 8,
-         units = "in")
-}
+ggsave(filename = hotspots_6_file,
+       plot = hotspot_6,
+       width = 6,
+       height = 8,
+       units = "in")
