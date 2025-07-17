@@ -17,6 +17,28 @@ suppressPackageStartupMessages(library(ggplot2))
 #| output: asis
 #| echo: false
 
+# Start with the three pages of contemporary distributions. Hard coded because 
+# of laziness
+
+c_1_file <- "../output/manuscript/distribution-pages/current-p-1.png"
+cat("![Contemporary distributions (1 of 3)](", c_1_file, ")\n", sep = "")
+
+# Add pagebreak between figures
+cat("{{< pagebreak >}}\n")
+
+c_2_file <- "../output/manuscript/distribution-pages/current-p-2.png"
+cat("![Contemporary distributions (2 of 3)](", c_2_file, ")\n", sep = "")
+
+cat("{{< pagebreak >}}\n")
+
+c_3_file <- "../output/manuscript/distribution-pages/current-p-3.png"
+cat("![Contemporary distributions (3 of 3)](", c_3_file, ")\n", sep = "")
+  
+cat("{{< pagebreak >}}\n")
+
+# Now add all the images for forecast distributions and comparisons to current 
+# distributions
+
 # TODO: Remove subsetting when ready for prime time
 species <- unlist(params$species)
 # species <- species[3:5]

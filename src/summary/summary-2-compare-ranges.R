@@ -27,6 +27,10 @@ replace_rasters <- TRUE
   # lat_min_bands: median lat among the southernmost cells in each long band
   # lon_max_bands: median long among the easternmost cells in each lat band
   # lon_min_bands: median long among the westernmost cells in each lat band
+  # lat_max_05: median latitude of 5% northernmost cells
+  # lat_min_05: median latitude of 5% southernmost cells
+  # lon_max_05: median longitude of 5% easternmost cells
+  # lon_min_05: median longitude of 5% westernmost cells
 
 # Summary stats that are calculated for each time period (across distribution types)
   # pinsect_withhost: % of insect range that overlaps with >= 1 host plant; 
@@ -52,8 +56,16 @@ replace_rasters <- TRUE
   #   westward shift)
   # lon_min_shift: median value of shifts (km) along western edge in each 
   #   latitudinal band (pos values = eastward; neg values = westward)
-  # Note for these shift calculations: only included bands with >= 1 cell 
+  # Note for these band shift calculations: only included bands with >= 1 cell 
   #   considered suitable in both time periods
+  # lat_max_05_shift: shift (deg) in median values of northernmost 5% of cells
+  #   (positive values = northward shift; negative values = southward shift)
+  # lat_min_05_shift: shift (deg) in median values of southernmost 5% of cells 
+  #   (pos values = northward; neg values = southward)
+  # lon_max_05_shift: shift (deg) in median values of easternmost 5% of cells
+  #   (positive values = eastward shift; negative values = westward shift)
+  # lon_min_05_shift: shift (deg) in median values of westernmost 5% of cells
+  #   (pos values = eastward; neg values = westward)
 
 # Note: Can calculate % of current range that's still suitable in future as 
 # area_retained/(area retained + area lost)
@@ -116,6 +128,10 @@ stats <- as.data.frame(expand_grid(insect = insects,
          lat_min_bands = NA,
          lon_max_bands = NA,
          lon_min_bands = NA,
+         lat_max_05 = NA,
+         lat_min_05 = NA,
+         lon_max_05 = NA,
+         lon_min_05 = NA,
          area_gained = NA,
          area_lost = NA,
          area_retained = NA,
@@ -123,6 +139,10 @@ stats <- as.data.frame(expand_grid(insect = insects,
          lat_min_shift = NA,
          lon_max_shift = NA,
          lon_min_shift = NA,
+         lat_max_05_shift = NA,
+         lat_min_05_shift = NA,
+         lon_max_05_shift = NA,
+         lon_min_05_shift = NA,
          pinsect_withhost = NA,
          pinsecthost_1host = NA,
          phost_insect = NA)
@@ -251,6 +271,13 @@ for (i in 1:length(insects)) {
     stats$lon_max[row_index_c] <- round(median(tail(sort(current_df$x), 10)), 2)
     stats$lon_min[row_index_c] <- round(median(head(sort(current_df$x), 10)), 2)
     
+    # Calculate 5% at extremes (median of highest/lowest 5% of cells)
+    n_cells_05_c <- round(0.05 * nrow(current_df), 0)
+    stats$lat_max_05[row_index_c] <- round(median(tail(sort(current_df$y), n_cells_05_c)), 2)
+    stats$lat_min_05[row_index_c] <- round(median(head(sort(current_df$y), n_cells_05_c)), 2)
+    stats$lon_max_05[row_index_c] <- round(median(tail(sort(current_df$x), n_cells_05_c)), 2)
+    stats$lon_min_05[row_index_c] <- round(median(head(sort(current_df$x), n_cells_05_c)), 2)
+
     # Calculate max/min latitude for each longitudinal band
     current_lats <- current_df %>%
       group_by(x) %>%
@@ -300,6 +327,19 @@ for (i in 1:length(insects)) {
         stats$lat_min[row_index] <- round(median(head(sort(future_df$y), 10)), 2)
         stats$lon_max[row_index] <- round(median(tail(sort(future_df$x), 10)), 2)
         stats$lon_min[row_index] <- round(median(head(sort(future_df$x), 10)), 2)
+        
+        # Calculate 5% at extremes (median of highest/lowest 5% of cells)
+        n_cells_05 <- round(0.05 * nrow(current_df), 0)
+        stats$lat_max_05[row_index] <- round(median(tail(sort(future_df$y), n_cells_05)), 2)
+        stats$lat_min_05[row_index] <- round(median(head(sort(future_df$y), n_cells_05)), 2)
+        stats$lon_max_05[row_index] <- round(median(tail(sort(future_df$x), n_cells_05)), 2)
+        stats$lon_min_05[row_index] <- round(median(head(sort(future_df$x), n_cells_05)), 2)
+        
+        # Calculate the shift in this 5% median value (future - current)
+        stats$lat_max_05_shift[row_index] <- round(stats$lat_max_05[row_index] - stats$lat_max_05[row_index_c], 2)
+        stats$lat_min_05_shift[row_index] <- round(stats$lat_min_05[row_index] - stats$lat_min_05[row_index_c], 2)
+        stats$lon_max_05_shift[row_index] <- round(stats$lon_max_05[row_index] - stats$lon_max_05[row_index_c], 2)
+        stats$lon_min_05_shift[row_index] <- round(stats$lon_min_05[row_index] - stats$lon_min_05[row_index_c], 2)
         
         # Calculate max/min latitude for each longitudinal band
         future_lats <- future_df %>%

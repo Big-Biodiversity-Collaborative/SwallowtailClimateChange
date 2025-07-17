@@ -11,7 +11,7 @@ require(sf) # should be imported by tidyterra, but just in case...
 require(cowplot)
 source(file = "functions/get_colors.R")
 
-# Richness: Five panel figure showing
+# Richness: Six panel figure showing
 #   (a) contemporary species richness, 
 #   (b) contemporary richness hotspots (>= 4 species), 
 #   (c) forecast richness for SSP3-7.0, 2050s, 

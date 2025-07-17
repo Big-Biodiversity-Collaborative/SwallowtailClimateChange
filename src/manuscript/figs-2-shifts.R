@@ -22,6 +22,14 @@ source(file = "functions/get_colors.R")
 #   westward shift)
 # lon_min_shift: median value of shifts (km) along western edge in each 
 #   latitudinal band (pos values = eastward; neg values = westward)
+# lat_max_05_shift: shift (deg) in median values of northernmost 5% of cells
+#   (positive values = northward shift; negative values = southward shift)
+# lat_min_05_shift: shift (deg) in median values of southernmost 5% of cells 
+#   (pos values = northward; neg values = southward)
+# lon_max_05_shift: shift (deg) in median values of easternmost 5% of cells
+#   (positive values = eastward shift; negative values = westward shift)
+# lon_min_05_shift: shift (deg) in median values of westernmost 5% of cells
+#   (pos values = eastward; neg values = westward)
 
 range_info <- read.csv(file = "output/summary-stats/overlap-summary-allspp.csv")
 # Read in east/west information
@@ -100,6 +108,25 @@ southern_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 southern_lollipop
 
+southern_lollipop <- ggplot(data = range_info %>%
+                              filter(!is.na(lat_min_05_shift)), 
+                            mapping = aes(y = insect,
+                                          color = ew)) +
+  geom_point(mapping = aes(x = lat_min_05_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lat_min_05_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Southern edge latitudinal shift (deg)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
+                                   hjust = 1, face = "italic"),
+        axis.title.x = element_blank(),
+        strip.background = element_rect(fill = "#F0F0F0")) +
+  coord_flip() +
+  facet_grid(ssp_text ~ yr_text)
+southern_lollipop
+
 # Northern (lat_max)
 northern_lollipop <- ggplot(data = range_info %>%
                               filter(!is.na(lat_max_shift)), 
@@ -120,6 +147,24 @@ northern_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 northern_lollipop
 
+northern_lollipop <- ggplot(data = range_info %>%
+                              filter(!is.na(lat_max_05_shift)), 
+                            mapping = aes(y = insect,
+                                          color = ew)) +
+  geom_point(mapping = aes(x = lat_max_05_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lat_max_05_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Northern edge latitudinal shift (deg)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
+                                   hjust = 1, face = "italic"),
+        axis.title.x = element_blank(),
+        strip.background = element_rect(fill = "#F0F0F0")) +
+  coord_flip() +
+  facet_grid(ssp_text ~ yr_text)
+northern_lollipop
 # For eastern & western plots, need to relevel the names, so they occur in 
 # ascending alphabetical order on the y axis (i.e. P. brevicauda on top and 
 # P. zelicaon on bottom)
@@ -144,6 +189,25 @@ western_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 western_lollipop
 
+western_lollipop <- ggplot(data = range_info %>%
+                             filter(!is.na(lon_min_05_shift)) %>%
+                             mutate(insect = factor(insect,
+                                                    levels = rev(unique(insect)))), 
+                           mapping = aes(y = insect,
+                                         color = ew)) +
+  geom_point(mapping = aes(x = lon_min_05_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lon_min_05_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Western edge longitudinal shift (deg)") +
+  theme_bw() +
+  theme(axis.text.y = element_text(face = "italic"),
+        strip.background = element_rect(fill = "#F0F0F0"),
+        axis.title.y = element_blank()) +
+  facet_grid(ssp_text ~ yr_text)
+western_lollipop
+
 # Eastern (lon_max)
 eastern_lollipop <- ggplot(data = range_info %>%
                              filter(!is.na(lon_max_shift)) %>%
@@ -157,6 +221,25 @@ eastern_lollipop <- ggplot(data = range_info %>%
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
   xlab(label = "Eastern edge longitudinal shift (km)") +
+  theme_bw() +
+  theme(axis.text.y = element_text(face = "italic"),
+        strip.background = element_rect(fill = "#F0F0F0"),
+        axis.title.y = element_blank()) +
+  facet_grid(ssp_text ~ yr_text)
+eastern_lollipop
+
+eastern_lollipop <- ggplot(data = range_info %>%
+                             filter(!is.na(lon_max_05_shift)) %>%
+                             mutate(insect = factor(insect,
+                                                    levels = rev(unique(insect)))), 
+                           mapping = aes(y = insect,
+                                         color = ew)) +
+  geom_point(mapping = aes(x = lon_max_05_shift)) +
+  geom_segment(mapping = aes(x = 0, xend = lon_max_05_shift)) +
+  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  xlab(label = "Eastern edge longitudinal shift (deg)") +
   theme_bw() +
   theme(axis.text.y = element_text(face = "italic"),
         strip.background = element_rect(fill = "#F0F0F0"),
