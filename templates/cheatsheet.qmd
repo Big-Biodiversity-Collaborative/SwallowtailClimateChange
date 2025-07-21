@@ -26,6 +26,21 @@ changes in suitability between current conditions and SSP3-7.0 in the 2050s are
 shown in (e) and (f).
 :::
 
+{{< pagebreak >}}
+
+::: {#fig-areas}
+
+![](../output/manuscript/Figure-Area-Change.png)
+
+**Predicted changes in suitable area under the SSP3-7.0 model in the 2050s.** 
+The change in total suitable area, which includes currently unsuitable areas, 
+in 1,000 km^2, the percentage of currently suitable area retained in the 
+SSP3-7.0 model in the 2050s, and the total percentage change in suitable area 
+under the SSP3-7.0 model in the 2050s.
+:::
+
+{{< pagebreak >}}
+
 ::: {#fig-shifts}
 
 ![](../output/manuscript/Figure-Shifts.png)
@@ -36,6 +51,8 @@ could be better defined_) between current climate and forecast climate for the
 2050s under the SSP3-7.0 model.
 :::
 
+{{< pagebreak >}}
+
 ::: {fig-richness}
 
 ![](../output/manuscript/Figure-Richness.png)
@@ -45,18 +62,23 @@ Total species richness of areas predicted to be suitable for _Papilio_ species
 under current climate conditions (a) and the SSP3-7.0 model in the 2050s (c). 
 Areas designated as richness hotspots for current (b) and the 2050s under 
 SSP3-7.0 (d). The change in species richness between current conditions and the 
-2050s is shown in (e).
+2050s is shown in (e) and the change in areas designated as richness hotspots 
+is shown in (f).
 :::
+
+{{< pagebreak >}}
 
 ::: {fig-protected}
 
 ![](../output/manuscript/Figure-Protected.png)
 
-**Species richness hotspots area changes under SSP3-7.0 model climate conditions.**
+**Species richness hotspots area changes under SSP3-7.0 model.**
 Total area suitable for at least four species of North American _Papilio_ shown 
 in (a). Total area (b) and percent area (c) of richness hotspots that occur on 
 lands currently protected under one of four management categories.
 :::
+
+{{< pagebreak >}}
 
 ## Supplemental
 
@@ -114,6 +136,7 @@ predicted as suitable for each *Papilio* species and at least one host plant
 species under three SSPs and two time points. Points left of the horizontal 
 dashed line indicate range contractions westward and points right of the 
 horizontal dashed line indicate range expansions eastward.
+
 :::
 
 {{< pagebreak >}}
@@ -127,6 +150,7 @@ Total species richness of areas predicted to be suitable for _Papilio_ species
 under the SSP2-4.5 model for the 2050s (a) and 2080s (b), under the SSP3-7.0 
 model for the 2050s (c) and 2080s (d), and under the SSP5-8.5 model for the 
 2050s (e) and 2080s (f).
+
 :::
 
 {{< pagebreak >}}
@@ -140,6 +164,7 @@ Richness hotspots (areas predicted to be suitable for four or more _Papilio_
 species under the SSP2-4.5 model for the 2050s (a) and 2080s (b), under the 
 SSP3-7.0 model for the 2050s (c) and 2080s (d), and under the SSP5-8.5 model 
 for the 2050s (e) and 2080s (f).
+
 :::
 
 {{< pagebreak >}}
@@ -154,6 +179,7 @@ richness figure, shown below:
 ![](../output/manuscript/Figure-Richness.png)
 
 **Illustration purposes only**. See panel e and note above figure.
+
 :::
 
 {{< pagebreak >}}
@@ -167,6 +193,7 @@ Total area suitable for at least four species of North American _Papilio_ shown
 for SSP2-4.5 (a) and SSP5-8.5 (b). Total area for SSP2-4.5 (c) and SSP5-8.5 (d) 
 and percent area for SSP2-4.5 (e) and SSP5-8.5 (f) of richness hotspots that 
 occur on lands currently protected under one of four management categories.
+
 :::
 
 {{< pagebreak >}}
@@ -185,4 +212,5 @@ kable(area_overlap)
 Supplemental Table 1. Total suitable area and suitable area overlapping the 
 suitable area for at least one host plant species for `r nrow(area_overlap)` 
 species of _Papilio_ under current climate conditions.
+
 :::
