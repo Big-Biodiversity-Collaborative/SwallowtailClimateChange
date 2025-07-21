@@ -31,6 +31,16 @@ source(file = "functions/get_colors.R")
 # lon_min_05_shift: shift (deg) in median values of westernmost 5% of cells
 #   (pos values = eastward; neg values = westward)
 
+# We chose one or the other of above for our plots
+use_05_percent <- TRUE # if false, we use the shifts based on lat/lon bands
+var_suffix <- ifelse(use_05_percent, "_05_shift", "_shift")
+# More elegant way exists for sure
+lat_min_var <- paste0("lat_min", var_suffix)
+lat_max_var <- paste0("lat_max", var_suffix)
+lon_min_var <- paste0("lon_min", var_suffix)
+lon_max_var <- paste0("lon_max", var_suffix)
+
+# Grab the info for all the species and models
 range_info <- read.csv(file = "output/summary-stats/overlap-summary-allspp.csv")
 # Read in east/west information
 ew <- read.csv(file = "data/insect-eastwest.csv")
@@ -52,27 +62,9 @@ range_info <- range_info %>%
   filter(climate != "current") %>%
   left_join(climate_models, by = c("climate" = "name"))
 
-
-
-  # mutate(ssp = substr(climate, start = 4, stop = 6),
-  #        year = substr(climate, start = 8, stop = 11)) %>%
-  # Create year information for facet labels
-  #     2041 -> 2050s
-  #     2071 -> 2080s
-  # mutate(yr_text = if_else(year == 2041, 
-  #                            true = "2050s", 
-  #                            false = "2080s")) %>%
-  # Create cleaner ssp labels
-  # mutate(ssp_text = paste0("SSP",
-  #                          substr(ssp, start = 1, stop = 1),
-  #                          "-",
-  #                          substr(ssp, start = 2, stop = 2),
-  #                          ".",
-  #                          substr(ssp, start = 3, stop = 3)))
-
 # Now add in east/west information for coloring
 range_info <- range_info %>%
-  left_join(ew)
+  left_join(ew, by = join_by(insect))
 
 # From here on out, the species names should have the genus abbreviated
 range_info <- range_info %>%
@@ -85,16 +77,24 @@ ew_colors <- get_colors(palette = "eastwest")
 # Need to make title case to align with data in range_info
 names(ew_colors) <- tools::toTitleCase(names(ew_colors))
 
+# In subsequent dplyr & ggplot2 functions, because we are using a character 
+# string to indicate which column to use for our edge variable (e.g. 
+# "lat_min_shift" or "lat_min_05_shift" is stored in the variable lat_min_var), 
+# we use the funky .data[[var_name]] syntax. See 
+# https://rlang.r-lib.org/reference/args_data_masking.html for more info (and 
+# note that the {{ var_name }} syntax does not work - that seems restricted to 
+# use when var_name is a parameter passed to a custom function).
+
 # TODO: Could remove appalachiensis and palamedes from shift data...(filtering 
 # in ggplot call removes the former, but not the latter, which only has non-NA 
 # values for SSP245-2055)
 # Southern (lat_min)
 southern_lollipop <- ggplot(data = range_info %>%
-                              filter(!is.na(lat_min_shift)), 
+                              filter(!is.na(.data[[lat_min_var]])), 
                             mapping = aes(y = insect,
                                           color = ew)) +
-  geom_point(mapping = aes(x = lat_min_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lat_min_shift)) +
+  geom_point(mapping = aes(x = .data[[lat_min_var]])) +
+  geom_segment(mapping = aes(x = 0, xend = .data[[lat_min_var]])) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
   scale_color_manual(name = "East/West",
                     values = ew_colors) +
@@ -108,32 +108,13 @@ southern_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 southern_lollipop
 
-southern_lollipop <- ggplot(data = range_info %>%
-                              filter(!is.na(lat_min_05_shift)), 
-                            mapping = aes(y = insect,
-                                          color = ew)) +
-  geom_point(mapping = aes(x = lat_min_05_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lat_min_05_shift)) +
-  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
-  scale_color_manual(name = "East/West",
-                     values = ew_colors) +
-  xlab(label = "Southern edge latitudinal shift (deg)") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
-                                   hjust = 1, face = "italic"),
-        axis.title.x = element_blank(),
-        strip.background = element_rect(fill = "#F0F0F0")) +
-  coord_flip() +
-  facet_grid(ssp_text ~ yr_text)
-southern_lollipop
-
 # Northern (lat_max)
 northern_lollipop <- ggplot(data = range_info %>%
-                              filter(!is.na(lat_max_shift)), 
+                              filter(!is.na(.data[[lat_max_var]])), 
                             mapping = aes(y = insect,
                                           color = ew)) +
-  geom_point(mapping = aes(x = lat_max_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lat_max_shift)) +
+  geom_point(mapping = aes(x = .data[[lat_max_var]])) +
+  geom_segment(mapping = aes(x = 0, xend = .data[[lat_max_var]])) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
@@ -147,37 +128,19 @@ northern_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 northern_lollipop
 
-northern_lollipop <- ggplot(data = range_info %>%
-                              filter(!is.na(lat_max_05_shift)), 
-                            mapping = aes(y = insect,
-                                          color = ew)) +
-  geom_point(mapping = aes(x = lat_max_05_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lat_max_05_shift)) +
-  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
-  scale_color_manual(name = "East/West",
-                     values = ew_colors) +
-  xlab(label = "Northern edge latitudinal shift (deg)") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, 
-                                   hjust = 1, face = "italic"),
-        axis.title.x = element_blank(),
-        strip.background = element_rect(fill = "#F0F0F0")) +
-  coord_flip() +
-  facet_grid(ssp_text ~ yr_text)
-northern_lollipop
 # For eastern & western plots, need to relevel the names, so they occur in 
 # ascending alphabetical order on the y axis (i.e. P. brevicauda on top and 
 # P. zelicaon on bottom)
 
 # Western (lon_min)
 western_lollipop <- ggplot(data = range_info %>%
-                             filter(!is.na(lon_min_shift)) %>%
+                             filter(!is.na(.data[[lon_min_var]])) %>%
                              mutate(insect = factor(insect,
                                                     levels = rev(unique(insect)))), 
                            mapping = aes(y = insect,
                                          color = ew)) +
-  geom_point(mapping = aes(x = lon_min_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lon_min_shift)) +
+  geom_point(mapping = aes(x = .data[[lon_min_var]])) +
+  geom_segment(mapping = aes(x = 0, xend = .data[[lon_min_var]])) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
@@ -189,34 +152,15 @@ western_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 western_lollipop
 
-western_lollipop <- ggplot(data = range_info %>%
-                             filter(!is.na(lon_min_05_shift)) %>%
-                             mutate(insect = factor(insect,
-                                                    levels = rev(unique(insect)))), 
-                           mapping = aes(y = insect,
-                                         color = ew)) +
-  geom_point(mapping = aes(x = lon_min_05_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lon_min_05_shift)) +
-  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
-  scale_color_manual(name = "East/West",
-                     values = ew_colors) +
-  xlab(label = "Western edge longitudinal shift (deg)") +
-  theme_bw() +
-  theme(axis.text.y = element_text(face = "italic"),
-        strip.background = element_rect(fill = "#F0F0F0"),
-        axis.title.y = element_blank()) +
-  facet_grid(ssp_text ~ yr_text)
-western_lollipop
-
 # Eastern (lon_max)
 eastern_lollipop <- ggplot(data = range_info %>%
-                             filter(!is.na(lon_max_shift)) %>%
+                             filter(!is.na(.data[[lon_max_var]])) %>%
                              mutate(insect = factor(insect,
                                                     levels = rev(unique(insect)))), 
                            mapping = aes(y = insect,
                                          color = ew)) +
-  geom_point(mapping = aes(x = lon_max_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lon_max_shift)) +
+  geom_point(mapping = aes(x = .data[[lon_max_var]])) +
+  geom_segment(mapping = aes(x = 0, xend = .data[[lon_max_var]])) +
   geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
@@ -228,32 +172,8 @@ eastern_lollipop <- ggplot(data = range_info %>%
   facet_grid(ssp_text ~ yr_text)
 eastern_lollipop
 
-eastern_lollipop <- ggplot(data = range_info %>%
-                             filter(!is.na(lon_max_05_shift)) %>%
-                             mutate(insect = factor(insect,
-                                                    levels = rev(unique(insect)))), 
-                           mapping = aes(y = insect,
-                                         color = ew)) +
-  geom_point(mapping = aes(x = lon_max_05_shift)) +
-  geom_segment(mapping = aes(x = 0, xend = lon_max_05_shift)) +
-  geom_vline(xintercept = 0, linetype = 2, linewidth = 0.5) +
-  scale_color_manual(name = "East/West",
-                     values = ew_colors) +
-  xlab(label = "Eastern edge longitudinal shift (deg)") +
-  theme_bw() +
-  theme(axis.text.y = element_text(face = "italic"),
-        strip.background = element_rect(fill = "#F0F0F0"),
-        axis.title.y = element_blank()) +
-  facet_grid(ssp_text ~ yr_text)
-eastern_lollipop
-
 # Make 
-# For now, just saving each lollipop as separate file; can assemble a 
-# multi-page pdf with ghostscript, e.g. from within output/plots, run in bash 
-# and note command to suppress page rotation:
-# gs -dBATCH -dNOPAUSE -sDEVICE=pdfwrite -dAutoRotatePages=/None \
-#    -sOUTPUTFILE=Figure-Supplemental-Shifts.pdf \
-#    shift-south.pdf shift-north.pdf shift-west.pdf shift-east.pdf
+# For now, just saving each lollipop as separate file
 ggsave(plot = southern_lollipop, filename = "output/manuscript/shifts/shift-south.png")
 ggsave(plot = northern_lollipop, filename = "output/manuscript/shifts/shift-north.png")
 ggsave(plot = western_lollipop, filename = "output/manuscript/shifts/shift-west.png")
@@ -263,11 +183,12 @@ ggsave(plot = eastern_lollipop, filename = "output/manuscript/shifts/shift-east.
 # plot (two facets) and latitude is another plot (two facets).
 
 # Start with data wrangling to get long-formatted data for SSP 3-7.0, 2055
+# Remember shift column names are actually stored in variables lat_min_var etc.
 range_info_long <- range_info %>%
-  select(insect, lat_min_shift, lat_max_shift, lon_min_shift, lon_max_shift,
+  select(insect, all_of(c(lat_min_var, lat_max_var, lon_min_var, lon_max_var)),
          ssp, yr, ew) %>%
   filter(ssp == "370", yr == 2041) %>%
-  pivot_longer(cols = c(lat_min_shift, lat_max_shift, lon_min_shift, lon_max_shift),
+  pivot_longer(cols = c(lat_min_var, lat_max_var, lon_min_var, lon_max_var),
                names_to = "shift",
                values_to = "value")
 
@@ -280,6 +201,15 @@ range_info_long <- range_info_long %>%
   arrange(desc(ew), insect) %>%
   mutate(insect = factor(x = insect,
                          levels = unique(insect)))
+
+# We can go ahead and update values in shift column to make things easier later 
+# on. This really just involves removing a "_05" from the string. We do this 
+# because subsequent code is looking for strings "lat_min_shift", 
+# "lat_max_shift", "lon_min_shift", and "lon_max_shift"
+range_info_long <- range_info_long %>%
+  mutate(shift = gsub(pattern = "_05",
+                      replacement = "", 
+                      x = shift))
 
 # Make named vector for labels
 facet_labels <- c("lon_min_shift" = "Western edge",
