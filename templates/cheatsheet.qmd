@@ -11,11 +11,19 @@ library(knitr) # For formatting output table
 
 A document that includes figures and legends for manuscript.
 
-Figure 1 (workflow) **TODO**
+{{< pagebreak >}}
+
+::: {#fig-workflow fig-pos="H"}
+
+![](../output/manuscript/Figure-Workflow.png)
+
+**Workflow.** More details to come.
+
+:::
 
 {{< pagebreak >}}
 
-::: {#fig-distributions}
+::: {#fig-distributions fig-pos="H"}
 
 ![](../output/manuscript/Figure-Distributions.png)
 
@@ -28,7 +36,7 @@ shown in (e) and (f).
 
 {{< pagebreak >}}
 
-::: {#fig-areas}
+::: {#fig-areas fig-pos="H"}
 
 ![](../output/manuscript/Figure-Area-Change.png)
 
@@ -41,7 +49,7 @@ under the SSP3-7.0 model in the 2050s.
 
 {{< pagebreak >}}
 
-::: {#fig-shifts}
+::: {#fig-shifts fig-pos="H"}
 
 ![](../output/manuscript/Figure-Shifts.png)
 
@@ -53,7 +61,7 @@ could be better defined_) between current climate and forecast climate for the
 
 {{< pagebreak >}}
 
-::: {fig-richness}
+::: {#fig-richness fig-pos="H"}
 
 ![](../output/manuscript/Figure-Richness.png)
 
@@ -68,7 +76,7 @@ is shown in (f).
 
 {{< pagebreak >}}
 
-::: {fig-protected}
+::: {#fig-protected fig-pos="H"}
 
 ![](../output/manuscript/Figure-Protected.png)
 
@@ -84,7 +92,7 @@ lands currently protected under one of four management categories.
 
 Figure S1 - see separate file, Supplemental-Figure-Distributions.pdf.
 
-::: {fig-s-shift-south}
+::: {#fig-s-shift-south fig-pos="H"}
 
 ![](../output/manuscript/shifts/shift-south.png)
 
@@ -98,7 +106,7 @@ horizontal dashed line indicate range expansions southward.
 
 {{< pagebreak >}}
 
-::: {fig-s-shift-north}
+::: {#fig-s-shift-north fig-pos="H"}
 
 ![](../output/manuscript/shifts/shift-north.png)
 
@@ -112,7 +120,7 @@ horizontal dashed line indicate range contractions southward.
 
 {{< pagebreak >}}
 
-::: {fig-s-shift-west}
+::: {#fig-s-shift-west fig-pos="H"}
 
 ![](../output/manuscript/shifts/shift-west.png)
 
@@ -126,7 +134,7 @@ horizontal dashed line indicate range contractions eastward.
 
 {{< pagebreak >}}
 
-::: {fig-s-shift-east}
+::: {#fig-s-shift-east fig-pos="H"}
 
 ![](../output/manuscript/shifts/shift-east.png)
 
@@ -141,7 +149,7 @@ horizontal dashed line indicate range expansions eastward.
 
 {{< pagebreak >}}
 
-::: {fig-s-richness}
+::: {#fig-s-richness fig-pos="H"}
 
 ![](../output/manuscript/Supplemental-Figure-Richness.png)
 
@@ -150,12 +158,11 @@ Total species richness of areas predicted to be suitable for _Papilio_ species
 under the SSP2-4.5 model for the 2050s (a) and 2080s (b), under the SSP3-7.0 
 model for the 2050s (c) and 2080s (d), and under the SSP5-8.5 model for the 
 2050s (e) and 2080s (f).
-
 :::
 
 {{< pagebreak >}}
 
-::: {fig-s-hotspots}
+::: {#fig-s-hotspots fig-pos="H"}
 
 ![](../output/manuscript/Supplemental-Figure-Hotspots.png)
 
@@ -164,7 +171,6 @@ Richness hotspots (areas predicted to be suitable for four or more _Papilio_
 species under the SSP2-4.5 model for the 2050s (a) and 2080s (b), under the 
 SSP3-7.0 model for the 2050s (c) and 2080s (d), and under the SSP5-8.5 model 
 for the 2050s (e) and 2080s (f).
-
 :::
 
 {{< pagebreak >}}
@@ -174,17 +180,16 @@ for the 2050s (e) and 2080s (f).
 This figure isn't made. It would be like panel e of the main manuscript 
 richness figure, shown below:
 
-::: {fig-s-delta}
+::: {#fig-s-delta fig-pos="H"}
 
 ![](../output/manuscript/Figure-Richness.png)
 
 **Illustration purposes only**. See panel e and note above figure.
-
 :::
 
 {{< pagebreak >}}
 
-::: {fig-s-protected}
+::: {#fig-s-protected fig-pos="H"}
 
 ![](../output/manuscript/Supplemental-Figure-Protected.png)
 
@@ -193,12 +198,11 @@ Total area suitable for at least four species of North American _Papilio_ shown
 for SSP2-4.5 (a) and SSP5-8.5 (b). Total area for SSP2-4.5 (c) and SSP5-8.5 (d) 
 and percent area for SSP2-4.5 (e) and SSP5-8.5 (f) of richness hotspots that 
 occur on lands currently protected under one of four management categories.
-
 :::
 
 {{< pagebreak >}}
 
-::: {tbl-area-overlap}
+::: {#tbl-area-overlap fig-pos="H"}
 
 ```{r sup-table-1, echo = FALSE}
 #| tbl-colwidths: [25, 25, 25, 25]
@@ -212,5 +216,4 @@ kable(area_overlap)
 Supplemental Table 1. Total suitable area and suitable area overlapping the 
 suitable area for at least one host plant species for `r nrow(area_overlap)` 
 species of _Papilio_ under current climate conditions.
-
 :::
