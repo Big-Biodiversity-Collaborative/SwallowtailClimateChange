@@ -104,8 +104,6 @@ changes_points <- ggplot(data = area_long %>%
   coord_flip()
 changes_points
 
-# TODO: This is the plot to use. May still combine by just using area, and 
-# labelling points with the percentage change
 # bquote("Area gained"~(km^2))
 facet_names <- c("area_delta" = "Change in total suitable area (1K km^2)",
                  "perc_delta" = "Change in total suitable area (%)",
@@ -148,6 +146,8 @@ ggsave(file = "output/manuscript/Figure-Area-Change.png",
        width = 6,
        height = 4)
 
+# TODO: This (below) is the plot to use. May still combine by just using area, 
+# and labeling points with the percentage change
 
 # Want to instead remove perc_delta plot, and instead include the information 
 # as a text annotation to the area_delta facet. To ensure this _only_ shows up 
@@ -189,13 +189,15 @@ label_data <- delta_data %>%
 nudge_y <- ifelse(test = label_data$perc_delta > 0,
                   yes = 100,
                   no = -100)
-    
+# box_fill <- ifelse(test = label_data$perc_delta > 0,
+#                    yes = "black",
+#                    no = "white")
+box_color <- ifelse(test = label_data$perc_delta > 0,
+                   yes = "black",
+                   no = "red")
+
 facet_names <- c("area_delta" = "Change in total suitable area (1K km^2)",
                  "perc_current" = "Currently suitable area retained (%)")
-
-
-# p <- p + geom_text(data = data.frame(x = 15, y = 5, cyl = 4, label = "Test"), 
-#                    aes(x = x, y = y, label = label), size = 4)
 
 delta_points <- ggplot(data = delta_data %>%
                          filter(change %in% c("area_delta", "perc_current")), 
@@ -203,13 +205,14 @@ delta_points <- ggplot(data = delta_data %>%
                                      y = area_km,
                                      color = ew)) +
   geom_hline(mapping = aes(yintercept = hline), linetype = 2, linewidth = 0.5) +
-  geom_point(size = 2) +
   geom_label(data = label_data, mapping = aes(y = area_delta, 
                                               label = label_text),
-             color = "black",
+             color = box_color, #"black",
+             # fill = box_fill,
              nudge_x = 0.25, 
              nudge_y = nudge_y,
              size = 2) +
+  geom_point(size = 2) +
   scale_color_manual(name = "East/West",
                      values = ew_colors) +
   coord_flip() +
