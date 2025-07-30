@@ -148,6 +148,88 @@ ggsave(file = "output/manuscript/Figure-Area-Change.png",
        width = 6,
        height = 4)
 
+
+# Want to instead remove perc_delta plot, and instead include the information 
+# as a text annotation to the area_delta facet. To ensure this _only_ shows up 
+# in that facet (and not the perc_current facet), will need to set the value 
+# of change to "area_delta" in the dataset we pass to geom_text.
+
+# Start by pulling out the two change values for facets
+delta_data <- area_long %>%
+  filter(change %in% c("area_delta", "perc_current", "perc_delta")) %>%
+  # Add an hline column for where to draw the line of no change
+  mutate(hline = if_else(change == "perc_current",
+                         true = 100,
+                         false = 0))%>%
+  # Make the area_delta easier to read by converting it to 1000s of km
+  mutate(area_km = if_else(change == "area_delta",
+                           area_km/1000,
+                           area_km))
+
+# Now we need to move the perc_delta values (which are in the inappropriately 
+# named column area_km) to their own column, at least for rows where change is 
+# "area_delta". Getting kind of lazy and just making a new data frame
+label_data <- delta_data %>%
+  filter(change %in% c("area_delta", "perc_delta")) %>%
+  select(-hline) %>%
+  # Transform to wide
+  pivot_wider(id_cols = c(insect, ew), names_from = change, values_from = area_km) %>%
+  # Create a label that will look nice on the plot
+  mutate(label_text = if_else(perc_delta > 0,
+                              true = paste0("+", round(perc_delta, 0), "%"),
+                              false = paste0(round(perc_delta, 0), "%"))) %>%
+  # Add back the change column so it shows up only in the area_delta facet
+  mutate(change = "area_delta")
+  # Add a little vector we can use to nudge the labels left (net loss) or right 
+  # (net gain)
+  # mutate(nudge_y = if_else(perc_delta >0,
+  #                          true = 100,
+  #                          false = -100))
+
+nudge_y <- ifelse(test = label_data$perc_delta > 0,
+                  yes = 100,
+                  no = -100)
+    
+facet_names <- c("area_delta" = "Change in total suitable area (1K km^2)",
+                 "perc_current" = "Currently suitable area retained (%)")
+
+
+# p <- p + geom_text(data = data.frame(x = 15, y = 5, cyl = 4, label = "Test"), 
+#                    aes(x = x, y = y, label = label), size = 4)
+
+delta_points <- ggplot(data = delta_data %>%
+                         filter(change %in% c("area_delta", "perc_current")), 
+                       mapping = aes(x = insect, 
+                                     y = area_km,
+                                     color = ew)) +
+  geom_hline(mapping = aes(yintercept = hline), linetype = 2, linewidth = 0.5) +
+  geom_point(size = 2) +
+  geom_label(data = label_data, mapping = aes(y = area_delta, 
+                                              label = label_text),
+             color = "black",
+             nudge_x = 0.25, 
+             nudge_y = nudge_y,
+             size = 2) +
+  scale_color_manual(name = "East/West",
+                     values = ew_colors) +
+  coord_flip() +
+  theme_bw() +
+  facet_grid(~ change, scale = "free_x", labeller = as_labeller(facet_names)) +
+  theme(axis.text.y = element_text(face = "italic", size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        strip.background = element_blank(),
+        strip.text = element_text(size = 6),
+        legend.position = "none")
+delta_points
+ggsave(file = "output/manuscript/Figure-Area-Change.png",
+       plot = delta_points,
+       width = 6,
+       height = 4)
+
+
+
 # Area gained 
 gained <- ggplot(data = range_info, mapping = aes(x = area_gained,
                                                   group = ew,
