@@ -289,7 +289,7 @@ delta_ggplot <- function(nice_name, model, plot_params, title = NULL,
 ################################################################################
 # Figure [1] (not Figure 1 in manuscript)
 # Main manuscript figure for two species
-main_species <- c("papilio_glaucus", "papilio_rutulus")
+main_species <- c("papilio_indra", "papilio_cresphontes")
 
 # + Predicted suitable areas for contemporary climate
 # + Predicted suitable areas for 2050s, under SSP3-7.0

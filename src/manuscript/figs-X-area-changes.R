@@ -196,11 +196,14 @@ box_color <- ifelse(test = label_data$perc_delta > 0,
                    yes = "black",
                    no = "red")
 
-facet_names <- c("area_delta" = "Change in total suitable area (1K km^2)",
-                 "perc_current" = "Currently suitable area retained (%)")
+facet_names <- c("perc_current" = "Currently suitable area retained (%)",
+                 "area_delta" = "Change in total suitable area (1K km^2)")
 
+#TODO: facets should be switched in order, but it isn't working??
 delta_points <- ggplot(data = delta_data %>%
-                         filter(change %in% c("area_delta", "perc_current")), 
+                         filter(change %in% c("area_delta", "perc_current")) %>%
+                         mutate(change = factor(x = change,
+                                                levels = c("perc_current", "area_delta"))), 
                        mapping = aes(x = insect, 
                                      y = area_km,
                                      color = ew)) +
@@ -230,7 +233,6 @@ ggsave(file = "output/manuscript/Figure-Area-Change.png",
        plot = delta_points,
        width = 6,
        height = 4)
-
 
 
 # Area gained 

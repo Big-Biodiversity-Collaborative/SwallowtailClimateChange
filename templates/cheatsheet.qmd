@@ -27,11 +27,21 @@ A document that includes figures and legends for manuscript.
 
 ![](../output/manuscript/Figure-Distributions.png)
 
-**Predicted areas of suitability for two _Papilio_ species.** Areas 
-predicted to be suitable for _P. cresphontes_  and _P. rumiko_ under current 
-climate conditions (a, b) and under the SSP3-7.0 model in the 2050s (c, d). The 
-changes in suitability between current conditions and SSP3-7.0 in the 2050s are 
-shown in (e) and (f).
+**Predicted areas of suitability for two _Papilio_ species.** Examples of areas 
+that are predicted to be climatically suitable for a swallowtail species and 
+their respective host plants now (a, b) and in the mid-twenty-first century (c, 
+d), as well as predicted changes in swallowtail distributions between now and 
+the mid-twenty-first century (e, f). Predictions for _Papilio indra_ are in the 
+left column and predictions for _P. cresphontes_ are in the right column. 
+Current distributions of butterflies are a consequence of mainly host suitable 
+habitat while future distributions of both _Papilio_ species  are expected to 
+expand in some areas and contract in other areas due to both climatic and host-
+plant distributions. Loss of suitable area may occur when a region is not 
+predicted to be climatically suitable for the swallowtail in the future (e.g., 
+_P. indra_ in California) or because an area is not predicted to be 
+climatically suitable for any of the swallowtail’s host plants (_P. cresphontes_
+in Florida).
+
 :::
 
 {{< pagebreak >}}
@@ -41,10 +51,8 @@ shown in (e) and (f).
 ![](../output/manuscript/Figure-Area-Change.png)
 
 **Predicted changes in suitable area under the SSP3-7.0 model in the 2050s.** 
-The change in total suitable area, which includes currently unsuitable areas, 
-in 1,000 km^2, the percentage of currently suitable area retained in the 
-SSP3-7.0 model in the 2050s, and the total percentage change in suitable area 
-under the SSP3-7.0 model in the 2050s.
+Percentage currently suitable area retained (left) and net change in total 
+suitable area (right) in the SSP3-7.0 model in the 2050s.
 :::
 
 {{< pagebreak >}}

@@ -1,0 +1,21 @@
+Proportion current suitable area retained 
+method:  Wilcoxon rank sum exact test 
+W =  13 
+p =  0.04693085 
+alternative:  less 
+
+***
+
+Net change in suitable area 
+method:  Wilcoxon rank sum exact test 
+W =  16 
+p =  0.09463869 
+alternative:  less 
+
+***
+
+Net change in suitable area 
+method:  Wilcoxon rank sum exact test 
+W =  15 
+p =  0.07599068 
+alternative:  less 
