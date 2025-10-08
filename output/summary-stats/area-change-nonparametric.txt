@@ -6,7 +6,7 @@ alternative:  less
 
 ***
 
-Net change in suitable area 
+Percentage change in suitable area 
 method:  Wilcoxon rank sum exact test 
 W =  16 
 p =  0.09463869 

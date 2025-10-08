@@ -59,7 +59,7 @@ cat("alternative: ", test_results$alternative, "\n")
 
 test_results <- mw_perc_net_change
 
-cat("\n***\n\nNet change in suitable area", "\n")
+cat("\n***\n\nPercentage change in suitable area", "\n")
 cat("method: ", test_results$method, "\n")
 cat("W = ", test_results$statistic, "\n")
 cat("p = ", test_results$p.value, "\n")
