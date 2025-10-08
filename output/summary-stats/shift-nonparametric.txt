@@ -1,0 +1,29 @@
+Southern edge shifts 
+method:  Wilcoxon rank sum exact test 
+W =  28 
+p =  0.710373 
+alternative:  two.sided 
+
+***
+
+Northern edge shifts 
+method:  Wilcoxon rank sum exact test 
+W =  33 
+p =  0.3175991 
+alternative:  two.sided 
+
+***
+
+Western edge shifts 
+method:  Wilcoxon rank sum exact test 
+W =  25 
+p =  1 
+alternative:  two.sided 
+
+***
+
+Eastern edge shifts 
+method:  Wilcoxon rank sum exact test 
+W =  18 
+p =  0.455711 
+alternative:  two.sided 
