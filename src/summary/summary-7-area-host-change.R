@@ -158,6 +158,8 @@ prop_forecast_plot <- ggplot(data = sans_app_brevi,
                              mapping = aes(x = num_hosts, y = prop_forecast)) +
   geom_point() +
   geom_line(data = pred_forecast) +
+  geom_segment(mapping = aes(x = 0, y = 1.0, xend = max(num_hosts), yend = 1.0),
+             linetype = 3) +
   ylab("Relative suitable area") +
   xlab("Number of host plant species") +
   theme_bw()
