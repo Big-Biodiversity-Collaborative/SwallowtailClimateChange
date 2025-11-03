@@ -10,6 +10,7 @@
 require(dplyr)
 require(tidyr)
 require(terra)
+require(ggplot2)
 
 # Get list of insects
 ih <- read.csv(file = "data/insect-host.csv")
@@ -169,3 +170,131 @@ areas_df <- areas_df %>%
 write.csv(file = "output/summary-stats/overlap-changes.csv",
           x = areas_df,
           row.names = FALSE)
+
+################################################################################
+# Now look at stats, in terms of number of host plants
+
+areas_df <- read.csv(file = "output/summary-stats/overlap-changes.csv")
+
+# Get insect host plant list
+ih <- read.csv(file = "data/insect-host.csv")
+
+# Want to drop those plant species that were not included (too few 
+# observations, which we will use as proxy to say plant is not available as a 
+# host in North America)
+pa_summary <- read.csv(file = "data/gbif-pa-summary.csv")
+# Drop species that we did not create a presence/absence file for
+pa_summary <- pa_summary[pa_summary$pa_csv == "yes", ]
+keep_plant <- ih$host_accepted %in% pa_summary$species
+
+# Drop those records for the plants we just excluded 
+ih <- ih[keep_plant, ]
+
+# Do host plant species count
+host_counts <- ih %>%
+  group_by(insect) %>%
+  summarize(num_hosts = n())
+
+# Join the count data with the area change calculations
+areas_df <- areas_df %>%
+  left_join(host_counts, by = c("insect" = "insect"))
+
+# Drop P. aristodemus
+areas_df <- areas_df %>%
+  filter(insect != "Papilio aristodemus")
+
+# For area_lost/area_gained, NA should be 0
+areas_df <- areas_df %>%
+  mutate(across(area_lost_both:area_gained_plant,  
+                ~ if_else(is.na(.x),
+                        0,
+                        .x)))
+         
+# Hypothesis: specialists will have greater proportion area lost to plant 
+# (plant and insect) vs area lost only to bug
+
+# Considering areas that become unsuitable for any host plant species 
+# (regardless of whether area is or is not suitable for insect)
+ggplot(data = areas_df %>% 
+         filter(climate == "ssp370_2041") %>%
+         filter(insect != "Papilio appalachiensis"),
+       mapping = aes(x = num_hosts, y = (area_lost_both + area_lost_plant)/area_current)) + 
+  geom_point()
+
+ggplot(data = areas_df %>% 
+         filter(climate == "ssp370_2041") %>%
+         filter(insect != "Papilio appalachiensis") %>%
+         filter(insect != "Papilio brevicauda"),
+       mapping = aes(x = num_hosts, y = (area_gained_both + area_gained_plant)/area_current)) + 
+  geom_point()
+
+# Areas lost
+# Longer data for bar chart
+areas_lost_long <- areas_df %>%
+  select(-c(area_current, num_hosts, area_gained_both, area_gained_insect, area_gained_plant)) %>%
+  # Want to plot proportions
+  mutate(total_lost = area_lost_both + area_lost_plant + area_lost_insect) %>%
+  mutate(prop_lost_both = area_lost_both/total_lost,
+         prop_lost_insect = area_lost_insect/total_lost,
+         prop_lost_plant = area_lost_plant/total_lost) %>%
+  select(-c(area_lost_both, area_lost_insect, area_lost_plant, total_lost)) %>%
+  pivot_longer(cols = -c(insect, climate),
+               names_to = "type",
+               values_to = "area")
+
+areas_lost_long <- areas_lost_long %>%
+  mutate(type = factor(type, levels = c("prop_lost_plant",
+                                        "prop_lost_both",
+                                        "prop_lost_insect")))
+
+ggplot(data = areas_lost_long %>%
+         filter(insect != "Papilio appalachiensis") %>%
+         filter(climate == "ssp370_2041"),
+       mapping = aes(x = insect)) +
+  geom_bar(stat = "identity",
+           mapping = aes(y = area, fill = type)) +
+  scale_fill_manual(values = c("#66C2A5", "#FC8D62", "#8DA0CB"))
+
+# Areas gained
+areas_gained_long <- areas_df %>%
+  select(-c(area_current, num_hosts, area_lost_both, area_lost_insect, area_lost_plant)) %>%
+  # Want to plot proportions
+  mutate(total_gained = area_gained_both + area_gained_plant + area_gained_insect) %>%
+  mutate(prop_gained_both = area_gained_both/total_gained,
+         prop_gained_insect = area_gained_insect/total_gained,
+         prop_gained_plant = area_gained_plant/total_gained) %>%
+  select(-c(area_gained_both, area_gained_insect, area_gained_plant, total_gained)) %>%
+  pivot_longer(cols = -c(insect, climate),
+               names_to = "type",
+               values_to = "area")
+
+areas_gained_long <- areas_gained_long %>%
+  mutate(type = factor(type, levels = c("prop_gained_plant",
+                                        "prop_gained_both",
+                                        "prop_gained_insect")))
+
+ggplot(data = areas_gained_long %>%
+         filter(insect != "Papilio appalachiensis") %>%
+         filter(climate == "ssp370_2041"),
+       mapping = aes(x = insect)) +
+  geom_bar(stat = "identity",
+           mapping = aes(y = area, fill = type)) +
+  scale_fill_manual(values = c("#66C2A5", "#FC8D62", "#8DA0CB"))
+
+# A little t-test comparing prop_lost_insect to prop_gained_insect
+prop_lost <- areas_lost_long %>%
+  filter(insect != "Papilio appalachiensis") %>%
+  filter(climate == "ssp370_2041")
+prop_gained <- areas_gained_long %>%
+  filter(insect != "Papilio appalachiensis") %>%
+  filter(climate == "ssp370_2041")
+
+# t.test(x = prop_lost$area[prop_lost$type == "prop_lost_insect"],
+#        y = prop_gained$area[prop_gained$type == "prop_gained_insect"])
+# t = 2.5571, df = 25.881, p-value = 0.01677
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   0.05073895 0.46705754
+# sample estimates:
+#   mean of x mean of y 
+# 0.7575052 0.4986070 
