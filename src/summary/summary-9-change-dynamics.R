@@ -11,6 +11,7 @@ require(dplyr)
 require(tidyr)
 require(terra)
 require(ggplot2)
+require(DirichletReg)
 
 # Get list of insects
 ih <- read.csv(file = "data/insect-host.csv")
@@ -298,3 +299,76 @@ prop_gained <- areas_gained_long %>%
 # sample estimates:
 #   mean of x mean of y 
 # 0.7575052 0.4986070 
+
+################################################################################
+# A more appropriate approach is Dirichlet regression, a multivariate extension 
+# of the beta regression approach for proportions
+
+# Want data in the following format:
+# insect | plant | both | type
+# where the first three columns are proportions that sum to 1, and type 
+# indicates gain or loss
+# Start by calculating proportions
+areas_prop_df <- areas_df %>%
+  select(-c(num_hosts)) %>%
+  mutate(area_lost = area_lost_both + area_lost_insect + area_lost_plant,
+         area_gained = area_gained_both + area_gained_insect + area_gained_plant) %>%
+  mutate(across(area_lost_both:area_lost_plant,
+                ~ .x/area_lost)) %>%
+  mutate(across(area_gained_both:area_gained_plant,
+                ~ .x/area_gained))
+  # mutate(across(area_lost_both:area_lost_plant),
+  #        ~ .x/sum(area_lost_both:area_lost_plant)) %>%
+  # mutate(across(area_gained_both:area_gained_plant),
+  #        ~ .x/sum(area_gained_both:area_gained_plant))
+  
+
+
+head(areas_prop_df %>% filter(insect == "Papilio brevicauda"))
+
+# We want to change to longer format now
+areas_prop_long <- areas_prop_df %>%
+  pivot_longer(cols = area_lost_both:area_gained_plant) %>%
+  mutate(type = if_else(substr(x = name, start = 1, stop = 9) == "area_lost",
+                        true = "loss",
+                        false = "gain")) %>%
+  mutate(name = gsub(pattern = "area_lost_",
+                     replacement = "",
+                     x = name)) %>%
+  mutate(name = gsub(pattern = "area_gained_", # Lazy, regex-hating bum
+                     replacement = "",
+                     x = name))
+
+# Now we go back to wider format (seems inefficient?)
+areas_prop_wide <- areas_prop_long %>%
+  select(-c(area_current, area_lost, area_gained)) %>%
+  rename(species = insect) %>% # otherwise end up with two "insect" columns
+  pivot_wider(id_cols = c(species, climate, type),
+              names_from = name,
+              values_from = value)
+
+head(areas_prop_long)
+head(areas_prop_wide)
+
+# For now, just look at ssp370_2041, remove P. appalachiensis, as there are no 
+# gains, and drop species and climate info from data frame
+areas_prop_ssp370_2041 <- areas_prop_wide %>%
+  filter(climate == "ssp370_2041") %>%
+  filter(species != "Papilio appalachiensis") %>%
+  select(-c(species, climate)) %>%
+  as.data.frame()
+
+# Reality check
+prop_sums <- rowSums(areas_prop_ssp370_2041[, 2:4])
+prop_sums
+
+# Now (finally!) we do Dirichlet regression
+# Prepare the data (should be ready)
+# Warning in DR_data(areas_prop_ssp370_2041[, 2:4]) :
+#   some entries are 0 or 1 => transformation forced
+areas_prop_DR <- DR_data(areas_prop_ssp370_2041[, 2:4])
+
+areas_DR <- DirichReg(areas_prop_DR ~ type, areas_prop_ssp370_2041)
+summary(areas_DR)
+plot(areas_prop_DR) # TODO: Maybe look to ggtern for a better plot
+
