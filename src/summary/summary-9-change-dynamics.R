@@ -12,6 +12,9 @@ require(tidyr)
 require(terra)
 require(ggplot2)
 require(DirichletReg)
+require(ggtern)
+
+source(file = "functions/get_colors.R")
 
 # Get list of insects
 ih <- read.csv(file = "data/insect-host.csv")
@@ -371,4 +374,20 @@ areas_prop_DR <- DR_data(areas_prop_ssp370_2041[, 2:4])
 areas_DR <- DirichReg(areas_prop_DR ~ type, areas_prop_ssp370_2041)
 summary(areas_DR)
 plot(areas_prop_DR) # TODO: Maybe look to ggtern for a better plot
+
+
+gl_colors <- get_colors(palette = "distdelta")
+ggtern(data = areas_prop_ssp370_2041, 
+       mapping = aes(x = insect, y = both, z = plant)) +
+  geom_point(mapping = aes(color = type)) +
+  tern_limit(T = 1.05, L = 1.05, R = 1.05) +
+  scale_color_manual(values = c(gl_colors[c(3, 2)])) +
+  theme_bw() + 
+  theme_showarrows()
+
+################################################################################
+# What if we did a binary approach, and just looked at plant or insect change, 
+# ditching the "both" consideration...
+# But then props will sum to greater than 1...
+# Seems like a non-parametric approach would be able to handle this just fine
 
