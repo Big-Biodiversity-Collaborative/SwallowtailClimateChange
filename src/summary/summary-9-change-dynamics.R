@@ -373,9 +373,9 @@ areas_prop_DR <- DR_data(areas_prop_ssp370_2041[, 2:4])
 
 areas_DR <- DirichReg(areas_prop_DR ~ type, areas_prop_ssp370_2041)
 summary(areas_DR)
-plot(areas_prop_DR) # TODO: Maybe look to ggtern for a better plot
+plot(areas_prop_DR)
 
-
+# Better plot with ggtern?
 gl_colors <- get_colors(palette = "distdelta")
 ggtern(data = areas_prop_ssp370_2041, 
        mapping = aes(x = insect, y = both, z = plant)) +
@@ -386,8 +386,122 @@ ggtern(data = areas_prop_ssp370_2041,
   theme_showarrows()
 
 ################################################################################
-# What if we did a binary approach, and just looked at plant or insect change, 
-# ditching the "both" consideration...
-# But then props will sum to greater than 1...
-# Seems like a non-parametric approach would be able to handle this just fine
+# Thinking about this in terms of direct effects of climate change (a place is 
+# no longer suitable for the insect) and indirect effects of climate change 
+# (place is still suitable for insect, but no longer suitable for any host 
+# plant species).
 
+# Start by just looking at the losses
+losses_df <- areas_prop_df %>%
+  mutate(direct = area_lost_both + area_lost_insect,
+         indirect = area_lost_plant) %>%
+  select(insect, climate, direct, indirect)
+head(losses_df)
+
+# Just look at one climate scenario
+losses_df_ssp370_2041 <- losses_df %>%
+  filter(climate == "ssp370_2041") %>%
+  select(-climate)
+
+# make a boxplot (starting with transform to long data)
+ld_long <- losses_df_ssp370_2041 %>%
+  pivot_longer(cols = c(direct, indirect), 
+               names_to = "type", 
+               values_to = "value")
+  
+ggplot(data = ld_long,
+       mapping = aes(x = type, y = value, color = type)) +
+  geom_boxplot()
+
+ggplot(data = ld_long,
+       mapping = aes(x = insect, y = value)) +
+  geom_point() +
+  coord_flip() +
+  facet_wrap(~ type)
+
+# Run t-test, which is absurd
+t.test(x = losses_df$direct, y = losses_df$indirect,
+       paired = FALSE)
+
+# Honestly, I wonder if it might be more interesting to compare within effect 
+# type (direct, indirect) across gain or loss. Can still to paired t-test, but 
+# the question is to consider what are gain direct vs. indirect. Maybe go ahead
+# and just have three separate categories (still kinda fuzzy with the gain 
+# indirect...)
+head(areas_prop_df)
+# Need to get long data
+areas_3_long <- areas_prop_df %>%
+  select(-c(area_current, area_lost, area_gained)) %>%
+  pivot_longer(cols = -c(insect, climate))
+
+# Update names 
+areas_3_long <- areas_3_long %>%
+  mutate(name = gsub(pattern = "area_",
+                     replacement = "",
+                     x = name))
+areas_3_long <- areas_3_long %>%
+  mutate(gl = if_else(substr(x = name, start = 1, stop = 4) == "lost",
+                      true = "loss",
+                      false = "gain"))
+areas_3_long <- areas_3_long %>%
+  mutate(name = gsub(pattern = "lost_|gained_",
+                     replacement = "", 
+                     name))
+areas_3_long <- areas_3_long %>%
+  mutate(type = case_when(name == "both" ~ "combination",
+                          name == "insect" ~ "direct",
+                          name == "plant" ~ "indirect")) %>%
+  select(-name)
+
+# Do the restriction by climate and drop P. appalachiensis
+areas_3_long <- areas_3_long %>%
+  filter(climate == "ssp370_2041") %>%
+  filter(insect != "Papilio appalachiensis") %>%
+  select(-climate)
+
+head(areas_3_long)
+# Three t-tests, one for each type of effect (direct, indirect, combination)
+# Make three datasets, one for each type of effect, then run t-test
+# Direct effects (only thing changing is suitability of insect)
+direct <- areas_3_long %>%
+  filter(type == "direct") %>%
+  select(-type) %>%
+  pivot_wider(id_cols = insect, names_from = gl, values_from = value)
+head(direct)
+
+direct_t <- t.test(x = direct$loss,
+                   y = direct$gain,
+                   paired = TRUE)
+direct_t
+
+# Indirect effects (only thing changing is suitability of plant)
+indirect <- areas_3_long %>%
+  filter(type == "indirect") %>%
+  select(-type) %>%
+  pivot_wider(id_cols = insect, names_from = gl, values_from = value)
+
+indirect_t <- t.test(x = indirect$loss,
+                     y = indirect$gain,
+                     paired = TRUE)
+indirect_t
+
+# Combination (suitability of area changes for both plant and insect)
+combination <- areas_3_long %>%
+  filter(type == "combination") %>%
+  select(-type) %>%
+  pivot_wider(id_cols = insect, names_from = gl, values_from = value)
+
+combination_t <- t.test(x = combination$loss,
+                        y = combination$gain,
+                        paired = TRUE)
+combination_t
+
+# Boxplot showing this stuff?
+gl_colors <- get_colors(palette = "distdelta")
+gl_colors <- gl_colors[c("gain", "loss")]
+areas_3_long <- areas_3_long %>%
+  mutate(type = factor(x = type, levels = c("direct", "indirect", "combination")))
+ggplot(data = areas_3_long, mapping = aes(x = type, y = value, fill = gl)) +
+  geom_boxplot() +
+  scale_fill_manual(values = gl_colors) +
+  theme_bw()
