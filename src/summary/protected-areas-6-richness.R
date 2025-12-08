@@ -38,11 +38,11 @@ current_richness <- terra::rast(x = "output/richness/current-richness-ov.rds")
 # Calculate average richness in protected areas for current climate
 # Pull out richness values for each type of protected area (takes less than a 
 # minute). We need individual cell richness values for subsequent t-tests
-cell_richness <- exactextractr::exact_extract(x = current_richness, 
+current_cell_richness <- exactextractr::exact_extract(x = current_richness, 
                                       y = sf::st_as_sf(protected_areas),
                                       progress = FALSE)
 # Resultant list is unnamed, so we want to name it
-names(cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
+names(current_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
 
 # We can use exact_extract to get summary stats, too, with means and standard 
 # deviation weighted by cell coverage
@@ -70,14 +70,15 @@ for (model_i in 1:nrow(forecast_models)) {
   forecast_richness <- terra::rast(forecast_file)
     
   # Calculate average richness in protected areas
-  message("Calculating richness and summary stats for ", model_name_short)
-  cell_richness <- exactextractr::exact_extract(x = forecast_richness, 
-                                                y = sf::st_as_sf(protected_areas),
-                                                progress = FALSE)
+  # message("Calculating richness and summary stats for ", model_name_short)
+  # forecast_cell_richness <- exactextractr::exact_extract(x = forecast_richness, 
+  #                                               y = sf::st_as_sf(protected_areas),
+  #                                               progress = FALSE)
   # Resultant list is unnamed, so we want to name it
-  names(cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
+  # names(forecast_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
   
   # Get summary stats for each protected area type
+  message("Calculating summary stats for ", model_name_short)
   summary_stats <- exactextractr::exact_extract(x = forecast_richness,
                                                 y = sf::st_as_sf(protected_areas),
                                                 progress = FALSE,
@@ -87,8 +88,42 @@ for (model_i in 1:nrow(forecast_models)) {
                          summary_stats)
   protected_stats[[model_name_short]] <- summary_stats
   
-  # TODO: Do t-test (or other?) to compares current vs forecast richness
+  # Instead of doing paired t-test with two vectors, do paired t-test with a 
+  # single vector that is the difference between...
+  message("Running t-test on current vs forecast richness for ", model_name_short)
+  # We need to make sure rasters are the same extent, so do a pair of crops as 
+  # we are doing the math
+  delta_richness = terra::crop(current_richness, forecast_richness) - 
+    terra::crop(forecast_richness, current_richness)
   
+  delta_cell_richness <- exactextractr::exact_extract(x = delta_richness,
+                                                      y = sf::st_as_sf(protected_areas),
+                                                      progress = FALSE)
+  names(delta_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
+
+  # Use protection level as iterator with lapply
+  prot_level <- names(delta_cell_richness)
+  # Extract t-test results, elements of a t-test object that we are interested 
+  # in: p.value, estimate, conf.int (a two-element vector), statistic, 
+  # parameter (df in this case)
+  richness_t_test <- lapply(X = prot_level,
+                            FUN = function(x, delta_cells) {
+                              delta_t <- t.test(x = delta_cells[[x]][, "value"],
+                                                mu = 0)
+                              delta_t <- data.frame(t = delta_t$statistic,
+                                                    df = delta_t$parameter,
+                                                    p = delta_t$p.value,
+                                                    estimate = delta_t$estimate,
+                                                    lwr = delta_t$conf.int[1],
+                                                    upr = delta_t$conf.int[2])
+                              rownames(delta_t) <- NULL
+                              return(delta_t)
+                            },
+                            delta_cells = delta_cell_richness)
+  
+  names(richness_t_test) <- prot_level
+  richness_t[[model_name_short]] <- richness_t_test %>%
+    bind_rows(.id = "protection_level")
 } # End iterating over all forecast climate models
 
 # Combine summary stats list elements into a single data frame
@@ -96,8 +131,19 @@ protected_stats <- protected_stats %>%
   bind_rows(.id = "climate_model")
 
 # Write those summary stats to file
+write.csv(x = protected_stats,
+          file = "output/summary-stats/protected-areas-richness.csv",
+          row.names = FALSE)
 
 # Extract t-test results
+richness_t <- richness_t %>% 
+  bind_rows(.id = "climate_model")
 
-# May need to kinda do this piecemeal. Will need some form of multiple 
-# comparison correction. Holm-Bonferroni makes sense.
+# Multiple comparison correction. Holm-Bonferroni makes sense.
+richness_t <- richness_t %>%
+  mutate(adj_p = p.adjust(p = p, method = "holm"))
+  
+write.csv(x = richness_t,
+          file = "output/summary-stats/richness-t.csv",
+          row.names = FALSE)
+
