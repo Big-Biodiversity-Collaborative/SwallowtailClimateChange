@@ -219,3 +219,8 @@ if (!(file.exists(summary_filename) & replace == FALSE)) {
             file = summary_filename, 
             row.names = FALSE)
 }
+
+# TODO: We could do a paired (within species) t-test to look for overall 
+# changes in amount protected. It would be nice to do this for individual 
+# species', too, but would need to do something other than area (which is a 
+# single number)...

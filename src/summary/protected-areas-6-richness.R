@@ -5,6 +5,8 @@
 
 require(dplyr)
 require(terra)
+require(exactextractr)
+require(ggplot2)
 
 # Want to know average richness in protected vs. unprotected areas (maybe not?)
 #    TODO: For the above, may need to decide which areas to look at - all of 
@@ -46,10 +48,11 @@ names(current_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
 
 # We can use exact_extract to get summary stats, too, with means and standard 
 # deviation weighted by cell coverage
+cell_stats <- c("mean", "stdev", "count")
 summary_stats <- exactextractr::exact_extract(x = current_richness,
                                               y = sf::st_as_sf(protected_areas),
                                               progress = FALSE,
-                                              fun = c("mean", "stdev"),
+                                              fun = cell_stats,
                                               force_df = TRUE)
 summary_stats <- cbind(agency = data.frame(protected_areas)$AGNCY_SHOR, 
                        summary_stats)
@@ -68,21 +71,13 @@ for (model_i in 1:nrow(forecast_models)) {
                           model_name, 
                           "-richness-ov.rds")
   forecast_richness <- terra::rast(forecast_file)
-    
-  # Calculate average richness in protected areas
-  # message("Calculating richness and summary stats for ", model_name_short)
-  # forecast_cell_richness <- exactextractr::exact_extract(x = forecast_richness, 
-  #                                               y = sf::st_as_sf(protected_areas),
-  #                                               progress = FALSE)
-  # Resultant list is unnamed, so we want to name it
-  # names(forecast_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
-  
+
   # Get summary stats for each protected area type
   message("Calculating summary stats for ", model_name_short)
   summary_stats <- exactextractr::exact_extract(x = forecast_richness,
                                                 y = sf::st_as_sf(protected_areas),
                                                 progress = FALSE,
-                                                fun = c("mean", "stdev"),
+                                                fun = cell_stats,
                                                 force_df = TRUE)
   summary_stats <- cbind(agency = data.frame(protected_areas)$AGNCY_SHOR, 
                          summary_stats)
@@ -144,6 +139,41 @@ richness_t <- richness_t %>%
   mutate(adj_p = p.adjust(p = p, method = "holm"))
   
 write.csv(x = richness_t,
-          file = "output/summary-stats/richness-t.csv",
+          file = "output/summary-stats/protected-areas-richness-t.csv",
           row.names = FALSE)
 
+# Do a plot of richness, comparing current to forecast. For now, just do the 
+# SSP3-7.0 2041; four panes: one for each protection level
+protected_stats <- read.csv(file = "output/summary-stats/protected-areas-richness.csv")
+protected_for_plot <- protected_stats %>%
+  filter(climate_model %in% c("current", "ssp370_2041"))
+
+protected_for_plot <- protected_for_plot %>%
+  mutate(agency = factor(x = agency,
+                         levels = c("National", "State", "Local", "Private")))
+
+protected_scatterplot <- ggplot(data = protected_for_plot,
+                                mapping = aes(x = climate_model,
+                                              y = mean)) +
+  geom_point() +
+  geom_errorbar(mapping = aes(ymin = mean - (stdev/sqrt(count)),
+                              ymax = mean + (stdev/sqrt(count))),
+                width = 0.3) +
+  facet_wrap(~ agency, scales = "free_y") +
+  ylab("Mean # species") +
+  theme_bw() +
+  theme(axis.title.x = element_blank())
+protected_scatterplot
+
+ggplot(data = protected_for_plot,
+       mapping = aes(x = agency,
+                     y = mean,
+                     color = climate_model)) +
+  geom_point(position = position_dodge(width = 0.4)) +
+  geom_errorbar(mapping = aes(ymin = mean - (stdev/sqrt(count)),
+                              ymax = mean + (stdev/sqrt(count))),
+                width = 0.3,
+                position = position_dodge(width = 0.4)) +
+  ylab("Mean # species") +
+  theme_bw() +
+  theme(axis.title.x = element_blank())
