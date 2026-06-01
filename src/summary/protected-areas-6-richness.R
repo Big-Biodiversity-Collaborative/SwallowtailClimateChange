@@ -4,9 +4,14 @@
 # 2025-12-01
 
 require(dplyr)
+require(tidyr)
 require(terra)
 require(exactextractr)
 require(ggplot2)
+
+# TODO: for the protected areas vectors, we still have Hawaii included. Will 
+# Need to crop these vectors to same geographic extent (or, at least, crop any 
+# assets we create with them to same geographic extent)
 
 # Want to know average richness in protected vs. unprotected areas (maybe not?)
 #    TODO: For the above, may need to decide which areas to look at - all of 
@@ -96,6 +101,9 @@ for (model_i in 1:nrow(forecast_models)) {
                                                       progress = FALSE)
   names(delta_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
 
+  # TODO: Figure out a way to get delta richness for cells that are not in 
+  # *any* of the polygons above...
+  
   # Use protection level as iterator with lapply
   prot_level <- names(delta_cell_richness)
   # Extract t-test results, elements of a t-test object that we are interested 
@@ -119,6 +127,27 @@ for (model_i in 1:nrow(forecast_models)) {
   names(richness_t_test) <- prot_level
   richness_t[[model_name_short]] <- richness_t_test %>%
     bind_rows(.id = "protection_level")
+  
+  # Since we have the deltas for each cell, create a histogram of values, for 
+  # each type of protected area (four histograms per climate model).
+  
+  # delta_cell_rich_df <- delta_cell_richness %>%
+  #   bind_rows(.id = "AGNCY_SHOR") %>%
+  #   tidyr::drop_na() %>%
+  #   mutate(AGNCY_SHOR = factor(AGNCY_SHOR,
+  #                              levels = c("National", "State",
+  #                                         "Local", "Private")))
+  
+  # TODO: Coverage is more often that not only part of the grid cell. That is, 
+  # the polygons of the protected area may only be part of the grid cell. What 
+  # sort of impact would this have on our analyses?
+  ggplot(data = delta_cell_rich_df, 
+         mapping = aes(x = value)) +
+    geom_histogram(binwidth = 1) + 
+    facet_wrap(~ AGNCY_SHOR, nrow = 2, scales = "free_y") +
+    theme_bw()
+
+  
 } # End iterating over all forecast climate models
 
 # Combine summary stats list elements into a single data frame
