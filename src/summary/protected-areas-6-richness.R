@@ -18,11 +18,57 @@ require(ggplot2)
 #          North America?
 # Want to compare richness in protected areas in current vs. future climates
 
+# TODO: If we want to combine protected areas polygons (say, to identify those
+# areas with NO protection), see terra::combineGeoms(). Behavior is a little 
+# odd, as it combines the second set of polygons (y) to the first geometry 
+# of the other set of polygons (x). Getting a single polygon will then require 
+# three steps. e.g.
+# national + state
+# (national+state) + local
+# (national+state+local) + private
+
+# To get areas with no protection, create a singl SpatVector polygon that is 
+# the extent of the area and create a difference. maybe with terra::symdif, 
+# passing the large rectangle as the x, and the protected areas SpatVector as 
+# the y
+
+# TODO: Since polygons will often only cover part of a grid cell (basically 
+# the unit of measurement here), we should include coverage as a weight. The 
+# weights package has a weighted t-test function, wtd.t.test() we can use.
+
 # Read in protected areas info (may take 3 minutes or so)
 shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
 message("Reading protected areas shapefile (may take a few minutes)...")
 protected_areas <- terra::vect(shpfile_path)
 message("Protected areas shapefile read.")
+
+################################################################################
+# Testing terra vector manipulation
+# top left: 39.65, -120.45
+# bottom right: 38.15, -117.60
+
+# Use a little rectangle from Nevada / California border for testing
+small_ext <- terra::ext(c(-120.45, -117.60, 38.15, 39.65))
+# Crop the protected areas SpatVector and plot for reality check
+small_pa <- terra::crop(protected_areas, small_ext)
+plot(small_pa, col = c("green", "red", "blue", "orange"))
+
+# Combine the four different geometries in the protected areas SpatVector to 
+# have a single polygon of protected areas. We do this so we can ultimately 
+# create a SpatVector of areas that have no protection
+small_all_pa <- terra::combineGeoms(combineGeoms(small_pa[1], small_pa[2]),
+                                    combineGeoms(small_pa[3], small_pa[4]))
+# Create a rectangle that covers the extent of the protected areas polygon
+area_rect <- terra::vect(terra::ext(small_pa))
+# Use terra's symdif() to substract the protected areas polygons from the 
+# rectangle covering the extent. The resultant SpatVector is the polygon of 
+# areas that have no protection. Plot for reality check; unprotected areas are 
+# in orange, and protected areas in green
+no_protect <- terra::symdif(area_rect, small_all_pa)
+plot(no_protect, col = "#d95f02", alpha = 0.3)
+plot(small_all_pa, col = "#1b9e77", alpha = 0.6, add = TRUE)
+
+################################################################################
 
 # Load list of climate models
 climate_models <- read.csv(file = "data/climate-models.csv")
