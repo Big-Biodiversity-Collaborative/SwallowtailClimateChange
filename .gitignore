@@ -36,8 +36,9 @@ data/gbif/presence-absence/*-pa.csv
 data/gbif/shapefiles/*
 !data/gbif/shapefiles/.gitkeep
 
-# Protected areas shapefiles
+# Protected & unprotected areas shapefiles
 data/protected-areas/protected-areas-categorized.*
+data/protected-areas/unprotected-areas.*
 
 ### OUTPUT
 # Estimated range areas

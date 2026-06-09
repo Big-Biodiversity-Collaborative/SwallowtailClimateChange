@@ -561,6 +561,14 @@ bio1 <- terra::rast(x = "data/wc2-1/bio1.tif")
 pa_categorized <- terra::crop(x = pa_categorized,
                               y = bio1)
 
+# While we are here, we can drop all the attributes but AGNCY_SHOR and agg_n.
+pa_categorized[, 2:24] <- NULL
+
+Sys.time()
+# Before writing to disk, we need to fix "invalid" polygons
+pa_categorized <- terra::makeValid(pa_categorized)
+Sys.time()
+
 # Write takes a while (1:35, that's 95 minutes!)
 Sys.time()
 terra::writeVector(x = pa_categorized,
@@ -568,6 +576,33 @@ terra::writeVector(x = pa_categorized,
                    overwrite = TRUE)
 Sys.time()
 
+################################################################################
+# Create a SpatVector with all UNprotected areas
+################################################################################
+pa_categorized <- terra::vect(x = "data/protected-areas/protected-areas-categorized.shp")
+
+# Combine the four different geometries in the protected areas SpatVector to 
+# have a single polygon of protected areas. We do this so we can ultimately 
+# create a SpatVector of areas that have no protection. 
+# May take a few minutes.
+all_prot_areas <- terra::aggregate(pa_categorized)
+
+# Create a rectangle that covers the extent of the protected areas polygon
+area_rect <- terra::vect(terra::ext(pa_categorized))
+unprotected_areas <- terra::symdif(area_rect, pa_categorized)
+if(!is.valid(unprotected_areas)){
+  warning("Unprotected areas SpatVector has invalid geometry")
+}
+
+# Add a pair of attributes to align with those of protected areas
+unprotected_areas$AGNCY_SHOR <- "None"
+unprotected_areas$agg_n <- NA
+
+# Write this to disk
+Sys.time()
+terra::writeVector(x = unprotected_areas,
+                   filename = "data/protected-areas/unprotected-areas.shp")
+Sys.time()
 
 ################################################################################
 # Convert SpatVector to SpatRaster

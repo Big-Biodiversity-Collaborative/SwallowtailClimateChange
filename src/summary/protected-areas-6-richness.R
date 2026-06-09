@@ -26,6 +26,7 @@ require(ggplot2)
 # national + state
 # (national+state) + local
 # (national+state+local) + private
+# UPDATE: try terra::aggregate instead
 
 # To get areas with no protection, create a singl SpatVector polygon that is 
 # the extent of the area and create a difference. maybe with terra::symdif, 
@@ -42,6 +43,16 @@ message("Reading protected areas shapefile (may take a few minutes)...")
 protected_areas <- terra::vect(shpfile_path)
 message("Protected areas shapefile read.")
 
+# Also read in the unprotected areas shapefile
+unprotected_path <- "data/protected-areas/unprotected-areas.shp"
+message("Reading unprotected areas shapefile (may take a few minutes)...")
+unprotected_areas <- terra::vect(unprotected_path)
+message("Unprotected areas shapefile read.")
+
+# TODO: UNTESTED!!!!
+# Add that no protection SpatVector to the protected areas object
+protected_areas <- rbind(protected_areas, unprotected_areas)
+
 ################################################################################
 # Testing terra vector manipulation
 # top left: 39.65, -120.45
@@ -56,18 +67,19 @@ plot(small_pa, col = c("green", "red", "blue", "orange"))
 # Combine the four different geometries in the protected areas SpatVector to 
 # have a single polygon of protected areas. We do this so we can ultimately 
 # create a SpatVector of areas that have no protection
-small_all_pa <- terra::combineGeoms(combineGeoms(small_pa[1], small_pa[2]),
-                                    combineGeoms(small_pa[3], small_pa[4]))
+small_all_pa <- terra::aggregate(small_pa)
+
 # Create a rectangle that covers the extent of the protected areas polygon
-area_rect <- terra::vect(terra::ext(small_pa))
+small_area_rect <- terra::vect(terra::ext(small_pa))
 # Use terra's symdif() to substract the protected areas polygons from the 
 # rectangle covering the extent. The resultant SpatVector is the polygon of 
 # areas that have no protection. Plot for reality check; unprotected areas are 
 # in orange, and protected areas in green
-no_protect <- terra::symdif(area_rect, small_all_pa)
-plot(no_protect, col = "#d95f02", alpha = 0.3)
+small_no_protect <- terra::symdif(small_area_rect, small_all_pa)
+plot(small_no_protect, col = "#d95f02", alpha = 0.3)
 plot(small_all_pa, col = "#1b9e77", alpha = 0.6, add = TRUE)
 
+# End test of vector (polygon) manipulation
 ################################################################################
 
 # Load list of climate models
@@ -147,9 +159,6 @@ for (model_i in 1:nrow(forecast_models)) {
                                                       progress = FALSE)
   names(delta_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
 
-  # TODO: Figure out a way to get delta richness for cells that are not in 
-  # *any* of the polygons above...
-  
   # Use protection level as iterator with lapply
   prot_level <- names(delta_cell_richness)
   # Extract t-test results, elements of a t-test object that we are interested 
