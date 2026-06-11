@@ -8,6 +8,7 @@ require(tidyr)
 require(terra)
 require(exactextractr)
 require(ggplot2)
+require(weights) # weighted t-tests
 
 # TODO: for the protected areas vectors, we still have Hawaii included. Will 
 # Need to crop these vectors to same geographic extent (or, at least, crop any 
@@ -45,14 +46,15 @@ message("Protected areas shapefile read.")
 
 # Also read in the unprotected areas shapefile
 unprotected_path <- "data/protected-areas/unprotected-areas.shp"
-message("Reading unprotected areas shapefile (may take a few minutes)...")
+message("Reading unprotected areas shapefile (may take several minutes)...")
 unprotected_areas <- terra::vect(unprotected_path)
 message("Unprotected areas shapefile read.")
 
 # TODO: UNTESTED!!!!
 # Add that no protection SpatVector to the protected areas object
 protected_areas <- rbind(protected_areas, unprotected_areas)
-
+rm(unprotected_areas)
+gc()
 ################################################################################
 # Testing terra vector manipulation
 # top left: 39.65, -120.45
@@ -105,7 +107,7 @@ current_richness <- terra::rast(x = "output/richness/current-richness-ov.rds")
 # minute). We need individual cell richness values for subsequent t-tests
 current_cell_richness <- exactextractr::exact_extract(x = current_richness, 
                                       y = sf::st_as_sf(protected_areas),
-                                      progress = FALSE)
+                                      progress = TRUE)
 # Resultant list is unnamed, so we want to name it
 names(current_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
 
@@ -114,9 +116,13 @@ names(current_cell_richness) <- data.frame(protected_areas)$AGNCY_SHOR
 cell_stats <- c("mean", "stdev", "count")
 summary_stats <- exactextractr::exact_extract(x = current_richness,
                                               y = sf::st_as_sf(protected_areas),
-                                              progress = FALSE,
+                                              progress = TRUE,
                                               fun = cell_stats,
                                               force_df = TRUE)
+# TODO: It would be nice if we could get a count of how many cells are not NA, 
+# although maybe they are ignored. The documentation for exact_extract() says:
+# "In all of the summary operations, NA values in the the primary raster (x) 
+# raster are ignored (i.e., na.rm = TRUE.)"
 summary_stats <- cbind(agency = data.frame(protected_areas)$AGNCY_SHOR, 
                        summary_stats)
 protected_stats[["current"]] <- summary_stats
@@ -147,12 +153,13 @@ for (model_i in 1:nrow(forecast_models)) {
   protected_stats[[model_name_short]] <- summary_stats
   
   # Instead of doing paired t-test with two vectors, do paired t-test with a 
-  # single vector that is the difference between...
+  # single vector that is the difference between current richness and forecast 
+  # richness. Null is that the value is 0.
   message("Running t-test on current vs forecast richness for ", model_name_short)
   # We need to make sure rasters are the same extent, so do a pair of crops as 
   # we are doing the math
-  delta_richness = terra::crop(current_richness, forecast_richness) - 
-    terra::crop(forecast_richness, current_richness)
+  delta_richness = terra::crop(forecast_richness, current_richness) - 
+    terra::crop(current_richness, forecast_richness)
   
   delta_cell_richness <- exactextractr::exact_extract(x = delta_richness,
                                                       y = sf::st_as_sf(protected_areas),
@@ -164,16 +171,33 @@ for (model_i in 1:nrow(forecast_models)) {
   # Extract t-test results, elements of a t-test object that we are interested 
   # in: p.value, estimate, conf.int (a two-element vector), statistic, 
   # parameter (df in this case)
+  # richness_t_test <- lapply(X = prot_level,
+  #                           FUN = function(x, delta_cells) {
+  #                             delta_t <- t.test(x = delta_cells[[x]][, "value"],
+  #                                               mu = 0)
+  #                             delta_t <- data.frame(t = delta_t$statistic,
+  #                                                   df = delta_t$parameter,
+  #                                                   p = delta_t$p.value,
+  #                                                   estimate = delta_t$estimate,
+  #                                                   lwr = delta_t$conf.int[1],
+  #                                                   upr = delta_t$conf.int[2],
+  #                                                   comparison = "forecast - current")
+  #                             rownames(delta_t) <- NULL
+  #                             return(delta_t)
+  #                           },
+  #                           delta_cells = delta_cell_richness)
+  # t-test using coverage_fraction as weight
   richness_t_test <- lapply(X = prot_level,
                             FUN = function(x, delta_cells) {
-                              delta_t <- t.test(x = delta_cells[[x]][, "value"],
-                                                mu = 0)
-                              delta_t <- data.frame(t = delta_t$statistic,
-                                                    df = delta_t$parameter,
-                                                    p = delta_t$p.value,
-                                                    estimate = delta_t$estimate,
-                                                    lwr = delta_t$conf.int[1],
-                                                    upr = delta_t$conf.int[2])
+                              delta_t <- wtd.t.test(x = delta_cells[[x]][, "value"],
+                                                    y = 0,
+                                                    weight = delta_cells[[x]][, "coverage_fraction"])
+                              delta_t <- data.frame(t = delta_t$coefficients["t.value"],
+                                                    df = delta_t$coefficients["df"],
+                                                    p = delta_t$coefficients["p.value"],
+                                                    estimate = delta_t$additional["Mean"],
+                                                    sterr = delta_t$additional["Std. Err"],
+                                                    comparison = "forecast - current")
                               rownames(delta_t) <- NULL
                               return(delta_t)
                             },
@@ -182,27 +206,28 @@ for (model_i in 1:nrow(forecast_models)) {
   names(richness_t_test) <- prot_level
   richness_t[[model_name_short]] <- richness_t_test %>%
     bind_rows(.id = "protection_level")
-  
-  # Since we have the deltas for each cell, create a histogram of values, for 
-  # each type of protected area (four histograms per climate model).
-  
-  # delta_cell_rich_df <- delta_cell_richness %>%
-  #   bind_rows(.id = "AGNCY_SHOR") %>%
-  #   tidyr::drop_na() %>%
-  #   mutate(AGNCY_SHOR = factor(AGNCY_SHOR,
-  #                              levels = c("National", "State",
-  #                                         "Local", "Private")))
-  
-  # TODO: Coverage is more often that not only part of the grid cell. That is, 
-  # the polygons of the protected area may only be part of the grid cell. What 
-  # sort of impact would this have on our analyses?
-  ggplot(data = delta_cell_rich_df, 
-         mapping = aes(x = value)) +
-    geom_histogram(binwidth = 1) + 
-    facet_wrap(~ AGNCY_SHOR, nrow = 2, scales = "free_y") +
-    theme_bw()
 
-  
+  make_histograms <- FALSE
+  if (make_histograms) {  
+    # Since we have the deltas for each cell, create a histogram of values, for 
+    # each type of protected area (four histograms per climate model).
+    delta_cell_rich_df <- delta_cell_richness %>%
+      bind_rows(.id = "AGNCY_SHOR") %>%
+      tidyr::drop_na() %>%
+      mutate(AGNCY_SHOR = factor(AGNCY_SHOR,
+                                 levels = c("National", "State",
+                                            "Local", "Private", "None")))
+    
+    # TODO: Coverage is more often that not only part of the grid cell. That is, 
+    # the polygons of the protected area may only be part of the grid cell. What 
+    # sort of impact would this have on our analyses?
+    ggplot(data = delta_cell_rich_df, 
+           mapping = aes(x = value)) +
+      geom_histogram(binwidth = 1) + 
+      facet_wrap(~ AGNCY_SHOR, nrow = 2, scales = "free_y") +
+      theme_bw()
+  }
+
 } # End iterating over all forecast climate models
 
 # Combine summary stats list elements into a single data frame
@@ -234,7 +259,7 @@ protected_for_plot <- protected_stats %>%
 
 protected_for_plot <- protected_for_plot %>%
   mutate(agency = factor(x = agency,
-                         levels = c("National", "State", "Local", "Private")))
+                         levels = c("National", "State", "Local", "Private", "None")))
 
 protected_scatterplot <- ggplot(data = protected_for_plot,
                                 mapping = aes(x = climate_model,

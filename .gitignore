@@ -39,6 +39,7 @@ data/gbif/shapefiles/*
 # Protected & unprotected areas shapefiles
 data/protected-areas/protected-areas-categorized.*
 data/protected-areas/unprotected-areas.*
+data/protected-areas/aggregate-protected.*
 
 ### OUTPUT
 # Estimated range areas

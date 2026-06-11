@@ -584,19 +584,44 @@ pa_categorized <- terra::vect(x = "data/protected-areas/protected-areas-categori
 # Combine the four different geometries in the protected areas SpatVector to 
 # have a single polygon of protected areas. We do this so we can ultimately 
 # create a SpatVector of areas that have no protection. 
-# May take a few minutes.
-all_prot_areas <- terra::aggregate(pa_categorized)
+# May take several minutes.
 
+# TODO: Do we really want aggregate? combineGeoms gets funky, as we have to 
+# add one geometry at a time, but it might better suit what we are trying to do
+Sys.time()
+all_prot_areas <- terra::aggregate(pa_categorized)
+Sys.time()
+# If desired, go ahead and write to disk
+terra::writeVector(x = all_prot_areas,
+                   filename = "data/protected-areas/aggregate-protected.shp")
+Sys.time()
+# Load in the single-geometry SpatVector of protected areas, may take >10 minutes
+all_prot_areas <- terra::vect(x = "data/protected-areas/aggregate-protected.shp")
+Sys.time()
 # Create a rectangle that covers the extent of the protected areas polygon
-area_rect <- terra::vect(terra::ext(pa_categorized))
-unprotected_areas <- terra::symdif(area_rect, pa_categorized)
+area_rect <- terra::vect(terra::ext(all_prot_areas))
+Sys.time()
+# plot(area_rect, col = "#d95f02", alpha = 0.4)
+# plot(all_prot_areas, col = "#1b9e77", alpha = 0.6, add = TRUE)
+
+Sys.time()
+unprotected_areas <- terra::symdif(area_rect, all_prot_areas)
+Sys.time()
 if(!is.valid(unprotected_areas)){
   warning("Unprotected areas SpatVector has invalid geometry")
 }
+# plot(unprotected_areas, col = "#BB0202", alpha = 0.4)
+# Look to make sure there are "holes" where protected areas are before running 
+# the next line
+# plot(all_prot_areas, col = "#1b9eC7", alpha = 0.6, add = TRUE)
+
+rm(area_rect, all_prot_areas)
+gc()
 
 # Add a pair of attributes to align with those of protected areas
 unprotected_areas$AGNCY_SHOR <- "None"
-unprotected_areas$agg_n <- NA
+unprotected_areas$agg_n <- 1 # There is really only one geometry here
+crs(unprotected_areas) <- "epsg:4326"
 
 # Write this to disk
 Sys.time()
