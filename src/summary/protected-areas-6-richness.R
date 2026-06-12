@@ -10,76 +10,63 @@ require(exactextractr)
 require(ggplot2)
 require(weights) # weighted t-tests
 
-# TODO: for the protected areas vectors, we still have Hawaii included. Will 
-# Need to crop these vectors to same geographic extent (or, at least, crop any 
-# assets we create with them to same geographic extent)
-
 # Want to know average richness in protected vs. unprotected areas (maybe not?)
 #    TODO: For the above, may need to decide which areas to look at - all of 
 #          North America?
 # Want to compare richness in protected areas in current vs. future climates
-
-# TODO: If we want to combine protected areas polygons (say, to identify those
-# areas with NO protection), see terra::combineGeoms(). Behavior is a little 
-# odd, as it combines the second set of polygons (y) to the first geometry 
-# of the other set of polygons (x). Getting a single polygon will then require 
-# three steps. e.g.
-# national + state
-# (national+state) + local
-# (national+state+local) + private
-# UPDATE: try terra::aggregate instead
 
 # To get areas with no protection, create a singl SpatVector polygon that is 
 # the extent of the area and create a difference. maybe with terra::symdif, 
 # passing the large rectangle as the x, and the protected areas SpatVector as 
 # the y
 
-# TODO: Since polygons will often only cover part of a grid cell (basically 
-# the unit of measurement here), we should include coverage as a weight. The 
-# weights package has a weighted t-test function, wtd.t.test() we can use.
-
 # Read in protected areas info (may take 3 minutes or so)
-shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
-message("Reading protected areas shapefile (may take a few minutes)...")
-protected_areas <- terra::vect(shpfile_path)
+# message("Reading protected areas shapefile (may take a few minutes)...")
+# shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
+# protected_areas <- terra::vect(shpfile_path)
+message("Reading protected areas RDS (may take a few seconds)...")
+protected_path <- "data/protected-areas/protected-areas-categorized.rds"
+protected_areas <- readRDS(file = protected_path)
 message("Protected areas shapefile read.")
 
-# Also read in the unprotected areas shapefile
-unprotected_path <- "data/protected-areas/unprotected-areas.shp"
-message("Reading unprotected areas shapefile (may take several minutes)...")
-unprotected_areas <- terra::vect(unprotected_path)
+# Also read in the unprotected areas data
+# message("Reading unprotected areas shapefile (may take several minutes)...")
+# unprotected_path <- "data/protected-areas/unprotected-areas.shp"
+# unprotected_areas <- terra::vect(unprotected_path)
+message("Reading unprotected areas RDS (may take a few seconds)...")
+unprotected_path <- "data/protected-areas/unprotected-areas.rds"
+unprotected_areas <- readRDS(file = unprotected_path)
 message("Unprotected areas shapefile read.")
 
-# TODO: UNTESTED!!!!
 # Add that no protection SpatVector to the protected areas object
 protected_areas <- rbind(protected_areas, unprotected_areas)
 rm(unprotected_areas)
 gc()
 ################################################################################
 # Testing terra vector manipulation
-# top left: 39.65, -120.45
-# bottom right: 38.15, -117.60
-
-# Use a little rectangle from Nevada / California border for testing
-small_ext <- terra::ext(c(-120.45, -117.60, 38.15, 39.65))
-# Crop the protected areas SpatVector and plot for reality check
-small_pa <- terra::crop(protected_areas, small_ext)
-plot(small_pa, col = c("green", "red", "blue", "orange"))
-
-# Combine the four different geometries in the protected areas SpatVector to 
-# have a single polygon of protected areas. We do this so we can ultimately 
-# create a SpatVector of areas that have no protection
-small_all_pa <- terra::aggregate(small_pa)
-
-# Create a rectangle that covers the extent of the protected areas polygon
-small_area_rect <- terra::vect(terra::ext(small_pa))
-# Use terra's symdif() to substract the protected areas polygons from the 
-# rectangle covering the extent. The resultant SpatVector is the polygon of 
-# areas that have no protection. Plot for reality check; unprotected areas are 
-# in orange, and protected areas in green
-small_no_protect <- terra::symdif(small_area_rect, small_all_pa)
-plot(small_no_protect, col = "#d95f02", alpha = 0.3)
-plot(small_all_pa, col = "#1b9e77", alpha = 0.6, add = TRUE)
+# # top left: 39.65, -120.45
+# # bottom right: 38.15, -117.60
+# 
+# # Use a little rectangle from Nevada / California border for testing
+# small_ext <- terra::ext(c(-120.45, -117.60, 38.15, 39.65))
+# # Crop the protected areas SpatVector and plot for reality check
+# small_pa <- terra::crop(protected_areas, small_ext)
+# plot(small_pa, col = c("green", "red", "blue", "orange"))
+# 
+# # Combine the four different geometries in the protected areas SpatVector to 
+# # have a single polygon of protected areas. We do this so we can ultimately 
+# # create a SpatVector of areas that have no protection
+# small_all_pa <- terra::aggregate(small_pa)
+# 
+# # Create a rectangle that covers the extent of the protected areas polygon
+# small_area_rect <- terra::vect(terra::ext(small_pa))
+# # Use terra's symdif() to substract the protected areas polygons from the 
+# # rectangle covering the extent. The resultant SpatVector is the polygon of 
+# # areas that have no protection. Plot for reality check; unprotected areas are 
+# # in orange, and protected areas in green
+# small_no_protect <- terra::symdif(small_area_rect, small_all_pa)
+# plot(small_no_protect, col = "#d95f02", alpha = 0.3)
+# plot(small_all_pa, col = "#1b9e77", alpha = 0.6, add = TRUE)
 
 # End test of vector (polygon) manipulation
 ################################################################################
@@ -98,6 +85,10 @@ names(protected_stats) <- climate_models$name_short
 # Create list to hold statistical analysis results
 richness_t <- vector(mode = "list", length = nrow(climate_models) - 1)
 names(richness_t) <- climate_models$name_short[-1]
+
+# Another list for ANOVA results
+delta_lm_results <- vector(mode = "list", length = nrow(climate_models) - 1)
+names(delta_lm_results) <- climate_models$name_short[-1]
 
 # Read in current richness raster
 current_richness <- terra::rast(x = "output/richness/current-richness-ov.rds")
@@ -119,8 +110,7 @@ summary_stats <- exactextractr::exact_extract(x = current_richness,
                                               progress = TRUE,
                                               fun = cell_stats,
                                               force_df = TRUE)
-# TODO: It would be nice if we could get a count of how many cells are not NA, 
-# although maybe they are ignored. The documentation for exact_extract() says:
+# The documentation for exact_extract() says:
 # "In all of the summary operations, NA values in the the primary raster (x) 
 # raster are ignored (i.e., na.rm = TRUE.)"
 summary_stats <- cbind(agency = data.frame(protected_areas)$AGNCY_SHOR, 
@@ -207,6 +197,22 @@ for (model_i in 1:nrow(forecast_models)) {
   richness_t[[model_name_short]] <- richness_t_test %>%
     bind_rows(.id = "protection_level")
 
+  # We also want to test AMONG different management types to see if some 
+  # will be more impacted than others. For this, we'll need a data frame
+  delta_cell_df <- delta_cell_richness %>%
+    bind_rows(.id = "protection_level") %>%
+    drop_na()
+
+  # Making "no protection" the reference level
+  delta_lm <- lm(value ~ protection_level, 
+                 weights = coverage_fraction,
+                 data = delta_cell_df %>%
+                   mutate(protection_level = factor(x = protection_level,
+                                                    levels = c("None", "National", "State", "Local", "Private"))))
+  
+  # store the results of this linear model
+  delta_lm_results[[model_name_short]] <- summary(delta_lm)
+    
   make_histograms <- FALSE
   if (make_histograms) {  
     # Since we have the deltas for each cell, create a histogram of values, for 
@@ -249,6 +255,25 @@ richness_t <- richness_t %>%
   
 write.csv(x = richness_t,
           file = "output/summary-stats/protected-areas-richness-t.csv",
+          row.names = FALSE)
+
+# Write the linear model (effectively ANOVA) results
+x <- delta_lm_results[[1]]
+
+# First extract model results from each of the list elements, then turn the 
+# resultant list into a data frame.
+delta_coeffs_df <- lapply(X = delta_lm_results,
+                            FUN = function(x) {
+                              coeffs <- as.data.frame(x$coefficients)
+                              coeffs$Coefficient <- rownames(coeffs)
+                              rownames(coeffs) <- NULL
+                              return(coeffs)
+                            }) %>%
+  bind_rows(.id = "climate_model") %>%
+  select(climate_model, Coefficient, everything())
+
+write.csv(x = delta_coeffs_df,
+          file = "output/summary-stats/protected-areas-delta-lm.csv",
           row.names = FALSE)
 
 # Do a plot of richness, comparing current to forecast. For now, just do the 

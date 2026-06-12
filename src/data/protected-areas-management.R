@@ -576,6 +576,11 @@ terra::writeVector(x = pa_categorized,
                    overwrite = TRUE)
 Sys.time()
 
+# Also store as RDS, which reads in faster
+saveRDS(pa_categorized, 
+        file = "data/protected-areas/protected-areas-categorized.rds")
+
+
 ################################################################################
 # Create a SpatVector with all UNprotected areas
 ################################################################################
@@ -628,6 +633,10 @@ Sys.time()
 terra::writeVector(x = unprotected_areas,
                    filename = "data/protected-areas/unprotected-areas.shp")
 Sys.time()
+
+# While we are here, also write an RDS object. Less useful for other programs, 
+# but reads a LOT faster into R than shapefiles
+saveRDS(unprotected_areas, file = "data/protected-areas/unprotected-areas.rds")
 
 ################################################################################
 # Convert SpatVector to SpatRaster

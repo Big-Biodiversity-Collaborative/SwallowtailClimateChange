@@ -187,3 +187,48 @@ pa_hs_370_plot <- ggplot(data = ssp370, mapping = aes(x = model_year,
 pa_hs_370_plot
 ggsave(filename = "output/manuscript/protected-changes-hotspots-370.png",
        plot = pa_hs_370_plot)
+
+# TODO: Doesn't include the "None" for protected areas; need to update the 
+# protected-areas-2-calc-hotspots.R to get those numbers.
+
+# Just do the area, adding % change in area as text. Only one model & ssp, so 
+# those don't need to be in the data frame.
+ssp370_small <- ssp370 %>%
+  select(-c(min_num_spp, distribution, model_name, model_ssp, climate)) %>%
+  filter(category != "Total") %>%
+  filter(model_year < 2060) %>%
+  filter(stat == "area")
+
+# We'll make a separate data frame with the % change
+ssp370_perc <- ssp370_small %>%
+  select(-stat) %>%
+  pivot_wider(id_cols = c(category), 
+              names_from = model_year, values_from = value) %>%
+  mutate(change = `2055.5` - `2010.5`) %>%
+  mutate(perc_change = 100*(change/`2010.5`)) %>%
+  mutate(perc_change_str = if_else(change > 0,
+                                   true = paste0("+", round(perc_change, 0), "%"),
+                                   false = paste0(round(perc_change, 0), "%"))) %>%
+  mutate(line_label = paste0(category, ": ", perc_change_str)) %>%
+  mutate(ypos = (`2010.5` + `2055.5`)/2) %>%
+  mutate(xpos = c(2020, 2020, 2040, 2045)) %>%
+  mutate(increase = change > 0)
+
+text_colors <- c("FALSE" = "red", "TRUE" = "black")
+ggplot(data = ssp370_small, 
+       mapping = aes(x = model_year, y = value, group = category)) + 
+  geom_point() +
+  geom_line() +
+  geom_text(data = ssp370_perc, 
+            mapping = aes(x = xpos, y = ypos,
+                          label = line_label,
+                          color = increase),
+            nudge_y = c(0, -0.05, -0.25, 0)) +
+  scale_color_manual(values = text_colors) +
+# geom_label(data = anno_df, mapping = aes(x = x, y = y, label = label),
+#            size = 3, hjust = 0) +
+  scale_y_log10(limits = c(1000, max(ssp370_small$value))) +
+  # ylim(c(0, max(ssp370_small$value))) +
+  labs(x = "Year", y = "Area (sq km)") +
+  theme_bw() +
+  theme(legend.position = "none")
