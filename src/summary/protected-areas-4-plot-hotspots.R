@@ -215,7 +215,7 @@ ssp370_perc <- ssp370_small %>%
   mutate(increase = change > 0)
 
 text_colors <- c("FALSE" = "red", "TRUE" = "black")
-ggplot(data = ssp370_small, 
+pa_hs_delta_370_plot <- ggplot(data = ssp370_small, 
        mapping = aes(x = model_year, y = value, group = category)) + 
   geom_point() +
   geom_line() +
@@ -223,12 +223,15 @@ ggplot(data = ssp370_small,
             mapping = aes(x = xpos, y = ypos,
                           label = line_label,
                           color = increase),
-            nudge_y = c(0, -0.05, -0.25, 0)) +
+            nudge_y = c(-2000, 4500, -2000, 2000)) +
   scale_color_manual(values = text_colors) +
 # geom_label(data = anno_df, mapping = aes(x = x, y = y, label = label),
 #            size = 3, hjust = 0) +
-  scale_y_log10(limits = c(1000, max(ssp370_small$value))) +
+  # scale_y_log10(limits = c(1000, max(ssp370_small$value))) +
   # ylim(c(0, max(ssp370_small$value))) +
   labs(x = "Year", y = "Area (sq km)") +
   theme_bw() +
   theme(legend.position = "none")
+pa_hs_delta_370_plot
+ggsave(filename = "output/manuscript/protected-area-delta-hotspots-370.png",
+       plot = pa_hs_delta_370_plot)

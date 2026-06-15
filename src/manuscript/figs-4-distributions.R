@@ -23,8 +23,8 @@ source(file = "functions/get_colors.R")
 # forecast distributions.
 
 # Two figures
-# Main manuscript: six panel figure, one column each for P. rutulus & P. 
-#   glaucus
+# Main manuscript: six panel figure, one column each for P. indra & P. 
+#   cresphontes
 #   + Predicted suitable areas for contemporary climate
 #   + Predicted suitable areas for 2050s, under SSP3-7.0
 #   + Difference in area between two predictions

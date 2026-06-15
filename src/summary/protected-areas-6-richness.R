@@ -27,7 +27,7 @@ require(weights) # weighted t-tests
 message("Reading protected areas RDS (may take a few seconds)...")
 protected_path <- "data/protected-areas/protected-areas-categorized.rds"
 protected_areas <- readRDS(file = protected_path)
-message("Protected areas shapefile read.")
+message("Protected areas vector read.")
 
 # Also read in the unprotected areas data
 # message("Reading unprotected areas shapefile (may take several minutes)...")
@@ -36,12 +36,12 @@ message("Protected areas shapefile read.")
 message("Reading unprotected areas RDS (may take a few seconds)...")
 unprotected_path <- "data/protected-areas/unprotected-areas.rds"
 unprotected_areas <- readRDS(file = unprotected_path)
-message("Unprotected areas shapefile read.")
+message("Unprotected areas vector read.")
 
 # Add that no protection SpatVector to the protected areas object
 protected_areas <- rbind(protected_areas, unprotected_areas)
 rm(unprotected_areas)
-gc()
+invisible(gc())
 ################################################################################
 # Testing terra vector manipulation
 # # top left: 39.65, -120.45
@@ -311,3 +311,51 @@ ggplot(data = protected_for_plot,
   ylab("Mean # species") +
   theme_bw() +
   theme(axis.title.x = element_blank())
+
+################################################################################
+# Let's make a little map, just showing areas with national-level protection
+# TODO: Move this to a separate file. Likely src/manuscript/figs-4
+# Figure 1: Workflow. Created in large part via SVG
+# Figure 2: Individual species as examples. indra & cresphontes; currently in 
+#           src/manuscript/figs-4-distributions.R
+# Figure 3: Big, six-panel figure with richness, richness change, hotspots for 
+#           contemporary and SSP3-7.0, 2050s; currently in 
+#           src/manuscript/figs-3-richness.R
+# Figure 4: Map of nationally protected areas (at the end of 
+#           src/summary/protected-areas-6-richness.R) and the plot showing the 
+#           change in area in square km and % for each of the four protection 
+#           levels (at the end of src/summary/protected-areas-4-plot-hotspots.R)
+
+national_areas <- protected_areas[2]
+
+# Grab spatial files with political boundaries
+countries <- vect("data/political-boundaries/countries.shp")
+states <- vect("data/political-boundaries/states.shp")  
+
+# Reproject states and countries (can take a couple moments with first call to 
+# project)
+states <- project(states, "ESRI:102009")
+countries <- project(countries, crs(states))
+
+# For plotting purposes, we only need Canada, Mexico, and US because the LCC 
+# projection is centered in the US, and country boundaries become very 
+# distorted for Greenland and Central America
+countries <- countries %>%
+  filter(adm0_a3 %in% c("USA", "CAN", "MEX"))
+
+linewidth <- 0.1
+margins <- c(2, 0, 6, 0)
+# Plot all national protected areas. Can take a moment.
+ggplot() +
+  geom_spatvector(data = states, color = NA, fill = "white") +
+  geom_spatvector(data = national_areas, color = NA, fill = "forestgreen") +
+  # Now state/federal draw boundaries
+  geom_spatvector(data = states, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), #xlim = xlim, ylim = ylim,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))

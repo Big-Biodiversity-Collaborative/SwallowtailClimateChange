@@ -10,10 +10,36 @@ require(tidyr)
 require(exactextractr)
 require(sf)
 
-# Identify where cropped, projected shapefile with protected areas in North
-# America lives:
-# shpfile_path <- "C:/Users/erin/Desktop/PAs/protected-areas.shp"
-shpfile_path <- "data/protected-areas/protected-areas-categorized.shp"
+# Get vector data on protected and unprotected areas in North America
+
+# First, see if rds version is available for each; if so load them, if not, 
+# load the shapefile version.
+pa_rds <- "data/protected-areas/protected-areas-categorized.rds"
+if (file.exists(pa_rds)) {
+  message("Reading protected areas RDS (may take a few seconds)...")
+  pa <- readRDS(pa_rds)
+  message("Protected areas RDS read.")
+} else {
+  pa_shp <- "data/protected-areas/protected-areas-categorized.shp"
+  message("Reading protected areas shapefile (may take a few minutes)...")
+  pa <- terra::vect(pa_shp)
+  message("Protected areas shapefile read.")
+}
+unprot_rds <- "data/protected-areas/unprotected-areas.rds"
+if (file.exists(unprot_rds)) {
+  message("Reading unprotected areas RDS (may take a few seconds)...")
+  unprot <- readRDS(unprot_rds)
+  message("Unprotected areas RDS read.")
+} else {
+  unprot_shp <- "data/protected-areas/unprotected-areas.shp"
+  message("Reading unprotected areas shapefile (may take a few minutes)...")
+  unprot <- terra::vect(unprot_shp)
+  message("Unprotected areas shapefile read.")
+}
+
+# Bind the protected and unprotected vector objects together
+pa <- rbind(pa, unprot)
+rm(unprot)
 
 # Logical indicating whether to replace summary table if it already exists
 replace <- TRUE
@@ -36,12 +62,8 @@ stats <- as.data.frame(expand_grid(min_num_spp = spp_min,
          area_prot_sqkm_national = NA,
          area_prot_sqkm_state = NA,
          area_prot_sqkm_local = NA,
-         area_prot_sqkm_private = NA)
-
-# Read in protected areas file (may take ~3 minutes)
-message("Reading protected areas shapefile (may take a few minutes)...")
-pa <- terra::vect(shpfile_path)
-message("Protected areas shapefile read.")
+         area_prot_sqkm_private = NA,
+         area_prot_sqkm_none = NA)
 
 # For each minimum number of species, climate model, and distribution type:
   # Reclassify richness raster (richness >= minimum = 1, NA everywhere else)
@@ -76,11 +98,11 @@ for (distrib in distributions) {
       # Create raster with cell areas, in sq km
       r <- terra::cellSize(r, mask = TRUE, unit = "km")
 
-      # pa is a 4-layer SpatVector
+      # pa is a 5-layer SpatVector (4 protected layers, 1 unprotected layer)
       in_pa <- exactextractr::exact_extract(x = r, 
                                             y = sf::st_as_sf(pa),
                                             progress = FALSE)
-      # Resulting in_pa is a 4-element, unnamed list. Get the names of the 
+      # Resulting in_pa is a 5-element, unnamed list. Get the names of the 
       # elements from the pa SpatVector
       names(in_pa) <- data.frame(pa)$AGNCY_SHOR
       
@@ -99,7 +121,7 @@ for (distrib in distributions) {
       
       # Perhaps unnecessary
       rm(in_pa, r)
-      gc()
+      invisible(gc())
       
       # Put summary stats in table
       row_index <- which(stats$min_num_spp == j &
@@ -111,11 +133,13 @@ for (distrib in distributions) {
       stats$area_prot_sqkm_state[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "State"])
       stats$area_prot_sqkm_local[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Local"])
       stats$area_prot_sqkm_private[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "Private"])
+      stats$area_prot_sqkm_none[row_index] = ifelse(length(in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "None"]) == 0, 0, in_pa_df$sum_area_in[in_pa_df$AGNCY_SHOR == "None"])
     }  
   }
 }
 
-# Calculate proportion of species' distributions that are protected
+# Calculate proportion of species' distributions that are in each protection 
+# category (4 protection levels, 1 unprotected)
 stats$proportion_national <- ifelse(stats$area_sqkm == 0, NA,
                                     stats$area_prot_sqkm_national / stats$area_sqkm)
 stats$proportion_state <- ifelse(stats$area_sqkm == 0, NA,
@@ -124,6 +148,8 @@ stats$proportion_local <- ifelse(stats$area_sqkm == 0, NA,
                                  stats$area_prot_sqkm_local / stats$area_sqkm)
 stats$proportion_private <- ifelse(stats$area_sqkm == 0, NA,
                                    stats$area_prot_sqkm_private / stats$area_sqkm)
+stats$proportion_none <- ifelse(stats$area_sqkm == 0, NA,
+                                stats$area_prot_sqkm_none / stats$area_sqkm)
 
 # Write to file
 summary_filename <- paste0("output/summary-stats/protected-areas-hotspots.csv")
