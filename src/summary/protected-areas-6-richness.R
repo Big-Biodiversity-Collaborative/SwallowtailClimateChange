@@ -326,6 +326,9 @@ ggplot(data = protected_for_plot,
 #           change in area in square km and % for each of the four protection 
 #           levels (at the end of src/summary/protected-areas-4-plot-hotspots.R)
 
+# TODO: Below here has been moved (and modified a bit) to 
+# src/manuscript/figs-4-protected-areas.R
+
 national_areas <- protected_areas[2]
 
 # Grab spatial files with political boundaries

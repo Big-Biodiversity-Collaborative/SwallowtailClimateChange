@@ -188,9 +188,6 @@ pa_hs_370_plot
 ggsave(filename = "output/manuscript/protected-changes-hotspots-370.png",
        plot = pa_hs_370_plot)
 
-# TODO: Doesn't include the "None" for protected areas; need to update the 
-# protected-areas-2-calc-hotspots.R to get those numbers.
-
 # Just do the area, adding % change in area as text. Only one model & ssp, so 
 # those don't need to be in the data frame.
 ssp370_small <- ssp370 %>%
