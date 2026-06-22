@@ -24,6 +24,10 @@ require(terra)
 # Categorization of polygons
 ################################################################################
 
+# Note, as of 2026-06-22, the data we based the land management categorization 
+# is no longer available (the link below 404s). There is a new map, for 2025 at 
+# https://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2025/
+
 # Data from 
 # http://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2021/
 # Includes information about agency (in the MGMT_AGNCY field). Would like to 
