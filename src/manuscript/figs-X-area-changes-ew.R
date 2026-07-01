@@ -158,7 +158,7 @@ delta_points <- ggplot(data = delta_data,
         strip.text = element_text(size = 6),
         legend.position = "none")
 delta_points
-ggsave(file = "output/manuscript/Figure-Area-Change.png",
+ggsave(file = "output/manuscript/Figure-Area-Change-East-West.png",
        plot = delta_points,
        width = 6,
        height = 4)
