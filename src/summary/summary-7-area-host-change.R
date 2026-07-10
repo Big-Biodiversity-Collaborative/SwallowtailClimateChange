@@ -21,6 +21,12 @@ keep_plant <- ih$host_accepted %in% pa_summary$species
 # Drop those records for the plants we just excluded 
 ih <- ih[keep_plant, ]
 
+# Drop duplicate host/insect rows (some associations have more than one source, 
+# and thus, more than one row)
+ih <- ih %>%
+  select(insect, host_accepted) %>%
+  distinct()
+
 # Do host plant species count
 host_counts <- ih %>%
   group_by(insect) %>%
@@ -58,6 +64,28 @@ host_area <- lm(area_net_change ~ num_hosts + current_area,
                 data = host_counts)
 summary(host_area)
 plot(x = host_counts$num_hosts, y = host_counts$area_net_change)
+
+# Is there a relationship between number of hosts and current area?
+host_current <- lm(current_area ~ num_hosts, data = host_counts)
+summary(host_current)
+# Yes, more hosts = more area. But not super surprising.
+
+# TODO: regression line is for simple linear regression and does not reflect 
+# estimate from model where current area is included as a covariate.
+change_v_hosts <- ggplot(data = host_counts, 
+                         mapping = aes(x = num_hosts, y = area_net_change)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = y ~ x) +
+  xlab(label = "Number of hosts") + 
+  ylab(label = "Change in suitable area (sq. km)") +
+  theme_bw()
+change_v_hosts
+ggsave(plot = change_v_hosts,
+       file = "output/manuscript/Figure-Area-Change-Hosts.png")
+
+################################################################################
+# Old below here
+################################################################################
 
 # Just for visualization, show also current and change
 plot(x = host_counts$current_area, y = host_counts$area_net_change)
