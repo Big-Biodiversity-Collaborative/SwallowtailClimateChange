@@ -12,6 +12,8 @@ gbif <- read.csv("data/gbif-pa-summary.csv")
 
 # File with east/west designation information
 ew <- read.csv(file = "data/insect-eastwest.csv")
+# Toggle to true if we want to output the east/west distinction to output table
+include_ew <- FALSE
 
 # Base of output filenames
 output_basename <- "output/manuscript/"
@@ -28,6 +30,7 @@ insects <- insects %>%
 # Get number of host plant species (total or with 40+ filtered records)
 ih2 <- ih %>%
   select(insect, host_accepted) %>%
+  distinct() %>% # some insect/host records have multiple sources (=rows)
   left_join(select(gbif, species, pa_csv), 
             join_by("host_accepted" == "species")) %>%
   group_by(insect) %>%
@@ -51,8 +54,14 @@ insects <- insects %>%
          `# Host SDMs` = n_hosts_suff,
          Location = ew)
 
+# Drop the east/west column if desired
+if (!include_ew) {
+  insects <- insects %>%
+    select(-Location)
+}
+
 # Write to file
-papilio_table <- paste0(output_basename, "papilio-table.csv")
+papilio_table <- paste0(output_basename, "Supplemental-Table-Species.csv")
 write.csv(x = insects, 
           file = papilio_table, 
           row.names = FALSE)
