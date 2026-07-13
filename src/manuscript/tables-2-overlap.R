@@ -5,6 +5,8 @@
 
 library(dplyr)
 
+# TODO: Update to include a column with % overlap for SSP3-7.0 2050s
+
 # Table with four columns:
 # | species | Area (km2) | Area (km2) >= 1 host | % >= 1 host |
 # Area and % info is in output/summary-stats/overlap-summary-allspp.csv
