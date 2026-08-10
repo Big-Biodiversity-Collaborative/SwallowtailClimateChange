@@ -14,8 +14,8 @@ quarto::quarto_render(input = "templates/cheatsheet.qmd",
                       output_file = "Manuscript-cheatsheet.pdf")
 
 # Move the file to where we want it to be
-if (file.copy(from = "Manuscript-cheatsheet.pdf",
+if (file.copy(from = "templates/Manuscript-cheatsheet.pdf",
               to = "output/manuscript/Manuscript-cheatsheet.pdf",
               overwrite = TRUE)) {
-  invisible(file.remove("Manuscript-cheatsheet.pdf"))
+  invisible(file.remove("templates/Manuscript-cheatsheet.pdf"))
 }

@@ -60,10 +60,10 @@ pa_all <- pa_results %>%
   arrange(insect, ssp, year)
 
 # Create east/west indicator and add to data.frame
-east <- "appalachiensis|brevicauda|canadensis|cresphontes|glaucus|palamedes|polyxenes|troilus"
-west <- "euymedon|indra|machaon|multicaudata|rumiko|rutulus|zelicaon"
-pa_all <- pa_all %>%
-  mutate(ew = if_else(grepl(east, insect), "East", "West"))
+# east <- "appalachiensis|brevicauda|canadensis|cresphontes|glaucus|palamedes|polyxenes|troilus"
+# west <- "euymedon|indra|machaon|multicaudata|rumiko|rutulus|zelicaon"
+# pa_all <- pa_all %>%
+#   mutate(ew = if_else(grepl(east, insect), "East", "West"))
 
 # Optional: Add column (group3) calling out P. machaon (in case we want that 
 # option for visualization purposes).
@@ -71,9 +71,14 @@ pa_all <- pa_all %>%
 # pa_all <- pa_all %>%
 #   mutate(group3 = if_else(insect == "Papilio machaon", "P. machaon", ew))
 
+# Calculate the total proportion of suitable habitat with any protection
+pa_all <- pa_all %>%
+  mutate(proportion_any = proportion_national + proportion_state + 
+                              proportion_local + proportion_private)
+
 # Transform to long for faceting
 pa_long <- pa_all %>%
-  pivot_longer(cols = -c(insect, ssp, year, ew),
+  pivot_longer(cols = -c(insect, ssp, year),
                names_to = "stat",
                names_prefix = "area_|proportion_",
                values_to = "value")
@@ -88,7 +93,7 @@ pa_long <- pa_all %>%
 # them, remove leading "prot" from stat for area calculations, then split stat 
 # column into state & category
 pa_long <- pa_long %>%
-  mutate(stat = if_else(stat %in% c("national", "state", "local", "private"),
+  mutate(stat = if_else(stat %in% c("national", "state", "local", "private", "any"),
                         true = paste0("prop_", stat),
                         false = stat)) %>%
   mutate(stat = gsub(pattern = "prot_",
@@ -112,6 +117,36 @@ pa_long <- pa_long %>%
 # area (sqkm), protected area (area), or protected proportion (prop)
 pa_long <- pa_long %>%
   mutate(stat = substr(x = stat, start = 1, stop = 4))
+
+# Want to extract, for each species/year/model combination, the percentage
+# of suitable area receiving any protection
+pa_any <- pa_long %>%
+  filter(stat == "prop" & category == "any") %>%
+  select(insect, ssp, year, value)
+
+# For ease of reading, pivot to wide
+pa_any_wide <- pa_any %>%
+  pivot_wider(id_cols = c(insect, ssp), names_from = "year", names_prefix = "year_",
+              values_from = "value")
+
+# Calculate change from current
+pa_any_wide <- pa_any_wide %>%
+  mutate(delta_2055 = year_2055 - year_2020) %>%
+  mutate(delta_2085 = year_2085 - year_2020)
+
+# Pull out just the 3-7.0 info, and 
+pa_ssp370 <- pa_any_wide %>%
+  filter(ssp == "370")
+
+# Some summary stats for 3-7.0
+min(pa_ssp370$year_2020)
+max(pa_ssp370$year_2020)
+min(pa_ssp370$delta_2055, na.rm = TRUE)
+max(pa_ssp370$delta_2055, na.rm = TRUE)
+
+
+################################################################################
+# Old below here (may need some updating, esp. about east/west stuff)
 
 # For each year, SSP, and East/West, sum total area covered by all insects, so 
 # we can use that to weight the means. Dropping two species that are forecast 

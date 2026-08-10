@@ -59,12 +59,15 @@ suitable area (right) in the SSP3-7.0 model in the 2050s.
 
 ::: {#fig-shifts fig-pos="H"}
 
-![](../output/manuscript/Figure-Shifts.png)
+![](../output/manuscript/Figure-4-Lats-Hosts.png)
 
-**Predicted changes in distribution under the SSP3-7.0 model in the 2050s.** 
-Longitudinal (a) and latitudinal (b) changes in margins of suitable area (_this 
-could be better defined_) between current climate and forecast climate for the 
-2050s under the SSP3-7.0 model.
+**Predicted changes in range position and relationship of diet to area changes.**
+(A) Anticipated changes to range margins at southern latitudes (horizontal axis) and 
+northern latitudes (vertical axis). Points to the right or below origin indicate 
+contraction, while points to the right or above origin indicate expansion. (B) 
+Association (add stats) between host diet breadth (number of host plant species) 
+and predicted change in total suitable area.
+
 :::
 
 {{< pagebreak >}}
@@ -86,12 +89,15 @@ is shown in (f).
 
 ::: {#fig-protected fig-pos="H"}
 
-![](../output/manuscript/Figure-Protected.png)
+![](../output/manuscript/Figure-Protected-Areas.png)
 
-**Species richness hotspots area changes under SSP3-7.0 model.**
-Total area suitable for at least four species of North American _Papilio_ shown 
-in (a). Total area (b) and percent area (c) of richness hotspots that occur on 
-lands currently protected under one of four management categories.
+**Nationally protected areas and predicted change for different levels of protection.**
+(A) Areas with national-level protection are concentrated in the western half 
+of North America. (B) Suitability hotspots are predicted to increase in area on 
+lands currently under national-level protection, while suitability hotspot 
+areas are predicted to decrease on lands under the other three protection 
+levels.
+
 :::
 
 {{< pagebreak >}}
@@ -99,63 +105,6 @@ lands currently protected under one of four management categories.
 ## Supplemental
 
 Figure S1 - see separate file, Supplemental-Figure-Distributions.pdf.
-
-::: {#fig-s-shift-south fig-pos="H"}
-
-![](../output/manuscript/shifts/shift-south.png)
-
-**Shifts in southern edge of predicted suitable areas.** Change in kilometers 
-(relative to contemporary predictions) in the median southern latitude of areas 
-predicted as suitable for each *Papilio* species and at least one host plant 
-species under three SSPs and two time points. Points above the horizontal 
-dashed line indicate range contractions northward and points below the 
-horizontal dashed line indicate range expansions southward.
-:::
-
-{{< pagebreak >}}
-
-::: {#fig-s-shift-north fig-pos="H"}
-
-![](../output/manuscript/shifts/shift-north.png)
-
-**Shifts in northern edge of predicted suitable areas.** Change in kilometers 
-(relative to contemporary predictions) in the median northern latitude of areas 
-predicted as suitable for each *Papilio* species and at least one host plant 
-species under three SSPs and two time points. Points above the horizontal 
-dashed line indicate range expansions northward and points below the 
-horizontal dashed line indicate range contractions southward.
-:::
-
-{{< pagebreak >}}
-
-::: {#fig-s-shift-west fig-pos="H"}
-
-![](../output/manuscript/shifts/shift-west.png)
-
-**Shifts in western edge of predicted suitable areas.** Change in kilometers 
-(relative to contemporary predictions) in the median western longitude of areas 
-predicted as suitable for each *Papilio* species and at least one host plant 
-species under three SSPs and two time points. Points left of the horizontal 
-dashed line indicate range expansions westward and points right of the 
-horizontal dashed line indicate range contractions eastward.
-:::
-
-{{< pagebreak >}}
-
-::: {#fig-s-shift-east fig-pos="H"}
-
-![](../output/manuscript/shifts/shift-east.png)
-
-**Shifts in eastern edge of predicted suitable areas.** Change in kilometers 
-(relative to contemporary predictions) in the median eastern longitude of areas 
-predicted as suitable for each *Papilio* species and at least one host plant 
-species under three SSPs and two time points. Points left of the horizontal 
-dashed line indicate range contractions westward and points right of the 
-horizontal dashed line indicate range expansions eastward.
-
-:::
-
-{{< pagebreak >}}
 
 ::: {#fig-s-richness fig-pos="H"}
 
@@ -197,19 +146,6 @@ richness figure, shown below:
 
 {{< pagebreak >}}
 
-::: {#fig-s-protected fig-pos="H"}
-
-![](../output/manuscript/Supplemental-Figure-Protected.png)
-
-**Species richness hotspots area changes under forecast model climate conditions.**
-Total area suitable for at least four species of North American _Papilio_ shown 
-for SSP2-4.5 (a) and SSP5-8.5 (b). Total area for SSP2-4.5 (c) and SSP5-8.5 (d) 
-and percent area for SSP2-4.5 (e) and SSP5-8.5 (f) of richness hotspots that 
-occur on lands currently protected under one of four management categories.
-:::
-
-{{< pagebreak >}}
-
 ::: {#tbl-area-overlap fig-pos="H"}
 
 ```{r sup-table-1, echo = FALSE}
@@ -224,4 +160,5 @@ kable(area_overlap)
 Supplemental Table 1. Total suitable area and suitable area overlapping the 
 suitable area for at least one host plant species for `r nrow(area_overlap)` 
 species of _Papilio_ under current climate conditions.
+
 :::
