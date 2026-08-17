@@ -90,6 +90,43 @@ national_areas_plot <- ggplot() +
         legend.spacing.y = unit(10, 'pt'))
 # national_areas_plot
 
+# Panel (a.2): A map of North America showing areas with any protection; 
+# colored by protection type (national, state, local, private)
+any_protection <- pa[which(pa$AGNCY_SHOR %in% c("National", "State", 
+                                                "Local", "Private"))]
+
+# Crop national areas vector, too
+any_protection <- crop(any_protection, rich_ext)
+
+# TODO: Update the color scheme. Maybe 4-class Set2 will work
+# Will need to re-level AGNCY_SHOR for stuff to show up in correct 
+# order
+# #66c2a5 - National
+# #fc8d62 - State
+# #8da0cb - Local
+# #e78ac3 - Private
+
+linewidth <- 0.1
+margins <- c(2, 0, 6, 0)
+# Plot areas with any level of protection. Can take a moment.
+any_protection_plot <- ggplot() +
+  geom_spatvector(data = states, color = NA, fill = "white") +
+  geom_spatvector(data = any_protection, color = NA, 
+                  mapping = aes(fill = AGNCY_SHOR)) +
+  # Now state/federal draw boundaries
+  geom_spatvector(data = states, color = "gray50", linewidth = linewidth,
+                  fill = NA) +
+  geom_spatvector(data = countries,
+                  color = "black", linewidth = linewidth, fill = NA) +
+  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+           expand = FALSE) +
+  theme_bw() +
+  theme(plot.margin = unit(margins, "pt"),
+        legend.spacing.y = unit(10, 'pt'))
+# Can take a few minutes for this plot to actually show.
+# any_protection_plot
+
+
 ################################################################################
 # Panel (b): Plot showing change between current and SSP3-7.0 2050s climate
 
