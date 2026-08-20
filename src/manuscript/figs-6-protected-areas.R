@@ -9,6 +9,7 @@ require(terra)
 require(tidyterra)
 require(ggplot2)
 require(cowplot)   # Multi-panel figure
+source("functions/get_colors.R")
 
 # Base of output filenames
 output_basename <- "output/manuscript/"
@@ -62,6 +63,12 @@ rich_ext <- ext(rich_current) * 1.01
 # Set western boundary of extent in order to make sure Aleutians are included 
 # in map
 rich_ext <- ext(c(-5e6, rich_ext[2:4]))
+
+# TODO: Remove once maps work. Cropping for smaller map for testing purposes.
+# rich_ext <- ext(c(-105, -96, 35, 40))
+# rich_current <- crop(rich_current, rich_ext)
+# End removal for testing purposes
+
 xlim <- c(ext(rich_ext)[1], ext(rich_ext)[2])
 ylim <- c(ext(rich_ext)[3], ext(rich_ext)[4])
 
@@ -83,8 +90,8 @@ national_areas_plot <- ggplot() +
                   fill = NA) +
   geom_spatvector(data = countries,
                   color = "black", linewidth = linewidth, fill = NA) +
-  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
-           expand = FALSE) +
+  # coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+  #          expand = FALSE) +
   theme_bw() +
   theme(plot.margin = unit(margins, "pt"),
         legend.spacing.y = unit(10, 'pt'))
@@ -98,14 +105,11 @@ any_protection <- pa[which(pa$AGNCY_SHOR %in% c("National", "State",
 # Crop national areas vector, too
 any_protection <- crop(any_protection, rich_ext)
 
-# TODO: Update the color scheme. Maybe 4-class Set2 will work
-# Will need to re-level AGNCY_SHOR for stuff to show up in correct 
-# order
-# #66c2a5 - National
-# #fc8d62 - State
-# #8da0cb - Local
-# #e78ac3 - Private
-
+any_protection$AGNCY_SHOR <- factor(x = any_protection$AGNCY_SHOR,
+                                    levels = c("National", "State", 
+                                               "Local", "Private"))
+area_colors <- get_colors(palette = "protected")
+names(area_colors) <- tools::toTitleCase(names(area_colors))
 linewidth <- 0.1
 margins <- c(2, 0, 6, 0)
 # Plot areas with any level of protection. Can take a moment.
@@ -113,19 +117,21 @@ any_protection_plot <- ggplot() +
   geom_spatvector(data = states, color = NA, fill = "white") +
   geom_spatvector(data = any_protection, color = NA, 
                   mapping = aes(fill = AGNCY_SHOR)) +
+  scale_fill_manual(values = area_colors) +
   # Now state/federal draw boundaries
   geom_spatvector(data = states, color = "gray50", linewidth = linewidth,
                   fill = NA) +
   geom_spatvector(data = countries,
                   color = "black", linewidth = linewidth, fill = NA) +
-  coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
-           expand = FALSE) +
+  # coord_sf(datum = sf::st_crs("EPSG:4326"), xlim = xlim, ylim = ylim,
+  #          expand = FALSE) +
   theme_bw() +
   theme(plot.margin = unit(margins, "pt"),
-        legend.spacing.y = unit(10, 'pt'))
+        # legend.spacing.y = unit(10, 'pt'),
+        # legend.title = element_blank(),
+        legend.position = "none")
 # Can take a few minutes for this plot to actually show.
 # any_protection_plot
-
 
 ################################################################################
 # Panel (b): Plot showing change between current and SSP3-7.0 2050s climate
@@ -164,10 +170,19 @@ ssp370_2041_current <- ssp370_2041_current %>%
                      replacement = "",
                      x = area))
 
+# Update the area columns with title case 
+ssp370_2041_current <- ssp370_2041_current %>%
+  mutate(area = tools::toTitleCase(area))
+
+# Make those areas a factor
+ssp370_2041_current <- ssp370_2041_current %>%
+  mutate(area = factor(area, levels = c("National", "State", "Local",
+                                        "Private", "Total", "None")))
+
 # At this point, create a wide format version of data we will use to label the 
 # lines (with percentage change); drop row of "total" first
 ssp370_2041_current_wide <- ssp370_2041_current %>%
-  filter(area != "total")  %>%
+  filter(area != "Total")  %>%
   pivot_wider(id_cols = area, names_from = climate, values_from = sqkm)
 
 # Create a column with the percentage change; first as a numeric column, then 
@@ -181,14 +196,13 @@ ssp370_2041_current_wide <- ssp370_2041_current_wide %>%
 # Make the text we'll use for the plot and a field with the color to use for 
 # the label
 ssp370_2041_current_wide <- ssp370_2041_current_wide %>%
-  mutate(label_text = paste0(tools::toTitleCase(area),
-                             ": ", perc_change_text, "%")) %>%
+  mutate(label_text = paste0(area, ": ", perc_change_text, "%")) %>%
   mutate(increase = perc_change > 0)
 
 # Let's add some position information!
 ssp370_2041_current_wide <- ssp370_2041_current_wide %>%
   mutate(ypos = (current + ssp370_2041)/2) %>%
-  mutate(xpos = 2050) # c(2020, 2020, 2040, 2045, 2015))
+  mutate(xpos = 2045) # c(2020, 2020, 2040, 2045, 2015))
   
 # Back to the long-formatted data, add column with a value for x-axis in 
 # plotting
@@ -197,46 +211,50 @@ ssp370_2041_current <- ssp370_2041_current %>%
                           climate == "current" ~ 2010.5,
                           .default = NA_real_)) 
 
-text_colors <- c("FALSE" = "#D10000", "TRUE" = "black")
+# text_colors <- c("FALSE" = "#D10000", "TRUE" = "black")
 # We drop "total" and "none" from plot - they are 10x higher than others
 ssp370_2041_current_plot <- ggplot(data = ssp370_2041_current %>%
-                                     filter(!(area %in% c("total", "none"))), 
+                                     filter(!(area %in% c("Total", "None"))), 
                                mapping = aes(x = year, 
                                              y = sqkm, 
                                              group = area)) + 
-  geom_point() +
-  geom_line() +
+  geom_point(pch = 19, size = 3, mapping = aes(color = area)) +
+  geom_line(mapping = aes(color = area)) +
+  scale_color_manual(values = area_colors) +
   geom_text(data = ssp370_2041_current_wide %>%
-              filter(area != "none"), 
+              filter(area != "None"), 
             mapping = aes(x = xpos, y = ypos,
-                          label = label_text,
-                          color = increase),
-            size = 3,
+                          # color = increase,
+                          label = label_text),
+            size = 2.5,
             # If not log scale, use:
             # nudge_y = c(-2000, 4500, -2000, 2000)) +
             # If using log scale, use:
-            nudge_y = c(-0.03, 0, -0.34, -0.05)) +
-  scale_color_manual(values = text_colors) +
+            nudge_y = c(-0.075, 0.08, -0.34, 0.1)) +
+            # nudge_y = c(-0.03, 0, -0.34, -0.05)) +
+  # scale_color_manual(values = text_colors) +
+  scale_x_continuous(breaks = c(2010, 2030, 2050)) +
   scale_y_log10(limits = c(1e3, 1e5)) +
   labs(x = "Year", y = "Area (sq km)") +
   theme_bw() +
   theme(legend.position = "none")
-# ssp370_2041_current_plot
+ssp370_2041_current_plot
 
 ################################################################################
 # And combine the two plots into a panels (a) and (b)
-pa_plots <- cowplot::plot_grid(plotlist = list(national_areas_plot, 
+pa_plots <- cowplot::plot_grid(plotlist = list(any_protection_plot, #national_areas_plot, 
                                                ssp370_2041_current_plot),
                                byrow = FALSE,
                                ncol = 2,
                                labels = "auto", 
-                               vjust = 1,
+                               # rel_widths = c(1.75, 1), # trying to get same height
+                               scale = c(1, 0.7),
+                               vjust = 2.5,
                                hjust = 0)
-                               # rel_widths = c(1.75, 1)) # trying to get same height
+# pa_plots                               
 pa_plots_file <- paste0(output_basename, "Figure-Protected-Areas.png")
 ggsave(filename = pa_plots_file,
        plot = pa_plots,
        width = 6,
        height = 4,
        units = "in")
-

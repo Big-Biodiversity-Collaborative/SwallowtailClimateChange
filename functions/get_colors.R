@@ -5,7 +5,7 @@
 #' @details
 #' Color values returned are based on the value passed to \code{palette} 
 #' argument. Valid palette names are:
-#' #' \describe{
+#' \describe{
 #'   \item{"distdelta"}{Four color vector for types of predicted changes in 
 #'   range (absent, loss, gain, stable)}
 #'   \item{"eastwest"}{Two color palette used to indicate Eastern and Western 
@@ -42,8 +42,10 @@ get_colors <- function(palette = c("distdelta", "eastwest", "hotspot",
                 hotspot = get_colors(palette = "richness")[c(1, 5)],
                 overlap = c(absent = "#ededed", host_only = "#b2df8a",
                             insect_only = "#a6cee3", both = "#1f78b4"),
-                protected = c(national = "#1B9E77", state = "#D95F02",
-                              local = "#7570B3", private = "#E7298A"),
+                # protected = c(national = "#1B9E77", state = "#D95F02",
+                #               local = "#7570B3", private = "#E7298A"),
+                protected = c(national = "#66c2a5", state = "#fc8d62",
+                              local = "#8da0cb", private = "#e78ac3"),
                 richdelta = c("#D10000", graycol, "#104e8b"),
                 richness = {
                   # Start with seven-color palette based on plasma
