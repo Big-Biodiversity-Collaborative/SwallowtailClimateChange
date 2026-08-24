@@ -4,7 +4,9 @@
 # 2024-08-09
 
 require(dplyr)
+require(tidyr)
 require(terra)
+require(exactextractr)
 
 ################################################################################
 # README
@@ -24,106 +26,220 @@ require(terra)
 # Categorization of polygons
 ################################################################################
 
-# Note, as of 2026-06-22, the data we based the land management categorization 
-# is no longer available (the link below 404s). There is a new map, for 2025 at 
-# https://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2025/
-
 # Data from 
-# http://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2021/
+# https://www.cec.org/north-american-environmental-atlas/north-american-protected-areas-2025/
 # Includes information about agency (in the MGMT_AGNCY field). Would like to 
 # consolidate into general types (national, state, regional). There is a field 
-# called GOV_TYPE in the data, but the majority of records (>53K are listed as 
-# "Not Reported"). Start by looking at PA_Type field, which has good "National",
-# "State", and "Local" starts of strings.
+# called GOV_TYPE in the data, that we start with, with a lot of areas that we 
+# can easily categorize. After that, look at PA_Type field, which has good 
+# "National", "State", and "Local" starts of strings.
 
 # Data wrangling starts with downloading zip from Google Drive, unzipping all 
 # the files, and reading the shapefile into memory.
 
 # Update path as appropriate on local machine.
-shpfile_orig <- "~/Desktop/iucn/CEC_NA_2021_terrestrial_IUCN_categories.shp"
+# shpfile_orig <- "~/Desktop/iucn/CEC_NA_2021_terrestrial_IUCN_categories.shp"
+shpfile_orig <- "~/Desktop/iucn/CEC_NA_2025_terrestrial_IUCN_categories.shp"
 
-# Read in protected areas file
+# Read in protected areas file, may take a few seconds
 pa <- terra::vect(shpfile_orig)
 
 # Make a quick data.frame copy to interrogate
 pa_df <- data.frame(pa)
 
-# This subset will be the one we actually work with, updating AGNCY_SHORT with 
-# values of "National", "State", "Local", and "Private"
+# This subset will be the one we actually work with, in a moment adding the 
+# column AGNCY_SHORT, which will take values of "National", "State", "Local", 
+# and "Private"
 agencies <- data.frame(pa) %>%
-  select(COUNTRY, STATE_PROV, MGMT_AGNCY, PA_NAME, TYPE_PA, GOV_TYPE) %>%
-  mutate(AGNCY_SHORT = NA_character_)
+  select(COUNTRY, STATE_PROV, MGMT_AGNCY, PA_NAME, TYPE_PA, GOV_TYPE)
+
+####################
+# GOV_TYPE field   #
+####################
+
+# What values show up in the GOV_TYPE field?
+agencies %>%
+  select(GOV_TYPE) %>%
+  table()
+
+# Plenty of easy associations here. Use the gov_type.csv to do initial 
+# assignment (file was created manually). Note the 2021 version of the data had 
+# much less data in the GOV_TYPE field and was not used.
+gov_type <- read.csv(file = "data/protected-areas/gov_type.csv")
+agencies <- agencies %>%
+  left_join(gov_type, by = "GOV_TYPE")
 
 # This reality check provides a measure of progress. The sum will (ideally) 
 # eventually be 0 (no missing categorizations)
 sum(is.na(agencies$AGNCY_SHORT))
-# 62272
+# 29704
 
 ####################
 # MGMT_AGNCY field #
 ####################
 
+# Are there some big ones still left that we can use MGMT_AGNCY for?
+agencies %>%
+  filter(is.na(agencies$AGNCY_SHORT)) %>%
+  group_by(MGMT_AGNCY) %>%
+  summarize(count = n()) %>%
+  ungroup() %>%
+  arrange(desc(count))
+
+# write.csv(file = "~/Desktop/still_missing.csv",
+#           row.names = FALSE,
+#           x = agencies %>%
+#             filter(is.na(agencies$AGNCY_SHORT)) %>%
+#             group_by(MGMT_AGNCY) %>%
+#             summarize(count = n()) %>%
+#             ungroup() %>%
+#             filter(count > 1) %>%
+#             arrange(desc(count)))
+
 ####################
-# Exact matches
-# Several agencies are named and easily categorized in the MGMT_AGNCY field. We
-# start here with those
-
-# Two values in MGMT_AGNCY are very close string-wise, but different agency
-# agencies %>%
-#   filter(substr(MGMT_AGNCY, 1, 46) == "National Commission of Natural Protected Areas")
-# National: "National Commission of Natural Protected Areas"
-# Private: "National Commission of Natural Protected Areas - Individual landowners"
+# Partial matches
+# Looking at the MGMT_AGNCY field, the beginning values can be used for some 
+# categorizations, e.g., "City of", "County of"
+# City of
+# County of
+# City Land
+# County Land
 agencies <- agencies %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "National Commission of Natural Protected Areas",
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 9) == "City Land",
+                               true = "Local",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 7) == "City of",
+                               true = "Local",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 11) == "County Land",
+                               true = "Local",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 20) == "Regional Agency Land",
+                               true = "Local",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 24) == "Regional Water Districts",
+                               true = "Local",
+                               false = AGNCY_SHORT))
+
+sum(is.na(agencies$AGNCY_SHORT))
+# 19204
+
+# Some First Nations manage lands with MGMT_AGNCY
+agencies <- agencies %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 17) == "Environment Yukon",
                                true = "National",
                                false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "National Commission of Natural Protected Areas - Individual landowners",
-                               true = "Private",
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 21) == "Indigenous Government",
+                               true = "National",
+                               false = AGNCY_SHORT))
+
+####################
+# Several agencies are named and easily categorized in the MGMT_AGNCY field.
+
+# A bunch of Canadian state agencies
+agencies <- agencies %>%
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Department of Tourism, Heritage and Culture, Government of New Brunswick",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 30) == "Government of British Columbia",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 26) == "Government of Newfoundland",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 21) == "Government of Nunavut",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 26) == "Government of Saskatchewan",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  # They may sound national, but Quebecois!
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 28) == "Ministère de l'Environnement",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 20) == "Ministère des Forêts",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 35) == "Ministère des Ressources naturelles",
+                               true = "State",               
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Ministry of Natural Resources and Forestry",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Nova Scotia Environment and Climate Change",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Ontario Parks",
+                               true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Parks Division, Alberta Forestry and Parks",
+                               true = "State",
                                false = AGNCY_SHORT))
 sum(is.na(agencies$AGNCY_SHORT))
-# 61741
+# 12906
 
-# National level:
-# "National Capital Commission (NCC)"
-# "Tennessee Valley Authority"
+# write.csv(file = "~/Desktop/still_missing.csv",
+#           row.names = FALSE,
+#           x = agencies %>%
+#             filter(is.na(agencies$AGNCY_SHORT)) %>%
+#             group_by(MGMT_AGNCY) %>%
+#             summarize(count = n()) %>%
+#             ungroup() %>%
+#             filter(count > 1) %>%
+#             arrange(desc(count)))
+
 # State level:
-# "Manitoba Agriculture and Resource Development"
-# "Manitoba Conservation and Climate"
-# Additional NGOs (Private)
-# "Nature Conservancy of Canada"
-# "Nature Trust of New Brunswick"
+# Manitoba Economic Development...
+# Manitoba Environment and Climate Change
+# PEI Department of...
 agencies <- agencies %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "National Capital Commission (NCC)",
-                               true = "National",
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 29) == "Manitoba Economic Development",
+                               true = "State",               
                                false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Tennessee Valley Authority",
-                               true = "National",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "American Indian Lands",
-                               true = "National",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Manitoba Agriculture and Resource Development",
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Manitoba Environment and Climate Change",
                                true = "State",
                                false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Manitoba Conservation and Climate",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Nature Conservancy of Canada",
-                               true = "Private",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Nature Trust of New Brunswick",
-                               true = "Private",
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 17) == "PEI Department of",
+                               true = "State",               
                                false = AGNCY_SHORT))
 sum(is.na(agencies$AGNCY_SHORT))
-# 61269
+# 12649
+
+# write.csv(file = "~/Desktop/still_missing.csv",
+#           row.names = FALSE,
+#           x = agencies %>%
+#             filter(is.na(agencies$AGNCY_SHORT)) %>%
+#             group_by(MGMT_AGNCY) %>%
+#             summarize(count = n()) %>%
+#             ungroup() %>%
+#             filter(count > 1) %>%
+#             arrange(desc(count)))
+
+# Another join for a bunch of joint-operated areas. Relies on the 
+# joint_el_al.csv another manually-created CSV file.
+joint_mgmt <- read.csv(file = "data/protected-areas/joint_et_al.csv")
+agencies <- agencies %>%
+  left_join(joint_mgmt, by = "MGMT_AGNCY") %>%
+  mutate(AGNCY_SHORT = coalesce(AGNCY_SHORT.x, AGNCY_SHORT.y),
+         .keep = "unused")
+sum(is.na(agencies$AGNCY_SHORT))
+# 11460
+
+################################################################################
+# TODO: August 2026 update to here
+################################################################################
+
+
+
 
 # A bunch of "Joint" things that each need individual attention; when 
 # partnership includes entities at different levels (e.g., State and Local), 
 # categorized under the higher-level entity (e.g., State and Local categorized
 # as State). For public / private partnerships, categorized based on the public 
 # entity (e.g., State and Private categorized as State)
-# State & Local (categorized as State)
-# "Joint - State of TN & City of Murfreesboro"
+
+# Stored in a csv since there are a bunch of them
+
 # Local
 # "Joint - City of Richmond Parks & Richmond Dept. of Public Works"
 # "Joint - Suffolk County / Town of East Hampton"
@@ -297,44 +413,6 @@ agencies <- agencies %>%
                                false = AGNCY_SHORT))
 sum(is.na(agencies$AGNCY_SHORT))
 # 35873
-
-# A bunch of Canadian state agencies
-agencies <- agencies %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 54) == "Department of Natural Resources and Energy Development",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 17) == "Environment Yukon",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 30) == "Government of British Columbia",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 22) == "Government of Manitoba",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 26) == "Government of Newfoundland",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 26) == "Government of Saskatchewan",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 39) == "Government of the Northwest Territories",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 28) == "Ministère de l'Environnement",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 20) == "Ministère des Forêts",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 42) == "Ministry of Natural Resources and Forestry",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 13) == "Ontario Parks",
-                               true = "State",
-                               false = AGNCY_SHORT))
-sum(is.na(agencies$AGNCY_SHORT))
-# 29542
 
 # More state-level agencies (US & CA)
 agencies <- agencies %>%
