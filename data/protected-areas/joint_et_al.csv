@@ -1,85 +1,130 @@
-MGMT_AGNCY,AGNCY_SHORT
-"Forest Planning & Stewardship Branch, Department of Natural Resources and Energy Development, Government of New Brunswick",State
-"Lands Operations Division, Alberta Forestry and Parks",State
-Other or Unknown Local Government,NA
-Bruce Trail Conservancy,NA
-Unknown - Division of Environmental Services,NA
-Quinte Conservation Authority,NA
-Capital Region District,Local
-"Forest Planning & Stewardship Branch, Department of Natural Resources and Energy Development",NA
-Credit Valley Conservation Authority,Local
-Contact Lead Organization for information about Managing Authority,NA
-"NS Environment and Climate Change, private owner(s)",State
-NS Department of Natural Resources and Renewables,State
-Other or Unknown Local Government - Unknown Local Government,NA
-Other or Unknown Local Government - Ocean County Natural Lands Trust,NA
-Regional District of Central Okanagan,Local
-Central Lake Ontario Conservation Authority,Local
-"Joint - Louisville, KY, Jefferson County Environmental Trust, KY",Local
-"NS Environment and Climate Change, Nature Conservancy of Canada",State
-Niagara Peninsula Conservation Authority,Local
-"Other or Unknown Local Government - Parsippany, NJ",Local
-Co-Managed,NA
-Joint - WV Division of Natural Resources and US Army Corps of Engineers,National
-Other or Unknown Local Government - LOC,NA
-Cataraqui Region Conservation Authority,NA
-"Joint - Minnesota Board of Water and Soil Resources, U.S. Natural Resources Conservation Service",National
-State Department of Natural Resources - NJ Department of Environmental Protection,State
-"Joint - The Nature Conservancy, VHCB",NA
-Lake Simcoe Region Conservation Authority,Local
-Other or Unknown Local Government - Lower Colorado River Authority,NA
-BC Nature,NA
-Dufferin County,Local
-Other or Unknown Local Government - Unspecified,NA
-Private Landowner; Government of Saskatchewan,State
-Unknown - PNP,NA
-Hamilton Conservation Authority,Local
-Joint - City and County of Broomfield,Local
-Joint - City of Richmond Parks and Richmond Dept of Public Works,Local
-Joint - Kentucky State Parks; Office of Kentucky Nature Preserves,State
-"Joint - Wallkill Valley Land Trust, Open Space Institute",Local
-"Joint - Indiana Department of Natural Resources, ACRES Land Trust",State
-Joint - Suffolk County / Town of East Hampton,Local
-Meewasin Valley Authority,Local
-Toronto and Region Conservation Authority,Local
-"Unknown - Florida Mitigation Providers, LLC",Private
-Joint - City of Aspen/Pitkin County,Local
-"Joint - Indiana Department of Natural Resources, Bluffton, IN",State
-"Joint - Indiana Department of Natural Resources, Hamilton County Parks Department, IN",State
-"Joint - Indiana Department of Natural Resources, NICHES Land Trust",State
-"Joint - Indiana Department of Natural Resources, St. Joseph County Parks, IN",State
-"Joint - Indiana Department of Natural Resources, Sycamore Land Trust",State
-Joint - Kentucky Department of Fish and Wildlife Resources; Office of Kentucky Nature Preserves,State
-"Joint - North Carolina State University, NC Department of Environment and Natural Resources",State
-Palau Government,NA
-"Toronto and Region Conservation Authority, Town of Ajax",Local
-Unknown - Bureau of Forestry,NA
-Unknown - EarthBalance,NA
-Upper Thames River Conservation Authority,Local
-Ausable Bayfield Conservation Authority,Local
-Guam Government - Unknown,NA
-Joint,NA
-Joint - City and County of Denver,Local
-Joint - City and County of Honolulu,Local
-Joint - City of Milford and Little Miami Inc.,Local
-Joint - Co-manejo: DRNA y Taller de Arte y Cultura de Adjuntas,NA
-"Joint - HeartLands Conservancy, Illinois Department of Natural Resources",State
-"Joint - Indiana Department of Natural Resources, Heritage Park Conservancy",State
-"Joint - Indiana Department of Natural Resources, LaGrange County Parks and Recreation Department, IN",State
-"Joint - Indiana Department of Natural Resources, Lake County Park Board, IN",State
-"Joint - Indiana Department of Natural Resources, West Lafayette Parks and Recreation, IN",State
-"Joint - Monadnock Conservancy, Harris Center for Conservation Education",NA
-Joint - Murray State University; Kentucky State Nature Preserves Commission,State
-"Joint - North Carolina Botanical Garden Foundation, NC Department of Environment and Natural Resources",State
-"Joint - Scenic Hudson Land Trust, Hudson Highlands Land Trust",NA
-"Joint - The Nature Conservancy, Maryland Environmental Trust",NA
-"NS Environment and Climate Change, Nova Scotia Nature Trust",State
-Nottawasaga Valley Conservation Authority,Local
-Ontario Heritage Trust,NA
-Other or Unknown Local Government - Brookhaven,NA
-Other or Unknown Local Government - Fort Worth Nature Center and Refuge,Local
-Other or Unknown Local Government - Springfield Township,Local
-Other or Unknown Local Government - Unknown,NA
-South Nation Conservation,NA
-Unknown - STP,NA
-Unknown - Westervelt Ecological Services,Private
+MGMT_AGNCY,AGNCY_SHORT,AGNCY_National,AGNCY_State,AGNCY_Local,AGNCY_Private
+Ausable Bayfield Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+BC Nature,Private,FALSE,FALSE,FALSE,TRUE
+Bruce Trail Conservancy,Private,FALSE,FALSE,FALSE,TRUE
+Capital Region District,Local,FALSE,FALSE,TRUE,FALSE
+Cataraqui Region Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+Central Lake Ontario Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+Co-Managed,NA,FALSE,FALSE,FALSE,FALSE
+Contact Lead Organization for information about Managing Authority,NA,FALSE,FALSE,FALSE,FALSE
+Credit Valley Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+Ducks Unlimited Canada,Private,,,,
+Ducks Unlimited Canada; Nature Conservancy of Canada,Private,,,,
+Dufferin County,Local,FALSE,FALSE,TRUE,FALSE
+"Forest Planning & Stewardship Branch, Department of Natural Resources and Energy Development",State,FALSE,TRUE,FALSE,FALSE
+"Forest Planning & Stewardship Branch, Department of Natural Resources and Energy Development, Government of New Brunswick",State,FALSE,TRUE,FALSE,FALSE
+Government of the Northwest Territories,State,,,,
+Guam Government - Unknown,State,FALSE,TRUE,FALSE,FALSE
+Hamilton Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+Joint,NA,FALSE,FALSE,FALSE,FALSE
+"Joint - American Farmland Trust, U.S. Fish and Wildlife Service",National; Private,,,,
+"Joint - Barrington Area Conservation Trust, The Conservation Foundation",Private,,,,
+"Joint - Champaign County Soil and Water Conservation District, Indiana Department of Natural Resources",State; Local,,,,
+Joint - City and County of Broomfield,Local,FALSE,FALSE,TRUE,FALSE
+Joint - City and County of Denver,Local,FALSE,FALSE,TRUE,FALSE
+Joint - City and County of Honolulu,Local,FALSE,FALSE,TRUE,FALSE
+Joint - City of Aspen/Pitkin County,Local,FALSE,FALSE,TRUE,FALSE
+Joint - City of Milford and Little Miami Inc.,Local,FALSE,FALSE,TRUE,FALSE
+Joint - City of Richmond Parks and Richmond Dept of Public Works,Local,FALSE,FALSE,TRUE,FALSE
+Joint - Co-manejo: DRNA y Taller de Arte y Cultura de Adjuntas,State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - HeartLands Conservancy, Illinois Department of Natural Resources",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - Hill Country Conservancy, U.S. Natural Resources Conservation Service",National; Private,,,,
+"Joint - Indiana Department of Natural Resources, ACRES Land Trust",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - Indiana Department of Natural Resources, Anderson Park Board, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Bluffton, IN",State; Local,FALSE,TRUE,TRUE,FALSE
+"Joint - Indiana Department of Natural Resources, Elkhart, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Fishers Park Board, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Goshen Park Board, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Hamilton County Parks Department, IN",State; Local,FALSE,TRUE,TRUE,FALSE
+"Joint - Indiana Department of Natural Resources, Hendricks County Park Board, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Heritage Park Conservancy",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - Indiana Department of Natural Resources, Indy Parks and Recreation, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, LaGrange County Parks and Recreation Department, IN",State; Local,FALSE,TRUE,TRUE,FALSE
+"Joint - Indiana Department of Natural Resources, Lake County Park Board, IN",State; Local,FALSE,TRUE,TRUE,FALSE
+"Joint - Indiana Department of Natural Resources, NICHES Land Trust",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - Indiana Department of Natural Resources, NICHES Land Trust, Wildcat Creek Foundation",State; Private,,,,
+"Joint - Indiana Department of Natural Resources, Portage Parks and Recreation, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Shirley Heinze Land Trust",State; Private,,,,
+"Joint - Indiana Department of Natural Resources, St. Joseph County Parks, IN",State; Local,FALSE,TRUE,TRUE,FALSE
+"Joint - Indiana Department of Natural Resources, Sycamore Land Trust",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - Indiana Department of Natural Resources, Tippecanoe County Park Board, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, Vigo County Parks Department, IN",State; Local,,,,
+"Joint - Indiana Department of Natural Resources, West Lafayette Parks and Recreation, IN",State; Local,FALSE,TRUE,TRUE,FALSE
+"Joint - Indiana Department of Natural Resources, Zionsville Park Board, IN",State; Local,,,,
+"Joint - Jefferson County Environmental Trust, KY, Jefferson County Environmental Trust, KY",Local,,,,
+Joint - Kentucky Department of Fish and Wildlife Resources; Office of Kentucky Nature Preserves,State,FALSE,TRUE,FALSE,FALSE
+Joint - Kentucky State Parks; Office of Kentucky Nature Preserves,State,FALSE,TRUE,FALSE,FALSE
+"Joint - Kitty Hawk, NC, NC Department of Environment and Natural Resources",State; Local,,,,
+"Joint - Louisville, KY, Jefferson County Environmental Trust, KY",Local,FALSE,FALSE,TRUE,FALSE
+"Joint - Louisville, KY, Louisville/Jefferson County Environmental Trust, KY",Local,,,,
+"Joint - Minnesota Board of Water and Soil Resources, U.S. Natural Resources Conservation Service",National; State,TRUE,TRUE,FALSE,FALSE
+"Joint - Monadnock Conservancy, Harris Center for Conservation Education",Private,FALSE,FALSE,FALSE,TRUE
+Joint - Murray State University; Kentucky State Nature Preserves Commission,State,FALSE,TRUE,FALSE,FALSE
+"Joint - New Hanover Soil and Water Conservation District, NC, NC Department of Environment and Natural Resources",State; Local,,,,
+"Joint - North Carolina Botanical Garden Foundation, NC Department of Environment and Natural Resources",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - North Carolina Coastal Land Trust, NC Department of Environment and Natural Resources",State; Local,,,,
+"Joint - North Carolina State University, NC Department of Environment and Natural Resources",State,FALSE,TRUE,FALSE,FALSE
+"Joint - Openlands, Lake County Forest Preserve District",Local,,,,
+"Joint - Preservation Society of Asheville and Buncombe County, Southern Appalachian Highlands Conservancy",Private,,,,
+"Joint - Scenic Hudson Land Trust, Hudson Highlands Land Trust",Private,FALSE,FALSE,FALSE,TRUE
+"Joint - Scenic Hudson Land Trust, Not Applicable",Private,,,,
+Joint - Suffolk County / Town of East Hampton,Local,FALSE,FALSE,TRUE,FALSE
+"Joint - The Nature Conservancy, Maryland Environmental Trust",State; Private,FALSE,TRUE,FALSE,TRUE
+"Joint - The Nature Conservancy, Vermont Land Trust",State; Private,,,,
+"Joint - The Nature Conservancy, VHCB",State; Private,FALSE,TRUE,FALSE,TRUE
+Joint - Town of North Kingstown and NRCS,National; Local,,,,
+"Joint - Triangle Land Conservancy, NC Department of Environment and Natural Resources",State; Private,,,,
+"Joint - Upper Valley Land Trust, VHCB",State; Private,,,,
+"Joint - Upper Valley Land Trust, VTFPR",State; Private,,,,
+"Joint - Vermont Land Trust, VT Dept of Fish and WIldlife",State; Private,,,,
+"Joint - VT Department of Fish and Wildlife, TNC",State; Private,,,,
+"Joint - VT Department of Forests, Parks and Rec, TNC",State; Private,,,,
+"Joint - Wallkill Valley Land Trust, Open Space Institute",Local; Private,FALSE,FALSE,TRUE,TRUE
+Joint - WV Division of Natural Resources and US Army Corps of Engineers,National; State,TRUE,TRUE,FALSE,FALSE
+Joint - WV OHCF/WV Agrictrl Land Prot Auth,State,,,,
+Lake Simcoe Region Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+"Lands Operations Division, Alberta Forestry and Parks",State,FALSE,TRUE,FALSE,FALSE
+Meewasin Valley Authority,Local,FALSE,FALSE,TRUE,FALSE
+Nature Conservancy of Canada,Private,,,,
+Niagara Peninsula Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+"Non-Governmental Organization - U.S. Land Conservancy, Inc.",Private,,,,
+Nottawasaga Valley Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+NS Department of Natural Resources and Renewables,State,FALSE,TRUE,FALSE,FALSE
+"NS Environment and Climate Change, Nature Conservancy of Canada",State; Private,FALSE,TRUE,FALSE,TRUE
+"NS Environment and Climate Change, Nova Scotia Nature Trust",State,FALSE,TRUE,FALSE,FALSE
+"NS Environment and Climate Change, Nova Scotia Power Inc.",State; Private,,,,
+"NS Environment and Climate Change, NS Department of Natural Resources and Renewables",State,,,,
+"NS Environment and Climate Change, NS Department of Natural Resources and Renewables, Nature Conservancy of Canada",State; Private,,,,
+"NS Environment and Climate Change, private owner(s)",State,FALSE,TRUE,FALSE,TRUE
+Ontario Heritage Trust,State,FALSE,TRUE,FALSE,FALSE
+Other or Unknown Local Government,NA,FALSE,FALSE,FALSE,FALSE
+Other or Unknown Local Government - Brookhaven,NA,FALSE,FALSE,FALSE,FALSE
+Other or Unknown Local Government - Fort Worth Nature Center and Refuge,Local,FALSE,FALSE,TRUE,FALSE
+Other or Unknown Local Government - LOC,NA,FALSE,FALSE,FALSE,FALSE
+Other or Unknown Local Government - Lower Colorado River Authority,State,FALSE,TRUE,FALSE,FALSE
+Other or Unknown Local Government - Ocean County Natural Lands Trust,Local,FALSE,FALSE,TRUE,FALSE
+"Other or Unknown Local Government - Parsippany, NJ",Local,FALSE,FALSE,TRUE,FALSE
+Other or Unknown Local Government - Springfield Township,Local,FALSE,FALSE,TRUE,FALSE
+Other or Unknown Local Government - Unknown,NA,FALSE,FALSE,FALSE,FALSE
+Other or Unknown Local Government - Unknown Local Government,NA,FALSE,FALSE,FALSE,FALSE
+Other or Unknown Local Government - Unspecified,NA,FALSE,FALSE,FALSE,FALSE
+Palau Government,National,TRUE,FALSE,FALSE,FALSE
+Private Landowner; Government of Saskatchewan,State; Private,FALSE,TRUE,FALSE,TRUE
+Quinte Conservation Authority,State,FALSE,TRUE,FALSE,FALSE
+Regional District of Central Okanagan,Local,FALSE,FALSE,TRUE,FALSE
+Saskatchewan Pheasants Forever,Private,,,,
+Saskatchewan Wildlife Federation,Private,,,,
+Saskatchewan Wildlife Federation; Nature Conservancy of Canada,Private,,,,
+South Nation Conservation,Private,FALSE,FALSE,FALSE,TRUE
+State Department of Natural Resources - NJ Department of Environmental Protection,State,FALSE,TRUE,FALSE,FALSE
+Toronto and Region Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE
+"Toronto and Region Conservation Authority, Town of Ajax",Local,FALSE,FALSE,TRUE,FALSE
+Unknown - Bureau of Forestry,State,FALSE,TRUE,FALSE,FALSE
+Unknown - Division of Environmental Services,NA,FALSE,FALSE,FALSE,FALSE
+Unknown - EarthBalance,Private,FALSE,FALSE,FALSE,TRUE
+"Unknown - Florida Mitigation Providers, LLC",Private,FALSE,FALSE,FALSE,TRUE
+Unknown - PNP,NA,FALSE,FALSE,FALSE,FALSE
+Unknown - STP,NA,FALSE,FALSE,FALSE,FALSE
+"Unknown - U.S. Land Conservancy, Inc.",Private,,,,
+Unknown - Westervelt Ecological Services,Private,FALSE,FALSE,FALSE,TRUE
+Upper Thames River Conservation Authority,Local,FALSE,FALSE,TRUE,FALSE

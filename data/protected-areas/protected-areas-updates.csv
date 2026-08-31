@@ -1,55 +1,116 @@
-STATE_PROV,PA_NAME,AGNCY_SHORT
-US-CO,Denver Water Board/Fehringer/Foothills,Local
-US-CO,Murphy Creek East Greenbelt,Local
-US-CO,PS/Foothills/Deer Creek Residential,Local
-US-CT,Honey Hill Road Open Space,Private
-US-CT,Open Space #1,NA
-US-CT,Open Space #2,NA
-US-CT,Open Space #3,NA
-US-CT,Platt Farm Preserve,Local
-US-CT,Quail Ridge Open Space,NA
-US-MN,Cedar Creek Nha,State
-US-MO,Blanchette Landing Access,State
-US-MO,Blue River Glades Natural Area,Local
-US-MO,Christie (James D.) Conservation Area,State
-US-MO,Emmenegger Nature Park,State
-US-MO,Headwaters Access,State
-US-MO,Hidden Valley Natural Area,Local
-US-MO,Isley Park Woods Natural Area,State
-US-MO,Nodaway County Conservation Land,State
-US-MO,Perry County Conservation Land,State
-US-MO,Ray County Conservation Land,State
-US-MO,Saint Stanislaus Conservation Area,State
-US-MO,St Louis (North Riverfront Park Access),Local
-US-MO,Wildcat Glades Natural Area,State
-US-MO,Worth County Conservation Land,Local
-US-MS,Caney Creek Wma,State
-US-MS,Caston Creek Wma,State
-US-MS,Chickasaw Wma,State
-US-MS,Chickasawhay Wma,State
-US-MS,Leaf River Wma,State
-US-MS,Mason Creek Wma,State
-US-MS,Old River Wma,State
-US-MS,Pascagoula Wma,State
-US-MS,Red Creek Wma,State
-US-MS,Sandy Creek Wma,State
-US-MS,Sunflower Wma,State
-US-MS,Tallahala Wma,State
-US-MS,Upper Sardis Wma,State
-US-MS,Ward Bayou Wma,State
-US-MS,Waterfowl Area,NA
-US-NH,Zeev Darer Memorial Natural Area,Local
-US-NJ,Deer Trail North,NA
-US-NJ,Finnegans Lane Natural Area,NA
-US-NJ,Ireland Brook Conservation Area,Local
-US-NJ,Scotts Corner Conservation Area,Local
-US-PA,Birch Run Forest - West Acquisition,Local
-US-PA,Moran Tract----(Old) Gray Property Acquisition,NA
-US-PW,Ngaremeduu Conservation Area,National
-US-PW,Ngaremeduu Conservation Area,National
-US-PW,Ngaremeduu Conservation Area,National
-US-PW,Ngaremeduu Conservation Area,National
-US-PW,Ngaremeduu Conservation Area,National
-US-RI,Unknown Park,NA
-US-TN,Mullins Cove,NA
-US-WA,Navy Yard City Open Space,Local
+COUNTRY,STATE_PROV,MGMT_AGNCY,PA_NAME,TYPE_PA,GOV_TYPE,AGNCY_SHORT
+CAN,CA-NL,Government of Newfounland & Labrador/Commission,Pippy Park Barren Lands Zone,Environmental Conservation Land Use Designation Barren Lands,Joint Governance,State
+CAN,CA-ON,Lakehead Region Conservation Authority,Beaver Avenue,Conservation Area,Sub-National Government,Local
+CAN,CA-ON,Kettle Creek Conservation Authority,Deer Ridge Conservation Area,Conservation Area,Sub-National Government,Local
+CAN,CA-ON,Kawartha Region Conservation Authority,Durham East Cross Forest Conservation Area,Conservation Area,Sub-National Government,Local
+CAN,CA-SK,Regina Fish & Game League,Fish And Wildlife Development Fund,Fish and Wildlife Development Fund Land,Sub-National Government,Local
+CAN,CA-ON,Rideau Waterway Land Trust,Rock Dunder Nature Reserve,NGO/Land Trust/Agency - Fee Simple Property,Sub-National Government,Local
+CAN,CA-ON,Grey Sauble Conservation Authority,Rothrock Property - Isaac Lake Management Area,Conservation Area,Sub-National Government,Local
+CAN,CA-ON,Essex Region Conservation Authority,Stone Road Alvar Conservation Area,Conservation Area,Sub-National Government,Local
+CAN,CA-ON,Halton Region Conservation Authority,Waterdown Woods Natural Area,Conservation Area,Sub-National Government,Local
+USA,US-NH,Unknown,Andorra Forest Conservation Easement - Wildcat Hollow Wilderness Area,Conservation Easement,Unknown,NA
+USA,US-CT,Unknown,Asen Conservation Easement,Conservation Easement,Unknown,NA
+USA,US-NC,Unknown,Asheville Watershed,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Bader,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Barbosa,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Bittersweet Farm Way,Watershed Protection Area,Unknown,NA
+USA,US-CT,Unknown,Black Rock Dam and Reservoir,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Bodnarczuk Tract (Scenic Easement),Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Budd,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Camp Onas,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Catamaran Street,Watershed Protection Area,Unknown,NA
+USA,US-RI,Unknown,City of Newport,Watershed Protection Area,Unknown,Local
+USA,US-RI,Unknown,City of Newport,Watershed Protection Area,Unknown,Local
+USA,US-VT,Unknown,Concord Woods,Research or Educational Area,Unknown,NA
+USA,US-NH,Unknown,Connecticut Lakes Wma North (East),Conservation Easement,Unknown,State
+USA,US-NH,Unknown,Connecticut Lakes Wma North (East),Conservation Easement,Unknown,State
+USA,US-NH,Unknown,Connecticut Lakes Wma North (East),Conservation Easement,Unknown,State
+USA,US-NH,Unknown,Conway School District,Conservation Easement,Unknown,Local
+USA,US-RI,Unknown,Darby Donation,Watershed Protection Area,Unknown,NA
+USA,US-VA,Unknown,Dragon Run VIMS Tract,Research or Educational Area,Unknown,NA
+USA,US-RI,Unknown,Ferry Street,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Folkes,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Four Brooks,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Frenchtown Road,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Gary Trauger,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Gilberti-Barker,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Grubb,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Halstead 2,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Halstead 3,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Halstead I,Conservation Easement,Unknown,NA
+USA,US-NH,Unknown,Harvard Forest Pisgah Tract,Research or Educational Area,Unknown,NA
+USA,US-PA,Unknown,Harvey,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Heine,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Heinz,Conservation Easement,Unknown,NA
+USA,US-ME,Unknown,Highview Parcel,Conservation Easement,Unknown,NA
+USA,US-CT,Unknown,Hochberg-Bear Hill Conservation Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Horn,Conservation Easement,Unknown,NA
+USA,US-CT,Unknown,Housatonic Floodplain,Conservation Easement,Unknown,NA
+USA,US-NH,Unknown,Humphrey Road - Don Ball,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Hunt River,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Jacobs,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Jugovich,Conservation Easement,Unknown,NA
+USA,US-NH,Unknown,Kauffmann Conservation Easement and Class 1 EcoReserve,Conservation Easement,Unknown,NA
+USA,US-CT,Unknown,Killingly High School Forestry Trust,Research or Educational Area,Unknown,NA
+USA,US-PA,Unknown,Kolar,Conservation Easement,Unknown,NA
+USA,US-ME,Unknown,Lake Auburn Watershed,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Lennox Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Macarthur/Novak,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,McCarthy-Luck,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,McGuigan,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Michael Moss Easement,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Mill Pond,Watershed Protection Area,Unknown,NA
+USA,US-RI,Unknown,Mill Pond Drive,Watershed Protection Area,Unknown,NA
+USA,US-VT,Unknown,Molly Bog,Research or Educational Area,Unknown,NA
+USA,US-VT,Unknown,Mount Mansfield Natural Area,Research or Educational Area,Unknown,State
+USA,US-VT,Unknown,Mount Mansfield Natural Area,Research or Educational Area,Unknown,State
+USA,US-VT,Unknown,Mount Mansfield Natural Area,Research or Educational Area,Unknown,State
+USA,US-RI,Unknown,Nautilus Street,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Ned Smith Center,Research or Educational Area,Unknown,NA
+USA,US-NH,Unknown,NH Technical Institute/Concord - Island Reserve,Research or Educational Area,Unknown,Local
+USA,US-CT,Unknown,Nickoll Falls Village Conservation Easement,Conservation Easement,Unknown,Local
+USA,US-CT,Unknown,Nickoll-Kinney Hill Conservation Easement (2007),Conservation Easement,Unknown,NA
+USA,US-PA,Unknown - STP,Niering Preserve (Swiftwater),Research or Educational Area,Unknown,NA
+USA,US-MA,Unknown,Notch Reservoir,Watershed Protection Area,Unknown,NA
+USA,US-ME,Unknown,Orono-Veazie Water District,Watershed Protection Area,Unknown,NA
+USA,US-CT,Unknown,Ostling-Tu Conservation Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Ott,Conservation Easement,Unknown,NA
+USA,US-ME,Unknown,Page Family Community Forest,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Patten,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Pepkowski Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Pfisterer,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Place 1,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Quinby 4,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Riptide Street,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Roaring Rocks,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Robert Hanley Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Rushton 1,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Rushton II,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Sailer,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Sardo/Wechsler,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Schaefer,Conservation Easement,Unknown,NA
+USA,US-MA,Unknown,School House Pond Conservation Area,Research or Educational Area,Unknown,Local
+USA,US-MA,Unknown,School House Pond Conservation Area,Research or Educational Area,Unknown,Local
+USA,US-MA,Unknown,Schoolhouse Pond Conservation area,Research or Educational Area,Unknown,Local
+USA,US-MA,Unknown,Schoolhouse Pond Conservation Area,Research or Educational Area,Unknown,Local
+USA,US-RI,Unknown,Ship Street,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Sigal,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Spanker Street,Watershed Protection Area,Unknown,NA
+USA,US-RI,Unknown,Spring Street,Watershed Protection Area,Unknown,NA
+USA,US-RI,Unknown,Steamboat Street,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,"Stevens, M. and J.",Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Stierheim Donation,Watershed Protection Area,Unknown,NA
+USA,US-CT,Unknown,Strassle-Great Hill Road Conservation Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Stroh,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Tomai,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Tuckertown Road,Watershed Protection Area,Unknown,NA
+USA,US-RI,Unknown,Tuckertown Road,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Van Duzer/Garrison,Conservation Easement,Unknown,NA
+USA,US-VT,Unknown,Vermont Land Trust Easement,Conservation Easement,Unknown,NA
+USA,US-ME,Unknown,Water Supply Lands,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,Wenner,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,West Beach Road Lot,Watershed Protection Area,Unknown,NA
+USA,US-PA,Unknown,White Knight Easement,Conservation Easement,Unknown,NA
+USA,US-PA,Unknown,Wieand/Tinicum Creek,Conservation Easement,Unknown,NA
+USA,US-NH,Unknown,Wilson Lot Conservation Easement,Conservation Easement,Unknown,NA
+USA,US-RI,Unknown,Yawl Avenue,Watershed Protection Area,Unknown,NA

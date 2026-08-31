@@ -74,17 +74,27 @@ agencies <- agencies %>%
 sum(is.na(agencies$AGNCY_SHORT))
 # 29704
 
+# Similarly, the PA_TYPE field has some that we can fairly easily assign
+type_pa <- read.csv(file = "data/protected-areas/type_pa.csv") %>%
+  select(TYPE_PA, AGNCY_SHORT)
+agencies <- agencies %>%
+  left_join(type_pa, by = "TYPE_PA") %>%
+  mutate(AGNCY_SHORT = coalesce(AGNCY_SHORT.x, AGNCY_SHORT.y),
+         .keep = "unused")
+sum(is.na(agencies$AGNCY_SHORT))
+# 9697
+
 ####################
 # MGMT_AGNCY field #
 ####################
 
 # Are there some big ones still left that we can use MGMT_AGNCY for?
-agencies %>%
-  filter(is.na(agencies$AGNCY_SHORT)) %>%
-  group_by(MGMT_AGNCY) %>%
-  summarize(count = n()) %>%
-  ungroup() %>%
-  arrange(desc(count))
+# agencies %>%
+#   filter(is.na(agencies$AGNCY_SHORT)) %>%
+#   group_by(MGMT_AGNCY) %>%
+#   summarize(count = n()) %>%
+#   ungroup() %>%
+#   arrange(desc(count))
 
 # write.csv(file = "~/Desktop/still_missing.csv",
 #           row.names = FALSE,
@@ -93,8 +103,7 @@ agencies %>%
 #             group_by(MGMT_AGNCY) %>%
 #             summarize(count = n()) %>%
 #             ungroup() %>%
-#             filter(count > 1) %>%
-#             arrange(desc(count)))
+#             arrange(MGMT_AGNCY))
 
 ####################
 # Partial matches
@@ -122,7 +131,7 @@ agencies <- agencies %>%
                                false = AGNCY_SHORT))
 
 sum(is.na(agencies$AGNCY_SHORT))
-# 19204
+# 7290
 
 # Some First Nations manage lands with MGMT_AGNCY
 agencies <- agencies %>%
@@ -133,14 +142,24 @@ agencies <- agencies %>%
                                true = "National",
                                false = AGNCY_SHORT))
 
+sum(is.na(agencies$AGNCY_SHORT))
+# 7269
+
 ####################
 # Several agencies are named and easily categorized in the MGMT_AGNCY field.
 
+# write.csv(file = "~/Desktop/still_missing.csv",
+#           row.names = FALSE,
+#           x = agencies %>%
+#             filter(is.na(agencies$AGNCY_SHORT)) %>%
+#             group_by(MGMT_AGNCY) %>%
+#             summarize(count = n()) %>%
+#             ungroup() %>%
+#             arrange(MGMT_AGNCY))
+
+
 # A bunch of Canadian state agencies
 agencies <- agencies %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Department of Tourism, Heritage and Culture, Government of New Brunswick",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
   mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 30) == "Government of British Columbia",
                                true = "State",
                                false = AGNCY_SHORT)) %>%
@@ -157,9 +176,6 @@ agencies <- agencies %>%
   mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 28) == "Ministère de l'Environnement",
                                true = "State",
                                false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 20) == "Ministère des Forêts",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
   mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 35) == "Ministère des Ressources naturelles",
                                true = "State",               
                                false = AGNCY_SHORT)) %>%
@@ -174,9 +190,15 @@ agencies <- agencies %>%
                                false = AGNCY_SHORT)) %>%
   mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Parks Division, Alberta Forestry and Parks",
                                true = "State",
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 29) == "Manitoba Economic Development",
+                               true = "State",               
+                               false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Manitoba Environment and Climate Change",
+                               true = "State",
                                false = AGNCY_SHORT))
 sum(is.na(agencies$AGNCY_SHORT))
-# 12906
+# 1484
 
 # write.csv(file = "~/Desktop/still_missing.csv",
 #           row.names = FALSE,
@@ -188,22 +210,19 @@ sum(is.na(agencies$AGNCY_SHORT))
 #             filter(count > 1) %>%
 #             arrange(desc(count)))
 
-# State level:
-# Manitoba Economic Development...
-# Manitoba Environment and Climate Change
-# PEI Department of...
+# A fair number of locally-managed areas start with 
+# "Other or Unknown Local Government"
 agencies <- agencies %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 29) == "Manitoba Economic Development",
-                               true = "State",               
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(MGMT_AGNCY == "Manitoba Environment and Climate Change",
-                               true = "State",
-                               false = AGNCY_SHORT)) %>%
-  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 17) == "PEI Department of",
-                               true = "State",               
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 33) == "Other or Unknown Local Government",
+                               true = "Local",               
                                false = AGNCY_SHORT))
-sum(is.na(agencies$AGNCY_SHORT))
-# 12649
+
+# At this point, all areas that have been categorized so far are managed at a 
+# single level, i.e. National OR State OR Local OR Private. There are some 
+# areas that are jointly managed, so we will need to accommodate this 
+# polymorphism. For now, this is being done in two ways: the AGNCY_SHORT column
+# will have semicolon-separated fields if an area is managed by entities at two 
+# different levels, e.g. "National; Local".
 
 # write.csv(file = "~/Desktop/still_missing.csv",
 #           row.names = FALSE,
@@ -217,17 +236,45 @@ sum(is.na(agencies$AGNCY_SHORT))
 
 # Another join for a bunch of joint-operated areas. Relies on the 
 # joint_el_al.csv another manually-created CSV file.
-joint_mgmt <- read.csv(file = "data/protected-areas/joint_et_al.csv")
+joint_mgmt <- read.csv(file = "data/protected-areas/joint_et_al.csv") %>%
+  select(MGMT_AGNCY, AGNCY_SHORT)
 agencies <- agencies %>%
   left_join(joint_mgmt, by = "MGMT_AGNCY") %>%
   mutate(AGNCY_SHORT = coalesce(AGNCY_SHORT.x, AGNCY_SHORT.y),
          .keep = "unused")
 sum(is.na(agencies$AGNCY_SHORT))
-# 11460
+# 115
+
+write.csv(file = "~/Desktop/still_missing.csv",
+          row.names = FALSE,
+          x = agencies %>%
+            filter(is.na(AGNCY_SHORT)))
+
+# The majority of remaining sites required searching the internet to find what 
+# type of agency manages the area. Information is stored in CSV file
+category_updates <- read.csv(file = "data/protected-areas/protected-areas-updates.csv")
+
+
+
+agencies %>% 
+  filter(is.na(AGNCY_SHORT)) %>%
+  group_by(GOV_TYPE) %>%
+  summarize(count = n())
+
+agencies %>% 
+  filter(is.na(AGNCY_SHORT)) %>%
+  group_by(TYPE_PA) %>%
+  summarize(count = n())
+
+
+
 
 ################################################################################
 # TODO: August 2026 update to here
 ################################################################################
+
+
+
 
 
 
