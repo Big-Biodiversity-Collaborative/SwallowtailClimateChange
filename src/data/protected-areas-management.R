@@ -255,6 +255,8 @@ write.csv(file = "~/Desktop/still_missing.csv",
 
 # The majority of remaining sites required searching the internet to find what 
 # type of agency manages the area. Information is stored in CSV file
+
+# TODO: Current work is manual updates to the file listed below
 category_updates <- read.csv(file = "data/protected-areas/protected-areas-updates.csv")
 
 
