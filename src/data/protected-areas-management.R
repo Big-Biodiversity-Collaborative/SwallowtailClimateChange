@@ -166,6 +166,9 @@ agencies <- agencies %>%
   mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 26) == "Government of Newfoundland",
                                true = "State",
                                false = AGNCY_SHORT)) %>%
+  mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 47) == "Government of Newfounland & Labrador/Commission",
+                               true = "State", # [sic] Newfoundland is misspelled
+                               false = AGNCY_SHORT)) %>%
   mutate(AGNCY_SHORT = if_else(substr(MGMT_AGNCY, 1, 21) == "Government of Nunavut",
                                true = "State",
                                false = AGNCY_SHORT)) %>%
@@ -220,7 +223,7 @@ agencies <- agencies %>%
 # At this point, all areas that have been categorized so far are managed at a 
 # single level, i.e. National OR State OR Local OR Private. There are some 
 # areas that are jointly managed, so we will need to accommodate this 
-# polymorphism. For now, this is being done in two ways: the AGNCY_SHORT column
+# polymorphism. For now, this is being: the AGNCY_SHORT column
 # will have semicolon-separated fields if an area is managed by entities at two 
 # different levels, e.g. "National; Local".
 
