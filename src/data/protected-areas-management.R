@@ -51,7 +51,7 @@ pa_df <- data.frame(pa)
 # column AGNCY_SHORT, which will take values of "National", "State", "Local", 
 # and "Private"
 agencies <- data.frame(pa) %>%
-  select(COUNTRY, STATE_PROV, MGMT_AGNCY, PA_NAME, TYPE_PA, GOV_TYPE)
+  select(OBJECTID, COUNTRY, STATE_PROV, MGMT_AGNCY, PA_NAME, TYPE_PA, GOV_TYPE)
 
 ####################
 # GOV_TYPE field   #
@@ -201,7 +201,7 @@ agencies <- agencies %>%
                                true = "State",
                                false = AGNCY_SHORT))
 sum(is.na(agencies$AGNCY_SHORT))
-# 1484
+# 1483
 
 # write.csv(file = "~/Desktop/still_missing.csv",
 #           row.names = FALSE,
@@ -246,30 +246,28 @@ agencies <- agencies %>%
   mutate(AGNCY_SHORT = coalesce(AGNCY_SHORT.x, AGNCY_SHORT.y),
          .keep = "unused")
 sum(is.na(agencies$AGNCY_SHORT))
-# 115
+# 114
 
-write.csv(file = "~/Desktop/still_missing.csv",
-          row.names = FALSE,
-          x = agencies %>%
-            filter(is.na(AGNCY_SHORT)))
-
-# The majority of remaining sites required searching the internet to find what 
-# type of agency manages the area. Information is stored in CSV file
-
-# TODO: Current work is manual updates to the file listed below
+# The remaining required manual updates.
 category_updates <- read.csv(file = "data/protected-areas/protected-areas-updates.csv")
+category_updates <- category_updates %>%
+  filter(!is.na(AGNCY_SHORT)) %>%
+  select(c(OBJECTID, AGNCY_SHORT))
 
+# Merge those and see what is left
+agencies <- agencies %>%
+  left_join(category_updates, by = c("OBJECTID")) %>%
+  mutate(AGNCY_SHORT = coalesce(AGNCY_SHORT.x, AGNCY_SHORT.y),
+         .keep = "unused")
 
+sum(is.na(agencies$AGNCY_SHORT))
+# 0
+# BAMF
 
-agencies %>% 
-  filter(is.na(AGNCY_SHORT)) %>%
-  group_by(GOV_TYPE) %>%
-  summarize(count = n())
-
-agencies %>% 
-  filter(is.na(AGNCY_SHORT)) %>%
-  group_by(TYPE_PA) %>%
-  summarize(count = n())
+# Next step is to write this information to file to save the record
+write.csv(file = "data/protected-areas/protected-areas-management.csv",
+          x = agencies,
+          row.names = FALSE)
 
 
 
