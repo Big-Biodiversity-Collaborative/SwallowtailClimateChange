@@ -269,6 +269,41 @@ write.csv(file = "data/protected-areas/protected-areas-management.csv",
           x = agencies,
           row.names = FALSE)
 
+################################################################################
+# Unionization of polygons within each category
+################################################################################
+# We will go ahead and create a Spat with only four geometries, one each of the 
+# unions for the four categories.
+agencies <- read.csv(file = "data/protected-areas/protected-areas-management.csv")
+
+# Before we create the shapefile, we will actually need to split semi-colon-
+# separated values in AGNCY_SHORT (e.g. "National; Local")
+
+# Next, we add these four columns to the pa object. We will use each in turn to 
+# create vectors for each of the four management types
+
+# In turn, extract a SpatVector for each management level
+
+# Create a single (vector) geometry for each of the management levels 
+# (terra::union?)
+
+# Put all these back into a single SpatVector
+
+# Create a layer that includes all UNprotected areas and add that to the larger 
+# SpatVector
+
+# Save as shapefile (maybe) and RDS (definitely).
+
+# First, add in the AGNCY_SHORT information to the pa object so we can use it 
+# with the by argument of terra::aggregate
+# pa[["AGNCY_SHORT"]] <- agencies$AGNCY_SHORT
+
+# AFTER adding back the management-level information to the pa object, we can 
+# drop any areas outside the North America (mostly we just drop U.S. 
+# Territories and the state of Hawaii)
+state_prov_excl <- c("US-AS", "US-FM", "US-GU", "US-HI", "US-MH", "US-N/A",
+                     "US-PR", "US-PW", "US-UM", "US-VI")
+pa <- terra::subset(pa, subset = !(pa$STATE_PROV %in% state_prov_excl))
 
 
 
