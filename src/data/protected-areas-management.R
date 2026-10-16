@@ -373,3 +373,5 @@ saveRDS(object = pa_categorized,
 saveRDS(object = unprotected_areas,
         file = "data/protected-areas/unprotected-areas.rds")
 Sys.time()
+
+# TODO: Consider making shapefile version of these two...
