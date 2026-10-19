@@ -33,7 +33,7 @@ if (file.exists(pa_rds)) {
 # Panel (a): A map of North America showing areas with national protection
 
 # Pull out just those areas under national protection
-national_areas <- pa[which(pa$AGNCY_SHOR == "National")]
+national_areas <- pa[which(pa$AGNCY_SHORT == "National")]
 
 # Grab spatial files with political boundaries
 countries <- vect("data/political-boundaries/countries.shp")
@@ -99,13 +99,14 @@ national_areas_plot <- ggplot() +
 
 # Panel (a.2): A map of North America showing areas with any protection; 
 # colored by protection type (national, state, local, private)
-any_protection <- pa[which(pa$AGNCY_SHOR %in% c("National", "State", 
+any_protection <- pa[which(pa$AGNCY_SHORT %in% c("National", "State", 
                                                 "Local", "Private"))]
 
-# Crop national areas vector, too
+# Crop areas vector
 any_protection <- crop(any_protection, rich_ext)
 
-any_protection$AGNCY_SHOR <- factor(x = any_protection$AGNCY_SHOR,
+# Turn protection type into factor for plotting
+any_protection$AGNCY_SHORT <- factor(x = any_protection$AGNCY_SHORT,
                                     levels = c("National", "State", 
                                                "Local", "Private"))
 area_colors <- get_colors(palette = "protected")
@@ -116,7 +117,7 @@ margins <- c(2, 0, 6, 0)
 any_protection_plot <- ggplot() +
   geom_spatvector(data = states, color = NA, fill = "white") +
   geom_spatvector(data = any_protection, color = NA, 
-                  mapping = aes(fill = AGNCY_SHOR)) +
+                  mapping = aes(fill = AGNCY_SHORT)) +
   scale_fill_manual(values = area_colors) +
   # Now state/federal draw boundaries
   geom_spatvector(data = states, color = "gray50", linewidth = linewidth,
@@ -234,7 +235,7 @@ ssp370_2041_current_plot <- ggplot(data = ssp370_2041_current %>%
             # nudge_y = c(-0.03, 0, -0.34, -0.05)) +
   # scale_color_manual(values = text_colors) +
   scale_x_continuous(breaks = c(2010, 2030, 2050)) +
-  scale_y_log10(limits = c(1e3, 1e5)) +
+  scale_y_log10(limits = c(1e2, 1e5)) +
   labs(x = "Year", y = "Area (sq km)") +
   theme_bw() +
   theme(legend.position = "none")
