@@ -18,18 +18,70 @@ sp_changes <- read.csv(file = "output/summary-stats/overlap-summary-allspp.csv")
 sp_changes <- sp_changes %>%
   filter(climate == "ssp370_2041") %>%
   filter(distribution == "insect + host") %>%
-  select(insect, lat_max_shift, lat_min_shift)
+  select(insect, lat_max_shift, lat_min_shift, 
+         lat_max_shift_q1, lat_max_shift_q3,
+         lat_min_shift_q1, lat_min_shift_q3) %>%
+  # Drop things that won't be plotted
+  filter(!is.na(lat_max_shift))
+
+# A little data frame with information about each quadrants
+quadrants <- data.frame(x = c(-270, 875, 875, -270),
+                        y = c(300, 300, -625, -625),
+                        description = c("Range\nexpands",
+                                        "Range shifts\nnorthward",
+                                        "Range\ncontracts",
+                                        "Range shifts\nsouthward"))
+# Add some arrows?
+quandrant_arrows <- quadrants
+# quandrant_arrows$description <- c("\u2191\n\u2193",
+#                                   "\u2191\n\u2191",
+#                                   "\u2193\n\u2191",
+#                                   "\u2193\n\u2193")
+quandrant_arrows$description <- c("\u2B06\n\u2B07",
+                                  "\u2B06\n\u2B06",
+                                  "\u2B07\n\u2B06",
+                                  "\u2B07\n\u2B07")
+quandrant_arrows$x <- quandrant_arrows$x - c(145, 185, 145, 185)
 
 lat_shifts_plot <- ggplot(data = sp_changes, mapping = aes(x = lat_min_shift, lat_max_shift)) + 
-  geom_hline(yintercept = 0, linetype = 2, color = "#999999") + 
-  geom_vline(xintercept = 0, linetype = 2, color = "#999999") + 
-  geom_point() + 
-  geom_text(mapping = aes(label = insect), hjust = 0, vjust = 0) +
-  xlab(label = "Southern edge") +
-  ylab(label = "Northern edge") +
+  geom_hline(yintercept = 0, linetype = 2, color = "#BBBBBB") + 
+  geom_vline(xintercept = 0, linetype = 2, color = "#BBBBBB") + 
+  geom_errorbar(mapping = aes(ymin = lat_max_shift_q1, ymax = lat_max_shift_q3),
+                color = "#666666", width = 0, linewidth = 0.25) +
+  geom_errorbar(mapping = aes(xmin = lat_min_shift_q1, xmax = lat_min_shift_q3),
+                color = "#666666", width = 0, linewidth = 0.25) +
+  # Points for viewing in RStudio
+  # geom_point(size = 2) + 
+  # Points for final output file
+  geom_point(size = 0.8) + 
+  # For now, not labeling points
+  # geom_text(mapping = aes(label = insect), hjust = 0, vjust = 0) +
+  geom_text(data = quadrants,
+            mapping = aes(x = x, y = y, label = description),
+            # Use this size for viewing in RStudio
+            # size = 4, 
+            # Use this size for final output plot
+            size = 2,
+            hjust = 0.5, vjust = 0, color = "#444444") +
+  # Add arrows for ease of understanding
+  geom_text(data = quandrant_arrows,
+            mapping = aes(x = x, y = y, label = description),
+            # Use this size for viewing in RStudio
+            # size = 6, 
+            # Use this size for final output plot
+            size = 2,
+            hjust = 0.5, vjust = 0, color = "#444444") +
+  xlab(label = "\u0394 Southern edge (km)") +
+  ylab(label = "\u0394 Northern edge (km)") +
   theme_bw()
 
 lat_shifts_plot
+
+ggsave(filename = "output/manuscript/Figure-4-Lat-shifts.png",
+       plot = lat_shifts_plot,
+       width = 3,
+       height = 3,
+       units = "in")
 
 ################################################################################
 # Plotting area change versus number of host plants
@@ -106,8 +158,8 @@ change_v_hosts_plot <- ggplot(data = host_counts,
   ylab(label = "Change in suitable area (sq. km)") +
   theme_bw()
 change_v_hosts_plot
-# ggsave(plot = change_v_hosts_plot,
-#        file = "output/manuscript/Figure-Area-Change-Hosts.png")
+ggsave(plot = change_v_hosts_plot,
+       file = "output/manuscript/Figure-Area-Change-Hosts.png")
 
 # Combine the plots into one image
 two_panel <- cowplot::plot_grid(plotlist = list(lat_shifts_plot, 
@@ -117,7 +169,7 @@ two_panel <- cowplot::plot_grid(plotlist = list(lat_shifts_plot,
                                labels = "auto", 
                                vjust = 1,
                                hjust = 0)
-two_panel_file <- paste0("output/manuscript/Figure-4-Lats-Hosts.png")
+two_panel_file <- paste0("output/manuscript/Figure-Lats-Hosts.png")
 ggsave(filename = two_panel_file,
        plot = two_panel,
        width = 6,
