@@ -17,6 +17,10 @@ replace_table <- TRUE
 replace_rasters <- TRUE
 
 ## Current set of summary stats ################################################
+## Some statistics refer to a longitudinal/latitudinal "band". A band is  
+# effectively a column (for longitudinal bands) or row (for latitudinal bands)
+# of raster cells
+
 # Summary stats that are calculated for each time period (and distribution type)
   # area: total area (sqkm)
   # lat_max: median latitude of 10 northernmost cells
@@ -56,6 +60,27 @@ replace_rasters <- TRUE
   #   westward shift)
   # lon_min_shift: median value of shifts (km) along western edge in each 
   #   latitudinal band (pos values = eastward; neg values = westward)
+  ## Calculate the 25th and 75th percentile for reporting spread related to 
+  # median values; two values for each band
+  # lat_max_shift_q1: 25th percentile of shifts (km) along northern edge in each 
+  #   longitudinal band
+  # lat_max_shift_q3: 75th percentile of shifts (km) along northern edge in each 
+  #   longitudinal band
+  # lat_min_shift_q1: 25th percentile of shifts (km) along southern edge in each 
+  #   longitudinal band
+  # lat_min_shift_q3: 75th percentile of shifts (km) along southern edge in each 
+  #   longitudinal band
+  # lon_max_shift_q1: 25th percentile of shifts (km) along eastern edge in each 
+  #   longitudinal band
+  # lon_max_shift_q3: 75th percentile of shifts (km) along eastern edge in each 
+  #   longitudinal band
+  # lon_min_shift_q1: 25th percentile of shifts (km) along western edge in each 
+  #   longitudinal band
+  # lon_min_shift_q3: 75th percentile of shifts (km) along western edge in each 
+  #   longitudinal band
+  #### Count the number of bands
+  # lat_n_bands: number of latitudinal bands
+  # lon_n_bands: number of longitudinal bands
   # Note for these band shift calculations: only included bands with >= 1 cell 
   #   considered suitable in both time periods
   # lat_max_05_shift: shift (deg) in median values of northernmost 5% of cells
@@ -139,6 +164,16 @@ stats <- as.data.frame(expand_grid(insect = insects,
          lat_min_shift = NA,
          lon_max_shift = NA,
          lon_min_shift = NA,
+         lat_max_shift_q1 = NA,
+         lat_max_shift_q3 = NA,
+         lat_min_shift_q1 = NA,
+         lat_min_shift_q3 = NA,
+         lon_max_shift_q1 = NA,
+         lon_max_shift_q3 = NA,
+         lon_min_shift_q1 = NA,
+         lon_min_shift_q3 = NA,
+         lat_n_bands = NA,
+         lon_n_bands = NA,
          lat_max_05_shift = NA,
          lat_min_05_shift = NA,
          lon_max_05_shift = NA,
@@ -170,13 +205,13 @@ for (i in 1:length(insects)) {
   # least one host plant under all climate scenarios (current + 4 future)
   insecthost_list <- list()
   
-  for (j in 1:length(overlap_files)) {
+  for (overlap_i in 1:length(overlap_files)) {
 
-    allinsect_list[[j]] <- readRDS(overlap_files[j])
-    insecthost_list[[j]] <- readRDS(overlap_files[j])
+    allinsect_list[[overlap_i]] <- readRDS(overlap_files[overlap_i])
+    insecthost_list[[overlap_i]] <- readRDS(overlap_files[overlap_i])
 
     # Calculate areas in each overlap category
-    ih_areas <- round(terra::expanse(allinsect_list[[j]], 
+    ih_areas <- round(terra::expanse(allinsect_list[[overlap_i]], 
                                      unit = "km",
                                      byValue = TRUE))
     cats <- ih_areas[, "value"]
@@ -185,7 +220,7 @@ for (i in 1:length(insects)) {
     # plants (if possible)
     row_index1 <- which(stats$insect == insects[i] & 
                           stats$distribution == "total insect" &
-                          stats$climate == climate_names_short[j])
+                          stats$climate == climate_names_short[overlap_i])
     if (max(cats) > 3) {
       # Total area estimated to be suitable for insect
       insect_area <- sum(ih_areas[ih_areas[, "value"] %in% 3:5, "area"])
@@ -207,7 +242,7 @@ for (i in 1:length(insects)) {
     # Calculate the percent of insect + host range where only 1 host occurs
     row_index2 <- which(stats$insect == insects[i] & 
                           stats$distribution == "insect + host" &
-                          stats$climate == climate_names_short[j])
+                          stats$climate == climate_names_short[overlap_i])
     if (all(4:5 %in% cats)) {
       ih_area <- sum(ih_areas[ih_areas[, "value"] %in% 4:5, "area"])
       ih1_area <- sum(ih_areas[ih_areas[, "value"] == 4, "area"])
@@ -224,7 +259,7 @@ for (i in 1:length(insects)) {
 
     # For all areas predicted suitable for the insect: reclassify cells in 
     # overlap rasters that are >= 3 as 1 (NA everywhere else)
-    allinsect_list[[j]] <- terra::classify(x = allinsect_list[[j]],
+    allinsect_list[[overlap_i]] <- terra::classify(x = allinsect_list[[overlap_i]],
                                            rcl = matrix(c(3, Inf, 1), nrow = 1),
                                            right = FALSE,
                                            others = NA)
@@ -232,7 +267,7 @@ for (i in 1:length(insects)) {
     # For all areas predicted suitable for the insect and one or more host
     # plants: reclassify cells in overlap rasters that are >= 4 as 1 
     # (NA everywhere else)
-    insecthost_list[[j]] <- terra::classify(x = insecthost_list[[j]],
+    insecthost_list[[overlap_i]] <- terra::classify(x = insecthost_list[[overlap_i]],
                                             rcl = matrix(c(4, Inf, 1), nrow = 1),
                                             right = FALSE,
                                             others = NA)
@@ -303,13 +338,13 @@ for (i in 1:length(insects)) {
     stats$lon_min_bands[row_index_c] <- round(median(current_lons$min_current), 2)
     
     # Loop through future climate scenarios
-    for (j in 2:nrow(climate_models)) {
-      clim_model <- climate_names_short[j]
+    for (future_i in 2:nrow(climate_models)) {
+      clim_model <- climate_names_short[future_i]
       row_index <- which(stats$insect == insects[i] & 
                            stats$distribution == distribution &
                            stats$climate == clim_model)
       # Grab 0/1 raster and convert to a NA/1 raster
-      future <- raster_list[[j]]
+      future <- raster_list[[future_i]]
       
       # Calculate land area (in sq km) and add to summary
       fa <- terra::expanse(future, unit = "km")
@@ -386,7 +421,12 @@ for (i in 1:length(insects)) {
           shift_n_km <- ifelse(future_n[, "max_future"] > current_n[, "max_current"], 
                              1 * dists_n, -1 * dists_n) / 1000
           stats$lat_max_shift[row_index] <- round(median(shift_n_km))
-
+          
+          # Calculate, then extract, the 25th (q1) and 75th (q3) percentiles
+          iqr_lat_max <- quantile(shift_n_km, probs = c(0.25, 0.75))
+          stats$lat_max_shift_q1[row_index] <- iqr_lat_max[1]
+          stats$lat_max_shift_q3[row_index] <- iqr_lat_max[2]
+          
           # Calculating shift along southern edge, in km, in each longitudinal band
           future_s <- as.matrix(future_lats[, c("x", "min_future")])
           current_s <- as.matrix(future_lats[, c("x", "min_current")])
@@ -397,6 +437,14 @@ for (i in 1:length(insects)) {
           shift_s_km <- ifelse(future_s[, "min_future"] > current_s[, "min_current"], 
                                1 * dists_s, -1 * dists_s) / 1000
           stats$lat_min_shift[row_index] <- round(median(shift_s_km))
+          
+          # Calculate, then extract, the 25th (q1) and 75th (q3) percentiles
+          iqr_lat_min <- quantile(shift_s_km, probs = c(0.25, 0.75))
+          stats$lat_min_shift_q1[row_index] <- iqr_lat_min[1]
+          stats$lat_min_shift_q3[row_index] <- iqr_lat_min[2]
+          
+          # Record the number of longitudinal bands (for SE calculation later)
+          stats$lon_n_bands[row_index] <- length(shift_s_km)
         }  
           
         # Join future and current latitudinal data (only including longitudinal 
@@ -420,6 +468,11 @@ for (i in 1:length(insects)) {
           shift_e_km <- ifelse(future_e[, "max_future"] > current_e[, "max_current"], 
                                1 * dists_e, -1 * dists_e) / 1000
           stats$lon_max_shift[row_index] <- round(median(shift_e_km))
+
+          # Calculate, then extract, the 25th (q1) and 75th (q3) percentiles
+          iqr_lon_max <- quantile(shift_e_km, probs = c(0.25, 0.75))
+          stats$lon_max_shift_q1[row_index] <- iqr_lon_max[1]
+          stats$lon_max_shift_q3[row_index] <- iqr_lon_max[2]
           
           # Calculating shift along western edge, in km, in each latitudinal band
           future_w <- as.matrix(future_lons[, c("min_future", "y")])
@@ -431,6 +484,14 @@ for (i in 1:length(insects)) {
           shift_w_km <- ifelse(future_w[, "min_future"] > current_w[, "min_current"], 
                                1 * dists_w, -1 * dists_w) / 1000
           stats$lon_min_shift[row_index] <- round(median(shift_w_km))
+
+          # Calculate, then extract, the 25th (q1) and 75th (q3) percentiles
+          iqr_lon_min <- quantile(shift_w_km, probs = c(0.25, 0.75))
+          stats$lon_min_shift_q1[row_index] <- iqr_lon_min[1]
+          stats$lon_min_shift_q3[row_index] <- iqr_lon_min[2]
+          
+          # Record the number of latitudinal bands (for SE calculation later)
+          stats$lat_n_bands[row_index] <- length(shift_w_km)
         }
       }
       
@@ -462,7 +523,7 @@ for (i in 1:length(insects)) {
       }
       # Create delta raster with 0 values:
       # Read in original overlap raster (to identify land areas with proper ext)
-      full_overlap <- readRDS(overlap_files[j])
+      full_overlap <- readRDS(overlap_files[future_i])
       # Reclassify, so all non-NA cells have a value of 0
       full_0 <- terra::classify(x = full_overlap,
                                 rcl = matrix(c(0, Inf, 0), nrow = 1),
