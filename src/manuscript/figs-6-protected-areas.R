@@ -235,7 +235,7 @@ ssp370_2041_current_plot <- ggplot(data = ssp370_2041_current %>%
             # nudge_y = c(-0.03, 0, -0.34, -0.05)) +
   # scale_color_manual(values = text_colors) +
   scale_x_continuous(breaks = c(2010, 2030, 2050)) +
-  scale_y_log10(limits = c(1e2, 1e5)) +
+  scale_y_log10(limits = c(5e2, 1e5)) +
   labs(x = "Year", y = "Area (sq km)") +
   theme_bw() +
   theme(legend.position = "none")

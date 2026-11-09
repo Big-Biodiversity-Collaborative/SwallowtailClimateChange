@@ -117,9 +117,12 @@ plot_params <- list(states = states,
 #' accepts \code{expression} objects
 #' @param title_size integer Font size for plot title
 #' @param axis_size integer Font size for axis labels
+#' @param legend_position character indicating position of legend; defaults to 
+#' no legend; see documentation for \code{ggplot2::theme()} for possible values
 #' @return ggplot object
 current_ggplot <- function(nice_name, plot_params, title = NULL, 
-                           title_size = 10, axis_size = 10) {
+                           title_size = 10, axis_size = 10, 
+                           legend_position = "none") {
   current <- readRDS(paste0("output/overlaps/", nice_name,
                             "-overlap-current.rds"))
   # Update the rasters to have values we want (1, 2, 3, 4). Rasters coming in 
@@ -156,7 +159,8 @@ current_ggplot <- function(nice_name, plot_params, title = NULL,
     coord_sf(datum = sf::st_crs("EPSG:4326"), 
              xlim = xlim_current, ylim = ylim_current) +
     theme_bw() +
-    theme(legend.position = "none", 
+    theme(legend.position = legend_position,
+          legend.title = element_blank(),
           axis.text = element_text(size = axis_size))
 
   if (!is.null(title)) {
@@ -181,9 +185,12 @@ current_ggplot <- function(nice_name, plot_params, title = NULL,
 #' accepts \code{expression} objects
 #' @param title_size integer Font size for plot title
 #' @param axis_size integer Font size for axis labels
+#' @param legend_position character indicating position of legend; defaults to 
+#' no legend; see documentation for \code{ggplot2::theme()} for possible values
 #' @return ggplot object
 forecast_ggplot <- function(nice_name, model, plot_params, title = NULL, 
-                            title_size = 10, axis_size = 10) {
+                            title_size = 10, axis_size = 10, 
+                            legend_position = "none") {
   # Get forecast raster
   forecast <- readRDS(paste0("output/overlaps/", nice_name,
                              "-overlap-ensemble_", model, ".rds"))
@@ -214,7 +221,8 @@ forecast_ggplot <- function(nice_name, model, plot_params, title = NULL,
              xlim = xlim_forecast, 
              ylim = ylim_forecast) +
     theme_bw() +
-    theme(legend.position = "none", 
+    theme(legend.position = legend_position,
+          legend.title = element_blank(),
           axis.text = element_text(size = axis_size))
   
   if (!is.null(title)) {
@@ -239,9 +247,12 @@ forecast_ggplot <- function(nice_name, model, plot_params, title = NULL,
 #' accepts \code{expression} objects
 #' @param title_size integer Font size for plot title
 #' @param axis_size integer Font size for axis labels
+#' @param legend_position character indicating position of legend; defaults to 
+#' no legend; see documentation for \code{ggplot2::theme()} for possible values
 #' @return ggplot object
 delta_ggplot <- function(nice_name, model, plot_params, title = NULL, 
-                         title_size = 10, axis_size = 10) {
+                         title_size = 10, axis_size = 10, 
+                         legend_position = "none") {
   # Get delta raster
   delta <- readRDS(paste0("output/deltas/", nice_name,
                           "-delta-insecthost-", model, ".rds"))
@@ -272,7 +283,8 @@ delta_ggplot <- function(nice_name, model, plot_params, title = NULL,
              xlim = xlim_delta, 
              ylim = ylim_delta) +
     theme_bw() +
-    theme(legend.position = "none", 
+    theme(legend.position = legend_position,
+          legend.title = element_blank(),
           axis.text = element_text(size = axis_size))
   
   if (!is.null(title)) {
@@ -306,21 +318,90 @@ for (i in 1:length(main_species)) {
   current_index <- (i - 1) * 3 + 1
   forecast_index <- current_index + 1
   delta_index <- current_index + 2
+  species_name <- gsub(pattern = "papilio_",
+                       replacement = "Papilio ",
+                       x = one_species)
 
-  message("Plotting ", gsub(pattern = "papilio_",
-                            replacement = "Papilio ",
-                            x = one_species), " for main manuscript.")
+  message("Plotting ", species_name, " for main manuscript.")
   main_plots_list[[current_index]] <- current_ggplot(nice_name = one_species,
-                                                        plot_params = plot_params)
+                                                     plot_params = plot_params,
+                                                     # Some funkiness for bquote
+                                                     title = bquote(italic(.(species_name))),
+                                                     legend_position = "bottom")
   
   main_plots_list[[forecast_index]] <- forecast_ggplot(nice_name = one_species,
-                                                          model = model,
-                                                          plot_params = plot_params)
+                                                       model = model,
+                                                       plot_params = plot_params)
   
   main_plots_list[[delta_index]] <- delta_ggplot(nice_name = one_species,
-                                                    model = model,
-                                                    plot_params = plot_params)
+                                                 model = model,
+                                                 plot_params = plot_params,
+                                                 legend_position = "bottom")
 }
+
+# For this merging of plots, we are going to do it in multiple steps.
+# Each row has two plots, there is a row each for legends
+# Row 1: Current plots
+# Row 2: Legend for current & forecast plots
+# Row 3: Forecast plots
+# Row 4: Delta plots
+# Row 5: Legend for delta plots
+# Will need to manually label those plots
+
+# Row 1: pull out the legend for row 2
+row_2 <- cowplot::get_legend(main_plots_list[[1]])
+
+current_plots <- c(main_plots_list[[1]] + 
+                     theme(legend.position = "none") + 
+                     ylab("Current"),
+                   main_plots_list[[4]] + theme(legend.position = "none"))
+  
+row_1 <- cowplot::plot_grid(plotlist = current_plots,
+                            byrow = TRUE,
+                            ncol = 2,
+                            labels = c("a", "b"),
+                            vjust = 1,
+                            hjust = 0,
+                            rel_widths = c(0.9, 1))
+
+forecast_plots <- c(main_plots_list[[2]] + 
+                      ylab("Forecast"),
+                    main_plots_list[[5]])
+row_3 <- cowplot::plot_grid(plotlist = forecast_plots,
+                            byrow = TRUE,
+                            ncol = 2,
+                            labels = c("c", "d"),
+                            vjust = 1,
+                            hjust = 0,
+                            rel_widths = c(0.8, 1))
+
+row_5 <- cowplot::get_legend(main_plots_list[[3]])
+delta_plots <- c(main_plots_list[[3]] + 
+                   theme(legend.position = "none") +
+                   ylab("Forecast - Current"),
+                 main_plots_list[[6]] + theme(legend.position = "none"))
+row_4 <- cowplot::plot_grid(plotlist = delta_plots,
+                            byrow = TRUE,
+                            ncol = 2,
+                            labels = c("a", "b"),
+                            vjust = 1,
+                            hjust = 0,
+                            rel_widths = c(0.8, 1))
+
+main_plots <- cowplot::plot_grid(row_1, row_2, row_3, row_4, row_5,
+                                 ncol = 1,
+                                 rel_heights = c(4, 1, 4, 4, 1))
+
+# This will look terrible in RStudio, but fine in a file
+main_plots
+
+main_dist_file <- paste0(output_basename, "Figure-Distributions-2.png")
+ggsave(filename = main_dist_file,
+       plot = main_plots,
+       width = 6,
+       height = 8,
+       units = "in")
+
 
 # Use the list to create the multi-panel figure
 main_plots <- cowplot::plot_grid(plotlist = main_plots_list,
