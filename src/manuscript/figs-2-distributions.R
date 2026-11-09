@@ -119,10 +119,12 @@ plot_params <- list(states = states,
 #' @param axis_size integer Font size for axis labels
 #' @param legend_position character indicating position of legend; defaults to 
 #' no legend; see documentation for \code{ggplot2::theme()} for possible values
+#' @param plot_extent SpatExtent for map; if \code{NULL} (default) uses extent 
+#' of raster file
 #' @return ggplot object
 current_ggplot <- function(nice_name, plot_params, title = NULL, 
                            title_size = 10, axis_size = 10, 
-                           legend_position = "none") {
+                           legend_position = "none", plot_extent = NULL) {
   current <- readRDS(paste0("output/overlaps/", nice_name,
                             "-overlap-current.rds"))
   # Update the rasters to have values we want (1, 2, 3, 4). Rasters coming in 
@@ -144,6 +146,11 @@ current_ggplot <- function(nice_name, plot_params, title = NULL,
   # Do re-projection to Lambert & drop missing
   current <- project(current, crs(plot_params$states), method = "near")
   current <- drop_na(current)
+
+  # If map_extent is not NULL, attempt to expand raster
+  if (!is.null(plot_extent)) {
+    current <- terra::extend(x = current, y = plot_extent)
+  }
   
   # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
   xlim_current <- c(ext(current)[1], ext(current)[2])
@@ -187,10 +194,12 @@ current_ggplot <- function(nice_name, plot_params, title = NULL,
 #' @param axis_size integer Font size for axis labels
 #' @param legend_position character indicating position of legend; defaults to 
 #' no legend; see documentation for \code{ggplot2::theme()} for possible values
+#' @param plot_extent SpatExtent for map; if \code{NULL} (default) uses extent 
+#' of raster file
 #' @return ggplot object
 forecast_ggplot <- function(nice_name, model, plot_params, title = NULL, 
                             title_size = 10, axis_size = 10, 
-                            legend_position = "none") {
+                            legend_position = "none", plot_extent = NULL) {
   # Get forecast raster
   forecast <- readRDS(paste0("output/overlaps/", nice_name,
                              "-overlap-ensemble_", model, ".rds"))
@@ -205,6 +214,11 @@ forecast_ggplot <- function(nice_name, model, plot_params, title = NULL,
   # Do re-projection to Lambert & drop missing
   forecast <- project(forecast, crs(plot_params$states), method = "near")
   forecast <- drop_na(forecast)
+  
+  # If map_extent is not NULL, attempt to expand raster
+  if (!is.null(plot_extent)) {
+    forecast <- terra::extend(x = forecast, y = plot_extent)
+  }
   
   # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
   xlim_forecast <- c(ext(forecast)[1], ext(forecast)[2])
@@ -249,10 +263,12 @@ forecast_ggplot <- function(nice_name, model, plot_params, title = NULL,
 #' @param axis_size integer Font size for axis labels
 #' @param legend_position character indicating position of legend; defaults to 
 #' no legend; see documentation for \code{ggplot2::theme()} for possible values
+#' @param plot_extent SpatExtent for map; if \code{NULL} (default) uses extent 
+#' of raster file
 #' @return ggplot object
 delta_ggplot <- function(nice_name, model, plot_params, title = NULL, 
                          title_size = 10, axis_size = 10, 
-                         legend_position = "none") {
+                         legend_position = "none", plot_extent = NULL) {
   # Get delta raster
   delta <- readRDS(paste0("output/deltas/", nice_name,
                           "-delta-insecthost-", model, ".rds"))
@@ -267,6 +283,11 @@ delta_ggplot <- function(nice_name, model, plot_params, title = NULL,
   # Do re-projection to Lambert & drop missing
   delta <- project(delta, crs(plot_params$states), method = "near")
   delta <- drop_na(delta)
+  
+  # If map_extent is not NULL, attempt to expand raster
+  if (!is.null(plot_extent)) {
+    delta <- terra::extend(x = delta, y = plot_extent)
+  }
   
   # Figure out extent for plot (otherwise extent is based on CAN, MEX, USA)
   xlim_delta <- c(ext(delta)[1], ext(delta)[2])
@@ -318,25 +339,52 @@ for (i in 1:length(main_species)) {
   current_index <- (i - 1) * 3 + 1
   forecast_index <- current_index + 1
   delta_index <- current_index + 2
+  
+  # Make a printable version of the name
   species_name <- gsub(pattern = "papilio_",
                        replacement = "Papilio ",
                        x = one_species)
 
+  # Ultimately, we want all plots for a species to have the same geographic 
+  # extent; to this end, we need to find the extents of all three rasters 
+  # first, then feed that in to the respective plotting functions
+  current_ext <- terra::ext(project(readRDS(paste0("output/overlaps/", one_species,
+                                           "-overlap-current.rds")),
+                            crs(plot_params$states), method = "near") |>
+                              tidyterra::drop_na())
+  forecast_ext <- terra::ext(project(readRDS(paste0("output/overlaps/", one_species,
+                                            "-overlap-ensemble_", model, ".rds")),
+                             crs(plot_params$states), method = "near") |>
+                               tidyterra::drop_na())
+  delta_ext <- terra::ext(project(readRDS(paste0("output/deltas/", one_species,
+                                         "-delta-insecthost-", model, ".rds")),
+                          crs(plot_params$states), method = "near") |>
+                            tidyterra::drop_na())
+  xmin <- min(current_ext[1], forecast_ext[1], delta_ext[1])
+  xmax <- max(current_ext[2], forecast_ext[2], delta_ext[2])
+  ymin <- min(current_ext[3], forecast_ext[3], delta_ext[3])
+  ymax <- max(current_ext[4], forecast_ext[4], delta_ext[4])
+  plot_ext <- terra::ext(c(xmin, xmax, ymin, ymax))
+  
   message("Plotting ", species_name, " for main manuscript.")
   main_plots_list[[current_index]] <- current_ggplot(nice_name = one_species,
                                                      plot_params = plot_params,
                                                      # Some funkiness for bquote
                                                      title = bquote(italic(.(species_name))),
-                                                     legend_position = "bottom")
+                                                     legend_position = "bottom",
+                                                     axis_size = 6,
+                                                     plot_extent = plot_ext)
   
   main_plots_list[[forecast_index]] <- forecast_ggplot(nice_name = one_species,
                                                        model = model,
-                                                       plot_params = plot_params)
+                                                       plot_params = plot_params,
+                                                       axis_size = 6)
   
   main_plots_list[[delta_index]] <- delta_ggplot(nice_name = one_species,
                                                  model = model,
                                                  plot_params = plot_params,
-                                                 legend_position = "bottom")
+                                                 legend_position = "bottom",
+                                                 axis_size = 6)
 }
 
 # For this merging of plots, we are going to do it in multiple steps.
@@ -349,7 +397,8 @@ for (i in 1:length(main_species)) {
 # Will need to manually label those plots
 
 # Row 1: pull out the legend for row 2
-row_2 <- cowplot::get_legend(main_plots_list[[1]])
+row_2 <- cowplot::get_legend(main_plots_list[[1]] +
+                               theme(legend.text = element_text(size = 6)))
 
 current_plots <- c(main_plots_list[[1]] + 
                      theme(legend.position = "none") + 
@@ -360,8 +409,9 @@ row_1 <- cowplot::plot_grid(plotlist = current_plots,
                             byrow = TRUE,
                             ncol = 2,
                             labels = c("a", "b"),
-                            vjust = 1,
-                            hjust = 0,
+                            label_size = 10,
+                            vjust = 2,
+                            hjust = -2,
                             rel_widths = c(0.9, 1))
 
 forecast_plots <- c(main_plots_list[[2]] + 
@@ -371,11 +421,13 @@ row_3 <- cowplot::plot_grid(plotlist = forecast_plots,
                             byrow = TRUE,
                             ncol = 2,
                             labels = c("c", "d"),
-                            vjust = 1,
-                            hjust = 0,
+                            label_size = 10,
+                            vjust = 2,
+                            hjust = -2,
                             rel_widths = c(0.8, 1))
 
-row_5 <- cowplot::get_legend(main_plots_list[[3]])
+row_5 <- cowplot::get_legend(main_plots_list[[3]] +
+                               theme(legend.text = element_text(size = 6)))
 delta_plots <- c(main_plots_list[[3]] + 
                    theme(legend.position = "none") +
                    ylab("Forecast - Current"),
@@ -383,14 +435,15 @@ delta_plots <- c(main_plots_list[[3]] +
 row_4 <- cowplot::plot_grid(plotlist = delta_plots,
                             byrow = TRUE,
                             ncol = 2,
-                            labels = c("a", "b"),
-                            vjust = 1,
-                            hjust = 0,
+                            labels = c("e", "f"),
+                            label_size = 10,
+                            vjust = 2,
+                            hjust = -2,
                             rel_widths = c(0.8, 1))
 
 main_plots <- cowplot::plot_grid(row_1, row_2, row_3, row_4, row_5,
                                  ncol = 1,
-                                 rel_heights = c(4, 1, 4, 4, 1))
+                                 rel_heights = c(5, 1, 5, 5, 1))
 
 # This will look terrible in RStudio, but fine in a file
 main_plots
@@ -401,7 +454,6 @@ ggsave(filename = main_dist_file,
        width = 6,
        height = 8,
        units = "in")
-
 
 # Use the list to create the multi-panel figure
 main_plots <- cowplot::plot_grid(plotlist = main_plots_list,
