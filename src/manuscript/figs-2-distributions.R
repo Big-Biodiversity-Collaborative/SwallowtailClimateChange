@@ -369,6 +369,7 @@ for (i in 1:length(main_species)) {
   message("Plotting ", species_name, " for main manuscript.")
   main_plots_list[[current_index]] <- current_ggplot(nice_name = one_species,
                                                      plot_params = plot_params,
+                                                     # including a title messes with relative plot size...
                                                      # Some funkiness for bquote
                                                      title = bquote(italic(.(species_name))),
                                                      legend_position = "bottom",
@@ -400,11 +401,33 @@ for (i in 1:length(main_species)) {
 row_2 <- cowplot::get_legend(main_plots_list[[1]] +
                                theme(legend.text = element_text(size = 6)))
 
+row_0 <- cowplot::plot_grid(cowplot::get_title(main_plots_list[[1]]),
+                            cowplot::get_title(main_plots_list[[4]]),
+                            byrow = TRUE,
+                            ncol = 2,
+                            vjust = 2,
+                            hjust = -2,
+                            rel_widths = c(0.8, 1))
+
+# titles <- c(cowplot::get_title(main_plots_list[[1]]),
+#             cowplot::get_title(main_plots_list[[4]]))
+# Pull out current plots into two-element list, making sure there's no legend; 
+# we also add a Y-axis label to the left-most plot
 current_plots <- c(main_plots_list[[1]] + 
-                     theme(legend.position = "none") + 
+                     theme(legend.position = "none",
+                           title = element_blank()) + 
                      ylab("Current"),
-                   main_plots_list[[4]] + theme(legend.position = "none"))
-  
+                   main_plots_list[[4]] + 
+                     theme(legend.position = "none",
+                           title = element_blank()))
+
+# row_0 <- cowplot::plot_grid(plotlist = titles,
+#                             byrow = TRUE,
+#                             ncol = 2,
+#                             vjust = 2,
+#                             hjust = -2,
+#                             rel_widths = c(0.8, 1))
+
 row_1 <- cowplot::plot_grid(plotlist = current_plots,
                             byrow = TRUE,
                             ncol = 2,
@@ -412,8 +435,10 @@ row_1 <- cowplot::plot_grid(plotlist = current_plots,
                             label_size = 10,
                             vjust = 2,
                             hjust = -2,
-                            rel_widths = c(0.9, 1))
+                            rel_widths = c(0.8, 1))
 
+# Pull out forecast plots into two-element list and add a Y-axis label to the 
+# left-most plot
 forecast_plots <- c(main_plots_list[[2]] + 
                       ylab("Forecast"),
                     main_plots_list[[5]])
@@ -428,10 +453,14 @@ row_3 <- cowplot::plot_grid(plotlist = forecast_plots,
 
 row_5 <- cowplot::get_legend(main_plots_list[[3]] +
                                theme(legend.text = element_text(size = 6)))
+
+# Pull out delta plots into two-element list, making sure there's no legend; we 
+# also add a Y-axis label to the left-most plot
 delta_plots <- c(main_plots_list[[3]] + 
                    theme(legend.position = "none") +
                    ylab("Forecast - Current"),
-                 main_plots_list[[6]] + theme(legend.position = "none"))
+                 main_plots_list[[6]] + 
+                   theme(legend.position = "none"))
 row_4 <- cowplot::plot_grid(plotlist = delta_plots,
                             byrow = TRUE,
                             ncol = 2,
@@ -441,9 +470,9 @@ row_4 <- cowplot::plot_grid(plotlist = delta_plots,
                             hjust = -2,
                             rel_widths = c(0.8, 1))
 
-main_plots <- cowplot::plot_grid(row_1, row_2, row_3, row_4, row_5,
+main_plots <- cowplot::plot_grid(row_0, row_1, row_2, row_3, row_4, row_5,
                                  ncol = 1,
-                                 rel_heights = c(5, 1, 5, 5, 1))
+                                 rel_heights = c(1, 5, 1, 5, 5, 1))
 
 # This will look terrible in RStudio, but fine in a file
 main_plots
