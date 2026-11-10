@@ -404,22 +404,19 @@ row_2 <- cowplot::get_legend(main_plots_list[[1]] +
 row_0 <- cowplot::plot_grid(cowplot::get_title(main_plots_list[[1]]),
                             cowplot::get_title(main_plots_list[[4]]),
                             byrow = TRUE,
-                            ncol = 2,
-                            vjust = 2,
-                            hjust = -2,
-                            rel_widths = c(0.8, 1))
+                            ncol = 2)
 
 # titles <- c(cowplot::get_title(main_plots_list[[1]]),
 #             cowplot::get_title(main_plots_list[[4]]))
 # Pull out current plots into two-element list, making sure there's no legend; 
 # we also add a Y-axis label to the left-most plot
 current_plots <- c(main_plots_list[[1]] + 
-                     theme(legend.position = "none",
-                           title = element_blank()) + 
+                     theme(legend.position = "none") + 
+                     labs(title = NULL) + 
                      ylab("Current"),
                    main_plots_list[[4]] + 
-                     theme(legend.position = "none",
-                           title = element_blank()))
+                     theme(legend.position = "none") + 
+                     labs(title = NULL))
 
 # row_0 <- cowplot::plot_grid(plotlist = titles,
 #                             byrow = TRUE,
